@@ -42,6 +42,7 @@ jobs:
         run: go vet ./...
 
       - name: Test
+        shell: bash
         run: go test -coverprofile=coverage.out ./...
 
       - name: Build
