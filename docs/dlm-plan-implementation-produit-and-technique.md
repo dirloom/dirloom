@@ -33,7 +33,35 @@ La vision à long terme est :
 
 > **Transformer la structure d'un projet en une représentation portable, lisible et exploitable aussi bien par les humains que par les outils.**
 
+## 1.1 Thèse produit et différenciation
 
+> **`tree` affiche une arborescence. Dirloom fait de la structure du projet un artefact exploitable.**
+
+Un artefact, au sens de Dirloom, possède quatre propriétés :
+
+- **déterministe** — à contenu, options et noms filesystem identiques au niveau des points de code Unicode, deux exécutions produisent les mêmes octets, indépendamment de la plateforme et de l'ordre d'énumération du filesystem ;
+- **filtrable** — les règles d'inclusion et d'exclusion sont explicites, documentées et reproductibles ;
+- **portable** — utilisable dans un terminal, une documentation, une CI ou un prompt sans retraitement ;
+- **exploitable par des machines** — le format JSON constitue un contrat versionné, pas un effet de bord du rendu.
+
+En v0.1, cette thèse se manifeste par une seule commande. Mais c'est le déterminisme de la v0.1 qui rend possibles les jalons suivants : un `diff` de structures n'a de sens que si deux exécutions comparables produisent des sorties comparables. Le contrat JSON versionné, le tri indépendant de la locale et l'absence d'auto-détection ne sont donc pas de la rigueur gratuite — ce sont les prérequis techniques de `snapshot`, `diff` et `browse`.
+
+Les commandes et modes futurs — `dirloom browse`, `dirloom --preset ai`, `dirloom snapshot`, `dirloom diff` — sont des opérations sur ce **même artefact structurel**, exposé via le rendu CLI, Markdown, JSON, TUI, contexte IA, snapshots, diffs ou annotations.
+
+```text
+Structure du projet (artefact)
+        │
+        ├── rendu texte (Unicode / ASCII)
+        ├── rendu Markdown
+        ├── contrat JSON
+        ├── exploration interactive (browse)
+        ├── contexte IA (preset)
+        ├── snapshot
+        ├── diff
+        └── annotations
+```
+
+Ce que Dirloom **n'est pas** : un remplaçant de `ls` ou `eza` pour l'inspection quotidienne, un analyseur de code, ni un outil de recherche de fichiers. Sa portée est la structure, pas le contenu.
 
 Le MVP doit rester volontairement simple, mais son architecture doit permettre cette évolution sans réécriture majeure.
 
@@ -293,6 +321,8 @@ dirloom --no-default-ignore
 
 Par défaut, Dirloom applique les fichiers `.gitignore` depuis la racine analysée et dans chaque sous-répertoire parcouru.
 
+Dirloom n'exige pas que la racine analysée appartienne à un dépôt Git. Tout fichier `.gitignore` rencontré dans la portée définie ci-dessus est interprété selon le contrat Dirloom, même en l'absence de répertoire `.git`.
+
 Les règles suivent la sémantique Git pertinente : ordre des règles, ancrage, séparateurs, jokers, répertoires et négations avec `!`.
 
 Prévoir :
@@ -303,15 +333,53 @@ dirloom --no-gitignore
 
 Les fichiers `.gitignore` sont des fichiers de contrôle et doivent être lus indépendamment du filtre d'affichage des fichiers cachés ; ils ne sont affichés dans l'arbre que si les règles de visibilité le permettent.
 
-Une règle d'un `.gitignore` imbriqué ne s'applique qu'à son répertoire et à ses descendants. Dirloom ne recherche pas les `.gitignore` au-dessus de la racine explicitement analysée et n'applique pas en v0.1 `.git/info/exclude` ni le fichier global `core.excludesFile`. `--no-gitignore` désactive toute cette couche, sans désactiver les exclusions par défaut ni `--ignore`. Le moteur doit utiliser une implémentation éprouvée ou être couvert par des tests de compatibilité dédiés ; une imitation partielle non documentée de Git est interdite.
+Une règle d'un `.gitignore` imbriqué ne s'applique qu'à son répertoire et à ses descendants. Dirloom ne recherche pas les `.gitignore` au-dessus de la racine explicitement analysée et n'applique pas en v0.1 `.git/info/exclude` ni le fichier global `core.excludesFile`. `--no-gitignore` désactive toute cette couche, sans désactiver les exclusions par défaut ni `--ignore`.
+
+Le contrat Dirloom est la source de vérité pour le comportement `.gitignore`, pas une bibliothèque tierce. L'agent doit : évaluer les bibliothèques disponibles ; vérifier leur maintenance et leur licence ; créer une suite de tests de conformité Git couvrant le contrat Dirloom ; choisir celle qui respecte réellement ce contrat ; encapsuler la dépendance derrière `internal/filter`. Une imitation partielle non documentée de Git est interdite.
+
+---
+
+## 5.9 Ordre d'application des filtres
+
+La racine explicitement analysée n'est soumise à aucune des couches d'exclusion 2 à 5. Le choix explicite de la racine prévaut sur les règles de filtrage ; celles-ci s'appliquent uniquement à ses descendants. Ainsi, `dirloom .git`, `dirloom node_modules` et `dirloom foo --ignore foo` conservent toujours la racine sélectionnée dans la sortie.
+
+Les couches sont évaluées dans cet ordre pour chaque entrée. La première exclusion est définitive : aucune couche ultérieure ne peut réinclure une entrée déjà exclue.
+
+1. **Exclusion de la destination `--output`** — inconditionnelle et non désactivable.
+2. **Exclusions par défaut** — désactivables par `--no-default-ignore`, mais non annulables par `--hidden` ni par une négation `.gitignore`.
+3. **`--ignore`** — union de toutes les occurrences ; aucune réinclusion n'est possible en v0.1.
+4. **`.gitignore`** — désactivable par `--no-gitignore` ; les négations `!` opèrent uniquement à l'intérieur de cette couche.
+5. **Fichiers cachés** — exclus par défaut et inclus avec `--hidden`, à condition d'avoir survécu aux couches 1 à 4.
+
+La table de vérité minimale est la suivante :
+
+| Situation | Résultat attendu |
+| --- | --- |
+| `.git` avec `--hidden` | exclu par les exclusions par défaut |
+| `.git` avec `--hidden --no-default-ignore` | inclus, sauf exclusion par `--ignore` ou `.gitignore` |
+| `.git` sélectionné comme racine avec `dirloom .git` | racine incluse ; filtres appliqués uniquement à ses descendants |
+| `foo` sélectionné comme racine avec `dirloom foo --ignore foo` | racine incluse malgré le motif `--ignore` |
+| `important.log` exclu par `--ignore "*.log"` mais réinclus par `!important.log` dans `.gitignore` | exclu par `--ignore` |
+| entrée exclue uniquement par les exclusions par défaut avec `--no-default-ignore` | évaluée normalement par `.gitignore`, `--ignore` et la visibilité hidden |
+| entrée exclue uniquement par `.gitignore` avec `--no-gitignore` | évaluée normalement par les exclusions par défaut, `--ignore` et la visibilité hidden |
+
+Un répertoire exclu aux couches 2, 3 ou 4 est pruné et n'est pas parcouru ; ses fichiers `.gitignore` imbriqués ne sont donc jamais lus. Cette règle est cohérente avec la sémantique Git : une négation ne peut pas réinclure le contenu d'un répertoire parent lui-même exclu.
+
+Les fichiers `.gitignore` sont lus comme fichiers de contrôle indépendamment de leur visibilité à la couche 5. Ils ne sont affichés dans l'arbre que si `--hidden` est actif et si aucune des couches 1 à 4 ne les exclut.
+
+`--no-default-ignore` n'a aucun effet sur `.gitignore`, et `--no-gitignore` n'a aucun effet sur les exclusions par défaut.
 
 ---
 
 # 6. Formats de sortie
 
+Tous les formats de sortie v0.1 (`text`, `markdown` et `json`) sont encodés en UTF-8 sans BOM et utilisent le caractère LF (`\n`) comme séparateur de lignes, indépendamment de la plateforme. Chaque sortie se termine par exactement un LF. Dirloom ne produit jamais automatiquement de CRLF sous Windows.
+
 ## 6.1 Unicode
 
-Format par défaut lorsque le terminal le permet :
+Le style par défaut est toujours `unicode`.
+
+Dirloom ne modifie jamais automatiquement le style en fonction du terminal, de la code page, d'une redirection ou de la plateforme. Aucune auto-détection n'est autorisée.
 
 ```text
 src/
@@ -324,6 +392,8 @@ src/
 ---
 
 ## 6.2 ASCII
+
+L'utilisateur souhaitant une sortie ASCII doit utiliser explicitement :
 
 ```bash
 dirloom --style ascii
@@ -351,7 +421,7 @@ dirloom --format markdown
 
 Sortie :
 
-```markdown
+````markdown
 ```text
 src/
 ├── components/
@@ -359,7 +429,7 @@ src/
 │   └── useFeature.ts
 └── index.ts
 ```
-```
+````
 
 Le Markdown doit être directement copiable dans :
 
@@ -410,7 +480,7 @@ Le JSON est encodé en UTF-8, indenté de façon stable et terminé par un uniqu
 
 `--format` définit le contrat de sortie. Valeurs v0.1 : `text` par défaut, `markdown` et `json`.
 
-`--style` définit uniquement le dessin de l'arbre pour les formats textuels. Valeurs v0.1 : `unicode` par défaut et `ascii`.
+`--style` définit uniquement le dessin de l'arbre pour les formats textuels. Valeurs v0.1 : `unicode` par défaut et `ascii`. Dirloom n'auto-détecte jamais le style.
 
 - `--format text --style unicode` produit l'arbre Unicode standard ;
 - `--format text --style ascii` produit l'arbre ASCII ;
@@ -453,6 +523,8 @@ Cela permettra de tester les renderers facilement.
 
 La destination est résolue en chemin absolu et comparée aux entrées scannées. Si le fichier demandé par `--output` se trouve dans la racine analysée, il est exclu implicitement du scan, qu'il existe déjà ou non, afin que la sortie ne puisse jamais s'auto-inclure.
 
+L'extension de `--output` n'est jamais utilisée pour inférer le format. Le format dépend exclusivement de `--format` et de sa valeur par défaut. Ainsi `dirloom --output structure.md` produit le format `text` avec le style `unicode` ; `dirloom --output structure.md --format markdown` produit du Markdown. Le nom d'un fichier ne doit jamais changer silencieusement la sémantique d'une commande.
+
 L'écriture fichier doit être transactionnelle : rendre vers un fichier temporaire créé dans le même répertoire, vérifier toutes les erreurs d'écriture et de fermeture, puis remplacer atomiquement la destination lorsque la plateforme le permet. En cas d'échec, conserver l'ancien fichier intact et supprimer le temporaire. **Aucun fallback non sûr n'est autorisé** : si la primitive de remplacement sûre échoue, Dirloom retourne une erreur et conserve la destination. Pas de séquence `delete old → rename temp`, car un crash entre les deux ferait disparaître l'ancien résultat. Créer les répertoires parents implicitement est interdit ; un parent absent est une erreur actionnable. Dirloom ne doit pas suivre un symlink utilisé comme destination de sortie.
 
 Avec `--output`, stdout reste vide en cas de succès. Les erreurs vont sur stderr. Le fichier produit doit contenir exactement les mêmes octets que ceux qui auraient été écrits sur stdout avec les mêmes options.
@@ -463,9 +535,11 @@ Avec `--output`, stdout reste vide en cas de succès. Les erreurs vont sur stder
 
 Fournir une liste initiale raisonnable de dossiers générés ou généralement inutiles lors du partage d'une architecture.
 
-Exemples :
+Liste v0.1 :
 
-`.git`, `node_modules`, `.next`, `.nuxt`, `dist`, `build`, `coverage`, `.cache`, `.turbo`
+`.git`, `node_modules`, `.next`, `.nuxt`, `coverage`, `.cache`, `.turbo`
+
+`dist` et `build` sont volontairement exclus de cette liste : trop génériques, ils peuvent contenir du code d'infrastructure versionné. Les presets futurs (`--preset node`, `--preset frontend`, `--preset ai`) pourront appliquer des exclusions plus ciblées.
 
 Attention :
 
@@ -473,7 +547,8 @@ Attention :
 - aucun dossier métier potentiellement important ne doit être masqué arbitrairement ;
 - elle doit être centralisée ;
 - elle doit être documentée ;
-- elle doit pouvoir être désactivée.
+- elle doit pouvoir être désactivée ;
+- Dirloom reste silencieux par défaut : aucun résumé du type « N entries hidden » sur stderr. Une future option explicite (`--stats` ou `--explain`) pourra exposer ce genre d'information.
 
 Ne pas embarquer des dizaines de règles spécifiques à des frameworks dans le MVP.
 
@@ -491,6 +566,8 @@ Dans chaque groupe :
 tri alphabétique case-insensitive
 
 Le comparateur est indépendant de la locale et identique sur toutes les plateformes. Il compare d'abord les noms par points de code Unicode après conversion en casse avec une règle Unicode déterministe, sans collation linguistique ni normalisation implicite. En cas d'égalité, il compare les noms originaux octet par octet en UTF-8 ; si nécessaire, le chemin relatif normalisé en `/` constitue le dernier départage. Le tri ne doit jamais dépendre de l'ordre retourné par le filesystem.
+
+Dirloom préserve les noms tels que le filesystem les fournit et ne convertit pas implicitement entre les formes de normalisation Unicode, par exemple NFC et NFD. Le déterminisme cross-platform est donc garanti lorsque les noms d'entrée sont identiques au niveau des points de code ; il ne garantit pas des octets identiques entre deux filesystems qui exposent des formes Unicode canoniquement équivalentes mais différentes.
 
 Exemple :
 
@@ -615,6 +692,8 @@ Le package `internal/app` expose le service applicatif partagé par le CLI et, p
 ```go
 Inspect(ctx context.Context, request InspectRequest) (*tree.Node, error)
 ```
+
+Recommandation non bloquante pour la v0.1 : le scanner devrait vérifier périodiquement `ctx.Done()` et interrompre proprement le parcours lorsque le contexte est annulé. Cette capacité préparera notamment l'annulation d'une inspection devenue obsolète dans le futur `dirloom browse`, sans devenir un critère de sortie obligatoire du MVP.
 
 Ne pas créer des packages vides uniquement pour reproduire cette arborescence.
 
@@ -882,7 +961,14 @@ Tester au minimum :
 - `--ignore` ;
 - glob patterns ;
 - `.gitignore` ;
-- désactivation des exclusions.
+- désactivation des exclusions ;
+- ordre et indépendance des cinq couches de filtrage ;
+- `--hidden` seul face à `.git`, puis `--hidden --no-default-ignore` ;
+- négation `.gitignore` face à une exclusion `--ignore` prioritaire ;
+- indépendance de `--no-default-ignore` et `--no-gitignore` ;
+- pruning d'un répertoire et absence de lecture de ses `.gitignore` imbriqués ;
+- préservation de la racine explicitement sélectionnée face aux couches 2 à 5 ;
+- application des `.gitignore` en dehors de tout dépôt Git.
 
 ### Renderers
 
@@ -892,8 +978,9 @@ Tester au minimum :
 - JSON schema v1 ;
 - symlinks ;
 - répertoire vide ;
-- UTF-8 ;
-- saut de ligne final.
+- UTF-8 sans BOM ;
+- LF comme unique séparateur de lignes, y compris sous Windows ;
+- exactement un LF final.
 
 Utiliser des golden tests lorsque cela apporte de la valeur pour les sorties textuelles. Le JSON étant un contrat public, prévoir des contract tests dédiés validant `schemaVersion`, la structure des nœuds et l'absence de champs non déterministes.
 
@@ -956,7 +1043,10 @@ Tester particulièrement :
 - Unicode ;
 - hidden files ;
 - symlinks/junctions lorsque possible ;
-- redirections PowerShell.
+- redirections PowerShell ;
+- chemins Windows longs (> 260 caractères) lorsque l'environnement CI le permet ;
+- chemins profondément imbriqués ;
+- noms contenant espaces et caractères Unicode dans ces chemins.
 
 ---
 
@@ -1147,13 +1237,13 @@ dirloom
 doit :
 
 1. prendre le répertoire courant comme racine ;
-2. utiliser le nom du répertoire comme première ligne ;
+2. utiliser l'étiquette de racine définie ci-dessous comme première ligne ;
 3. afficher dossiers puis fichiers ;
 4. appliquer un tri stable ;
 5. respecter `.gitignore` ;
 6. appliquer les exclusions par défaut ;
 7. ne pas suivre récursivement les symlinks ;
-8. produire une arborescence Unicode ;
+8. produire une arborescence Unicode, sans auto-détection de style ;
 9. écrire uniquement la structure sur stdout ;
 10. envoyer les erreurs sur stderr.
 
@@ -1165,11 +1255,17 @@ Ceci est important pour permettre :
 dirloom > tree.txt
 ```
 
+## 32.1 Étiquette de la racine
+
+Dirloom résout d'abord le chemin fourni en chemin absolu nettoyé, puis utilise son dernier segment non vide comme étiquette de racine. Cette règle produit le même résultat pour `dirloom .`, `dirloom ..` et leur chemin absolu équivalent.
+
+Si aucun dernier segment non vide n'existe, notamment pour une racine de volume telle que `C:\`, l'étiquette est le chemin absolu nettoyé lui-même. Un répertoire est suffixé par `/` dans les rendus textuels, conformément au contrat du renderer ; le champ JSON `name` ne contient pas ce suffixe d'affichage.
+
 ---
 
 # 33. Roadmap produit
 
-Cette spécification reste normative pour le comportement de la ligne `v0.1`. Son ancienne mini-roadmap post-MVP est remplacée par la [roadmap produit stratégique votée](docs/product/roadmap.md), qui devient l'unique autorité pour les piliers, le séquencement `v0.2+`, les Architecture Packs, les surfaces interactives et les horizons long terme.
+Ce document reste normatif pour l'implémentation de la ligne `v0.1`. Son ancienne mini-roadmap post-MVP est remplacée par la [roadmap produit stratégique votée](product/roadmap.md), qui devient l'unique autorité pour les piliers, le séquencement `v0.2+`, les Architecture Packs, les surfaces interactives et les horizons long terme.
 
 Les numéros de versions de cette roadmap restent indicatifs ; les dépendances produit, la qualité et les preuves d'usage priment sur le calendrier.
 
@@ -1188,6 +1284,8 @@ Tous ces éléments restent hors périmètre v0.1. Le TUI est néanmoins une ori
 # 35. Critères d'acceptation v0.1
 
 La version n'est considérée comme terminée que si les scénarios suivants fonctionnent réellement.
+
+## 35.1 Scénarios d'acceptation
 
 ### Cas 1
 
@@ -1266,6 +1364,14 @@ dirloom --output structure.md --format markdown
 
 crée correctement le fichier demandé.
 
+### Cas 9b — extension sans inférence de format
+
+```powershell
+dirloom --output structure.md
+```
+
+produit le format `text` style `unicode`. L'extension `.md` n'influence pas le renderer.
+
 ### Cas 10
 
 ```powershell
@@ -1287,7 +1393,7 @@ Une release peut produire les binaires pour les architectures supportées.
 
 ### Cas 13 — profondeur et tri déterministe
 
-Sans `--depth`, le parcours est illimité. Avec `--depth 0`, seule la racine apparaît. Les valeurs négatives ou invalides retournent le code `2`. Des entrées ne différant que par la casse ou contenant de l'Unicode conservent le même ordre sur Windows, Linux et macOS.
+Sans `--depth`, le parcours est illimité. Avec `--depth 0`, seule la racine apparaît. Les valeurs négatives ou invalides retournent le code `2`. Des entrées ne différant que par la casse ou contenant de l'Unicode conservent le même ordre sur Windows, Linux et macOS lorsque leurs noms sont identiques au niveau des points de code.
 
 ### Cas 14 — fichiers cachés
 
@@ -1297,9 +1403,18 @@ Par défaut, les noms commençant par `.` sont masqués sur tous les OS et l'att
 
 Les occurrences répétées de `--ignore` sont combinées sans découpage par virgule. Les `.gitignore` imbriqués, leur portée et les négations sont respectés depuis la racine analysée, sans lire de configuration Git située au-dessus ou globale.
 
+Les scénarios de priorité suivants doivent aussi passer :
+
+- `--hidden` seul ne fait pas apparaître `.git`, tandis que `--hidden --no-default-ignore` le fait apparaître en l'absence d'une autre exclusion ;
+- `!important.log` dans `.gitignore` ne réinclut pas un fichier exclu par `--ignore "*.log"` ;
+- `--no-default-ignore` ne désactive pas `.gitignore`, et `--no-gitignore` ne désactive pas les exclusions par défaut ;
+- un répertoire exclu et pruné n'entraîne pas la lecture de ses `.gitignore` imbriqués ;
+- `dirloom .git`, `dirloom node_modules` et `dirloom foo --ignore foo` conservent la racine explicitement sélectionnée ;
+- un fichier `.gitignore` est appliqué conformément au contrat Dirloom même lorsque la racine analysée n'appartient pas à un dépôt Git.
+
 ### Cas 16 — formats
 
-`--format json` produit un document conforme au schéma v1. Markdown accepte les styles Unicode et ASCII. JSON combiné explicitement avec `--style` échoue avec le code `2`.
+`--format json` produit un document conforme au schéma v1. Markdown accepte les styles Unicode et ASCII. JSON combiné explicitement avec `--style` échoue avec le code `2`. Pour `text`, `markdown` et `json`, la sortie est encodée en UTF-8 sans BOM, utilise uniquement LF comme séparateur de lignes sur toutes les plateformes et se termine par exactement un LF.
 
 ### Cas 17 — erreurs et export sûr
 
@@ -1308,6 +1423,10 @@ Une erreur de lecture ne produit aucun arbre partiel. Un fichier `--output` situ
 ### Cas 18 — liens et junctions
 
 Les symlinks, liens cassés, junctions Windows et autres reparse points Windows de redirection de noms sont affichés comme des liens terminaux sans parcours de cible, sans boucle et avec une représentation stable dans les formats texte et JSON. Les reparse points non redirectionnels ne sont pas reclassés automatiquement comme liens.
+
+### Cas 19 — étiquette de la racine
+
+`dirloom .`, `dirloom ..` et leurs chemins absolus équivalents utilisent le dernier segment du chemin absolu nettoyé. Pour une racine de volume sans dernier segment, Dirloom utilise le chemin absolu nettoyé comme étiquette. Les rendus textuels ajoutent `/` aux répertoires ; le champ JSON `name` ne l'ajoute pas.
 
 ---
 
@@ -1334,17 +1453,21 @@ Commencer par inspecter entièrement le repository s'il existe déjà.
 Ensuite, suivre cette séquence d'implémentation :
 
 1. bootstrap du repository et dépendances minimales ;
-2. modèle interne (`tree.Node`, types, tri déterministe) ;
-3. policies de filtrage (defaults, `--ignore`, `.gitignore`) ;
-4. scanner filter-aware (profondeur, hidden, symlinks, pruning) ;
-5. service applicatif (`internal/app.Inspect`) ;
-6. renderers (Unicode, ASCII, Markdown, JSON schema v1) ;
-7. CLI (`cobra` ou équivalent, options, exit codes, help/version) ;
-8. tests unitaires, golden tests, contract tests JSON et tests d'intégration ;
-9. CI multi-plateforme ;
-10. release engineering (GoReleaser) ;
-11. documentation utilisateur (README, CONTRIBUTING, SECURITY) ;
-12. validation finale contre les critères d'acceptation v0.1.
+2. bootstrap minimal Cobra + `main` (`spf13/cobra`, sauf découverte technique bloquante) ;
+3. walking skeleton exécutable dès que possible : `dirloom --help`, `dirloom --version`, `dirloom .` ;
+4. modèle interne (`tree.Node`, types, tri déterministe) ;
+5. policies de filtrage (defaults, `--ignore`, `.gitignore`) ;
+6. scanner filter-aware (profondeur, hidden, symlinks, pruning) ;
+7. service applicatif (`internal/app.Inspect`) ;
+8. renderers (Unicode, ASCII, Markdown, JSON schema v1) ;
+9. finalisation CLI (options, exit codes, help/version complets) ;
+10. tests unitaires, golden tests, contract tests JSON et tests d'intégration ;
+11. CI multi-plateforme ;
+12. release engineering (GoReleaser) ;
+13. documentation utilisateur (README, CONTRIBUTING, SECURITY) ;
+14. validation finale contre les critères d'acceptation v0.1.
+
+Le framework CLI retenu est **Cobra**, afin de structurer `internal/cli` et de préparer les sous-commandes futures (`browse`, `snapshot`, `diff`). Ne pas laisser ce choix ouvert à « un équivalent » sauf blocage technique pendant le bootstrap.
 
 Ne pas considérer la tâche comme terminée simplement parce que le code compile.
 
@@ -1356,7 +1479,7 @@ L'agent est autorisé à ajuster les détails d'implémentation lorsque cela am�
 
 Il ne doit cependant pas modifier sans justification les invariants suivants :
 
-Nom du produit : Dirloom ; binaire : `dirloom` ; langage : Go ; cross-platform ; Windows first-class ; CLI first ; commande par défaut non interactive et redirigeable ; TUI futur uniquement via `dirloom browse` ; core headless et réutilisable par toutes les interfaces ; local-first ; deterministic output ; scanner séparé du renderer ; pas de modification du projet inspecté ; pas de télémétrie ; pas de fonctionnalités réseau en v0.1 ; tests obligatoires ; CI obligatoire.
+Nom du produit : Dirloom ; binaire : `dirloom` ; langage : Go ; framework CLI : Cobra ; cross-platform ; Windows first-class ; CLI first ; commande par défaut non interactive et redirigeable ; TUI futur uniquement via `dirloom browse` ; core headless et réutilisable par toutes les interfaces ; local-first ; deterministic output ; style Unicode par défaut sans auto-détection ; scanner séparé du renderer ; pas de modification du projet inspecté ; pas de télémétrie ; pas de fonctionnalités réseau en v0.1 ; tests obligatoires ; CI obligatoire.
 
 En cas de choix entre :
 
