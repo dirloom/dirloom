@@ -1,0 +1,16 @@
+# Local toolchains and scratch builds
+/.tools/
+/.tmp/
+/bin/
+/dist/
+
+# Go test and profiling outputs
+/coverage.out
+/*.test
+/*.prof
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

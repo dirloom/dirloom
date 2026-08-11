@@ -1,0 +1,70 @@
+version: 2
+
+project_name: dirloom
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: dirloom
+    main: ./cmd/dirloom
+    binary: dirloom
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/dirloom/dirloom/internal/buildinfo.Version={{ .Version }}
+        -X github.com/dirloom/dirloom/internal/buildinfo.Commit={{ .FullCommit }}
+        -X github.com/dirloom/dirloom/internal/buildinfo.Date={{ .Date }}
+
+archives:
+  - id: release-archives
+    ids:
+      - dirloom
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_{{ title .Os }}_{{ if eq .Arch "amd64" }}x86_64{{ else }}{{ .Arch }}{{ end }}
+    files:
+      - LICENSE
+      - LICENSES/**
+      - README.md
+      - CHANGELOG.md
+      - CONTRIBUTING.md
+      - SECURITY.md
+      - THIRD_PARTY_NOTICES.md
+      - docs/**
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - '^Merge '
+
+release:
+  draft: true
