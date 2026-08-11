@@ -4,6 +4,10 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Official Scoop distribution for Windows x64 and ARM64 with automated release updates.
+
 ## [0.1.0] - 2026-08-11
 
 ### Added
