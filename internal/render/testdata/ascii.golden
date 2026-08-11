@@ -1,0 +1,6 @@
+project/
+|-- empty/
+|-- src/
+|   |-- link -> ../shared
+|   `-- index.ts
+`-- README.md
