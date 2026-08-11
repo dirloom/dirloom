@@ -4,7 +4,7 @@ Thank you for helping improve Dirloom.
 
 ## Prerequisites
 
-- Go 1.25.5 or newer;
+- Go 1.25.12 or newer;
 - Git;
 - optional: GoReleaser 2.17.1 for release snapshots;
 - optional: golangci-lint 2.12.2 for the same lint pass as CI.

@@ -19,7 +19,7 @@ Unlike a raw `tree` listing, the output is designed to be a reproducible artifac
 
 Download the archive for Windows, Linux or macOS from the GitHub release, extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
 
-With Go 1.25.5 or newer:
+With Go 1.25.12 or newer:
 
 ```bash
 go install github.com/dirloom/dirloom/cmd/dirloom@latest
