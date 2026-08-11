@@ -1,6 +1,6 @@
 # Dirloom
 
-Clean project trees for humans and tools.
+Clean project trees for humans and AI.
 
 Dirloom turns a real directory into a clean, deterministic, filterable and shareable project structure. It is a local-only, cross-platform CLI: no telemetry, no network calls, no project files modified unless you explicitly use `--output`.
 
@@ -58,6 +58,8 @@ PowerShell composition works naturally:
 dirloom --format markdown | Set-Clipboard
 dirloom --style ascii > structure.txt
 ```
+
+See [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
 
 ## CLI reference
 
@@ -235,13 +237,21 @@ Releases are created as drafts so maintainers can verify artifacts and checksums
 
 ## Roadmap
 
-- v0.2: configuration and ergonomic presets;
-- v0.3: explicit `dirloom browse` TUI reusing the same core;
-- v0.4: deterministic AI-oriented presets and budgets, still local-only;
-- v0.5: versioned snapshots and structural diffs;
-- v0.6: structural annotations.
+The voted product sequence builds from the deterministic v0.1 foundation toward structural intelligence:
 
-TUI, GUI, HTTP, MCP, cloud, telemetry, code analysis, watch mode and file-content summaries are intentionally outside v0.1.
+- v0.2: product UX, configuration and visual identity;
+- v0.3: interactive `dirloom browse` explorer;
+- v0.4: fingerprints, snapshots, verification and structural diff;
+- v0.5: scaffold, templates and Architecture Packs;
+- v0.6: architecture contracts, Shape Signatures and persistent knowledge;
+- v0.7: query, metrics and structural intelligence;
+- v0.8: drift, dependency analysis, impact and simulation foundations;
+- v0.9: local agent-context infrastructure, MCP and official skills;
+- v1.0: stable public structural-intelligence platform.
+
+See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
+
+TUI, Desktop, MCP, code analysis, watch mode and file-content summaries remain intentionally outside v0.1. Future networked capabilities must remain explicit; the core stays local-first.
 
 ## License
 
