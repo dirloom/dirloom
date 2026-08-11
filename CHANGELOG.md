@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-11
+
+### Fixed
+
+- Resolve the release version from Go module build metadata when Dirloom is installed with `go install module@version`, while preserving GoReleaser linker injection and the `dev` fallback for local builds.
+
 ## [0.1.0] - 2026-08-11
 
 ### Added
@@ -17,5 +23,6 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/dirloom/dirloom/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dirloom/dirloom/releases/tag/v0.1.0
