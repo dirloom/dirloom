@@ -39,6 +39,8 @@ Windows, Linux and macOS are first-class targets. Do not introduce shell-specifi
 
 Changes to JSON fields, CLI flags, default exclusions, filter priority or ordering are public-contract changes and require explicit discussion plus contract tests.
 
+Changes to `.dirloom.yaml`, configuration discovery, precedence, diagnostic fields or source statuses are also public-contract changes. Update implementation tests, CLI tests, `docs/configuration.md`, README and changelog together. Marked YAML examples in the public guide are parsed by the test suite and must remain executable.
+
 ## Pull requests
 
 Explain the user-visible problem, the chosen behavior, tests added and cross-platform considerations. Keep unrelated refactors separate. CI must pass before merge.

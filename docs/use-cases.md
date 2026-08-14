@@ -1,9 +1,9 @@
 # Dirloom — Cas d’usage et exemples pratiques
 
 > **Statut :** guide utilisateur évolutif<br>
-> **Périmètre :** capacités natives de la ligne v0.1 actuellement implémentées<br>
-> **Dernière vérification :** 11 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Périmètre :** capacités natives actuellement implémentées<br>
+> **Dernière vérification :** 15 août 2026<br>
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -53,6 +53,9 @@ dirloom --help
 | Générer un artefact pour la CI | `dirloom --format json --output structure.json` |
 | Auditer ce que masque `.gitignore` | `dirloom --no-gitignore` |
 | Auditer absolument toutes les couches de filtrage | `dirloom --hidden --no-gitignore --no-default-ignore` |
+| Expliquer la configuration effective | `dirloom config explain` |
+| Ignorer les préférences personnelles en CI | `dirloom --no-user-config` |
+| Désactiver toute configuration persistante | `dirloom --no-config` |
 
 ## 3. Prendre en main l’inspection
 
@@ -335,6 +338,29 @@ Sont également rejetés :
 - chemin Windows avec lettre de lecteur ;
 - segment `..` ;
 - motif syntaxiquement invalide.
+
+### 4.13 Réutiliser une configuration persistante
+
+Un fichier projet `.dirloom.yaml` permet de partager les mêmes limites, formats et exclusions. L'[exemple minimal canonique](configuration.md#quick-start) peut être copié tel quel puis adapté au projet.
+
+La priorité est `CLI explicite > projet > utilisateur > défauts intégrés`. Les exclusions sont fusionnées dans l’ordre utilisateur, projet puis CLI, avec suppression des doublons exacts.
+
+Pour vérifier les valeurs et leur origine :
+
+```bash
+dirloom config explain
+dirloom config explain --as json
+```
+
+Pour une CI indépendante des préférences personnelles :
+
+```bash
+dirloom . --no-user-config --config .dirloom.yaml --format json --output structure.json
+```
+
+Dans un monorepo Git, Dirloom charge le `.dirloom.yaml` le plus proche entre la racine inspectée et la frontière du worktree. Les fichiers projet parents ne sont pas fusionnés. Hors Git, seul le fichier placé dans la racine inspectée est découvert automatiquement.
+
+La référence publique complète — schéma, chemins multiplateformes, sécurité, erreurs et recettes — se trouve dans [Configuration persistante](configuration.md).
 
 ## 5. Choisir le bon rendu
 
@@ -946,7 +972,7 @@ dirloom --depth -1
 dirloom --depth invalid
 ```
 
-`--depth` accepte uniquement un entier positif ou nul.
+`--depth` accepte un entier positif ou nul, ainsi que `unlimited` pour retirer une limite héritée.
 
 ### 11.5 Format ou style invalide
 
@@ -984,13 +1010,13 @@ echo $?
 
 ## 12. Ce qui n’est pas encore disponible
 
-La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes ne font pas partie de la CLI v0.1 actuelle :
+La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes ne font pas encore partie de la CLI actuelle :
 
 | Capacité future | Alternative actuelle |
 | --- | --- |
 | `--copy` natif | Pipe vers `Set-Clipboard`, `pbcopy`, `wl-copy` ou `xclip` |
 | Couleurs, icônes et thèmes | Rendus Unicode ou ASCII non colorés |
-| `.dirloom.yaml`, configuration utilisateur et presets | Répéter les options dans un script ou une tâche locale |
+| Presets nommés | Utiliser `.dirloom.yaml`, la configuration utilisateur ou des options CLI explicites |
 | `browse` ou TUI | Générer une sortie texte, Markdown ou JSON |
 | Fingerprint, snapshot, verify et diff natifs | Versionner le JSON et utiliser Git ou un outil de diff |
 | `watch` et flux d’événements | Relancer Dirloom depuis un outil externe |
@@ -1009,6 +1035,12 @@ Cette séparation doit être maintenue à chaque évolution du guide : une comma
 ```bash
 # Vue rapide
 dirloom --depth 2
+
+# Expliquer les valeurs persistantes et leur origine
+dirloom config explain
+
+# Appliquer uniquement la configuration projet et la CLI
+dirloom --no-user-config
 
 # Architecture uniquement
 dirloom --dirs-only --depth 4

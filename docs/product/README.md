@@ -39,7 +39,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Scaffolding | Plateforme de génération complète : templates, plans, migrations et Architecture Packs |
 | Premier Architecture Pack | Architecture FSD-like de référence, sous identifiant provisoire `reference-fsd` jusqu'à son baptême |
 | Couleurs et icônes | Système thématique sémantique puissant, sans contaminer l'artefact canonique |
-| Configuration | `.dirloom.yaml`, configuration utilisateur et presets inspectables |
+| Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur et résolution inspectable ; presets encore planifiés |
 | TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |

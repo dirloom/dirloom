@@ -251,10 +251,12 @@ La v0.1 constitue le **contrat de confiance** sans lequel les fonctions de diff,
 
 **Niveau : Foundation / Adoption**
 
-Ordre cible :
+**Statut : socle implémenté dans l'incrément initial de v0.2.** Les presets et la présentation thématique restent des capacités distinctes à livrer ensuite.
+
+Ordre livré :
 
 ```text
-CLI > project config > user config > defaults
+CLI explicite > configuration projet > configuration utilisateur > défauts intégrés
 ```
 
 Exemple :
@@ -265,18 +267,23 @@ schemaVersion: 1
 
 defaults:
   depth: 6
+  dirsOnly: false
+  hidden: false
   format: text
   style: unicode
+
+filters:
+  useDefaultIgnores: true
+  useGitignore: true
 
 ignore:
   - generated/**
   - vendor/cache/**
-
-presentation:
-  theme: midnight
 ```
 
-Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible.
+Le schéma v1, la découverte bornée par Git, les contrôles `--config`, `--no-user-config`, `--no-config`, `--depth unlimited` et `dirloom config explain` sont couverts par des contrats publics et des tests multiplateformes. Les listes `ignore` sont additives dans l'ordre utilisateur, projet puis CLI ; les scalaires suivent la priorité générale.
+
+Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible. La propriété prospective `presentation.theme` appartient au Visual Theme Engine de la section 6.4 et n'est pas acceptée par le schéma initial.
 
 ## 6.3 Presets
 

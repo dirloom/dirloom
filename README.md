@@ -61,6 +61,36 @@ dirloom --style ascii > structure.txt
 
 See [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
 
+## Persistent configuration
+
+Dirloom can load shared project settings from `.dirloom.yaml` and personal defaults from your operating system's configuration directory.
+
+<!-- dirloom-config-example:readme -->
+```yaml
+schemaVersion: 1
+
+defaults:
+  depth: 4
+  format: text
+
+ignore:
+  - generated/**
+```
+
+Explicit CLI options take priority over the project file, which takes priority over the user file and built-in defaults. Inspect the effective values and their sources with:
+
+```bash
+dirloom config explain
+```
+
+Keep CI independent of personal settings while retaining the committed project configuration:
+
+```bash
+dirloom . --no-user-config --format json --output structure.json
+```
+
+See [Persistent configuration](docs/configuration.md) for discovery rules, the complete schema, monorepo and CI recipes, diagnostics, security boundaries and troubleshooting.
+
 ## CLI reference
 
 ```text
@@ -71,7 +101,7 @@ dirloom [directory] [flags]
 
 | Option | Meaning |
 | --- | --- |
-| `-d, --depth N` | Maximum depth. `0` prints only the root; omitted means unlimited. |
+| `-d, --depth N\|unlimited` | Maximum depth. `0` prints only the root; `unlimited` removes an inherited limit. |
 | `--dirs-only` | Include directories only. |
 | `--hidden` | Include hidden entries that survive all other filters. |
 | `--ignore PATTERN` | Add an exclusion. Repeat the option to add more rules. |
@@ -79,11 +109,16 @@ dirloom [directory] [flags]
 | `--no-gitignore` | Do not load `.gitignore` files. |
 | `--format text\|markdown\|json` | Select the public output contract. Default: `text`. |
 | `--style unicode\|ascii` | Select the drawing style for text and Markdown. Default: `unicode`. |
+| `--config FILE` | Use an explicit project configuration file instead of automatic discovery. |
+| `--no-user-config` | Skip personal configuration while retaining project configuration. |
+| `--no-config` | Disable user and project configuration files. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
 `--style` is intentionally rejected when explicitly combined with `--format json`; JSON has no drawing style.
+
+`dirloom config explain [directory]` reports source status, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
 
 ## Filtering
 
@@ -91,7 +126,7 @@ Dirloom evaluates every descendant in this fixed order. The first exclusion is f
 
 1. the `--output` destination;
 2. built-in directory exclusions;
-3. repeated `--ignore` rules;
+3. explicit ignore rules merged from user configuration, project configuration and repeated `--ignore` options;
 4. scoped `.gitignore` rules;
 5. hidden-entry visibility.
 
@@ -107,7 +142,7 @@ The v0.1 list is deliberately conservative:
 
 `dist` and `build` are not excluded automatically. Use `--no-default-ignore` to disable the list.
 
-### `--ignore` rules
+### Explicit ignore rules
 
 Rules are case-sensitive and use `/` as their normalized separator:
 
@@ -122,7 +157,9 @@ dirloom --ignore node_modules --ignore "*.log" --ignore "src/**/generated?.go"
 - A matched directory is pruned immediately.
 - Commas are literal; each rule needs its own `--ignore` occurrence.
 - Absolute and root-escaping patterns are rejected.
-- There is no `!` re-inclusion syntax for CLI rules in v0.1.
+- There is no `!` re-inclusion syntax for explicit rules.
+
+Configuration ignore lists are additive: user rules come first, followed by project and CLI rules. Exact duplicates are removed without changing the first rule's position or source.
 
 ### `.gitignore`
 
@@ -194,6 +231,7 @@ Dirloom preserves filesystem names exactly and does not silently normalize Unico
 
 ```text
 CLI arguments
+    → configuration discovery and resolution
     → application service
     → filter-aware filesystem scanner
     → renderer-independent tree model
@@ -202,7 +240,7 @@ CLI arguments
     → stdout or transactional file output
 ```
 
-The headless application service and model are independent from Cobra and from renderers, keeping the future `browse`, snapshot and diff interfaces able to reuse the same core.
+The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse`, snapshot and diff interfaces able to reuse the same core.
 
 See [docs/architecture.md](docs/architecture.md) for package boundaries and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
