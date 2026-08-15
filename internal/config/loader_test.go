@@ -77,6 +77,152 @@ ignore:
 	}
 }
 
+func TestResolvePresetPrecedenceAndExplicitOverrides(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	userBase := t.TempDir()
+	writeConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), `schemaVersion: 1
+preset: compact
+defaults:
+  hidden: true
+ignore:
+  - user/**
+`)
+	writeConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+preset: ai
+defaults:
+  format: text
+ignore:
+  - project/**
+`)
+	loader := NewLoader(WithUserConfigDir(func() (string, error) { return userBase, nil }))
+	resolved, err := loader.Resolve(ResolveOptions{
+		Root: root,
+		Overrides: Overrides{
+			Preset:         PresetSelection{Set: true, Name: "docs"},
+			Depth:          DepthOverride{Set: true, Value: 6},
+			IgnorePatterns: []string{"cli/**"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Preset.Name == nil || *resolved.Preset.Name != "docs" || resolved.Preset.Origin.Source != SourceCLI {
+		t.Fatalf("preset = %#v", resolved.Preset)
+	}
+	if resolved.Effective.MaxDepth == nil || *resolved.Effective.MaxDepth != 6 || resolved.Effective.DirectoriesOnly || resolved.Effective.IncludeHidden || resolved.Effective.Format != FormatMarkdown {
+		t.Fatalf("effective = %#v", resolved.Effective)
+	}
+	if got := resolved.Provenance["format"]; got.Source != SourceCLI || got.Preset != "docs" {
+		t.Fatalf("format origin = %#v", got)
+	}
+	if got := resolved.Provenance["depth"]; got.Source != SourceCLI || got.Preset != "" {
+		t.Fatalf("depth origin = %#v", got)
+	}
+	wantIgnores := []string{"user/**", "project/**", "cli/**"}
+	if !reflect.DeepEqual(resolved.Effective.IgnorePatterns, wantIgnores) {
+		t.Fatalf("ignore = %#v, want %#v", resolved.Effective.IgnorePatterns, wantIgnores)
+	}
+}
+
+func TestResolvePresetResetAndAdditiveIgnores(t *testing.T) {
+	t.Run("project reset preserves explicit values", func(t *testing.T) {
+		root := t.TempDir()
+		userBase := t.TempDir()
+		writeConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), `schemaVersion: 1
+preset: compact
+defaults:
+  hidden: true
+ignore:
+  - user/**
+`)
+		writeConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+preset: null
+defaults:
+  depth: 2
+`)
+		resolved, err := NewLoader(WithUserConfigDir(func() (string, error) { return userBase, nil })).Resolve(ResolveOptions{Root: root})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resolved.Preset.Name != nil || resolved.Preset.Origin.Source != SourceProject {
+			t.Fatalf("preset = %#v", resolved.Preset)
+		}
+		if resolved.Effective.DirectoriesOnly || !resolved.Effective.IncludeHidden || resolved.Effective.MaxDepth == nil || *resolved.Effective.MaxDepth != 2 {
+			t.Fatalf("effective = %#v", resolved.Effective)
+		}
+		if !reflect.DeepEqual(resolved.Effective.IgnorePatterns, []string{"user/**"}) {
+			t.Fatalf("ignore = %#v", resolved.Effective.IgnorePatterns)
+		}
+	})
+
+	t.Run("selected preset contributes before explicit layer ignores", func(t *testing.T) {
+		root := t.TempDir()
+		userBase := t.TempDir()
+		writeConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), `schemaVersion: 1
+ignore:
+  - "**/dist"
+  - user/**
+`)
+		writeConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+preset: ai
+defaults:
+  format: text
+ignore:
+  - "**/dist"
+  - project/**
+`)
+		resolved, err := NewLoader(WithUserConfigDir(func() (string, error) { return userBase, nil })).Resolve(ResolveOptions{Root: root})
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := []string{"**/dist", "user/**", "**/build", "*.map", "project/**"}
+		if !reflect.DeepEqual(resolved.Effective.IgnorePatterns, want) {
+			t.Fatalf("ignore = %#v, want %#v", resolved.Effective.IgnorePatterns, want)
+		}
+		if resolved.Ignores[0].Origin.Source != SourceUser || resolved.Ignores[2].Origin.Preset != "ai" || resolved.Ignores[4].Origin.Preset != "" {
+			t.Fatalf("ignore origins = %#v", resolved.Ignores)
+		}
+		if got := resolved.Provenance["style"]; got.Source != SourceProject || got.Preset != "ai" {
+			t.Fatalf("style origin = %#v", got)
+		}
+		if got := resolved.Provenance["format"]; got.Source != SourceProject || got.Preset != "" {
+			t.Fatalf("format origin = %#v", got)
+		}
+	})
+
+	t.Run("CLI reset skips configured preset", func(t *testing.T) {
+		root := t.TempDir()
+		writeConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npreset: ai\ndefaults:\n  depth: 7\n")
+		resolved, err := loaderWithoutUserConfig().Resolve(ResolveOptions{
+			Root:      root,
+			Overrides: Overrides{Preset: PresetSelection{Set: true, Disabled: true}},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resolved.Preset.Name != nil || resolved.Preset.Origin.Source != SourceCLI || resolved.Effective.Format != FormatText || resolved.Effective.MaxDepth == nil || *resolved.Effective.MaxDepth != 7 || len(resolved.Ignores) != 0 {
+			t.Fatalf("resolution = %#v", resolved)
+		}
+	})
+
+	t.Run("CLI preset remains active with no config", func(t *testing.T) {
+		resolved, err := loaderWithoutUserConfig().Resolve(ResolveOptions{
+			Root:       t.TempDir(),
+			DisableAll: true,
+			Overrides:  Overrides{Preset: PresetSelection{Set: true, Name: "ai"}},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resolved.Preset.Name == nil || *resolved.Preset.Name != "ai" || resolved.Effective.Format != FormatMarkdown || len(resolved.Ignores) != 3 {
+			t.Fatalf("resolution = %#v", resolved)
+		}
+	})
+}
+
 func TestResolveProjectDiscoveryStopsAtNearestConfigWithinGitBoundary(t *testing.T) {
 	repository := t.TempDir()
 	if err := os.Mkdir(filepath.Join(repository, ".git"), 0o755); err != nil {
@@ -225,6 +371,9 @@ func TestResolveRejectsOversizedConfig(t *testing.T) {
 func TestResolveRejectsInvalidCLIValues(t *testing.T) {
 	root := t.TempDir()
 	tests := []Overrides{
+		{Preset: PresetSelection{Set: true, Name: "unknown"}},
+		{Preset: PresetSelection{Set: true}},
+		{Preset: PresetSelection{Set: true, Disabled: true, Name: "ai"}},
 		{Format: Optional[string]{Set: true, Value: "yaml"}},
 		{Style: Optional[string]{Set: true, Value: "auto"}},
 		{Depth: DepthOverride{Set: true, Value: -1}},
