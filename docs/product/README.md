@@ -16,6 +16,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Roadmap produit](roadmap.md) | Quelle direction a été votée, dans quel ordre construire les capacités et quels paris privilégier ? | Produit, engineering, contributeurs |
 | [Glossaire](glossary.md) | Que signifient précisément les termes structurants ? | Tous les contributeurs |
 | [Cas d’usage et exemples pratiques](../use-cases.md) | Que permet réellement la version actuelle et comment l’utiliser ? | Utilisateurs, contributeurs, intégrateurs |
+| [Presets intégrés](../presets.md) | Quels profils sont disponibles, comment les activer et comment inspecter leurs effets ? | Utilisateurs, contributeurs, intégrateurs |
 
 Pour implémenter ou vérifier le comportement de la ligne `v0.1`, la source normative reste [SPEC-v0.1.md](../../SPEC-v0.1.md). Les documents présents n'en modifient pas rétroactivement les contrats.
 
@@ -39,7 +40,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Scaffolding | Plateforme de génération complète : templates, plans, migrations et Architecture Packs |
 | Premier Architecture Pack | Architecture FSD-like de référence, sous identifiant provisoire `reference-fsd` jusqu'à son baptême |
 | Couleurs et icônes | Système thématique sémantique puissant, sans contaminer l'artefact canonique |
-| Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur et résolution inspectable ; presets encore planifiés |
+| Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
 | TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
