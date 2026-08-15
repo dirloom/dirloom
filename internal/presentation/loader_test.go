@@ -43,7 +43,11 @@ func TestLoadCustomThemeAndRuleFallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if theme.Name != "team" || theme.Source.Kind != "file" || theme.Source.Path != path || theme.Icons.Spacing != 2 || len(theme.Warnings) != 0 {
+	resolvedPath, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if theme.Name != "team" || theme.Source.Kind != "file" || theme.Source.Path != resolvedPath || theme.Icons.Spacing != 2 || len(theme.Warnings) != 0 {
 		t.Fatalf("theme = %#v", theme)
 	}
 	compiled, err := Compile(theme)
