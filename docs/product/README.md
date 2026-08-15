@@ -17,6 +17,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Glossaire](glossary.md) | Que signifient précisément les termes structurants ? | Tous les contributeurs |
 | [Cas d’usage et exemples pratiques](../use-cases.md) | Que permet réellement la version actuelle et comment l’utiliser ? | Utilisateurs, contributeurs, intégrateurs |
 | [Presets intégrés](../presets.md) | Quels profils sont disponibles, comment les activer et comment inspecter leurs effets ? | Utilisateurs, contributeurs, intégrateurs |
+| [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
 
 Pour implémenter ou vérifier le comportement de la ligne `v0.1`, la source normative reste [SPEC-v0.1.md](../../SPEC-v0.1.md). Les documents présents n'en modifient pas rétroactivement les contrats.
 
@@ -39,7 +40,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Primitive centrale | Artefact structurel déterministe et versionné |
 | Scaffolding | Plateforme de génération complète : templates, plans, migrations et Architecture Packs |
 | Premier Architecture Pack | Architecture FSD-like de référence, sous identifiant provisoire `reference-fsd` jusqu'à son baptême |
-| Couleurs et icônes | Système thématique sémantique puissant, sans contaminer l'artefact canonique |
+| Couleurs et icônes | Socle v0.2 livré : TTY auto, `NO_COLOR`, thèmes intégrés/personnalisés et artefacts canoniques intacts ; tokens architecturaux avancés futurs |
 | Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
 | TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |

@@ -4,6 +4,8 @@ Dirloom can keep repeatable inspection settings in YAML while preserving explici
 
 Built-in presets can also provide a named starting point. See [Built-in presets](presets.md) for their exact definitions and usage recipes.
 
+Terminal colors, icons, and themes use the same layered resolution while remaining inactive for canonical Markdown and JSON. See [Terminal colors, icons, and themes](themes.md) for their rendering and security contracts.
+
 Configuration is optional. If no configuration file exists, Dirloom behaves exactly as it does with its built-in defaults.
 
 ## Quick start
@@ -106,6 +108,8 @@ Scalar values use normal precedence: the highest layer that explicitly defines a
 
 Use `preset: null` in YAML or `--preset none` on the CLI to neutralize an inherited preset while retaining other inherited configuration values.
 
+Presentation values are independent scalars. `presentation.theme: null` explicitly replaces an inherited theme with the built-in `default`; it does not reset color or icons. Presets never define presentation values.
+
 The `ignore` list is additive because personal, project, and one-off exclusions serve different purposes. Dirloom appends patterns in this order:
 
 ```text
@@ -132,6 +136,9 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `filters.useDefaultIgnores` | Boolean | `true` | Apply Dirloom's built-in directory exclusions. |
 | `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
+| `presentation.color` | `never`, `always`, or `auto` | `auto` | Select the requested text color mode. Runtime TTY and environment resolution happens at output time. |
+| `presentation.icons` | `never`, `unicode`, `nerd`, or `auto` | `auto` | Select the requested text icon mode. |
+| `presentation.theme` | built-in name, explicit relative path, or `null` | `default` | Select `default`, `midnight`, `daylight`, a confined local theme, or reset an inherited theme. |
 
 `directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
 
@@ -157,6 +164,11 @@ ignore:
   - generated/**
   - vendor/cache/**
   - "*.log"
+
+presentation:
+  color: auto
+  icons: unicode
+  theme: midnight
 ```
 
 Configuration files are limited to 1 MiB. Unknown fields, duplicate keys, multiple YAML documents, aliases, anchors, merge keys, and custom tags are rejected. Dirloom does not expand environment variables and does not support includes or templates.
@@ -177,6 +189,7 @@ The text report includes:
 - the active preset or explicit reset and its origin;
 - every effective scalar and its origin;
 - every effective ignore pattern and its origin;
+- requested color and icon modes, the resolved theme source, and their provenance;
 - settings that are currently inactive.
 
 Use JSON for automation:
@@ -223,9 +236,14 @@ schemaVersion: 1
 defaults:
   depth: 3
   style: ascii
+
+presentation:
+  color: never
+  icons: unicode
+  theme: daylight
 ```
 
-A project can override either value without modifying the user file.
+A project can override any value without modifying the user file. `NO_COLOR` still disables a configured color mode; only an explicit CLI `--color always` overrides it.
 
 If the user file selects a preset, a project can neutralize only that selection:
 
@@ -311,6 +329,8 @@ A configuration file can change which names appear in output, including hidden e
 
 Preset definitions are compiled into Dirloom and have the same boundaries. They do not load additional files, perform network access, or select an output destination.
 
+A selected custom theme is the one permitted additional read. A CLI theme path is resolved from the working directory. A theme path from configuration must be relative to that configuration file and, after symlink resolution, remain inside the configuration directory. Masked theme paths are syntax-checked but not opened. Theme files cannot execute code, include another document, access the network, select a root, or choose an output destination.
+
 Secrets do not belong in Dirloom configuration. The schema has no secret-bearing fields.
 
 ## Troubleshooting
@@ -326,6 +346,8 @@ Check spelling and nesting against the schema reference. Dirloom rejects unknown
 ### A value comes from the wrong source
 
 Use `config explain` to inspect the active preset and provenance. Remember that an explicit CLI value wins, the nearest project file replaces any more distant project file, and ignore patterns accumulate across layers. Use `preset explain <name>` to compare the effective result with the intrinsic preset definition.
+
+Presentation follows the same scalar precedence. Use `theme explain <name-or-path>` for the normalized definition and `theme validate <path>` for a custom file. Requested `auto` values are resolved only when tree output is written.
 
 ### An ignore pattern is rejected
 
@@ -349,6 +371,6 @@ Configuration errors are written to stderr before rendering begins. Stdout stays
 
 Configuration is a public Dirloom contract. Schema version `1` keeps the documented meanings and types stable. A future optional field may be introduced with release notes, but an older strict binary will reject a field it does not recognize. A change to an existing field's meaning or type requires a new schema version.
 
-The optional `preset` field was added before the first v0.2 release and remains part of schema version `1`. The preset explanation JSON and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
+The optional `preset` and `presentation` fields were added before the first v0.2 release and remain part of schema version `1`. Preset explanation JSON, theme command JSON, and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
 
 An older Dirloom binary fails clearly when it encounters an unsupported schema version or field. It never guesses how to interpret a newer contract. The CLI, configuration schema, diagnostic JSON, and tree JSON are versioned and tested independently.
