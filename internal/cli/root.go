@@ -64,6 +64,7 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
   dirloom --dirs-only
   dirloom --style ascii
   dirloom --format markdown
+  dirloom --format markdown-tree
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown`,
 		Version:       version,
@@ -84,8 +85,8 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 			if err != nil {
 				return err
 			}
-			if resolved.Effective.Format == render.FormatJSON && overrides.Style.Set {
-				return &usageError{err: fmt.Errorf("--style cannot be used with --format json")}
+			if styleIsInactive(resolved.Effective.Format) && overrides.Style.Set {
+				return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolved.Effective.Format)}
 			}
 
 			model, err := app.Inspect(cmd.Context(), app.InspectRequest{
@@ -147,7 +148,7 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, or json")
+	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, or json")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
 }
 
@@ -248,8 +249,8 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 			if err != nil {
 				return err
 			}
-			if resolved.Effective.Format == render.FormatJSON && overrides.Style.Set {
-				return &usageError{err: fmt.Errorf("--style cannot be used with --format json")}
+			if styleIsInactive(resolved.Effective.Format) && overrides.Style.Set {
+				return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolved.Effective.Format)}
 			}
 			switch outputFormat {
 			case "text":
@@ -270,6 +271,10 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
 	command.AddCommand(explain)
 	return command
+}
+
+func styleIsInactive(format string) bool {
+	return format == render.FormatJSON || format == render.FormatMarkdownTree
 }
 
 func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {

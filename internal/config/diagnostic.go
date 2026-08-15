@@ -85,8 +85,8 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 	}
 	for _, value := range values {
 		inactive := ""
-		if value.name == "style" && resolution.Effective.Format == FormatJSON {
-			inactive = "; inactive for json"
+		if value.name == "style" && styleInactive(resolution.Effective.Format) {
+			inactive = "; inactive for " + resolution.Effective.Format
 		}
 		if _, err := fmt.Fprintf(writer, "  %s: %s (%s%s)\n", value.name, value.value, formatOrigin(resolution.Provenance[value.name]), inactive); err != nil {
 			return err
@@ -109,7 +109,7 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 
 func (resolution Resolution) diagnostic() diagnosticDocument {
 	inactive := make([]string, 0, 1)
-	if resolution.Effective.Format == FormatJSON {
+	if styleInactive(resolution.Effective.Format) {
 		inactive = append(inactive, "style")
 	}
 	ignores := append([]IgnoreRule(nil), resolution.Ignores...)
@@ -138,6 +138,10 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 		Provenance: resolution.Provenance,
 		Inactive:   inactive,
 	}
+}
+
+func styleInactive(format string) bool {
+	return format == FormatJSON || format == FormatMarkdownTree
 }
 
 func formatOrigin(origin Origin) string {

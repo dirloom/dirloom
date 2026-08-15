@@ -400,9 +400,9 @@ func validateEffective(resolution Resolution) error {
 		return invalidf("depth must be a non-negative integer or unlimited")
 	}
 	switch resolution.Effective.Format {
-	case FormatText, FormatMarkdown, FormatJSON:
+	case FormatText, FormatMarkdown, FormatMarkdownTree, FormatJSON:
 	default:
-		return invalidf("unsupported format %q (expected text, markdown, or json)", resolution.Effective.Format)
+		return invalidf("unsupported format %q (expected text, markdown, markdown-tree, or json)", resolution.Effective.Format)
 	}
 	switch resolution.Effective.Style {
 	case StyleUnicode, StyleASCII:

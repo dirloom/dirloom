@@ -76,7 +76,7 @@ func parseDocument(data []byte, path string) (partial, error) {
 		return partial{}, invalidf("invalid config %q: unsupported schemaVersion %d (expected %d)", path, *document.SchemaVersion, SchemaVersion)
 	}
 
-	format, err := parseEnumNode(document.Defaults.Format, path, "defaults.format", []string{FormatText, FormatMarkdown, FormatJSON})
+	format, err := parseEnumNode(document.Defaults.Format, path, "defaults.format", []string{FormatText, FormatMarkdown, FormatMarkdownTree, FormatJSON})
 	if err != nil {
 		return partial{}, err
 	}
