@@ -12,6 +12,7 @@ import (
 
 type fileDocument struct {
 	SchemaVersion *int         `yaml:"schemaVersion"`
+	Preset        yaml.Node    `yaml:"preset"`
 	Defaults      fileDefaults `yaml:"defaults"`
 	Filters       fileFilters  `yaml:"filters"`
 	Ignore        yaml.Node    `yaml:"ignore"`
@@ -31,6 +32,7 @@ type fileFilters struct {
 }
 
 type partial struct {
+	Preset            PresetSelection
 	Depth             DepthOverride
 	DirectoriesOnly   Optional[bool]
 	IncludeHidden     Optional[bool]
@@ -87,6 +89,7 @@ func parseDocument(data []byte, path string) (partial, error) {
 		return partial{}, err
 	}
 	result := partial{
+		Preset:            PresetSelection{},
 		DirectoriesOnly:   optionalBool(document.Defaults.DirectoriesOnly),
 		IncludeHidden:     optionalBool(document.Defaults.IncludeHidden),
 		Format:            format,
@@ -95,12 +98,37 @@ func parseDocument(data []byte, path string) (partial, error) {
 		UseGitIgnore:      optionalBool(document.Filters.UseGitIgnore),
 		IgnorePatterns:    ignore,
 	}
+	preset, err := parsePresetNode(document.Preset, path)
+	if err != nil {
+		return partial{}, err
+	}
+	result.Preset = preset
 	depth, err := parseDepthNode(document.Defaults.Depth, path)
 	if err != nil {
 		return partial{}, err
 	}
 	result.Depth = depth
 	return result, nil
+}
+
+func parsePresetNode(node yaml.Node, path string) (PresetSelection, error) {
+	if node.Kind == 0 {
+		return PresetSelection{}, nil
+	}
+	if node.Kind != yaml.ScalarNode {
+		return PresetSelection{}, invalidf("invalid config %q: line %d, column %d: preset must be a built-in preset name or null", path, node.Line, node.Column)
+	}
+	if node.ShortTag() == "!!null" {
+		return PresetSelection{Set: true, Disabled: true}, nil
+	}
+	if node.ShortTag() != "!!str" {
+		return PresetSelection{}, invalidf("invalid config %q: line %d, column %d: preset must be a built-in preset name or null", path, node.Line, node.Column)
+	}
+	if _, ok := LookupPreset(node.Value); !ok {
+		allowed := append(PresetNames(), "null")
+		return PresetSelection{}, invalidf("invalid config %q: line %d, column %d: unsupported preset %q (expected %s)", path, node.Line, node.Column, node.Value, joinExpected(allowed))
+	}
+	return PresetSelection{Set: true, Name: node.Value}, nil
 }
 
 func optionalBool(value *bool) Optional[bool] {

@@ -7,10 +7,13 @@ import (
 	"strconv"
 )
 
+const configurationDiagnosticVersion = 1
+
 type diagnosticDocument struct {
 	SchemaVersion int                 `json:"schemaVersion"`
 	Root          string              `json:"root"`
 	Sources       []Source            `json:"sources"`
+	Preset        ResolvedPreset      `json:"preset"`
 	Effective     diagnosticEffective `json:"effective"`
 	Provenance    map[string]Origin   `json:"provenance"`
 	Inactive      []string            `json:"inactive"`
@@ -53,6 +56,13 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 		if _, err := fmt.Fprintln(writer); err != nil {
 			return err
 		}
+	}
+	preset := "none"
+	if resolution.Preset.Name != nil {
+		preset = *resolution.Preset.Name
+	}
+	if _, err := fmt.Fprintf(writer, "\nPreset: %s (%s)\n", preset, formatOrigin(resolution.Preset.Origin)); err != nil {
+		return err
 	}
 	if _, err := fmt.Fprintln(writer, "\nEffective:"); err != nil {
 		return err
@@ -111,9 +121,10 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 		sources = []Source{}
 	}
 	return diagnosticDocument{
-		SchemaVersion: SchemaVersion,
+		SchemaVersion: configurationDiagnosticVersion,
 		Root:          resolution.Root,
 		Sources:       sources,
+		Preset:        resolution.Preset,
 		Effective: diagnosticEffective{
 			Depth:             resolution.Effective.MaxDepth,
 			DirectoriesOnly:   resolution.Effective.DirectoriesOnly,
@@ -130,8 +141,12 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 }
 
 func formatOrigin(origin Origin) string {
-	if origin.Path == "" {
-		return string(origin.Source)
+	label := string(origin.Source)
+	if origin.Preset != "" {
+		label += " preset " + origin.Preset
 	}
-	return fmt.Sprintf("%s: %s", origin.Source, origin.Path)
+	if origin.Path == "" {
+		return label
+	}
+	return fmt.Sprintf("%s: %s", label, origin.Path)
 }

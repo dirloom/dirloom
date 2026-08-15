@@ -46,6 +46,14 @@ type Source struct {
 type Origin struct {
 	Source SourceKind `json:"source"`
 	Path   string     `json:"path,omitempty"`
+	Preset string     `json:"preset,omitempty"`
+}
+
+// ResolvedPreset identifies the effective preset selection and its source.
+// Name is nil when no preset is active, including after an explicit reset.
+type ResolvedPreset struct {
+	Name   *string `json:"name"`
+	Origin Origin  `json:"origin"`
 }
 
 // IgnoreRule is an effective exclusion together with its source.
@@ -70,6 +78,7 @@ type Effective struct {
 type Resolution struct {
 	Root       string
 	Sources    []Source
+	Preset     ResolvedPreset
 	Effective  Effective
 	Provenance map[string]Origin
 	Ignores    []IgnoreRule
@@ -88,8 +97,17 @@ type DepthOverride struct {
 	Value     int
 }
 
+// PresetSelection distinguishes inheritance, a named preset, and an explicit
+// reset. Disabled is meaningful only when Set is true.
+type PresetSelection struct {
+	Set      bool
+	Disabled bool
+	Name     string
+}
+
 // Overrides contains only options explicitly supplied on the command line.
 type Overrides struct {
+	Preset            PresetSelection
 	Depth             DepthOverride
 	DirectoriesOnly   Optional[bool]
 	IncludeHidden     Optional[bool]
