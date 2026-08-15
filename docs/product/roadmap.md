@@ -409,6 +409,8 @@ dirloom --format d2
 
 Usages : README, documentation d’architecture, rapports, présentations.
 
+Le socle `markdown-tree` est livré séparément : il couvre la documentation Markdown sémantique sans devenir un export graphique, sans HTML et sans réutiliser la présentation terminal.
+
 ## 6.6 Clipboard, completions et distribution
 
 **Niveau : Adoption**
@@ -1960,6 +1962,7 @@ Fonctions :
 - `.dirloom.yaml` ;
 - configuration utilisateur ;
 - presets ;
+- Markdown sémantique (`markdown-tree`) ;
 - `--copy` ;
 - complétions shell ;
 - Visual Theme Engine ;

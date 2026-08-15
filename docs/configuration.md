@@ -127,13 +127,15 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `defaults.depth` | integer or `null` | unlimited | Maximum depth. `0` prints only the root; `null` removes an inherited limit. |
 | `defaults.dirsOnly` | Boolean | `false` | Include directories only. |
 | `defaults.hidden` | Boolean | `false` | Include hidden entries that survive the other filters. |
-| `defaults.format` | `text`, `markdown`, or `json` | `text` | Select the public output contract. |
-| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and Markdown. It is inactive for JSON. |
+| `defaults.format` | `text`, `markdown`, `markdown-tree`, or `json` | `text` | Select the public output contract. |
+| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and fenced Markdown. It is inactive for semantic Markdown and JSON. |
 | `filters.useDefaultIgnores` | Boolean | `true` | Apply Dirloom's built-in directory exclusions. |
 | `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
 
 `directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
+
+`markdown` keeps the historical fenced text drawing. `markdown-tree` produces a native nested list and ignores inherited drawing style; see the [semantic Markdown guide](markdown-tree.md).
 
 ### Complete example
 

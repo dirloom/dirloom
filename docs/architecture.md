@@ -21,7 +21,7 @@ cmd/dirloom
 - `internal/app`: root and output resolution plus the reusable `Inspect` application service.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
-- `internal/render`: Unicode, ASCII, Markdown and JSON schema v1 contracts writing to `io.Writer`.
+- `internal/render`: Unicode, ASCII, fenced Markdown, semantic Markdown and JSON schema v1 contracts writing to `io.Writer`.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
 - `internal/buildinfo`: version metadata injected once at link time.
 
@@ -35,4 +35,4 @@ Configuration is resolved before the application service starts scanning. The re
 
 Filter priority is encoded in `filter.Policy`; nested `.gitignore` state is loaded only when the scanner actually enters a directory. This preserves pruning and prevents ignored branches from influencing the scan.
 
-The tree stores normalized relative paths only as private tie-break metadata. Public JSON deliberately projects to a separate type, preventing accidental leakage of absolute paths or future internal fields.
+The tree stores normalized relative paths only as private tie-break metadata. Public JSON deliberately projects to a separate type, preventing accidental leakage of absolute paths or future internal fields. The semantic Markdown renderer walks the same sorted model, creates only nested list items and escapes unsafe label characters without mutating node data.
