@@ -16,19 +16,20 @@ type drawing struct {
 }
 
 type textRenderer struct {
-	drawing drawing
+	drawing   drawing
+	decorator Decorator
 }
 
-func newTextRenderer(style string) (textRenderer, error) {
+func newTextRenderer(style string, decorator Decorator) (textRenderer, error) {
 	switch style {
 	case StyleUnicode:
 		return textRenderer{drawing: drawing{
 			branch: "├── ", last: "└── ", vertical: "│   ", space: "    ",
-		}}, nil
+		}, decorator: decorator}, nil
 	case StyleASCII:
 		return textRenderer{drawing: drawing{
 			branch: "|-- ", last: "`-- ", vertical: "|   ", space: "    ",
-		}}, nil
+		}, decorator: decorator}, nil
 	default:
 		return textRenderer{}, fmt.Errorf("unsupported style %q (expected unicode or ascii)", style)
 	}
@@ -36,7 +37,7 @@ func newTextRenderer(style string) (textRenderer, error) {
 
 func (r textRenderer) Render(w io.Writer, root *tree.Node) error {
 	buffer := bufio.NewWriter(w)
-	if _, err := fmt.Fprintln(buffer, displayName(root)); err != nil {
+	if _, err := fmt.Fprintln(buffer, r.decorateNode(root)); err != nil {
 		return err
 	}
 	if err := r.renderChildren(buffer, root.Children, ""); err != nil {
@@ -54,7 +55,7 @@ func (r textRenderer) renderChildren(w io.Writer, children []*tree.Node, prefix 
 			connector = r.drawing.last
 			nextPrefix = prefix + r.drawing.space
 		}
-		if _, err := fmt.Fprintf(w, "%s%s%s\n", prefix, connector, displayName(child)); err != nil {
+		if _, err := fmt.Fprintf(w, "%s%s%s\n", r.decorateEdge(prefix), r.decorateEdge(connector), r.decorateNode(child)); err != nil {
 			return err
 		}
 		if child.Type == tree.NodeDirectory {
@@ -64,6 +65,21 @@ func (r textRenderer) renderChildren(w io.Writer, children []*tree.Node, prefix 
 		}
 	}
 	return nil
+}
+
+func (r textRenderer) decorateEdge(value string) string {
+	if r.decorator == nil || value == "" {
+		return value
+	}
+	return r.decorator.Edge(value)
+}
+
+func (r textRenderer) decorateNode(node *tree.Node) string {
+	display := displayName(node)
+	if r.decorator == nil {
+		return display
+	}
+	return r.decorator.Node(NodeContext{Path: node.Path, Name: node.Name, Display: display, Type: node.Type})
 }
 
 func displayName(node *tree.Node) string {
