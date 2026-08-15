@@ -56,8 +56,12 @@ func TestResolutionDiagnostics(t *testing.T) {
 		t.Fatalf("preset = %#v", document["preset"])
 	}
 	inactive, ok := document["inactive"].([]any)
-	if !ok || len(inactive) != 1 || inactive[0] != "style" {
+	if !ok || len(inactive) != 4 || inactive[0] != "style" || inactive[1] != "color" || inactive[2] != "icons" || inactive[3] != "theme" {
 		t.Fatalf("inactive = %#v", document["inactive"])
+	}
+	presentation, ok := document["presentation"].(map[string]any)
+	if !ok || presentation["color"] != "auto" || presentation["icons"] != "auto" {
+		t.Fatalf("presentation = %#v", document["presentation"])
 	}
 }
 

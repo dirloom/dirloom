@@ -20,6 +20,10 @@ filters:
 ignore:
   - generated/**
   - "*.log"
+presentation:
+  color: always
+  icons: nerd
+  theme: .dirloom/themes/team.yaml
 `), ".dirloom.yaml")
 	if err != nil {
 		t.Fatal(err)
@@ -44,6 +48,32 @@ ignore:
 	}
 	if strings.Join(values.IgnorePatterns, ",") != "generated/**,*.log" {
 		t.Fatalf("ignore = %#v", values.IgnorePatterns)
+	}
+	if !values.Color.Set || values.Color.Value != "always" || !values.Icons.Set || values.Icons.Value != "nerd" || !values.Theme.Set || values.Theme.Reset || values.Theme.Value != ".dirloom/themes/team.yaml" {
+		t.Fatalf("presentation = color:%#v icons:%#v theme:%#v", values.Color, values.Icons, values.Theme)
+	}
+}
+
+func TestParseDocumentDistinguishesThemeInheritanceAndReset(t *testing.T) {
+	absent, err := parseDocument([]byte("schemaVersion: 1\n"), "absent.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if absent.Theme.Set {
+		t.Fatalf("absent theme = %#v", absent.Theme)
+	}
+	reset, err := parseDocument([]byte("schemaVersion: 1\npresentation:\n  theme: null\n"), "reset.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reset.Theme.Set || !reset.Theme.Reset || reset.Theme.Value != "" {
+		t.Fatalf("reset theme = %#v", reset.Theme)
+	}
+	for _, value := range []string{"default", "midnight", "daylight", "themes/team.yaml", "team.yml"} {
+		parsed, parseErr := parseDocument([]byte("schemaVersion: 1\npresentation:\n  theme: "+value+"\n"), "theme.yaml")
+		if parseErr != nil || !parsed.Theme.Set || parsed.Theme.Value != value {
+			t.Errorf("theme %q = %#v err=%v", value, parsed.Theme, parseErr)
+		}
 	}
 }
 
@@ -124,6 +154,13 @@ func TestParseDocumentRejectsInvalidYAMLContracts(t *testing.T) {
 		{"null-ignore", "schemaVersion: 1\nignore: null\n", "ignore must be a sequence"},
 		{"non-string-ignore", "schemaVersion: 1\nignore:\n  - 42\n", "ignore entries must be strings"},
 		{"invalid-ignore", "schemaVersion: 1\nignore:\n  - ../outside\n", "line 3, column 5: ignore pattern"},
+		{"bad-color", "schemaVersion: 1\npresentation:\n  color: \"yes\"\n", "unsupported presentation.color"},
+		{"bad-icons", "schemaVersion: 1\npresentation:\n  icons: font\n", "unsupported presentation.icons"},
+		{"empty-theme", "schemaVersion: 1\npresentation:\n  theme: \"\"\n", "presentation.theme must be a non-empty"},
+		{"unknown-theme", "schemaVersion: 1\npresentation:\n  theme: ocean\n", "unsupported theme"},
+		{"escaping-theme", "schemaVersion: 1\npresentation:\n  theme: ../outside.yaml\n", "must remain inside"},
+		{"theme-number", "schemaVersion: 1\npresentation:\n  theme: 42\n", "presentation.theme must be"},
+		{"unknown-presentation-field", "schemaVersion: 1\npresentation:\n  future: true\n", "field future not found"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

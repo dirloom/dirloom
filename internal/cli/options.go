@@ -56,6 +56,9 @@ type options struct {
 	format          string
 	style           string
 	output          string
+	color           string
+	icons           string
+	theme           string
 }
 
 type sourceOptions struct {

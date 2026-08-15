@@ -14,6 +14,11 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Add the inspectable `docs`, `compact`, `monorepo` and `ai` presets with CLI and YAML activation.
 - Add `dirloom preset explain` text and JSON contracts plus preset provenance in `config explain`.
 - Publish and automatically validate the built-in preset guide.
+- Add terminal-safe `--color`, `--icons`, and `--theme` controls with TTY-aware defaults and `NO_COLOR` support.
+- Add immutable `default`, `midnight`, and `daylight` themes plus strict, confined custom YAML themes.
+- Add `dirloom theme list`, `theme explain`, and `theme validate` text and JSON contracts.
+- Preserve canonical text, Markdown, and tree JSON through a presentation-only renderer projection.
+- Publish and automatically validate the terminal themes guide, icon provenance, and pipeline guarantees.
 
 ## [0.1.1] - 2026-08-11
 

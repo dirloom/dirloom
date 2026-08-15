@@ -127,7 +127,7 @@ dirloom --color always --icons never
 dirloom --theme midnight
 ```
 
-Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. Afin de préserver le contrat historique, le profil par défaut de la commande scriptable DEVRAIT rester non décoré tant qu'une décision de version n'a pas explicitement modifié ce contrat. Un preset interactif PEUT activer `auto`.
+Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe les défauts à `auto` : un TTY interactif utilisable reçoit couleurs et icônes Unicode, tandis qu'un pipe, une redirection, `--output`, CI ou `TERM=dumb` conserve exactement le rendu historique non décoré. Les presets NE DOIVENT PAS modifier ces valeurs.
 
 - `never` n'émet aucune séquence ANSI ni icône décorative ;
 - `auto` active la décoration seulement sur une surface compatible ;
@@ -162,7 +162,7 @@ annotation.owner
 annotation.deprecated
 ```
 
-La liste PEUT évoluer avec une version de thème. Un token inconnu DOIT être ignoré avec un avertissement en mode validation, sans faire échouer une simple inspection si un fallback existe.
+Le schéma v1 livré active `tree.edge`, `node.directory`, `node.file` et `node.symlink`. Les autres rôles de la liste décrivent l'évolution sémantique attendue lorsque diff, contracts, drift et annotations existeront. La liste PEUT évoluer avec une version de thème. Un token inconnu DOIT être ignoré avec un avertissement en mode validation, sans faire échouer une simple inspection si un fallback existe.
 
 ### 5.4 Résolution des règles
 
@@ -184,44 +184,42 @@ Exemple exploratoire :
 ```yaml
 schemaVersion: 1
 name: midnight
+description: Thème sombre partagé
+appearance: dark
 
 palette:
   directory: "#7AA2F7"
-  warning: "#E0AF68"
-  danger: "#F7768E"
+  file: "#C0CAF5"
 
 tokens:
   node.directory:
     color: directory
-    icon: "󰉋"
-  state.moved:
-    color: warning
-    icon: "→"
-  status.fail:
-    color: danger
-    style: bold
+    styles: [bold]
+    icons:
+      unicode: "▸"
+      nerd: "󰉋"
 
 rules:
-  - match: { name: "README.md" }
-    icon: "󰂺"
   - match: { extension: ".go" }
-    icon: ""
+    color: file
+    icons:
+      unicode: "•"
+      nerd: "󰟓"
 
 icons:
   spacing: 1
-  fallback: "·"
 ```
 
 ### 5.5 Validation et fallback
 
-Dirloom DOIT pouvoir valider un thème sans lancer une inspection complète. Il DOIT signaler : token inconnu, couleur invalide, règle inaccessible, icône vide, collision non déterministe et version incompatible.
+Dirloom DOIT pouvoir valider un thème sans lancer une inspection complète. Le socle v0.2 signale : token inconnu, couleur invalide, matcher absent ou multiple, doublon strict, icône vide ou dangereuse, limite dépassée et version incompatible. La détection plus générale des règles inaccessibles appartient à l'évolution sémantique du moteur.
 
 Si la police ne rend pas une icône correctement, l'utilisateur DOIT pouvoir choisir un jeu ASCII/Unicode portable. L'alignement NE DOIT PAS supposer qu'un glyphe occupe toujours une cellule ; l'espacement doit être configurable.
 
 ### 5.6 Critères d'acceptation
 
 - La même structure sans décoration conserve le même ordre et le même JSON qu'avant l'activation d'un thème.
-- Un thème peut différencier au minimum dossiers, fichiers, symlinks, extensions, états de diff et sévérités de contrat.
+- Le socle v0.2 différencie au minimum bordures, dossiers, fichiers, symlinks, noms, chemins, globs, extensions et types. Les états de diff et sévérités de contrat deviendront obligatoires avec les moteurs qui les produisent.
 - `NO_COLOR` et les trois modes sont couverts par des tests TTY et non-TTY.
 - Un thème invalide produit un diagnostic localisé et ne corrompt aucune sortie.
 - Les thèmes fournis restent lisibles en thème clair, sombre et sans couleur.
@@ -916,7 +914,7 @@ La configuration utilisateur DOIT suivre le répertoire de configuration natif d
 
 Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. Une seule sélection est active selon la priorité CLI, projet, utilisateur ; `preset: null` et `--preset none` neutralisent une sélection héritée sans retirer les autres valeurs. Le preset gagnant est développé dans sa couche avant les valeurs explicites de cette couche. `dirloom preset explain <name>` DOIT rendre sa définition intrinsèque visible en texte et en JSON versionné, tandis que `dirloom config explain` DOIT exposer la sélection effective et la provenance de chaque effet.
 
-Les options qui affectent un artefact persistant DOIVENT être enregistrées avec lui. Les secrets NE DOIVENT pas être sérialisés. La configuration PEUT référencer des fichiers séparés pour les thèmes, packs, contracts ou annotations sans créer une seconde priorité implicite.
+Les options qui affectent un artefact persistant DOIVENT être enregistrées avec lui. Les secrets NE DOIVENT pas être sérialisés. Le schéma v1 accepte `presentation.color`, `presentation.icons` et `presentation.theme` avec la priorité générale ; `theme: null` rétablit le thème `default` sans toucher aux autres valeurs. Un thème référencé par la configuration DOIT rester sous le dossier du fichier source après résolution des liens symboliques. La configuration PEUT référencer plus tard des fichiers séparés pour packs, contracts ou annotations sans créer une seconde priorité implicite.
 
 ## 14. Definition of Done d'une capacité produit
 
@@ -939,7 +937,6 @@ Une capacité n'est prête que si :
 | --- | --- | --- |
 | Nom public de l'architecture FSD-like | Publication du premier Architecture Pack | Vocabulaire, philosophie, disponibilité du nom |
 | Forme exacte des variantes Flutter/Next.js/Hono.js | Spécification du pack `reference-fsd` | Trois projets de référence et invariants communs |
-| Valeur par défaut de `--color` / `--icons` | Release du système de thèmes | Tests utilisateurs et compatibilité du contrat déterministe |
 | DSL de query et de contracts | Avant implémentation publique | Prototypes, erreurs attendues, capacité de migration |
 | Format de manifest et des templates | Avant scaffold public | Besoins réels du pack de référence et modèle de sécurité |
 | Politique des hooks | Avant toute exécution par un pack | Menaces, CI, provenance, permissions et rollback |

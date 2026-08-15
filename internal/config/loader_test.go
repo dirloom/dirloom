@@ -77,6 +77,56 @@ ignore:
 	}
 }
 
+func TestResolvePresentationPrecedenceResetAndPresetIndependence(t *testing.T) {
+	root := t.TempDir()
+	userBase := t.TempDir()
+	writeConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), `schemaVersion: 1
+presentation:
+  color: always
+  icons: nerd
+  theme: midnight
+`)
+	writeConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+preset: ai
+presentation:
+  color: never
+  theme: null
+`)
+	loader := NewLoader(WithUserConfigDir(func() (string, error) { return userBase, nil }))
+	resolved, err := loader.Resolve(ResolveOptions{Root: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Effective.Color != "never" || resolved.Effective.Icons != "nerd" || resolved.Effective.Theme != "default" {
+		t.Fatalf("effective presentation = %#v", resolved.Effective)
+	}
+	if resolved.Provenance["color"].Source != SourceProject || resolved.Provenance["icons"].Source != SourceUser || resolved.Provenance["theme"].Source != SourceProject {
+		t.Fatalf("presentation provenance = %#v", resolved.Provenance)
+	}
+	if resolved.Provenance["color"].Preset != "" || resolved.Provenance["icons"].Preset != "" || resolved.Provenance["theme"].Preset != "" {
+		t.Fatal("preset unexpectedly defined presentation")
+	}
+
+	resolved, err = loader.Resolve(ResolveOptions{Root: root, Overrides: Overrides{
+		Color: Optional[string]{Set: true, Value: "auto"},
+		Theme: ThemeSelection{Set: true, Value: "daylight"},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Effective.Color != "auto" || resolved.Effective.Icons != "nerd" || resolved.Effective.Theme != "daylight" || resolved.Provenance["theme"].Source != SourceCLI {
+		t.Fatalf("CLI presentation = %#v provenance=%#v", resolved.Effective, resolved.Provenance)
+	}
+
+	withoutConfig, err := loader.Resolve(ResolveOptions{Root: root, DisableAll: true, Overrides: Overrides{Preset: PresetSelection{Set: true, Name: "ai"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if withoutConfig.Effective.Color != "auto" || withoutConfig.Effective.Icons != "auto" || withoutConfig.Effective.Theme != "default" {
+		t.Fatalf("preset changed presentation = %#v", withoutConfig.Effective)
+	}
+}
+
 func TestResolvePresetPrecedenceAndExplicitOverrides(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
