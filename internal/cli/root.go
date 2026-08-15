@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/dirloom/dirloom/internal/app"
 	configuration "github.com/dirloom/dirloom/internal/config"
@@ -59,6 +60,7 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 		Example: `  dirloom
   dirloom ./src
   dirloom --depth 3
+  dirloom --preset docs
   dirloom --dirs-only
   dirloom --style ascii
   dirloom --format markdown
@@ -132,11 +134,13 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 	bindInspectFlags(command, &opts)
 	command.Flags().StringVarP(&opts.output, "output", "o", "", "write transactionally to a file instead of stdout")
 	command.AddCommand(newConfigCommand(stdout, loader, &sources))
+	command.AddCommand(newPresetCommand(stdout, &sources))
 
 	return command
 }
 
 func bindInspectFlags(command *cobra.Command, opts *options) {
+	command.Flags().StringVar(&opts.preset, "preset", "", "built-in preset: ai, compact, docs, monorepo, or none")
 	command.Flags().VarP(&opts.depth, "depth", "d", "maximum depth (0 shows only the root; unlimited removes the limit)")
 	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, "show directories only")
 	command.Flags().BoolVar(&opts.includeHidden, "hidden", false, "include hidden entries that survive other filters")
@@ -151,7 +155,10 @@ func resolveOptions(command *cobra.Command, loader *configuration.Loader, root s
 	if command.Flags().Changed("config") && sources.path == "" {
 		return configuration.Resolution{}, configuration.Overrides{}, &usageError{err: fmt.Errorf("--config requires a non-empty path")}
 	}
-	overrides := explicitOverrides(command, opts)
+	overrides, err := explicitOverrides(command, opts)
+	if err != nil {
+		return configuration.Resolution{}, configuration.Overrides{}, err
+	}
 	resolved, err := loader.Resolve(configuration.ResolveOptions{
 		Root:                root,
 		ExplicitProjectPath: sources.path,
@@ -168,8 +175,18 @@ func resolveOptions(command *cobra.Command, loader *configuration.Loader, root s
 	return resolved, overrides, nil
 }
 
-func explicitOverrides(command *cobra.Command, opts *options) configuration.Overrides {
+func explicitOverrides(command *cobra.Command, opts *options) (configuration.Overrides, error) {
 	result := configuration.Overrides{}
+	if command.Flags().Changed("preset") {
+		if opts.preset == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--preset requires a non-empty value")}
+		}
+		if opts.preset == configuration.PresetNone {
+			result.Preset = configuration.PresetSelection{Set: true, Disabled: true}
+		} else {
+			result.Preset = configuration.PresetSelection{Set: true, Name: opts.preset}
+		}
+	}
 	if command.Flags().Changed("depth") {
 		result.Depth = configuration.DepthOverride{Set: true, Unlimited: opts.depth.unlimited, Value: opts.depth.value}
 	}
@@ -194,7 +211,7 @@ func explicitOverrides(command *cobra.Command, opts *options) configuration.Over
 	if command.Flags().Changed("ignore") {
 		result.IgnorePatterns = append([]string(nil), opts.ignorePatterns...)
 	}
-	return result
+	return result, nil
 }
 
 func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *sourceOptions) *cobra.Command {
@@ -253,6 +270,80 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
 	command.AddCommand(explain)
 	return command
+}
+
+func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
+	names := strings.Join(configuration.PresetNames(), ", ")
+	command := &cobra.Command{
+		Use:   "preset",
+		Short: "Inspect built-in presets",
+		Long:  "Inspect Dirloom's built-in presets. Available presets: " + names + ".",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) != 0 {
+				return &usageError{err: fmt.Errorf("expected a preset subcommand, received %d argument(s)", len(args))}
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			if err := rejectPresetSourceFlags(cmd, sources); err != nil {
+				return err
+			}
+			return cmd.Help()
+		},
+	}
+	var outputFormat string
+	explain := &cobra.Command{
+		Use:   "explain <preset>",
+		Short: "Explain one built-in preset",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return &usageError{err: fmt.Errorf("expected exactly one preset name, received %d", len(args))}
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := rejectPresetSourceFlags(cmd, sources); err != nil {
+				return err
+			}
+			definition, ok := configuration.LookupPreset(args[0])
+			if !ok {
+				return &usageError{err: fmt.Errorf("unsupported preset %q (expected %s)", args[0], names)}
+			}
+			switch outputFormat {
+			case "text":
+				if err := definition.WriteText(stdout); err != nil {
+					return fmt.Errorf("write preset explanation: %w", err)
+				}
+			case "json":
+				if err := definition.WriteJSON(stdout); err != nil {
+					return fmt.Errorf("write preset explanation: %w", err)
+				}
+			default:
+				return &usageError{err: fmt.Errorf("unsupported explanation format %q (expected text or json)", outputFormat)}
+			}
+			return nil
+		},
+	}
+	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
+	command.AddCommand(explain)
+	return command
+}
+
+func rejectPresetSourceFlags(command *cobra.Command, sources *sourceOptions) error {
+	checks := []struct {
+		name    string
+		changed bool
+	}{
+		{name: "config", changed: command.Flags().Changed("config") || sources.path != ""},
+		{name: "no-user-config", changed: command.Flags().Changed("no-user-config") || sources.noUser},
+		{name: "no-config", changed: command.Flags().Changed("no-config") || sources.noConfig},
+	}
+	for _, check := range checks {
+		if check.changed {
+			return &usageError{err: fmt.Errorf("--%s cannot be used with preset inspection", check.name)}
+		}
+	}
+	return nil
 }
 
 func writeAll(writer io.Writer, data []byte) error {
