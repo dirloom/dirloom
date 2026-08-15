@@ -7,6 +7,7 @@ import (
 
 func TestParseDocumentAcceptsCompleteSchema(t *testing.T) {
 	values, err := parseDocument([]byte(`schemaVersion: 1
+preset: docs
 defaults:
   depth: 0
   dirsOnly: false
@@ -22,6 +23,9 @@ ignore:
 `), ".dirloom.yaml")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !values.Preset.Set || values.Preset.Disabled || values.Preset.Name != "docs" {
+		t.Fatalf("preset = %#v", values.Preset)
 	}
 	if !values.Depth.Set || values.Depth.Unlimited || values.Depth.Value != 0 {
 		t.Fatalf("depth = %#v", values.Depth)
@@ -40,6 +44,35 @@ ignore:
 	}
 	if strings.Join(values.IgnorePatterns, ",") != "generated/**,*.log" {
 		t.Fatalf("ignore = %#v", values.IgnorePatterns)
+	}
+}
+
+func TestParseDocumentDistinguishesPresetInheritanceAndReset(t *testing.T) {
+	absent, err := parseDocument([]byte("schemaVersion: 1\n"), "absent.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if absent.Preset.Set {
+		t.Fatalf("absent preset = %#v", absent.Preset)
+	}
+
+	reset, err := parseDocument([]byte("schemaVersion: 1\npreset: null\n"), "reset.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reset.Preset.Set || !reset.Preset.Disabled || reset.Preset.Name != "" {
+		t.Fatalf("reset preset = %#v", reset.Preset)
+	}
+
+	for _, name := range PresetNames() {
+		values, err := parseDocument([]byte("schemaVersion: 1\npreset: "+name+"\n"), name+".yaml")
+		if err != nil {
+			t.Errorf("preset %q: %v", name, err)
+			continue
+		}
+		if !values.Preset.Set || values.Preset.Disabled || values.Preset.Name != name {
+			t.Errorf("preset %q parsed as %#v", name, values.Preset)
+		}
 	}
 }
 
@@ -70,6 +103,12 @@ func TestParseDocumentRejectsInvalidYAMLContracts(t *testing.T) {
 		{"empty", "", "file is empty"},
 		{"missing-version", "defaults: {}\n", "schemaVersion is required"},
 		{"unsupported-version", "schemaVersion: 2\n", "unsupported schemaVersion 2"},
+		{"empty-preset", "schemaVersion: 1\npreset: \"\"\n", "line 2, column 9: unsupported preset"},
+		{"unknown-preset", "schemaVersion: 1\npreset: unknown\n", "line 2, column 9: unsupported preset"},
+		{"uppercase-preset", "schemaVersion: 1\npreset: AI\n", "line 2, column 9: unsupported preset"},
+		{"boolean-preset", "schemaVersion: 1\npreset: true\n", "line 2, column 9: preset must be"},
+		{"sequence-preset", "schemaVersion: 1\npreset: [docs]\n", "line 2, column 9: preset must be"},
+		{"mapping-preset", "schemaVersion: 1\npreset: {name: docs}\n", "line 2, column 9: preset must be"},
 		{"unknown-field", "schemaVersion: 1\nunknown: true\n", "field unknown not found"},
 		{"unknown-nested-field", "schemaVersion: 1\ndefaults:\n  unknown: true\n", "field unknown not found"},
 		{"duplicate-key", "schemaVersion: 1\ndefaults:\n  hidden: true\n  hidden: false\n", "duplicate key \"hidden\""},

@@ -2,6 +2,8 @@
 
 Dirloom can keep repeatable inspection settings in YAML while preserving explicit command-line control. Commit a project configuration when a team needs the same output, keep personal defaults in the operating system's configuration directory, and use CLI options for one-off changes.
 
+Built-in presets can also provide a named starting point. See [Built-in presets](presets.md) for their exact definitions and usage recipes.
+
 Configuration is optional. If no configuration file exists, Dirloom behaves exactly as it does with its built-in defaults.
 
 ## Quick start
@@ -100,13 +102,19 @@ dirloom . --no-config
 
 Scalar values use normal precedence: the highest layer that explicitly defines a value wins. This includes `false`, `0`, and an explicit unlimited depth.
 
+`preset` is also a scalar. The highest user, project, or CLI selection wins, and Dirloom applies the selected preset before explicit values from that same layer. A higher explicit value can therefore override one preset setting without redefining the others.
+
+Use `preset: null` in YAML or `--preset none` on the CLI to neutralize an inherited preset while retaining other inherited configuration values.
+
 The `ignore` list is additive because personal, project, and one-off exclusions serve different purposes. Dirloom appends patterns in this order:
 
 ```text
-user configuration → project configuration → repeated --ignore options
+user preset → user ignore
+  → project preset → project ignore
+  → CLI preset → repeated --ignore options
 ```
 
-Exact duplicates are removed while the first occurrence and its source are preserved. The initial schema does not support negation or resetting inherited explicit exclusions.
+Only the winning preset contributes rules; masked presets are skipped. Preset rules are inserted before explicit exclusions from the same layer. Exact duplicates are removed while the first occurrence and its source are preserved. The initial schema does not support negation or resetting inherited explicit exclusions.
 
 ## Schema reference
 
@@ -115,6 +123,7 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | Field | Type | Built-in default | Description |
 | --- | --- | --- | --- |
 | `schemaVersion` | integer | required | Configuration contract version. Only `1` is supported. |
+| `preset` | `docs`, `compact`, `monorepo`, `ai`, or `null` | no preset | Select a built-in preset, or explicitly neutralize an inherited preset with `null`. |
 | `defaults.depth` | integer or `null` | unlimited | Maximum depth. `0` prints only the root; `null` removes an inherited limit. |
 | `defaults.dirsOnly` | Boolean | `false` | Include directories only. |
 | `defaults.hidden` | Boolean | `false` | Include hidden entries that survive the other filters. |
@@ -131,6 +140,7 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 <!-- dirloom-config-example:complete -->
 ```yaml
 schemaVersion: 1
+preset: docs
 
 defaults:
   depth: 6
@@ -164,6 +174,7 @@ The text report includes:
 - the absolute inspected root;
 - user and project source paths;
 - source status: `loaded`, `missing`, `disabled`, or `unavailable`;
+- the active preset or explicit reset and its origin;
 - every effective scalar and its origin;
 - every effective ignore pattern and its origin;
 - settings that are currently inactive.
@@ -181,6 +192,8 @@ You can apply temporary inspection options to the explanation itself:
 ```bash
 dirloom config explain . --depth 3 --format markdown
 ```
+
+Values supplied by a preset identify both their configuration layer and preset name. Values explicitly replaced in that layer report the direct layer as their origin.
 
 ## Common recipes
 
@@ -213,6 +226,15 @@ defaults:
 ```
 
 A project can override either value without modifying the user file.
+
+If the user file selects a preset, a project can neutralize only that selection:
+
+```yaml
+schemaVersion: 1
+preset: null
+```
+
+The remaining explicit user values and exclusions continue to participate in normal resolution.
 
 ### Configure a monorepo
 
@@ -287,6 +309,8 @@ A configuration file can change which names appear in output, including hidden e
 - choose an output destination;
 - modify the project or the configuration file.
 
+Preset definitions are compiled into Dirloom and have the same boundaries. They do not load additional files, perform network access, or select an output destination.
+
 Secrets do not belong in Dirloom configuration. The schema has no secret-bearing fields.
 
 ## Troubleshooting
@@ -301,7 +325,7 @@ Check spelling and nesting against the schema reference. Dirloom rejects unknown
 
 ### A value comes from the wrong source
 
-Use `config explain` to inspect provenance. Remember that an explicit CLI value wins, the nearest project file replaces any more distant project file, and ignore patterns accumulate across layers.
+Use `config explain` to inspect the active preset and provenance. Remember that an explicit CLI value wins, the nearest project file replaces any more distant project file, and ignore patterns accumulate across layers. Use `preset explain <name>` to compare the effective result with the intrinsic preset definition.
 
 ### An ignore pattern is rejected
 
@@ -324,5 +348,7 @@ Configuration errors are written to stderr before rendering begins. Stdout stays
 ## Compatibility
 
 Configuration is a public Dirloom contract. Schema version `1` keeps the documented meanings and types stable. A future optional field may be introduced with release notes, but an older strict binary will reject a field it does not recognize. A change to an existing field's meaning or type requires a new schema version.
+
+The optional `preset` field was added before the first v0.2 release and remains part of schema version `1`. The preset explanation JSON and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
 
 An older Dirloom binary fails clearly when it encounters an unsupported schema version or field. It never guesses how to interpret a newer contract. The CLI, configuration schema, diagnostic JSON, and tree JSON are versioned and tested independently.

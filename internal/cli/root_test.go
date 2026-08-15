@@ -17,7 +17,7 @@ func TestHelpAndVersion(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "config"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "config", "preset"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}
@@ -40,6 +40,8 @@ func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 		{"--format", "yaml"},
 		{"--style", "auto"},
 		{"--ignore", "../outside"},
+		{"--preset", "unknown"},
+		{"--preset="},
 		{"one", "two"},
 	}
 	for _, args := range tests {
@@ -49,6 +51,168 @@ func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 				t.Fatalf("Execute(%#v)=(stdout=%q, stderr=%q, code=%d)", args, stdout, stderr, code)
 			}
 		})
+	}
+}
+
+func TestCLIBuiltInPresetsAndOverrides(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "preset project é")
+	for _, directory := range []string{
+		filepath.Join(root, "src", "domain", "deep"),
+		filepath.Join(root, "packages", "web", "dist"),
+		filepath.Join(root, "packages", "web", "build"),
+	} {
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, path := range []string{
+		filepath.Join(root, "main.go"),
+		filepath.Join(root, "bundle.js.map"),
+		filepath.Join(root, "src", "domain", "model.go"),
+		filepath.Join(root, "packages", "web", "dist", "bundle.js"),
+		filepath.Join(root, "packages", "web", "build", "artifact.txt"),
+	} {
+		if err := os.WriteFile(path, nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	docs, stderr, code := executeForTest(t, root, "--preset", "docs", "--no-config")
+	if code != 0 || stderr != "" || !strings.HasPrefix(docs, "```text\n") || !strings.Contains(docs, "main.go") {
+		t.Fatalf("docs=(%q, %q, %d)", docs, stderr, code)
+	}
+
+	compact, stderr, code := executeForTest(t, root, "--preset", "compact", "--no-config")
+	if code != 0 || stderr != "" || strings.HasPrefix(compact, "```") || strings.Contains(compact, "main.go") || !strings.Contains(compact, "src/") {
+		t.Fatalf("compact=(%q, %q, %d)", compact, stderr, code)
+	}
+
+	monorepo, stderr, code := executeForTest(t, root, "--preset", "monorepo", "--no-config")
+	if code != 0 || stderr != "" || strings.Contains(monorepo, "dist/") || strings.Contains(monorepo, "build/") || strings.Contains(monorepo, "main.go") {
+		t.Fatalf("monorepo=(%q, %q, %d)", monorepo, stderr, code)
+	}
+
+	ai, stderr, code := executeForTest(t, root, "--preset", "ai", "--no-config")
+	if code != 0 || stderr != "" || !strings.HasPrefix(ai, "```text\n") || !strings.Contains(ai, "main.go") || strings.Contains(ai, "bundle.js.map") || strings.Contains(ai, "dist/") || strings.Contains(ai, "build/") {
+		t.Fatalf("ai=(%q, %q, %d)", ai, stderr, code)
+	}
+
+	overridden, stderr, code := executeForTest(t, root, "--preset", "compact", "--dirs-only=false", "--depth", "6", "--no-config")
+	if code != 0 || stderr != "" || !strings.Contains(overridden, "main.go") || strings.HasPrefix(overridden, "```") {
+		t.Fatalf("overridden compact=(%q, %q, %d)", overridden, stderr, code)
+	}
+
+	jsonOverride, stderr, code := executeForTest(t, root, "--preset", "docs", "--format", "json", "--no-config")
+	if code != 0 || stderr != "" || !strings.Contains(jsonOverride, `"schemaVersion": 1`) || strings.HasPrefix(jsonOverride, "```text") {
+		t.Fatalf("JSON override=(%q, %q, %d)", jsonOverride, stderr, code)
+	}
+}
+
+func TestCLIPresetConfigurationAndReset(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "preset config é")
+	if err := os.Mkdir(root, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "visible.txt"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	userBase := t.TempDir()
+	writeCLIConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), "schemaVersion: 1\npreset: compact\n")
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npreset: null\n")
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return userBase, nil }))
+
+	stdout, stderr, code := executeForTestWithLoader(t, loader, root)
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "visible.txt") || strings.HasPrefix(stdout, "```") {
+		t.Fatalf("project reset=(%q, %q, %d)", stdout, stderr, code)
+	}
+
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npreset: ai\n")
+	stdout, stderr, code = executeForTestWithLoader(t, loader, root, "--preset", "none")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "visible.txt") || strings.HasPrefix(stdout, "```") {
+		t.Fatalf("CLI reset=(%q, %q, %d)", stdout, stderr, code)
+	}
+
+	stdout, stderr, code = executeForTestWithLoader(t, loader, root, "--no-config", "--preset", "ai")
+	if code != 0 || stderr != "" || !strings.HasPrefix(stdout, "```text\n") {
+		t.Fatalf("no-config preset=(%q, %q, %d)", stdout, stderr, code)
+	}
+}
+
+func TestCLIPresetExplainAndConfigDiagnostics(t *testing.T) {
+	stdout, stderr, code := executeForTest(t, "preset")
+	if code != 0 || stderr != "" {
+		t.Fatalf("preset help=(%q, %q, %d)", stdout, stderr, code)
+	}
+	for _, name := range configuration.PresetNames() {
+		if !strings.Contains(stdout, name) {
+			t.Errorf("preset help is missing %q\n%s", name, stdout)
+		}
+	}
+
+	stdout, stderr, code = executeForTest(t, "preset", "explain", "ai")
+	if code != 0 || stderr != "" {
+		t.Fatalf("text explain=(%q, %q, %d)", stdout, stderr, code)
+	}
+	for _, want := range []string{"Preset: ai", "depth: 4", "format: markdown", "**/dist", "*.map"} {
+		if !strings.Contains(stdout, want) {
+			t.Errorf("preset explanation missing %q\n%s", want, stdout)
+		}
+	}
+
+	stdout, stderr, code = executeForTest(t, "preset", "explain", "compact", "--as", "json")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"schemaVersion": 1`) || !strings.Contains(stdout, `"name": "compact"`) || !strings.Contains(stdout, `"ignore": []`) {
+		t.Fatalf("JSON explain=(%q, %q, %d)", stdout, stderr, code)
+	}
+
+	root := t.TempDir()
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npreset: ai\n")
+	stdout, stderr, code = executeForTest(t, "config", "explain", root, "--depth", "6")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "Preset: ai (project:") || !strings.Contains(stdout, "format: markdown (project preset ai:") || !strings.Contains(stdout, "depth: 6 (cli)") {
+		t.Fatalf("config text explain=(%q, %q, %d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "config", "explain", root, "--as", "json")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"name": "ai"`) || !strings.Contains(stdout, `"preset": "ai"`) {
+		t.Fatalf("config JSON explain=(%q, %q, %d)", stdout, stderr, code)
+	}
+
+	invalid := [][]string{
+		{"preset", "explain"},
+		{"preset", "explain", "ai", "extra"},
+		{"preset", "explain", "none"},
+		{"preset", "explain", "AI"},
+		{"preset", "explain", "ai", "--as", "yaml"},
+		{"preset", "explain", "ai", "--config", "config.yaml"},
+		{"preset", "explain", "ai", "--no-config"},
+		{"preset", "explain", "ai", "--no-user-config"},
+	}
+	for _, args := range invalid {
+		stdout, stderr, code = executeForTest(t, args...)
+		if code != 2 || stdout != "" || !strings.HasPrefix(stderr, "Error: ") {
+			t.Fatalf("Execute(%#v)=(%q, %q, %d)", args, stdout, stderr, code)
+		}
+	}
+}
+
+func TestCLIPresetErrorsPreserveOutputAndClassifyWriteFailure(t *testing.T) {
+	root := t.TempDir()
+	output := filepath.Join(t.TempDir(), "tree.txt")
+	if err := os.WriteFile(output, []byte("preserved"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	stdout, stderr, code := executeForTest(t, root, "--preset", "unknown", "--output", output)
+	if code != 2 || stdout != "" || !strings.Contains(stderr, "unsupported preset") {
+		t.Fatalf("invalid preset=(%q, %q, %d)", stdout, stderr, code)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil || string(data) != "preserved" {
+		t.Fatalf("output changed after preset error: data=%q err=%v", data, err)
+	}
+
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return "", errors.New("must not be called") }))
+	var errorOutput bytes.Buffer
+	code = executeWithLoader(context.Background(), []string{"preset", "explain", "ai"}, failingWriter{}, &errorOutput, "v0.1.0-test", loader)
+	if code != 1 || !strings.Contains(errorOutput.String(), "write preset explanation") {
+		t.Fatalf("write failure=(stderr=%q, code=%d)", errorOutput.String(), code)
 	}
 }
 
@@ -347,17 +511,27 @@ func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 	if !strings.Contains(string(readme), "docs/configuration.md") {
 		t.Fatal("README does not link to docs/configuration.md")
 	}
+	presetDocumentation, err := os.ReadFile(filepath.Join("..", "..", "docs", "presets.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "docs/presets.md") {
+		t.Fatal("README does not link to docs/presets.md")
+	}
 	stdout, stderr, code := executeForTest(t, "--help")
 	if code != 0 || stderr != "" {
 		t.Fatalf("help=(%q, %q, %d)", stdout, stderr, code)
 	}
-	for _, option := range []string{"--config", "--no-user-config", "--no-config", "--depth", "--dirs-only", "--hidden", "--format", "--style", "--no-default-ignore", "--no-gitignore"} {
+	for _, option := range []string{"--config", "--no-user-config", "--no-config", "--preset", "--depth", "--dirs-only", "--hidden", "--format", "--style", "--no-default-ignore", "--no-gitignore"} {
 		if !strings.Contains(stdout, option) {
 			t.Errorf("CLI help is missing documented option %q", option)
 		}
 		if !strings.Contains(string(documentation), option) {
 			t.Errorf("public configuration documentation is missing option %q", option)
 		}
+	}
+	if !strings.Contains(stdout, "preset") || !strings.Contains(string(presetDocumentation), "dirloom preset explain") {
+		t.Fatal("preset help or public documentation is missing")
 	}
 }
 
@@ -384,4 +558,10 @@ func writeCLIConfig(t *testing.T, path, content string) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("synthetic write failure")
 }

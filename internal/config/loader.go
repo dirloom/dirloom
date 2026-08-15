@@ -68,40 +68,42 @@ func (loader *Loader) Resolve(options ResolveOptions) (Resolution, error) {
 	}
 
 	resolution := defaultResolution(root)
+	var userSource, projectSource Source
+	var userValues, projectValues partial
 	if options.DisableAll {
-		resolution.Sources = []Source{
-			{Kind: SourceUser, Status: StatusDisabled},
-			{Kind: SourceProject, Status: StatusDisabled},
-		}
-		if err := applyOverrides(&resolution, options.Overrides); err != nil {
+		userSource = Source{Kind: SourceUser, Status: StatusDisabled}
+		projectSource = Source{Kind: SourceProject, Status: StatusDisabled}
+	} else {
+		userSource, userValues, err = loader.loadUser(options.DisableUser)
+		if err != nil {
 			return Resolution{}, err
 		}
-		return resolution, nil
+		projectSource, projectValues, err = loader.loadProject(root, options.ExplicitProjectPath)
+		if err != nil {
+			return Resolution{}, err
+		}
 	}
 
-	userSource, userValues, err := loader.loadUser(options.DisableUser)
+	resolution.Sources = []Source{userSource, projectSource}
+	selected, err := resolvePresetSelection(userSource, userValues, projectSource, projectValues, options.Overrides)
 	if err != nil {
 		return Resolution{}, err
 	}
-	resolution.Sources = append(resolution.Sources, userSource)
+	resolution.Preset = selected
+
 	if userSource.Status == StatusLoaded {
-		if err := applyPartial(&resolution, userValues, Origin{Source: SourceUser, Path: userSource.Path}); err != nil {
+		origin := Origin{Source: SourceUser, Path: userSource.Path}
+		if err := applyLayer(&resolution, userValues, origin, selected); err != nil {
 			return Resolution{}, err
 		}
 	}
-
-	projectSource, projectValues, err := loader.loadProject(root, options.ExplicitProjectPath)
-	if err != nil {
-		return Resolution{}, err
-	}
-	resolution.Sources = append(resolution.Sources, projectSource)
 	if projectSource.Status == StatusLoaded {
-		if err := applyPartial(&resolution, projectValues, Origin{Source: SourceProject, Path: projectSource.Path}); err != nil {
+		origin := Origin{Source: SourceProject, Path: projectSource.Path}
+		if err := applyLayer(&resolution, projectValues, origin, selected); err != nil {
 			return Resolution{}, err
 		}
 	}
-
-	if err := applyOverrides(&resolution, options.Overrides); err != nil {
+	if err := applyCLILayer(&resolution, options.Overrides, selected); err != nil {
 		return Resolution{}, err
 	}
 	return resolution, nil
@@ -245,7 +247,8 @@ func (loader *Loader) loadOptional(kind SourceKind, path string, required bool) 
 func defaultResolution(root string) Resolution {
 	builtIn := Origin{Source: SourceBuiltIn}
 	return Resolution{
-		Root: root,
+		Root:   root,
+		Preset: ResolvedPreset{Origin: builtIn},
 		Effective: Effective{
 			Format:            FormatText,
 			Style:             StyleUnicode,
@@ -262,6 +265,73 @@ func defaultResolution(root string) Resolution {
 			"useGitignore":      builtIn,
 		},
 	}
+}
+
+func resolvePresetSelection(userSource Source, userValues partial, projectSource Source, projectValues partial, overrides Overrides) (ResolvedPreset, error) {
+	selection := PresetSelection{}
+	origin := Origin{Source: SourceBuiltIn}
+	if userSource.Status == StatusLoaded && userValues.Preset.Set {
+		selection = userValues.Preset
+		origin = Origin{Source: SourceUser, Path: userSource.Path}
+	}
+	if projectSource.Status == StatusLoaded && projectValues.Preset.Set {
+		selection = projectValues.Preset
+		origin = Origin{Source: SourceProject, Path: projectSource.Path}
+	}
+	if overrides.Preset.Set {
+		selection = overrides.Preset
+		origin = Origin{Source: SourceCLI}
+	}
+	if !selection.Set {
+		return ResolvedPreset{Origin: origin}, nil
+	}
+	if selection.Disabled {
+		if selection.Name != "" {
+			return ResolvedPreset{}, invalidf("disabled preset selection must not include a name")
+		}
+		return ResolvedPreset{Origin: origin}, nil
+	}
+	if selection.Name == "" {
+		return ResolvedPreset{}, invalidf("preset name must not be empty")
+	}
+	if _, ok := LookupPreset(selection.Name); !ok {
+		allowed := append(PresetNames(), PresetNone)
+		return ResolvedPreset{}, invalidf("unsupported preset %q (expected %s)", selection.Name, joinExpected(allowed))
+	}
+	name := selection.Name
+	return ResolvedPreset{Name: &name, Origin: origin}, nil
+}
+
+func applyLayer(resolution *Resolution, values partial, origin Origin, selected ResolvedPreset) error {
+	if selected.Name != nil && sameOrigin(selected.Origin, origin) {
+		if err := applyNamedPreset(resolution, *selected.Name, origin); err != nil {
+			return err
+		}
+	}
+	return applyPartial(resolution, values, origin)
+}
+
+func applyCLILayer(resolution *Resolution, overrides Overrides, selected ResolvedPreset) error {
+	origin := Origin{Source: SourceCLI}
+	if selected.Name != nil && sameOrigin(selected.Origin, origin) {
+		if err := applyNamedPreset(resolution, *selected.Name, origin); err != nil {
+			return err
+		}
+	}
+	return applyOverrides(resolution, overrides)
+}
+
+func applyNamedPreset(resolution *Resolution, name string, origin Origin) error {
+	definition, ok := LookupPreset(name)
+	if !ok {
+		return invalidf("unsupported preset %q (expected %s)", name, joinExpected(PresetNames()))
+	}
+	origin.Preset = name
+	return applyPartial(resolution, presetPartial(definition), origin)
+}
+
+func sameOrigin(left, right Origin) bool {
+	return left.Source == right.Source && left.Path == right.Path
 }
 
 func applyPartial(resolution *Resolution, values partial, origin Origin) error {

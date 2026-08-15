@@ -914,7 +914,7 @@ La configuration utilisateur DOIT suivre le répertoire de configuration natif d
 
 `dirloom config explain` DOIT rendre visibles sources, statuts, valeurs effectives, provenance et exclusions. Aucun fichier de configuration NE DOIT pouvoir sélectionner la racine, imposer une destination d'écriture, exécuter une commande, interpoler l'environnement ou inclure un autre document.
 
-Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. `dirloom preset explain <name>` doit rendre ses effets visibles.
+Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. Une seule sélection est active selon la priorité CLI, projet, utilisateur ; `preset: null` et `--preset none` neutralisent une sélection héritée sans retirer les autres valeurs. Le preset gagnant est développé dans sa couche avant les valeurs explicites de cette couche. `dirloom preset explain <name>` DOIT rendre sa définition intrinsèque visible en texte et en JSON versionné, tandis que `dirloom config explain` DOIT exposer la sélection effective et la provenance de chaque effet.
 
 Les options qui affectent un artefact persistant DOIVENT être enregistrées avec lui. Les secrets NE DOIVENT pas être sérialisés. La configuration PEUT référencer des fichiers séparés pour les thèmes, packs, contracts ou annotations sans créer une seconde priorité implicite.
 

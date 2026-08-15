@@ -3,7 +3,7 @@
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
 > **Dernière vérification :** 15 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -49,13 +49,17 @@ dirloom --help
 | Produire un document machine versionné | `dirloom --format json` |
 | Écrire sûrement dans un fichier | `dirloom --output structure.txt` |
 | Générer une documentation d’architecture | `dirloom --format markdown --output structure.md` |
-| Préparer un contexte structurel pour une IA | `dirloom --format markdown --depth 4` |
 | Générer un artefact pour la CI | `dirloom --format json --output structure.json` |
 | Auditer ce que masque `.gitignore` | `dirloom --no-gitignore` |
 | Auditer absolument toutes les couches de filtrage | `dirloom --hidden --no-gitignore --no-default-ignore` |
 | Expliquer la configuration effective | `dirloom config explain` |
 | Ignorer les préférences personnelles en CI | `dirloom --no-user-config` |
 | Désactiver toute configuration persistante | `dirloom --no-config` |
+| Produire une vue documentaire | `dirloom --preset docs` |
+| Produire une vue compacte | `dirloom --preset compact` |
+| Voir la forme d’un monorepo | `dirloom --preset monorepo` |
+| Préparer un contexte structurel pour une IA | `dirloom --preset ai` |
+| Expliquer un preset intégré | `dirloom preset explain ai` |
 
 ## 3. Prendre en main l’inspection
 
@@ -343,7 +347,7 @@ Sont également rejetés :
 
 Un fichier projet `.dirloom.yaml` permet de partager les mêmes limites, formats et exclusions. L'[exemple minimal canonique](configuration.md#quick-start) peut être copié tel quel puis adapté au projet.
 
-La priorité est `CLI explicite > projet > utilisateur > défauts intégrés`. Les exclusions sont fusionnées dans l’ordre utilisateur, projet puis CLI, avec suppression des doublons exacts.
+La priorité est `CLI explicite > projet > utilisateur > défauts intégrés`. Les exclusions sont fusionnées dans l’ordre utilisateur, projet puis CLI, avec les règles du preset gagnant insérées dans sa couche avant les exclusions explicites et suppression des doublons exacts.
 
 Pour vérifier les valeurs et leur origine :
 
@@ -547,7 +551,7 @@ Relisez toujours la sortie avant de la publier : les noms de fichiers peuvent r�
 ### 7.1 Présenter rapidement un projet à un nouveau contributeur
 
 ```bash
-dirloom . --dirs-only --depth 4 --format markdown
+dirloom . --preset compact --format markdown --depth 4
 ```
 
 Résultat recherché : montrer les grandes zones du dépôt, leurs niveaux et leur organisation sans submerger le lecteur avec tous les fichiers.
@@ -555,7 +559,7 @@ Résultat recherché : montrer les grandes zones du dépôt, leurs niveaux et le
 ### 7.2 Documenter un sous-système
 
 ```bash
-dirloom ./src/features/payments --depth 4 --format markdown
+dirloom ./src/features/payments --preset docs
 ```
 
 Le répertoire ciblé devient la racine de l’artefact. Cette approche permet de documenter un module indépendamment du reste du dépôt.
@@ -563,38 +567,30 @@ Le répertoire ciblé devient la racine de l’artefact. Cette approche permet d
 ### 7.3 Préparer le contexte structurel d’une conversation avec une IA
 
 ```bash
-dirloom . \
-  --depth 4 \
-  --ignore dist \
-  --ignore build \
-  --ignore "*.map" \
-  --format markdown
+dirloom . --preset ai
 ```
 
 Sous PowerShell :
 
 ```powershell
-dirloom . --depth 4 --ignore dist --ignore build --ignore '*.map' --format markdown |
-  Set-Clipboard
+dirloom . --preset ai | Set-Clipboard
 ```
 
-Dirloom fournit uniquement la structure. Ajoutez séparément les fichiers ou extraits de code réellement nécessaires à la tâche.
+Le preset retire les dossiers `dist` et `build` à toute profondeur ainsi que les fichiers `*.map`. Dirloom fournit uniquement la structure : ajoutez séparément les fichiers ou extraits de code réellement nécessaires à la tâche.
 
 ### 7.4 Obtenir la forme d’un monorepo
 
 ```bash
-dirloom . --dirs-only --depth 3
+dirloom . --preset monorepo
 ```
 
-Pour masquer les sorties générées propres à chaque package :
+Le preset affiche uniquement les dossiers jusqu’à la profondeur `4` et masque `**/dist` ainsi que `**/build`. Pour examiner davantage un workspace :
 
 ```bash
-dirloom . \
-  --dirs-only \
-  --depth 4 \
-  --ignore "packages/**/dist" \
-  --ignore "packages/**/build"
+dirloom packages --preset monorepo --depth 6
 ```
+
+Les définitions exactes, leur activation YAML et leur priorité sont documentées dans [Presets intégrés](presets.md).
 
 ### 7.5 Examiner l’organisation des tests
 
@@ -1016,7 +1012,6 @@ La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes n
 | --- | --- |
 | `--copy` natif | Pipe vers `Set-Clipboard`, `pbcopy`, `wl-copy` ou `xclip` |
 | Couleurs, icônes et thèmes | Rendus Unicode ou ASCII non colorés |
-| Presets nommés | Utiliser `.dirloom.yaml`, la configuration utilisateur ou des options CLI explicites |
 | `browse` ou TUI | Générer une sortie texte, Markdown ou JSON |
 | Fingerprint, snapshot, verify et diff natifs | Versionner le JSON et utiliser Git ou un outil de diff |
 | `watch` et flux d’événements | Relancer Dirloom depuis un outil externe |
@@ -1039,14 +1034,17 @@ dirloom --depth 2
 # Expliquer les valeurs persistantes et leur origine
 dirloom config explain
 
+# Expliquer la définition intrinsèque d’un preset
+dirloom preset explain ai
+
 # Appliquer uniquement la configuration projet et la CLI
 dirloom --no-user-config
 
 # Architecture uniquement
-dirloom --dirs-only --depth 4
+dirloom --preset compact --depth 4
 
 # Markdown partageable
-dirloom --depth 4 --format markdown
+dirloom --preset docs
 
 # Compatibilité ASCII
 dirloom --depth 4 --style ascii
@@ -1067,7 +1065,7 @@ dirloom --no-gitignore
 dirloom --hidden --no-gitignore --no-default-ignore --depth 3
 
 # Contexte structurel compact pour une IA
-dirloom --dirs-only --depth 5 --format markdown
+dirloom --preset ai
 ```
 
 ## 14. Faire évoluer ce guide

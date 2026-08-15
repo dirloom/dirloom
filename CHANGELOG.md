@@ -10,6 +10,9 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Add Git-bounded project discovery, additive ignore rules and `dirloom config explain` diagnostics with value provenance.
 - Add `--config`, `--no-user-config`, `--no-config` and `--depth unlimited`.
 - Publish and automatically validate the public persistent-configuration guide.
+- Add the inspectable `docs`, `compact`, `monorepo` and `ai` presets with CLI and YAML activation.
+- Add `dirloom preset explain` text and JSON contracts plus preset provenance in `config explain`.
+- Publish and automatically validate the built-in preset guide.
 
 ## [0.1.1] - 2026-08-11
 

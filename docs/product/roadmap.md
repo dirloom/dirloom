@@ -251,7 +251,7 @@ La v0.1 constitue le **contrat de confiance** sans lequel les fonctions de diff,
 
 **Niveau : Foundation / Adoption**
 
-**Statut : socle implémenté dans l'incrément initial de v0.2.** Les presets et la présentation thématique restent des capacités distinctes à livrer ensuite.
+**Statut : socle implémenté dans l'incrément initial de v0.2.** Les presets intégrés ont été livrés dans l'incrément suivant ; la présentation thématique reste une capacité distincte.
 
 Ordre livré :
 
@@ -289,6 +289,8 @@ Usages : exclusions partagées, préférences personnelles, monorepos, CI reprod
 
 **Niveau : Adoption**
 
+**Statut : socle livré dans v0.2.** Les quatre définitions sont compilées, déterministes, activables par CLI ou configuration, neutralisables et inspectables en texte ou JSON.
+
 ```bash
 dirloom --preset docs
 dirloom --preset compact
@@ -301,6 +303,10 @@ Un preset doit être inspectable :
 ```bash
 dirloom preset explain ai
 ```
+
+La priorité reste explicite : sélection CLI, puis projet, puis utilisateur. Les valeurs explicites de la couche active remplacent les effets du preset, et `dirloom config explain` conserve leur provenance.
+
+Le preset `ai` livré compose uniquement les capacités existantes. Statistiques, compression sous budget et appels LLM restent hors de ce socle et appartiennent aux évolutions avancées du pilier Agent Context Infrastructure.
 
 Les presets réduisent le coût d’entrée sans retirer la puissance de la CLI.
 
@@ -1321,11 +1327,13 @@ Ce moteur peut devenir le cœur d’un véritable **digital twin architectural**
 
 **Niveau : Adoption**
 
+**Statut : socle livré dans v0.2 ; enrichissements analytiques futurs.**
+
 ```bash
 dirloom --preset ai
 ```
 
-Réduction du bruit, représentation compacte, exclusions adaptées, structure lisible par modèle et statistiques de taille. Aucun appel LLM nécessaire.
+Le socle livré réduit le bruit avec une profondeur bornée, un rendu Markdown et des exclusions adaptées, tout en conservant les fichiers sources. Il ne calcule ni statistiques de taille, ni budget de contexte et n'effectue aucun appel LLM. Les statistiques déterministes constituent un enrichissement futur avant la compression sous budget de la section suivante.
 
 ## 12.2 Structural Compression sous budget
 

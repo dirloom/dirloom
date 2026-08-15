@@ -45,6 +45,9 @@ dirloom ./src --depth 3
 # Produce copy-ready Markdown
 dirloom --format markdown
 
+# Start from a documented built-in preset
+dirloom --preset compact
+
 # Produce the versioned machine contract
 dirloom --format json
 
@@ -91,6 +94,26 @@ dirloom . --no-user-config --format json --output structure.json
 
 See [Persistent configuration](docs/configuration.md) for discovery rules, the complete schema, monorepo and CI recipes, diagnostics, security boundaries and troubleshooting.
 
+## Built-in presets
+
+Dirloom includes deterministic presets for common workflows:
+
+```bash
+dirloom --preset docs       # Markdown for documentation and reviews
+dirloom --preset compact    # Shallow directory-only overview
+dirloom --preset monorepo   # Workspace topology without dist/build noise
+dirloom --preset ai         # Markdown source structure for AI workflows
+```
+
+Inspect the exact built-in definition without scanning a directory:
+
+```bash
+dirloom preset explain ai
+dirloom preset explain ai --as json
+```
+
+Explicit options override individual preset values. Use `--preset none` to neutralize a preset inherited from configuration. See [Built-in presets](docs/presets.md) for exact definitions, precedence, YAML activation, diagnostics, security boundaries and recipes.
+
 ## CLI reference
 
 ```text
@@ -112,13 +135,14 @@ dirloom [directory] [flags]
 | `--config FILE` | Use an explicit project configuration file instead of automatic discovery. |
 | `--no-user-config` | Skip personal configuration while retaining project configuration. |
 | `--no-config` | Disable user and project configuration files. |
+| `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
 `--style` is intentionally rejected when explicitly combined with `--format json`; JSON has no drawing style.
 
-`dirloom config explain [directory]` reports source status, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
+`dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
 
 ## Filtering
 
@@ -126,7 +150,7 @@ Dirloom evaluates every descendant in this fixed order. The first exclusion is f
 
 1. the `--output` destination;
 2. built-in directory exclusions;
-3. explicit ignore rules merged from user configuration, project configuration and repeated `--ignore` options;
+3. preset and explicit ignore rules merged from user, project and CLI layers;
 4. scoped `.gitignore` rules;
 5. hidden-entry visibility.
 
@@ -232,6 +256,7 @@ Dirloom preserves filesystem names exactly and does not silently normalize Unico
 ```text
 CLI arguments
     → configuration discovery and resolution
+    → built-in preset expansion
     → application service
     → filter-aware filesystem scanner
     → renderer-independent tree model

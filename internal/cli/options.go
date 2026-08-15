@@ -46,6 +46,7 @@ func (*optionalDepth) Type() string {
 }
 
 type options struct {
+	preset          string
 	depth           optionalDepth
 	directoriesOnly bool
 	includeHidden   bool
