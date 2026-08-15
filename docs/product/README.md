@@ -17,6 +17,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Glossaire](glossary.md) | Que signifient précisément les termes structurants ? | Tous les contributeurs |
 | [Cas d’usage et exemples pratiques](../use-cases.md) | Que permet réellement la version actuelle et comment l’utiliser ? | Utilisateurs, contributeurs, intégrateurs |
 | [Presets intégrés](../presets.md) | Quels profils sont disponibles, comment les activer et comment inspecter leurs effets ? | Utilisateurs, contributeurs, intégrateurs |
+| [Arbres Markdown sémantiques](../markdown-tree.md) | Comment produire une liste Markdown native, sûre et déterministe ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
 
 Pour implémenter ou vérifier le comportement de la ligne `v0.1`, la source normative reste [SPEC-v0.1.md](../../SPEC-v0.1.md). Les documents présents n'en modifient pas rétroactivement les contrats.
@@ -36,6 +37,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Sujet | Décision actuelle |
 | --- | --- |
 | Socle `v0.1.1` | Livré : inspection et rendu déterministes, formats texte/Markdown/JSON, filtrage et export sûr |
+| Markdown sémantique `v0.2` | Livré : projection `markdown-tree` native, déterministe et distincte du Markdown textuel clôturé |
 | Catégorie visée | Intelligence structurelle pour les systèmes logiciels |
 | Primitive centrale | Artefact structurel déterministe et versionné |
 | Scaffolding | Plateforme de génération complète : templates, plans, migrations et Architecture Packs |

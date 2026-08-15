@@ -71,6 +71,7 @@ func TestPublicThemeDocumentationRelativeLinksExist(t *testing.T) {
 	paths := []string{
 		filepath.Join("..", "..", "README.md"),
 		filepath.Join("..", "..", "docs", "themes.md"),
+		filepath.Join("..", "..", "docs", "markdown-tree.md"),
 		filepath.Join("..", "..", "docs", "configuration.md"),
 		filepath.Join("..", "..", "docs", "presets.md"),
 	}

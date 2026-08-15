@@ -291,7 +291,7 @@ dirloom config explain
 dirloom config explain --as json
 ```
 
-The report describes requested `auto` modes rather than depending on the diagnostic command's current TTY. For Markdown and JSON tree formats, `color`, `icons`, and `theme` appear as inactive.
+The report describes requested `auto` modes rather than depending on the diagnostic command's current TTY. For fenced Markdown, semantic Markdown and JSON tree formats, `color`, `icons`, and `theme` appear as inactive. Semantic Markdown also reports `style` as inactive.
 
 ## Terminal and pipeline behavior
 
@@ -301,10 +301,11 @@ For reproducible pipeline output, select a canonical format explicitly:
 ```bash
 dirloom --color never --icons never > structure.txt
 dirloom --format markdown --output structure.md
+dirloom --format markdown-tree --output project-tree.md
 dirloom --format json --output structure.json
 ```
 
-Inherited presentation settings are inactive for Markdown and JSON, so team or user preferences cannot contaminate machine artifacts. Explicit active visual options with those formats are rejected with exit code `2`; `--color never` and `--icons never` are accepted.
+Inherited presentation settings are inactive for fenced Markdown, semantic Markdown and JSON, so team or user preferences cannot contaminate canonical artifacts. Explicit active visual options with those formats are rejected with exit code `2`; `--color never` and `--icons never` are accepted.
 
 Forced presentation is available when a text file intentionally needs ANSI or icons:
 

@@ -4,7 +4,7 @@ Dirloom can keep repeatable inspection settings in YAML while preserving explici
 
 Built-in presets can also provide a named starting point. See [Built-in presets](presets.md) for their exact definitions and usage recipes.
 
-Terminal colors, icons, and themes use the same layered resolution while remaining inactive for canonical Markdown and JSON. See [Terminal colors, icons, and themes](themes.md) for their rendering and security contracts.
+Terminal colors, icons, and themes use the same layered resolution while remaining inactive for fenced Markdown, semantic Markdown and JSON. See [Terminal colors, icons, and themes](themes.md) for their rendering and security contracts.
 
 Configuration is optional. If no configuration file exists, Dirloom behaves exactly as it does with its built-in defaults.
 
@@ -131,8 +131,8 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `defaults.depth` | integer or `null` | unlimited | Maximum depth. `0` prints only the root; `null` removes an inherited limit. |
 | `defaults.dirsOnly` | Boolean | `false` | Include directories only. |
 | `defaults.hidden` | Boolean | `false` | Include hidden entries that survive the other filters. |
-| `defaults.format` | `text`, `markdown`, or `json` | `text` | Select the public output contract. |
-| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and Markdown. It is inactive for JSON. |
+| `defaults.format` | `text`, `markdown`, `markdown-tree`, or `json` | `text` | Select the public output contract. |
+| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and fenced Markdown. It is inactive for semantic Markdown and JSON. |
 | `filters.useDefaultIgnores` | Boolean | `true` | Apply Dirloom's built-in directory exclusions. |
 | `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
@@ -141,6 +141,8 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `presentation.theme` | built-in name, explicit relative path, or `null` | `default` | Select `default`, `midnight`, `daylight`, a confined local theme, or reset an inherited theme. |
 
 `directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
+
+`markdown` keeps the historical fenced text drawing. `markdown-tree` produces a native nested list and ignores inherited drawing style; see the [semantic Markdown guide](markdown-tree.md).
 
 ### Complete example
 

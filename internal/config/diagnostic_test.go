@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -108,5 +109,38 @@ func TestResolutionDiagnosticsExposePresetProvenance(t *testing.T) {
 	}
 	if document.Provenance["format"].Preset != "ai" || document.Provenance["depth"].Preset != "" {
 		t.Fatalf("provenance = %#v", document.Provenance)
+	}
+}
+
+func TestResolutionDiagnosticsMarkStyleInactiveForSemanticMarkdown(t *testing.T) {
+	resolved := defaultResolution("/workspace")
+	if err := applyPartial(&resolved, partial{
+		Format: Optional[string]{Set: true, Value: FormatMarkdownTree},
+		Style:  Optional[string]{Set: true, Value: StyleASCII},
+	}, Origin{Source: SourceProject, Path: "/workspace/.dirloom.yaml"}); err != nil {
+		t.Fatal(err)
+	}
+
+	var textOutput bytes.Buffer
+	if err := resolved.WriteText(&textOutput); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(textOutput.String(), "style: ascii (project: /workspace/.dirloom.yaml; inactive for markdown-tree)") {
+		t.Fatalf("text diagnostic = %q", textOutput.String())
+	}
+
+	var jsonOutput bytes.Buffer
+	if err := resolved.WriteJSON(&jsonOutput); err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Inactive []string `json:"inactive"`
+	}
+	if err := json.Unmarshal(jsonOutput.Bytes(), &document); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"style", "color", "icons", "theme"}
+	if !reflect.DeepEqual(document.Inactive, want) {
+		t.Fatalf("inactive = %#v", document.Inactive)
 	}
 }

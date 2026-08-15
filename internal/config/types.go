@@ -12,11 +12,12 @@ const (
 	// SchemaVersion is the only supported .dirloom.yaml schema version.
 	SchemaVersion = 1
 
-	FormatText     = "text"
-	FormatMarkdown = "markdown"
-	FormatJSON     = "json"
-	StyleUnicode   = "unicode"
-	StyleASCII     = "ascii"
+	FormatText         = "text"
+	FormatMarkdown     = "markdown"
+	FormatMarkdownTree = "markdown-tree"
+	FormatJSON         = "json"
+	StyleUnicode       = "unicode"
+	StyleASCII         = "ascii"
 )
 
 type SourceKind string

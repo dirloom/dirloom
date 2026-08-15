@@ -23,7 +23,7 @@ cmd/dirloom
 - `internal/app`: root and output resolution plus the reusable `Inspect` application service.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
-- `internal/render`: canonical Unicode, ASCII, Markdown and JSON schema v1 contracts plus a presentation-neutral text decorator boundary.
+- `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown and JSON schema v1 contracts plus a presentation-neutral text decorator boundary.
 - `internal/presentation`: immutable built-in themes, strict custom-theme loading, rule compilation, terminal capability resolution, ANSI generation, icon fallback and theme diagnostics.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
 - `internal/buildinfo`: version metadata injected once at link time.
@@ -42,6 +42,6 @@ The winning presentation reference is validated and compiled before `app.Inspect
 
 Filter priority is encoded in `filter.Policy`; nested `.gitignore` state is loaded only when the scanner actually enters a directory. This preserves pruning and prevents ignored branches from influencing the scan.
 
-The tree stores normalized relative paths only as private tie-break metadata. Public JSON deliberately projects to a separate type, preventing accidental leakage of absolute paths or future internal fields.
+The tree stores normalized relative paths only as private tie-break metadata. Public JSON deliberately projects to a separate type, preventing accidental leakage of absolute paths or future internal fields. The semantic Markdown renderer walks the same sorted model, creates only nested list items and escapes unsafe label characters without mutating node data.
 
 Rendering finishes in memory before stdout or the transactional file writer receives bytes. Theme, mode and terminal-preparation errors therefore leave stdout and existing output files untouched. A forced interactive Windows color session restores the previous console mode after writing.

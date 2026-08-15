@@ -3,7 +3,7 @@
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
 > **Dernière vérification :** 15 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [thèmes](themes.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [thèmes](themes.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -46,6 +46,7 @@ dirloom --help
 | Désactiver la lecture des `.gitignore` | `dirloom --no-gitignore` |
 | Produire un arbre ASCII | `dirloom --style ascii` |
 | Produire du Markdown prêt à insérer | `dirloom --format markdown` |
+| Produire une liste Markdown sémantique | `dirloom --format markdown-tree` |
 | Produire un document machine versionné | `dirloom --format json` |
 | Écrire sûrement dans un fichier | `dirloom --output structure.txt` |
 | Générer une documentation d’architecture | `dirloom --format markdown --output structure.md` |
@@ -428,7 +429,7 @@ dirloom . --color never --icons never
 
 `NO_COLOR` non vide désactive les couleurs issues des défauts et de la configuration. Seul `--color always` explicitement fourni en CLI le surclasse. Les icônes restent indépendantes.
 
-Markdown et JSON ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
+Le Markdown clôturé, le Markdown sémantique et le JSON ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
 
 ### 5.4 Markdown prêt à insérer
 
@@ -451,6 +452,25 @@ Le style ASCII reste disponible :
 ```bash
 dirloom --format markdown --style ascii
 ```
+
+### 5.4 Markdown sémantique pour la documentation
+
+```bash
+dirloom --format markdown-tree
+```
+
+```markdown
+- `my-project/`
+  - `src/`
+    - `components/`
+    - `index.ts`
+  - `package.json`
+  - `README.md`
+```
+
+Contrairement au format `markdown`, qui encapsule le dessin textuel dans un bloc clôturé, `markdown-tree` produit une vraie liste imbriquée. Il est adapté aux README, descriptions de pull request, systèmes documentaires et lecteurs d’écran.
+
+Ce format ne contient ni ANSI, ni icône terminal, ni HTML. Le style `unicode` ou `ascii` n’a aucun effet et une combinaison CLI explicite avec `--style` est rejetée. Le contrat complet est décrit dans le [guide Markdown sémantique](markdown-tree.md).
 
 ### 5.5 JSON pour les machines
 
@@ -496,6 +516,7 @@ dirloom --format json --style ascii
 ```bash
 dirloom --output structure.txt
 dirloom --format markdown --output docs/structure.md
+dirloom --format markdown-tree --output docs/project-tree.md
 dirloom --format json --output structure.json
 ```
 
@@ -1031,7 +1052,7 @@ dirloom --style auto
 dirloom --format json --style ascii
 ```
 
-Formats disponibles : `text`, `markdown`, `json`. Styles disponibles pour les rendus textuels : `unicode`, `ascii`.
+Formats disponibles : `text`, `markdown`, `markdown-tree`, `json`. Styles disponibles pour les rendus texte et Markdown clôturé : `unicode`, `ascii`.
 
 ### 11.6 Destination impossible
 

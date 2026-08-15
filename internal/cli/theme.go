@@ -29,8 +29,8 @@ func rejectSourceFlags(command *cobra.Command, sources *sourceOptions, context s
 }
 
 func validateFormatOptions(resolution configuration.Resolution, overrides configuration.Overrides) error {
-	if resolution.Effective.Format == render.FormatJSON && overrides.Style.Set {
-		return &usageError{err: fmt.Errorf("--style cannot be used with --format json")}
+	if (resolution.Effective.Format == render.FormatJSON || resolution.Effective.Format == render.FormatMarkdownTree) && overrides.Style.Set {
+		return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolution.Effective.Format)}
 	}
 	if resolution.Effective.Format == render.FormatText {
 		return nil

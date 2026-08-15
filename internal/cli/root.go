@@ -74,6 +74,7 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
   dirloom --style ascii
   dirloom --theme midnight --icons unicode
   dirloom --format markdown
+  dirloom --format markdown-tree
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown`,
 		Version:       version,
@@ -185,7 +186,7 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, or json")
+	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, or json")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
 	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto")
 	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto")

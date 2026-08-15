@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	FormatText     = "text"
-	FormatMarkdown = "markdown"
-	FormatJSON     = "json"
-	StyleUnicode   = "unicode"
-	StyleASCII     = "ascii"
+	FormatText         = "text"
+	FormatMarkdown     = "markdown"
+	FormatMarkdownTree = "markdown-tree"
+	FormatJSON         = "json"
+	StyleUnicode       = "unicode"
+	StyleASCII         = "ascii"
 )
 
 // Renderer writes exactly one complete representation of a tree.
@@ -52,9 +53,11 @@ func New(format, style string, decorators ...Decorator) (Renderer, error) {
 			return nil, err
 		}
 		return markdownRenderer{text: text}, nil
+	case FormatMarkdownTree:
+		return markdownTreeRenderer{}, nil
 	case FormatJSON:
 		return jsonRenderer{}, nil
 	default:
-		return nil, fmt.Errorf("unsupported format %q (expected text, markdown, or json)", format)
+		return nil, fmt.Errorf("unsupported format %q (expected text, markdown, markdown-tree, or json)", format)
 	}
 }

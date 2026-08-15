@@ -19,7 +19,7 @@ func TestHelpAndVersion(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "config", "preset", "theme"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "markdown-tree", "config", "preset", "theme"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}
@@ -141,12 +141,20 @@ presentation:
 	if code != 0 || stderr != "" || configuredMarkdown != canonicalMarkdown || strings.ContainsRune(configuredMarkdown, '\x1b') {
 		t.Fatalf("Markdown changed=(%q,%q,%d)", configuredMarkdown, stderr, code)
 	}
+	configuredSemanticMarkdown, stderr, code := executeForTest(t, root, "--format", "markdown-tree")
+	canonicalSemanticMarkdown, _, _ := executeForTest(t, root, "--no-config", "--format", "markdown-tree")
+	if code != 0 || stderr != "" || configuredSemanticMarkdown != canonicalSemanticMarkdown || strings.ContainsRune(configuredSemanticMarkdown, '\x1b') || strings.Contains(configuredSemanticMarkdown, "󰈔") {
+		t.Fatalf("semantic Markdown changed=(%q,%q,%d)", configuredSemanticMarkdown, stderr, code)
+	}
 
 	invalid := [][]string{
 		{root, "--no-config", "--format", "json", "--color", "auto"},
 		{root, "--no-config", "--format", "json", "--color", "always"},
 		{root, "--no-config", "--format", "markdown", "--icons", "auto"},
 		{root, "--no-config", "--format", "markdown", "--icons", "unicode"},
+		{root, "--no-config", "--format", "markdown-tree", "--color", "auto"},
+		{root, "--no-config", "--format", "markdown-tree", "--icons", "unicode"},
+		{root, "--no-config", "--format", "markdown-tree", "--theme", "default"},
 		{root, "--no-config", "--format", "json", "--icons", "nerd"},
 		{root, "--no-config", "--format", "json", "--theme", "default"},
 	}
@@ -156,7 +164,7 @@ presentation:
 			t.Fatalf("%#v=(%q,%q,%d)", args, stdout, errorOutput, exitCode)
 		}
 	}
-	for _, args := range [][]string{{root, "--no-config", "--format", "json", "--color", "never", "--icons", "never"}, {root, "--no-config", "--format", "markdown", "--color", "never", "--icons", "never"}} {
+	for _, args := range [][]string{{root, "--no-config", "--format", "json", "--color", "never", "--icons", "never"}, {root, "--no-config", "--format", "markdown", "--color", "never", "--icons", "never"}, {root, "--no-config", "--format", "markdown-tree", "--color", "never", "--icons", "never"}} {
 		_, errorOutput, exitCode := executeForTest(t, args...)
 		if exitCode != 0 || errorOutput != "" {
 			t.Fatalf("neutral machine %#v=(%q,%d)", args, errorOutput, exitCode)
@@ -281,6 +289,7 @@ func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 		{"--depth", "invalid"},
 		{"--depth", "-1"},
 		{"--format", "json", "--style", "ascii"},
+		{"--format", "markdown-tree", "--style", "ascii"},
 		{"--format", "yaml"},
 		{"--style", "auto"},
 		{"--ignore", "../outside"},
@@ -506,6 +515,11 @@ func TestCLIEndToEndFormatsAndRepeatedIgnores(t *testing.T) {
 	stdout, stderr, code = executeForTest(t, root, "--format", "markdown", "--style", "ascii", "--depth", "0")
 	if code != 0 || stderr != "" || stdout != "```text\nprojet espace é/\n```\n" {
 		t.Fatalf("markdown=(stdout=%q, stderr=%q, code=%d)", stdout, stderr, code)
+	}
+
+	stdout, stderr, code = executeForTest(t, root, "--format", "markdown-tree", "--depth", "1", "--ignore", "*.log", "--ignore", "*.tmp")
+	if code != 0 || stderr != "" || stdout != "- `projet espace é/`\n  - `src/`\n  - `README.md`\n" {
+		t.Fatalf("markdown-tree=(stdout=%q, stderr=%q, code=%d)", stdout, stderr, code)
 	}
 
 	stdout, stderr, code = executeForTest(t, root, "--format", "json", "--depth", "0")
@@ -753,6 +767,19 @@ func TestCLIStyleConflictIncludesConfiguredJSON(t *testing.T) {
 	}
 }
 
+func TestCLIStyleConflictIncludesConfiguredSemanticMarkdown(t *testing.T) {
+	root := t.TempDir()
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\ndefaults:\n  format: markdown-tree\n  style: ascii\n")
+	stdout, stderr, code := executeForTest(t, root)
+	if code != 0 || stderr != "" || !strings.HasPrefix(stdout, "- `") {
+		t.Fatalf("configured inactive style=(%q, %q, %d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, root, "--style", "ascii")
+	if code != 2 || stdout != "" || !strings.Contains(stderr, "--style cannot be used with --format markdown-tree") {
+		t.Fatalf("style conflict=(%q, %q, %d)", stdout, stderr, code)
+	}
+}
+
 func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 	documentationPath := filepath.Join("..", "..", "docs", "configuration.md")
 	documentation, err := os.ReadFile(documentationPath)
@@ -772,6 +799,13 @@ func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 	}
 	if !strings.Contains(string(readme), "docs/presets.md") {
 		t.Fatal("README does not link to docs/presets.md")
+	}
+	markdownTreeDocumentation, err := os.ReadFile(filepath.Join("..", "..", "docs", "markdown-tree.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "docs/markdown-tree.md") || !strings.Contains(string(markdownTreeDocumentation), "dirloom --format markdown-tree") {
+		t.Fatal("README or semantic Markdown documentation is missing")
 	}
 	themeDocumentation, err := os.ReadFile(filepath.Join("..", "..", "docs", "themes.md"))
 	if err != nil {

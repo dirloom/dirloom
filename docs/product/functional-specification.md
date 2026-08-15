@@ -58,7 +58,9 @@ Dirloom NE DOIT PAS accepter silencieusement un schéma incompatible. Il DOIT so
 
 ### 3.3 Projection et enrichissement
 
-Les rendus texte, Markdown, JSON, TUI, Desktop, Mermaid, Graphviz et D2 sont des projections. Une projection PEUT cacher, regrouper ou enrichir des informations, mais elle NE DOIT PAS modifier le modèle source.
+Les rendus texte, Markdown clôturé, Markdown sémantique, JSON, TUI, Desktop, Mermaid, Graphviz et D2 sont des projections. Une projection PEUT cacher, regrouper ou enrichir des informations, mais elle NE DOIT PAS modifier le modèle source.
+
+Le format Markdown sémantique `markdown-tree` DOIT rester distinct du format `markdown` historique : il exprime chaque nœud comme un élément de liste imbriqué, sans ANSI, thème, icône terminal, HTML ni lien implicite. Son échappement PEUT modifier la représentation visible d'un caractère dangereux, mais NE DOIT ni renommer le nœud dans le modèle, ni modifier les autres formats.
 
 Les transformations visuelles — couleur, icône, indentation, badge, regroupement — NE DOIVENT PAS changer :
 

@@ -139,7 +139,7 @@ dirloom --icons nerd --theme midnight
 dirloom theme explain daylight
 ```
 
-Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Markdown and JSON are always canonical and never contain ANSI or presentation icons. Reproduce the historical text bytes explicitly with:
+Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown and JSON are always canonical and never contain ANSI or presentation icons. Reproduce the historical text bytes explicitly with:
 
 ```bash
 dirloom --color never --icons never
@@ -163,8 +163,8 @@ dirloom [directory] [flags]
 | `--ignore PATTERN` | Add an exclusion. Repeat the option to add more rules. |
 | `--no-default-ignore` | Disable built-in directory exclusions. |
 | `--no-gitignore` | Do not load `.gitignore` files. |
-| `--format text\|markdown\|json` | Select the public output contract. Default: `text`. |
-| `--style unicode\|ascii` | Select the drawing style for text and Markdown. Default: `unicode`. |
+| `--format text\|markdown\|markdown-tree\|json` | Select the public output contract. Default: `text`. |
+| `--style unicode\|ascii` | Select the drawing style for text and fenced Markdown. Default: `unicode`. |
 | `--config FILE` | Use an explicit project configuration file instead of automatic discovery. |
 | `--no-user-config` | Skip personal configuration while retaining project configuration. |
 | `--no-config` | Disable user and project configuration files. |
@@ -176,7 +176,7 @@ dirloom [directory] [flags]
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
-`--style` is intentionally rejected when explicitly combined with `--format json`; JSON has no drawing style.
+`--style` is intentionally rejected when explicitly combined with `--format json` or `--format markdown-tree`; neither contract has a drawing style.
 
 `dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
 
@@ -252,6 +252,23 @@ Markdown wraps the selected text drawing in a fenced `text` block:
 dirloom --format markdown --style ascii
 ```
 
+### Semantic Markdown
+
+Use a native nested list when the destination should understand the tree as Markdown structure:
+
+```bash
+dirloom --format markdown-tree
+```
+
+```markdown
+- `my-project/`
+  - `src/`
+    - `index.ts`
+  - `README.md`
+```
+
+This format is deterministic, contains no ANSI or terminal icons, and does not use `--style`. See the [semantic Markdown guide](docs/markdown-tree.md) for its escaping, symlink and compatibility contracts.
+
 ### JSON schema v1
 
 ```json
@@ -299,7 +316,7 @@ CLI arguments
     → filter-aware filesystem scanner
     → renderer-independent tree model
     → deterministic sort
-    → canonical tree renderer
+    → canonical text / fenced Markdown / semantic Markdown / JSON renderer
     → optional terminal-only text projection
     → stdout or transactional file output
 ```
