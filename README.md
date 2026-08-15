@@ -17,13 +17,28 @@ Unlike a raw `tree` listing, the output is designed to be a reproducible artifac
 
 ## Installation
 
-Download the archive for Windows, Linux or macOS from the GitHub release, extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
+### Windows with Scoop
+
+```powershell
+scoop bucket add dirloom https://github.com/dirloom/scoop-bucket
+scoop install dirloom
+```
+
+The official bucket selects the x64 or ARM64 release, verifies its SHA-256 checksum and adds `dirloom` to `PATH`. Upgrade later with `scoop update dirloom`.
+
+### Release archives
+
+Download the archive for Windows, Linux or macOS from [GitHub Releases](https://github.com/dirloom/dirloom/releases), extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
+
+### Install with Go
 
 With Go 1.25.12 or newer:
 
 ```bash
 go install github.com/dirloom/dirloom/cmd/dirloom@latest
 ```
+
+### Build from source
 
 For local development:
 
@@ -297,6 +312,8 @@ dirloom_Darwin_arm64.tar.gz
 ```
 
 Releases are created as drafts so maintainers can verify artifacts and checksums before publication.
+
+The official [Scoop bucket](https://github.com/dirloom/scoop-bucket) checks published stable releases every six hours and updates its x64 and ARM64 manifest automatically.
 
 ## Roadmap
 
