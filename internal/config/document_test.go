@@ -94,6 +94,16 @@ func TestParseDocumentDistinguishesAbsentAndUnlimitedDepth(t *testing.T) {
 	}
 }
 
+func TestParseDocumentAcceptsSemanticMarkdownFormat(t *testing.T) {
+	values, err := parseDocument([]byte("schemaVersion: 1\ndefaults:\n  format: markdown-tree\n"), ".dirloom.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !values.Format.Set || values.Format.Value != FormatMarkdownTree {
+		t.Fatalf("format = %#v", values.Format)
+	}
+}
+
 func TestParseDocumentRejectsInvalidYAMLContracts(t *testing.T) {
 	tests := []struct {
 		name     string

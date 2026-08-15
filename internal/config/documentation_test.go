@@ -155,3 +155,23 @@ func TestPublicPresetDocumentationMatchesCatalog(t *testing.T) {
 		t.Fatal("use cases still list named presets as unavailable")
 	}
 }
+
+func TestSemanticMarkdownConfigurationExampleUsesRealSchema(t *testing.T) {
+	path := filepath.Join("..", "..", "docs", "markdown-tree.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pattern := regexp.MustCompile(`(?s)<!-- dirloom-markdown-tree-config:project -->\r?\n` + "```yaml" + `\r?\n(.*?)\r?\n` + "```")
+	match := pattern.FindSubmatch(data)
+	if match == nil {
+		t.Fatal("semantic Markdown configuration example was not found")
+	}
+	values, err := parseDocument(match[1], path+"#project")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !values.Depth.Set || values.Depth.Value != 4 || !values.Format.Set || values.Format.Value != FormatMarkdownTree {
+		t.Fatalf("semantic Markdown configuration = %#v", values)
+	}
+}
