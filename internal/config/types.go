@@ -4,6 +4,8 @@ package config
 import (
 	"errors"
 	"fmt"
+
+	"github.com/dirloom/dirloom/internal/presentation"
 )
 
 const (
@@ -72,6 +74,9 @@ type Effective struct {
 	UseDefaultIgnores bool
 	UseGitIgnore      bool
 	IgnorePatterns    []string
+	Color             string
+	Icons             string
+	Theme             string
 }
 
 // Resolution contains effective values and enough metadata to explain them.
@@ -82,6 +87,14 @@ type Resolution struct {
 	Effective  Effective
 	Provenance map[string]Origin
 	Ignores    []IgnoreRule
+	ThemeInfo  *presentation.Theme
+}
+
+// SetThemeInfo attaches an already validated winning theme for diagnostics.
+// The configuration loader deliberately does not read theme files itself.
+func (resolution *Resolution) SetThemeInfo(theme presentation.Theme) {
+	copyTheme := theme
+	resolution.ThemeInfo = &copyTheme
 }
 
 // Optional represents a scalar CLI override, including explicit false values.
@@ -105,6 +118,14 @@ type PresetSelection struct {
 	Name     string
 }
 
+// ThemeSelection distinguishes inheritance, a named/path theme, and null,
+// which explicitly resets an inherited selection to the built-in default.
+type ThemeSelection struct {
+	Set   bool
+	Reset bool
+	Value string
+}
+
 // Overrides contains only options explicitly supplied on the command line.
 type Overrides struct {
 	Preset            PresetSelection
@@ -116,6 +137,9 @@ type Overrides struct {
 	UseDefaultIgnores Optional[bool]
 	UseGitIgnore      Optional[bool]
 	IgnorePatterns    []string
+	Color             Optional[string]
+	Icons             Optional[string]
+	Theme             ThemeSelection
 }
 
 // ResolveOptions controls source selection and supplies explicit CLI values.

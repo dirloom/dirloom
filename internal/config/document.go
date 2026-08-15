@@ -5,17 +5,27 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
+	"strings"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/presentation"
 	"go.yaml.in/yaml/v3"
 )
 
 type fileDocument struct {
-	SchemaVersion *int         `yaml:"schemaVersion"`
-	Preset        yaml.Node    `yaml:"preset"`
-	Defaults      fileDefaults `yaml:"defaults"`
-	Filters       fileFilters  `yaml:"filters"`
-	Ignore        yaml.Node    `yaml:"ignore"`
+	SchemaVersion *int             `yaml:"schemaVersion"`
+	Preset        yaml.Node        `yaml:"preset"`
+	Defaults      fileDefaults     `yaml:"defaults"`
+	Filters       fileFilters      `yaml:"filters"`
+	Ignore        yaml.Node        `yaml:"ignore"`
+	Presentation  filePresentation `yaml:"presentation"`
+}
+
+type filePresentation struct {
+	Color yaml.Node `yaml:"color"`
+	Icons yaml.Node `yaml:"icons"`
+	Theme yaml.Node `yaml:"theme"`
 }
 
 type fileDefaults struct {
@@ -41,6 +51,9 @@ type partial struct {
 	UseDefaultIgnores Optional[bool]
 	UseGitIgnore      Optional[bool]
 	IgnorePatterns    []string
+	Color             Optional[string]
+	Icons             Optional[string]
+	Theme             ThemeSelection
 }
 
 func parseDocument(data []byte, path string) (partial, error) {
@@ -88,6 +101,18 @@ func parseDocument(data []byte, path string) (partial, error) {
 	if err != nil {
 		return partial{}, err
 	}
+	color, err := parseEnumNode(document.Presentation.Color, path, "presentation.color", presentation.ColorModes())
+	if err != nil {
+		return partial{}, err
+	}
+	icons, err := parseEnumNode(document.Presentation.Icons, path, "presentation.icons", presentation.IconModes())
+	if err != nil {
+		return partial{}, err
+	}
+	theme, err := parseThemeNode(document.Presentation.Theme, path)
+	if err != nil {
+		return partial{}, err
+	}
 	result := partial{
 		Preset:            PresetSelection{},
 		DirectoriesOnly:   optionalBool(document.Defaults.DirectoriesOnly),
@@ -97,6 +122,9 @@ func parseDocument(data []byte, path string) (partial, error) {
 		UseDefaultIgnores: optionalBool(document.Filters.UseDefaultIgnores),
 		UseGitIgnore:      optionalBool(document.Filters.UseGitIgnore),
 		IgnorePatterns:    ignore,
+		Color:             color,
+		Icons:             icons,
+		Theme:             theme,
 	}
 	preset, err := parsePresetNode(document.Preset, path)
 	if err != nil {
@@ -109,6 +137,35 @@ func parseDocument(data []byte, path string) (partial, error) {
 	}
 	result.Depth = depth
 	return result, nil
+}
+
+func parseThemeNode(node yaml.Node, path string) (ThemeSelection, error) {
+	if node.Kind == 0 {
+		return ThemeSelection{}, nil
+	}
+	if node.Kind != yaml.ScalarNode {
+		return ThemeSelection{}, invalidf("invalid config %q: line %d, column %d: presentation.theme must be a built-in name, relative YAML path, or null", path, node.Line, node.Column)
+	}
+	if node.ShortTag() == "!!null" {
+		return ThemeSelection{Set: true, Reset: true}, nil
+	}
+	if node.ShortTag() != "!!str" || node.Value == "" {
+		return ThemeSelection{}, invalidf("invalid config %q: line %d, column %d: presentation.theme must be a non-empty built-in name, relative YAML path, or null", path, node.Line, node.Column)
+	}
+	if presentation.IsBuiltIn(node.Value) {
+		return ThemeSelection{Set: true, Value: node.Value}, nil
+	}
+	if !presentation.IsThemePath(node.Value) {
+		return ThemeSelection{}, invalidf("invalid config %q: line %d, column %d: unsupported theme %q (expected %s or a relative .yaml/.yml path)", path, node.Line, node.Column, node.Value, joinExpected(presentation.ThemeNames()))
+	}
+	if filepath.IsAbs(node.Value) {
+		return ThemeSelection{}, invalidf("invalid config %q: line %d, column %d: presentation.theme path must be relative to the configuration file", path, node.Line, node.Column)
+	}
+	cleaned := filepath.Clean(node.Value)
+	if cleaned == ".." || strings.HasPrefix(cleaned, ".."+string(filepath.Separator)) {
+		return ThemeSelection{}, invalidf("invalid config %q: line %d, column %d: presentation.theme path must remain inside the configuration directory", path, node.Line, node.Column)
+	}
+	return ThemeSelection{Set: true, Value: node.Value}, nil
 }
 
 func parsePresetNode(node yaml.Node, path string) (PresetSelection, error) {
