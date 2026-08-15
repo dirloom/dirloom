@@ -4,6 +4,13 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add strict layered configuration through `.dirloom.yaml`, the native user configuration directory and explicit CLI overrides.
+- Add Git-bounded project discovery, additive ignore rules and `dirloom config explain` diagnostics with value provenance.
+- Add `--config`, `--no-user-config`, `--no-config` and `--depth unlimited`.
+- Publish and automatically validate the public persistent-configuration guide.
+
 ## [0.1.1] - 2026-08-11
 
 ### Fixed

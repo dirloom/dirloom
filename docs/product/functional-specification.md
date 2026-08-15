@@ -901,7 +901,7 @@ Le Pack SDK DOIT permettre de créer et valider templates, contracts, queries, a
 
 ## 13. Configuration fonctionnelle
 
-La configuration cible DOIT utiliser `.dirloom.yaml` pour le projet et respecter cette priorité :
+Le socle livré DOIT utiliser `.dirloom.yaml` pour le projet et respecter cette priorité :
 
 ```text
 CLI explicite
@@ -909,6 +909,10 @@ CLI explicite
   > configuration utilisateur
   > valeurs par défaut
 ```
+
+La configuration utilisateur DOIT suivre le répertoire de configuration natif de l'OS. Dans Git, Dirloom DOIT charger le `.dirloom.yaml` le plus proche sans fusionner plusieurs fichiers projet ; hors Git, il DOIT examiner seulement la racine inspectée. Les exclusions explicites DOIVENT s'accumuler dans l'ordre utilisateur, projet puis CLI, avec déduplication stable. Les autres valeurs DOIVENT suivre la priorité générale et distinguer absence, `false`, `0` et profondeur illimitée explicite.
+
+`dirloom config explain` DOIT rendre visibles sources, statuts, valeurs effectives, provenance et exclusions. Aucun fichier de configuration NE DOIT pouvoir sélectionner la racine, imposer une destination d'écriture, exécuter une commande, interpoler l'environnement ou inclure un autre document.
 
 Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. `dirloom preset explain <name>` doit rendre ses effets visibles.
 

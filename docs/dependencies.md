@@ -1,6 +1,6 @@
 # Dependency decisions
 
-Dirloom v0.1 intentionally has three direct runtime dependencies.
+Dirloom keeps its direct runtime dependencies small and encapsulated behind internal packages.
 
 ## Cobra v1.10.2
 
@@ -17,6 +17,12 @@ Dirloom creates the matcher with an empty root and feeds only `.gitignore` files
 ## x/sys v0.47.0
 
 `golang.org/x/sys/windows` provides the typed `MoveFileEx` binding needed for safe replacement of an existing output file on Windows. The standard `os.Rename` contract cannot guarantee replacement there. Using the official Go extended-system package avoids maintaining an unsafe local syscall wrapper. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause.
+
+## yaml v3.0.4
+
+`go.yaml.in/yaml/v3` parses the single public `.dirloom.yaml` format. Version 3 provides typed decoding, an inspectable node tree and strict known-field validation, which Dirloom combines with its own rejection of duplicate keys, multiple documents, anchors, aliases, merge keys and custom tags.
+
+The dependency is isolated in `internal/config`. Dirloom does not enable YAML-based execution, includes, templates or environment interpolation. The module is dual-licensed under MIT and Apache-2.0.
 
 ## Review policy
 
