@@ -117,6 +117,8 @@ The preset still controls depth, filtering and directory visibility. The explici
 
 `markdown-tree` performs no terminal detection, emits no ANSI sequences and does not depend on locale, theme or font. The same canonical model produces the same bytes on Windows, Linux and macOS.
 
+Presentation values inherited from user or project configuration are inactive. Explicit `--color never` and `--icons never` remain valid for hermetic scripts; active color or icon modes and every explicit `--theme` are rejected with `markdown-tree` instead of being ignored silently.
+
 For a durable generated document, prefer `--output` over shell redirection. Dirloom renders the full document before transactionally replacing the destination, and the destination is excluded from its own scan.
 
 ## Limitations

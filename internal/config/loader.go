@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/presentation"
 )
 
 const maxConfigSize = 1 << 20
@@ -254,6 +255,9 @@ func defaultResolution(root string) Resolution {
 			Style:             StyleUnicode,
 			UseDefaultIgnores: true,
 			UseGitIgnore:      true,
+			Color:             presentation.ColorAuto,
+			Icons:             presentation.IconsAuto,
+			Theme:             presentation.ThemeDefault,
 		},
 		Provenance: map[string]Origin{
 			"depth":             builtIn,
@@ -263,6 +267,9 @@ func defaultResolution(root string) Resolution {
 			"style":             builtIn,
 			"useDefaultIgnores": builtIn,
 			"useGitignore":      builtIn,
+			"color":             builtIn,
+			"icons":             builtIn,
+			"theme":             builtIn,
 		},
 	}
 }
@@ -342,6 +349,9 @@ func applyPartial(resolution *Resolution, values partial, origin Origin) error {
 	applyOptional(&resolution.Effective.Style, "style", values.Style, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.UseDefaultIgnores, "useDefaultIgnores", values.UseDefaultIgnores, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.UseGitIgnore, "useGitignore", values.UseGitIgnore, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.Color, "color", values.Color, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.Icons, "icons", values.Icons, origin, resolution.Provenance)
+	applyTheme(resolution, values.Theme, origin)
 	appendIgnores(resolution, values.IgnorePatterns, origin)
 	return validateEffective(*resolution)
 }
@@ -355,8 +365,24 @@ func applyOverrides(resolution *Resolution, overrides Overrides) error {
 	applyOptional(&resolution.Effective.Style, "style", overrides.Style, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.UseDefaultIgnores, "useDefaultIgnores", overrides.UseDefaultIgnores, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.UseGitIgnore, "useGitignore", overrides.UseGitIgnore, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.Color, "color", overrides.Color, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.Icons, "icons", overrides.Icons, origin, resolution.Provenance)
+	applyTheme(resolution, overrides.Theme, origin)
 	appendIgnores(resolution, overrides.IgnorePatterns, origin)
 	return validateEffective(*resolution)
+}
+
+func applyTheme(resolution *Resolution, selection ThemeSelection, origin Origin) {
+	if !selection.Set {
+		return
+	}
+	if selection.Reset {
+		resolution.Effective.Theme = presentation.ThemeDefault
+	} else {
+		resolution.Effective.Theme = selection.Value
+	}
+	resolution.Provenance["theme"] = origin
+	resolution.ThemeInfo = nil
 }
 
 func applyDepth(resolution *Resolution, value DepthOverride, origin Origin) {
@@ -408,6 +434,22 @@ func validateEffective(resolution Resolution) error {
 	case StyleUnicode, StyleASCII:
 	default:
 		return invalidf("unsupported style %q (expected unicode or ascii)", resolution.Effective.Style)
+	}
+	switch resolution.Effective.Color {
+	case presentation.ColorNever, presentation.ColorAlways, presentation.ColorAuto:
+	default:
+		return invalidf("unsupported color mode %q (expected never, always, or auto)", resolution.Effective.Color)
+	}
+	switch resolution.Effective.Icons {
+	case presentation.IconsNever, presentation.IconsUnicode, presentation.IconsNerd, presentation.IconsAuto:
+	default:
+		return invalidf("unsupported icon mode %q (expected never, unicode, nerd, or auto)", resolution.Effective.Icons)
+	}
+	if resolution.Effective.Theme == "" {
+		return invalidf("theme must not be empty")
+	}
+	if !presentation.IsBuiltIn(resolution.Effective.Theme) && !presentation.IsThemePath(resolution.Effective.Theme) {
+		return invalidf("unsupported theme %q (expected %s or a .yaml/.yml path)", resolution.Effective.Theme, joinExpected(presentation.ThemeNames()))
 	}
 	if _, err := filter.NewIgnoreMatcher(resolution.Effective.IgnorePatterns); err != nil {
 		return invalidf("%v", err)

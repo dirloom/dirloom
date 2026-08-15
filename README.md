@@ -129,6 +129,24 @@ dirloom preset explain ai --as json
 
 Explicit options override individual preset values. Use `--preset none` to neutralize a preset inherited from configuration. See [Built-in presets](docs/presets.md) for exact definitions, precedence, YAML activation, diagnostics, security boundaries and recipes.
 
+## Terminal presentation
+
+Interactive text output uses terminal colors and portable Unicode icons automatically. Choose a built-in theme or force a specific icon set when the destination supports it:
+
+```bash
+dirloom --theme midnight
+dirloom --icons nerd --theme midnight
+dirloom theme explain daylight
+```
+
+Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown and JSON are always canonical and never contain ANSI or presentation icons. Reproduce the historical text bytes explicitly with:
+
+```bash
+dirloom --color never --icons never
+```
+
+Dirloom respects `NO_COLOR`; only an explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for built-in palettes, the custom-theme schema, Nerd Font fallback, pipeline guarantees, security boundaries, and validation commands.
+
 ## CLI reference
 
 ```text
@@ -151,6 +169,9 @@ dirloom [directory] [flags]
 | `--no-user-config` | Skip personal configuration while retaining project configuration. |
 | `--no-config` | Disable user and project configuration files. |
 | `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
+| `--color never\|always\|auto` | Control ANSI color for text output. Default: `auto`. |
+| `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `auto`. |
+| `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, or a local YAML theme. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
@@ -215,11 +236,12 @@ All formats are UTF-8 without BOM, contain LF line endings on every platform, an
 
 ### Text
 
-Unicode is always the default; Dirloom never changes styles by inspecting the terminal or redirection target.
+Unicode tree drawing remains the default. Terminal presentation is automatic only on a usable interactive TTY; non-interactive output preserves the historical neutral bytes.
 
 ```bash
 dirloom --style unicode
 dirloom --style ascii
+dirloom --color never --icons never
 ```
 
 ### Markdown
@@ -281,7 +303,7 @@ Directories always have `children`, including empty directories. Files never do.
 
 Directories are listed before terminal entries. Each group is sorted case-insensitively with deterministic Unicode casing, then by the original UTF-8 name and normalized relative path. Filesystem enumeration order, locale and platform do not control the output.
 
-Dirloom preserves filesystem names exactly and does not silently normalize Unicode between NFC and NFD.
+Canonical output preserves filesystem names exactly and does not silently normalize Unicode between NFC and NFD. When terminal presentation is active, dangerous controls are escaped in the displayed projection without changing the tree model.
 
 ## Architecture
 
@@ -289,11 +311,13 @@ Dirloom preserves filesystem names exactly and does not silently normalize Unico
 CLI arguments
     → configuration discovery and resolution
     → built-in preset expansion
+    → presentation resolution and theme validation
     → application service
     → filter-aware filesystem scanner
     → renderer-independent tree model
     → deterministic sort
-    → text / fenced Markdown / semantic Markdown / JSON renderer
+    → canonical text / fenced Markdown / semantic Markdown / JSON renderer
+    → optional terminal-only text projection
     → stdout or transactional file output
 ```
 

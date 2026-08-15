@@ -175,3 +175,23 @@ func TestSemanticMarkdownConfigurationExampleUsesRealSchema(t *testing.T) {
 		t.Fatalf("semantic Markdown configuration = %#v", values)
 	}
 }
+
+func TestPublicPresentationConfigurationExampleUsesRealSchema(t *testing.T) {
+	path := filepath.Join("..", "..", "docs", "themes.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pattern := regexp.MustCompile(`(?s)<!-- dirloom-theme-config-example:presentation -->\r?\n` + "```yaml" + `\r?\n(.*?)\r?\n` + "```")
+	match := pattern.FindSubmatch(data)
+	if match == nil {
+		t.Fatal("presentation configuration example was not found")
+	}
+	values, err := parseDocument(match[1], path+"#presentation")
+	if err != nil {
+		t.Fatalf("presentation configuration example is invalid: %v", err)
+	}
+	if !values.Color.Set || values.Color.Value != "auto" || !values.Icons.Set || values.Icons.Value != "unicode" || !values.Theme.Set || values.Theme.Reset || values.Theme.Value != "midnight" {
+		t.Fatalf("presentation example = %#v", values)
+	}
+}

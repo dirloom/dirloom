@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -56,8 +57,12 @@ func TestResolutionDiagnostics(t *testing.T) {
 		t.Fatalf("preset = %#v", document["preset"])
 	}
 	inactive, ok := document["inactive"].([]any)
-	if !ok || len(inactive) != 1 || inactive[0] != "style" {
+	if !ok || len(inactive) != 4 || inactive[0] != "style" || inactive[1] != "color" || inactive[2] != "icons" || inactive[3] != "theme" {
 		t.Fatalf("inactive = %#v", document["inactive"])
+	}
+	presentation, ok := document["presentation"].(map[string]any)
+	if !ok || presentation["color"] != "auto" || presentation["icons"] != "auto" {
+		t.Fatalf("presentation = %#v", document["presentation"])
 	}
 }
 
@@ -134,7 +139,8 @@ func TestResolutionDiagnosticsMarkStyleInactiveForSemanticMarkdown(t *testing.T)
 	if err := json.Unmarshal(jsonOutput.Bytes(), &document); err != nil {
 		t.Fatal(err)
 	}
-	if len(document.Inactive) != 1 || document.Inactive[0] != "style" {
+	want := []string{"style", "color", "icons", "theme"}
+	if !reflect.DeepEqual(document.Inactive, want) {
 		t.Fatalf("inactive = %#v", document.Inactive)
 	}
 }

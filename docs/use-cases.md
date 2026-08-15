@@ -3,7 +3,7 @@
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
 > **Dernière vérification :** 15 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [thèmes](themes.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -61,6 +61,10 @@ dirloom --help
 | Voir la forme d’un monorepo | `dirloom --preset monorepo` |
 | Préparer un contexte structurel pour une IA | `dirloom --preset ai` |
 | Expliquer un preset intégré | `dirloom preset explain ai` |
+| Choisir un thème sombre ou clair | `dirloom --theme midnight` ou `dirloom --theme daylight` |
+| Utiliser une Nerd Font | `dirloom --icons nerd` |
+| Garantir un texte canonique sans décoration | `dirloom --color never --icons never` |
+| Inspecter ou valider un thème | `dirloom theme explain midnight` ou `dirloom theme validate theme.yaml` |
 
 ## 3. Prendre en main l’inspection
 
@@ -400,7 +404,34 @@ my-project/
 
 Utilisez-le pour des consoles limitées, certains logs, des systèmes anciens ou des canaux qui dégradent les caractères de dessin Unicode.
 
-### 5.3 Markdown prêt à insérer
+### 5.3 Présentation terminal : couleurs, icônes et thèmes
+
+Sur un TTY interactif utilisable, les modes `auto` activent les couleurs et les icônes Unicode portables. Un pipe, une redirection, `--output`, `CI` ou `TERM=dumb` conserve automatiquement le rendu historique neutre.
+
+Choisir une palette sombre ou claire :
+
+```bash
+dirloom . --theme midnight
+dirloom . --theme daylight
+```
+
+Utiliser une Nerd Font déjà configurée dans le terminal :
+
+```bash
+dirloom . --icons nerd --theme midnight
+```
+
+Dirloom ne détecte ni la police installée ni le fond du terminal. En cas de glyphes absents, utilisez `--icons unicode` ou `--icons never`. Pour une sortie texte reproductible :
+
+```bash
+dirloom . --color never --icons never
+```
+
+`NO_COLOR` non vide désactive les couleurs issues des défauts et de la configuration. Seul `--color always` explicitement fourni en CLI le surclasse. Les icônes restent indépendantes.
+
+Le Markdown clôturé, le Markdown sémantique et le JSON ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
+
+### 5.4 Markdown prêt à insérer
 
 ```bash
 dirloom --format markdown
@@ -728,7 +759,29 @@ Comparer ensuite avec un outil externe :
 git diff --no-index -- ../before.json ../after.json
 ```
 
-Dirloom observe la structure ; il n’exécute pas lui-même la génération ou la migration en v0.1.
+Dirloom observe la structure ; il n’exécute pas lui-même la génération ou la migration.
+
+### 7.13 Partager une identité terminal d’équipe
+
+Conservez le thème sous le même dossier que la configuration projet :
+
+```yaml
+schemaVersion: 1
+
+presentation:
+  color: auto
+  icons: unicode
+  theme: .dirloom/themes/team.yaml
+```
+
+Validez-le sans scanner le dépôt :
+
+```bash
+dirloom theme validate .dirloom/themes/team.yaml
+dirloom config explain
+```
+
+Le chemin configuré doit rester sous le dossier contenant `.dirloom.yaml`, y compris après résolution des liens symboliques. Un preset ne remplace aucune préférence visuelle.
 
 ## 8. Recettes par écosystème
 
@@ -1032,7 +1085,6 @@ La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes n
 | Capacité future | Alternative actuelle |
 | --- | --- |
 | `--copy` natif | Pipe vers `Set-Clipboard`, `pbcopy`, `wl-copy` ou `xclip` |
-| Couleurs, icônes et thèmes | Rendus Unicode ou ASCII non colorés |
 | `browse` ou TUI | Générer une sortie texte, Markdown ou JSON |
 | Fingerprint, snapshot, verify et diff natifs | Versionner le JSON et utiliser Git ou un outil de diff |
 | `watch` et flux d’événements | Relancer Dirloom depuis un outil externe |
@@ -1057,6 +1109,15 @@ dirloom config explain
 
 # Expliquer la définition intrinsèque d’un preset
 dirloom preset explain ai
+
+# Expliquer un thème intégré
+dirloom theme explain midnight
+
+# Présentation terminal sombre avec Nerd Font
+dirloom --icons nerd --theme midnight
+
+# Texte historique canonique
+dirloom --color never --icons never
 
 # Appliquer uniquement la configuration projet et la CLI
 dirloom --no-user-config

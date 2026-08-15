@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	configuration "github.com/dirloom/dirloom/internal/config"
+	"github.com/dirloom/dirloom/internal/presentation"
 )
 
 func TestHelpAndVersion(t *testing.T) {
@@ -17,7 +19,7 @@ func TestHelpAndVersion(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "markdown-tree", "config", "preset"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "markdown-tree", "config", "preset", "theme"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}
@@ -32,6 +34,256 @@ func TestHelpAndVersion(t *testing.T) {
 	}
 }
 
+func TestVisualPresentationCanonicalAndInteractiveContracts(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "visual project é")
+	if err := os.Mkdir(root, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"README.md", "main.go", "data.json"} {
+		if err := os.WriteFile(filepath.Join(root, name), nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	automatic, stderr, code := executeForTest(t, root, "--no-config")
+	if code != 0 || stderr != "" {
+		t.Fatalf("auto=(%q,%q,%d)", automatic, stderr, code)
+	}
+	neutral, stderr, code := executeForTest(t, root, "--no-config", "--color", "never", "--icons", "never")
+	if code != 0 || stderr != "" || neutral != automatic || strings.ContainsRune(neutral, '\x1b') {
+		t.Fatalf("neutral differs\nauto=%q\nneutral=%q\nstderr=%q code=%d", automatic, neutral, stderr, code)
+	}
+
+	evaluator := presentation.NewEvaluator(
+		presentation.WithEnvironment(func(name string) (string, bool) {
+			if name == "COLORTERM" {
+				return "truecolor", true
+			}
+			return "", false
+		}),
+		presentation.WithTerminalDetection(func(io.Writer) bool { return true }),
+		presentation.WithANSIPreparation(func(io.Writer) (func() error, error) { return func() error { return nil }, nil }),
+		presentation.WithWindowsTerminalCompatibility(false),
+	)
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return "", errors.New("disabled") }))
+	interactive, stderr, code := executeForTestWithDependencies(t, loader, evaluator, root, "--no-config", "--theme", "midnight")
+	if code != 0 || stderr != "" || !strings.ContainsRune(interactive, '\x1b') || !strings.Contains(interactive, "¶ README.md") || !strings.Contains(interactive, "• main.go") || !strings.Contains(interactive, "◇ data.json") {
+		t.Fatalf("interactive=(%q,%q,%d)", interactive, stderr, code)
+	}
+	for _, line := range strings.Split(strings.TrimSuffix(interactive, "\n"), "\n") {
+		if !strings.HasSuffix(line, "\x1b[0m") {
+			t.Errorf("style leaked or reset missing in %q", line)
+		}
+	}
+	outputPath := filepath.Join(t.TempDir(), "colored tree.txt")
+	fileStdout, fileStderr, fileCode := executeForTest(t, root, "--no-config", "--color", "always", "--icons", "unicode", "--theme", "daylight", "--output", outputPath)
+	data, err := os.ReadFile(outputPath)
+	if err != nil || fileCode != 0 || fileStdout != "" || fileStderr != "" || !bytes.Contains(data, []byte("\x1b[")) || !bytes.Contains(data, []byte("¶ README.md")) {
+		t.Fatalf("forced file stdout=%q stderr=%q code=%d data=%q err=%v", fileStdout, fileStderr, fileCode, data, err)
+	}
+}
+
+func TestVisualPresentationNoColorAndForcedModes(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.go"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return "", errors.New("disabled") }))
+	newEvaluator := func(noColor bool) *presentation.Evaluator {
+		return presentation.NewEvaluator(
+			presentation.WithEnvironment(func(name string) (string, bool) {
+				if name == "NO_COLOR" && noColor {
+					return "1", true
+				}
+				return "", false
+			}),
+			presentation.WithTerminalDetection(func(io.Writer) bool { return true }),
+			presentation.WithANSIPreparation(func(io.Writer) (func() error, error) { return func() error { return nil }, nil }),
+			presentation.WithWindowsTerminalCompatibility(false),
+		)
+	}
+	withoutColor, stderr, code := executeForTestWithDependencies(t, loader, newEvaluator(true), root, "--no-config", "--icons", "unicode")
+	if code != 0 || stderr != "" || strings.ContainsRune(withoutColor, '\x1b') || !strings.Contains(withoutColor, "• main.go") {
+		t.Fatalf("NO_COLOR=(%q,%q,%d)", withoutColor, stderr, code)
+	}
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npresentation:\n  color: always\n  icons: unicode\n")
+	configured, stderr, code := executeForTestWithDependencies(t, loader, newEvaluator(true), root)
+	if code != 0 || stderr != "" || strings.ContainsRune(configured, '\x1b') || !strings.Contains(configured, "• main.go") {
+		t.Fatalf("configured NO_COLOR=(%q,%q,%d)", configured, stderr, code)
+	}
+	forced, stderr, code := executeForTestWithDependencies(t, loader, newEvaluator(true), root, "--no-config", "--color", "always", "--icons", "nerd")
+	if code != 0 || stderr != "" || !strings.ContainsRune(forced, '\x1b') || !strings.Contains(forced, "󰟓 main.go") {
+		t.Fatalf("forced=(%q,%q,%d)", forced, stderr, code)
+	}
+}
+
+func TestVisualOptionsPreserveMachineFormatsAndRejectExplicitDecoration(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "visible.txt"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+presentation:
+  color: always
+  icons: nerd
+  theme: midnight
+`)
+	configuredJSON, stderr, code := executeForTest(t, root, "--format", "json")
+	if code != 0 || stderr != "" || strings.ContainsRune(configuredJSON, '\x1b') || strings.Contains(configuredJSON, "󰈔") {
+		t.Fatalf("configured JSON=(%q,%q,%d)", configuredJSON, stderr, code)
+	}
+	canonicalJSON, stderr, code := executeForTest(t, root, "--no-config", "--format", "json")
+	if code != 0 || stderr != "" || configuredJSON != canonicalJSON {
+		t.Fatalf("JSON changed\nconfigured=%q\ncanonical=%q", configuredJSON, canonicalJSON)
+	}
+	configuredMarkdown, stderr, code := executeForTest(t, root, "--format", "markdown")
+	canonicalMarkdown, _, _ := executeForTest(t, root, "--no-config", "--format", "markdown")
+	if code != 0 || stderr != "" || configuredMarkdown != canonicalMarkdown || strings.ContainsRune(configuredMarkdown, '\x1b') {
+		t.Fatalf("Markdown changed=(%q,%q,%d)", configuredMarkdown, stderr, code)
+	}
+	configuredSemanticMarkdown, stderr, code := executeForTest(t, root, "--format", "markdown-tree")
+	canonicalSemanticMarkdown, _, _ := executeForTest(t, root, "--no-config", "--format", "markdown-tree")
+	if code != 0 || stderr != "" || configuredSemanticMarkdown != canonicalSemanticMarkdown || strings.ContainsRune(configuredSemanticMarkdown, '\x1b') || strings.Contains(configuredSemanticMarkdown, "󰈔") {
+		t.Fatalf("semantic Markdown changed=(%q,%q,%d)", configuredSemanticMarkdown, stderr, code)
+	}
+
+	invalid := [][]string{
+		{root, "--no-config", "--format", "json", "--color", "auto"},
+		{root, "--no-config", "--format", "json", "--color", "always"},
+		{root, "--no-config", "--format", "markdown", "--icons", "auto"},
+		{root, "--no-config", "--format", "markdown", "--icons", "unicode"},
+		{root, "--no-config", "--format", "markdown-tree", "--color", "auto"},
+		{root, "--no-config", "--format", "markdown-tree", "--icons", "unicode"},
+		{root, "--no-config", "--format", "markdown-tree", "--theme", "default"},
+		{root, "--no-config", "--format", "json", "--icons", "nerd"},
+		{root, "--no-config", "--format", "json", "--theme", "default"},
+	}
+	for _, args := range invalid {
+		stdout, errorOutput, exitCode := executeForTest(t, args...)
+		if exitCode != 2 || stdout != "" || !strings.HasPrefix(errorOutput, "Error: ") {
+			t.Fatalf("%#v=(%q,%q,%d)", args, stdout, errorOutput, exitCode)
+		}
+	}
+	for _, args := range [][]string{{root, "--no-config", "--format", "json", "--color", "never", "--icons", "never"}, {root, "--no-config", "--format", "markdown", "--color", "never", "--icons", "never"}, {root, "--no-config", "--format", "markdown-tree", "--color", "never", "--icons", "never"}} {
+		_, errorOutput, exitCode := executeForTest(t, args...)
+		if exitCode != 0 || errorOutput != "" {
+			t.Fatalf("neutral machine %#v=(%q,%d)", args, errorOutput, exitCode)
+		}
+	}
+}
+
+func TestThemeCommandsAndCustomThemeLifecycle(t *testing.T) {
+	themePath := filepath.Join(t.TempDir(), "team theme é.yaml")
+	writeCLIConfig(t, themePath, `schemaVersion: 1
+name: team
+description: Team theme
+appearance: dark
+tokens:
+  node.future:
+    color: default
+rules:
+  - match: {extension: .go}
+    color: ansi:cyan
+    icons: {unicode: "•", nerd: "󰟓"}
+`)
+
+	stdout, stderr, code := executeForTest(t, "theme", "list")
+	if code != 0 || stderr != "" || strings.Index(stdout, "daylight") > strings.Index(stdout, "default") || strings.Index(stdout, "default") > strings.Index(stdout, "midnight") {
+		t.Fatalf("list=(%q,%q,%d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "theme", "list", "--as", "json")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"schemaVersion": 1`) || !strings.Contains(stdout, `"themes": [`) || strings.Contains(stdout, `"themes": null`) {
+		t.Fatalf("list JSON=(%q,%q,%d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "theme", "explain", "midnight")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "Theme: midnight") || !strings.Contains(stdout, "Appearance: dark") {
+		t.Fatalf("explain=(%q,%q,%d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "theme", "explain", themePath, "--as", "json")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"name": "team"`) || !strings.Contains(stdout, `"kind": "file"`) {
+		t.Fatalf("custom explain=(%q,%q,%d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "theme", "validate", themePath)
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "Valid theme: team") || !strings.Contains(stdout, "unknown-token") {
+		t.Fatalf("validate=(%q,%q,%d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "theme", "validate", themePath, "--as", "json")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"valid": true`) || !strings.Contains(stdout, `"warnings": [`) {
+		t.Fatalf("validate JSON=(%q,%q,%d)", stdout, stderr, code)
+	}
+
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.go"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	stdout, stderr, code = executeForTest(t, root, "--no-config", "--color", "never", "--icons", "unicode", "--theme", themePath)
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "• main.go") {
+		t.Fatalf("custom render=(%q,%q,%d)", stdout, stderr, code)
+	}
+
+	invalid := [][]string{
+		{"theme", "list", "extra"}, {"theme", "list", "--as", "yaml"},
+		{"theme", "explain"}, {"theme", "explain", "ocean"}, {"theme", "explain", "midnight", "extra"},
+		{"theme", "validate", "midnight"}, {"theme", "validate", filepath.Join(t.TempDir(), "missing.yaml")},
+		{"theme", "list", "--no-config"}, {"theme", "list", "--no-user-config"}, {"theme", "list", "--config", "x.yaml"},
+	}
+	for _, args := range invalid {
+		stdout, stderr, code = executeForTest(t, args...)
+		if code != 2 || stdout != "" || !strings.HasPrefix(stderr, "Error: ") {
+			t.Fatalf("%#v=(%q,%q,%d)", args, stdout, stderr, code)
+		}
+	}
+}
+
+func TestThemeErrorsPrecedeScanPreserveOutputAndMaskedPathIsNotRead(t *testing.T) {
+	root := t.TempDir()
+	outputPath := filepath.Join(t.TempDir(), "tree.txt")
+	if err := os.WriteFile(outputPath, []byte("preserved"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	missing := filepath.Join(t.TempDir(), "missing.yaml")
+	stdout, stderr, code := executeForTest(t, root, "--no-config", "--theme", missing, "--output", outputPath)
+	if code != 2 || stdout != "" || !strings.Contains(stderr, "does not exist") {
+		t.Fatalf("missing=(%q,%q,%d)", stdout, stderr, code)
+	}
+	data, err := os.ReadFile(outputPath)
+	if err != nil || string(data) != "preserved" {
+		t.Fatalf("output=%q err=%v", data, err)
+	}
+
+	userBase := t.TempDir()
+	writeCLIConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), "schemaVersion: 1\npresentation:\n  theme: missing.yaml\n")
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), "schemaVersion: 1\npresentation:\n  theme: daylight\n")
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return userBase, nil }))
+	stdout, stderr, code = executeForTestWithLoader(t, loader, root, "--color", "never", "--icons", "never")
+	if code != 0 || stderr != "" || stdout == "" {
+		t.Fatalf("masked theme=(%q,%q,%d)", stdout, stderr, code)
+	}
+}
+
+func TestConfigExplainIncludesPresentationProvenanceWithoutTTYResolution(t *testing.T) {
+	root := t.TempDir()
+	writeCLIConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+presentation:
+  color: auto
+  icons: nerd
+  theme: midnight
+`)
+	stdout, stderr, code := executeForTest(t, "config", "explain", root)
+	if code != 0 || stderr != "" {
+		t.Fatalf("text=(%q,%q,%d)", stdout, stderr, code)
+	}
+	for _, want := range []string{"color: auto (project:", "resolved at output time", "icons: nerd (project:", "theme: midnight (project:", "theme source: built-in"} {
+		if !strings.Contains(stdout, want) {
+			t.Errorf("text missing %q\n%s", want, stdout)
+		}
+	}
+	stdout, stderr, code = executeForTest(t, "config", "explain", root, "--as", "json", "--format", "markdown")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"presentation": {`) || !strings.Contains(stdout, `"appearance": "dark"`) || !strings.Contains(stdout, `"inactive": [`) || !strings.Contains(stdout, `"theme"`) {
+		t.Fatalf("JSON=(%q,%q,%d)", stdout, stderr, code)
+	}
+}
+
 func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 	tests := [][]string{
 		{"--depth", "invalid"},
@@ -43,6 +295,12 @@ func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 		{"--ignore", "../outside"},
 		{"--preset", "unknown"},
 		{"--preset="},
+		{"--color", "sometimes"},
+		{"--color="},
+		{"--icons", "font"},
+		{"--icons="},
+		{"--theme", "ocean"},
+		{"--theme="},
 		{"one", "two"},
 	}
 	for _, args := range tests {
@@ -194,7 +452,7 @@ func TestCLIPresetExplainAndConfigDiagnostics(t *testing.T) {
 	}
 }
 
-func TestCLIPresetErrorsPreserveOutputAndClassifyWriteFailure(t *testing.T) {
+func TestCLIInspectionErrorsPreserveOutputAndClassifyWriteFailure(t *testing.T) {
 	root := t.TempDir()
 	output := filepath.Join(t.TempDir(), "tree.txt")
 	if err := os.WriteFile(output, []byte("preserved"), 0o644); err != nil {
@@ -214,6 +472,11 @@ func TestCLIPresetErrorsPreserveOutputAndClassifyWriteFailure(t *testing.T) {
 	code = executeWithLoader(context.Background(), []string{"preset", "explain", "ai"}, failingWriter{}, &errorOutput, "v0.1.0-test", loader)
 	if code != 1 || !strings.Contains(errorOutput.String(), "write preset explanation") {
 		t.Fatalf("write failure=(stderr=%q, code=%d)", errorOutput.String(), code)
+	}
+	errorOutput.Reset()
+	code = executeWithLoader(context.Background(), []string{"theme", "list"}, failingWriter{}, &errorOutput, "v0.1.0-test", loader)
+	if code != 1 || !strings.Contains(errorOutput.String(), "write theme list") {
+		t.Fatalf("theme write failure=(stderr=%q, code=%d)", errorOutput.String(), code)
 	}
 }
 
@@ -544,6 +807,13 @@ func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 	if !strings.Contains(string(readme), "docs/markdown-tree.md") || !strings.Contains(string(markdownTreeDocumentation), "dirloom --format markdown-tree") {
 		t.Fatal("README or semantic Markdown documentation is missing")
 	}
+	themeDocumentation, err := os.ReadFile(filepath.Join("..", "..", "docs", "themes.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "docs/themes.md") {
+		t.Fatal("README does not link to docs/themes.md")
+	}
 	stdout, stderr, code := executeForTest(t, "--help")
 	if code != 0 || stderr != "" {
 		t.Fatalf("help=(%q, %q, %d)", stdout, stderr, code)
@@ -556,8 +826,19 @@ func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 			t.Errorf("public configuration documentation is missing option %q", option)
 		}
 	}
+	for _, option := range []string{"--color", "--icons", "--theme"} {
+		if !strings.Contains(stdout, option) {
+			t.Errorf("CLI help is missing documented option %q", option)
+		}
+		if !strings.Contains(string(themeDocumentation), option) {
+			t.Errorf("public theme documentation is missing option %q", option)
+		}
+	}
 	if !strings.Contains(stdout, "preset") || !strings.Contains(string(presetDocumentation), "dirloom preset explain") {
 		t.Fatal("preset help or public documentation is missing")
+	}
+	if !strings.Contains(stdout, "theme") || !strings.Contains(string(themeDocumentation), "dirloom theme validate") {
+		t.Fatal("theme help or public documentation is missing")
 	}
 }
 
@@ -573,6 +854,13 @@ func executeForTestWithLoader(t *testing.T, loader *configuration.Loader, args .
 	t.Helper()
 	var stdout, stderr bytes.Buffer
 	code := executeWithLoader(context.Background(), args, &stdout, &stderr, "v0.1.0-test", loader)
+	return stdout.String(), stderr.String(), code
+}
+
+func executeForTestWithDependencies(t *testing.T, loader *configuration.Loader, evaluator *presentation.Evaluator, args ...string) (string, string, int) {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	code := executeWithDependencies(context.Background(), args, &stdout, &stderr, "v0.1.0-test", loader, evaluator)
 	return stdout.String(), stderr.String(), code
 }
 

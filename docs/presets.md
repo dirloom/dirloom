@@ -37,6 +37,8 @@ Every preset also sets:
 
 Preset ignore rules are additive. They do not remove exclusions inherited from user or project configuration.
 
+Presets intentionally do not select terminal colors, icons, or a theme. Presentation follows its own CLI and configuration precedence; see [Terminal colors, icons, and themes](themes.md).
+
 ### `docs`
 
 `docs` produces a bounded Markdown tree that can be pasted into a README, architecture note, pull request, or review document.
@@ -335,4 +337,4 @@ The optional YAML `preset` field remains part of configuration `schemaVersion: 1
 
 Preset explanation JSON has its own `schemaVersion: 1`. Configuration diagnostic JSON remains version `1` with additive preset and provenance fields. Tree JSON is unchanged.
 
-Future custom presets, inheritance, composition, themes, AI statistics, and context compression are separate capabilities and are not accepted by the current CLI or configuration schema.
+Future custom presets, inheritance, composition, AI statistics, and context compression remain separate capabilities. Terminal themes are available independently and never alter a preset definition or the canonical tree artifact.

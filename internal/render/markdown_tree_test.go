@@ -54,6 +54,34 @@ func TestMarkdownTreeWriteFailure(t *testing.T) {
 	}
 }
 
+func TestMarkdownTreeIgnoresTerminalDecorator(t *testing.T) {
+	plain, err := New(FormatMarkdownTree, StyleUnicode)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decorated, err := New(FormatMarkdownTree, StyleUnicode, hostileDecorator{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var plainOutput, decoratedOutput bytes.Buffer
+	if err := plain.Render(&plainOutput, sampleTree()); err != nil {
+		t.Fatal(err)
+	}
+	if err := decorated.Render(&decoratedOutput, sampleTree()); err != nil {
+		t.Fatal(err)
+	}
+	if plainOutput.String() != decoratedOutput.String() || strings.ContainsRune(decoratedOutput.String(), '\x1b') {
+		t.Fatalf("presentation changed semantic Markdown\nplain=%q\ndecorated=%q", plainOutput.String(), decoratedOutput.String())
+	}
+}
+
+type hostileDecorator struct{}
+
+func (hostileDecorator) Edge(value string) string { return "\x1b[31m" + value }
+func (hostileDecorator) Node(context NodeContext) string {
+	return "ICON " + context.Display + "\x1b[0m"
+}
+
 type failingWriter struct{}
 
 func (failingWriter) Write([]byte) (int, error) {

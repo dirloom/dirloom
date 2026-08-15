@@ -5,18 +5,38 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/dirloom/dirloom/internal/presentation"
 )
 
 const configurationDiagnosticVersion = 1
 
 type diagnosticDocument struct {
-	SchemaVersion int                 `json:"schemaVersion"`
-	Root          string              `json:"root"`
-	Sources       []Source            `json:"sources"`
-	Preset        ResolvedPreset      `json:"preset"`
-	Effective     diagnosticEffective `json:"effective"`
-	Provenance    map[string]Origin   `json:"provenance"`
-	Inactive      []string            `json:"inactive"`
+	SchemaVersion int                    `json:"schemaVersion"`
+	Root          string                 `json:"root"`
+	Sources       []Source               `json:"sources"`
+	Preset        ResolvedPreset         `json:"preset"`
+	Effective     diagnosticEffective    `json:"effective"`
+	Provenance    map[string]Origin      `json:"provenance"`
+	Inactive      []string               `json:"inactive"`
+	Presentation  diagnosticPresentation `json:"presentation"`
+}
+
+type diagnosticPresentation struct {
+	Color string          `json:"color"`
+	Icons string          `json:"icons"`
+	Theme diagnosticTheme `json:"theme"`
+}
+
+type diagnosticTheme struct {
+	Name       string                `json:"name"`
+	Appearance string                `json:"appearance,omitempty"`
+	Source     diagnosticThemeSource `json:"source"`
+}
+
+type diagnosticThemeSource struct {
+	Kind string `json:"kind"`
+	Path string `json:"path,omitempty"`
 }
 
 type diagnosticEffective struct {
@@ -92,6 +112,30 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 			return err
 		}
 	}
+	if _, err := fmt.Fprintln(writer, "\nPresentation:"); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  color: %s (%s; resolved at output time)\n", resolution.Effective.Color, formatOrigin(resolution.Provenance["color"])); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  icons: %s (%s; resolved at output time)\n", resolution.Effective.Icons, formatOrigin(resolution.Provenance["icons"])); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  theme: %s (%s)\n", resolution.Effective.Theme, formatOrigin(resolution.Provenance["theme"])); err != nil {
+		return err
+	}
+	theme := resolution.diagnosticTheme()
+	if _, err := fmt.Fprintf(writer, "  theme source: %s", theme.Source.Kind); err != nil {
+		return err
+	}
+	if theme.Source.Path != "" {
+		if _, err := fmt.Fprintf(writer, " (%s)", theme.Source.Path); err != nil {
+			return err
+		}
+	}
+	if _, err := fmt.Fprintln(writer); err != nil {
+		return err
+	}
 	if len(resolution.Ignores) == 0 {
 		_, err := fmt.Fprintln(writer, "\nIgnore: none")
 		return err
@@ -108,9 +152,12 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 }
 
 func (resolution Resolution) diagnostic() diagnosticDocument {
-	inactive := make([]string, 0, 1)
+	inactive := make([]string, 0, 4)
 	if styleInactive(resolution.Effective.Format) {
 		inactive = append(inactive, "style")
+	}
+	if resolution.Effective.Format != FormatText {
+		inactive = append(inactive, "color", "icons", "theme")
 	}
 	ignores := append([]IgnoreRule(nil), resolution.Ignores...)
 	if ignores == nil {
@@ -137,11 +184,30 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 		},
 		Provenance: resolution.Provenance,
 		Inactive:   inactive,
+		Presentation: diagnosticPresentation{
+			Color: resolution.Effective.Color,
+			Icons: resolution.Effective.Icons,
+			Theme: resolution.diagnosticTheme(),
+		},
 	}
 }
 
 func styleInactive(format string) bool {
 	return format == FormatJSON || format == FormatMarkdownTree
+}
+
+func (resolution Resolution) diagnosticTheme() diagnosticTheme {
+	if resolution.ThemeInfo != nil {
+		return diagnosticTheme{
+			Name:       resolution.ThemeInfo.Name,
+			Appearance: resolution.ThemeInfo.Appearance,
+			Source:     diagnosticThemeSource{Kind: resolution.ThemeInfo.Source.Kind, Path: resolution.ThemeInfo.Source.Path},
+		}
+	}
+	if theme, ok := presentation.Lookup(resolution.Effective.Theme); ok {
+		return diagnosticTheme{Name: theme.Name, Appearance: theme.Appearance, Source: diagnosticThemeSource{Kind: theme.Source.Kind}}
+	}
+	return diagnosticTheme{Name: resolution.Effective.Theme, Source: diagnosticThemeSource{Kind: "unresolved"}}
 }
 
 func formatOrigin(origin Origin) string {

@@ -12,6 +12,7 @@ import (
 	"github.com/dirloom/dirloom/internal/app"
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/output"
+	"github.com/dirloom/dirloom/internal/presentation"
 	"github.com/dirloom/dirloom/internal/render"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,11 @@ func Execute(ctx context.Context, args []string, stdout, stderr io.Writer, versi
 }
 
 func executeWithLoader(ctx context.Context, args []string, stdout, stderr io.Writer, version string, loader *configuration.Loader) int {
-	command := newRootCommand(stdout, stderr, version, loader)
+	return executeWithDependencies(ctx, args, stdout, stderr, version, loader, presentation.NewEvaluator())
+}
+
+func executeWithDependencies(ctx context.Context, args []string, stdout, stderr io.Writer, version string, loader *configuration.Loader, evaluator *presentation.Evaluator) int {
+	command := newRootCommandWithEvaluator(stdout, stderr, version, loader, evaluator)
 	command.SetArgs(args)
 	if err := command.ExecuteContext(ctx); err != nil {
 		_, _ = fmt.Fprintf(stderr, "Error: %s\n", err)
@@ -49,6 +54,10 @@ func NewRootCommand(stdout, stderr io.Writer, version string) *cobra.Command {
 }
 
 func newRootCommand(stdout, stderr io.Writer, version string, loader *configuration.Loader) *cobra.Command {
+	return newRootCommandWithEvaluator(stdout, stderr, version, loader, presentation.NewEvaluator())
+}
+
+func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loader *configuration.Loader, evaluator *presentation.Evaluator) *cobra.Command {
 	var opts options
 	var sources sourceOptions
 	command := &cobra.Command{
@@ -63,6 +72,7 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
   dirloom --preset docs
   dirloom --dirs-only
   dirloom --style ascii
+  dirloom --theme midnight --icons unicode
   dirloom --format markdown
   dirloom --format markdown-tree
   dirloom --ignore node_modules --ignore dist
@@ -85,9 +95,27 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 			if err != nil {
 				return err
 			}
-			if styleIsInactive(resolved.Effective.Format) && overrides.Style.Set {
-				return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolved.Effective.Format)}
+			if err := validateFormatOptions(resolved, overrides); err != nil {
+				return err
 			}
+			theme, compiled, err := loadEffectiveTheme(resolved)
+			if err != nil {
+				return classifyPresentationError(err)
+			}
+			resolved.SetThemeInfo(theme)
+			capabilities, err := evaluator.Evaluate(presentation.CapabilityRequest{
+				Format: resolved.Effective.Format, ColorMode: resolved.Effective.Color, IconMode: resolved.Effective.Icons,
+				ColorExplicitCLI: overrides.Color.Set, OutputPath: opts.output, Writer: stdout,
+			})
+			if err != nil {
+				return classifyPresentationError(err)
+			}
+			closed := false
+			defer func() {
+				if !closed {
+					_ = capabilities.Close()
+				}
+			}()
 
 			model, err := app.Inspect(cmd.Context(), app.InspectRequest{
 				Root:              resolved.Root,
@@ -103,7 +131,11 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 				return err
 			}
 
-			renderer, err := render.New(resolved.Effective.Format, resolved.Effective.Style)
+			var decorator render.Decorator
+			if capabilities.ColorEnabled || capabilities.IconMode != presentation.IconsNever {
+				decorator = presentation.NewDecorator(compiled, capabilities.ColorEnabled, capabilities.IconMode, capabilities.Profile)
+			}
+			renderer, err := render.New(resolved.Effective.Format, resolved.Effective.Style, decorator)
 			if err != nil {
 				return err
 			}
@@ -113,11 +145,16 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 			}
 
 			if opts.output != "" {
-				return output.WriteFile(opts.output, rendered.Bytes())
-			}
-			if err := writeAll(stdout, rendered.Bytes()); err != nil {
+				if err := output.WriteFile(opts.output, rendered.Bytes()); err != nil {
+					return err
+				}
+			} else if err := writeAll(stdout, rendered.Bytes()); err != nil {
 				return fmt.Errorf("write output: %w", err)
 			}
+			if err := capabilities.Close(); err != nil {
+				return err
+			}
+			closed = true
 			return nil
 		},
 	}
@@ -136,6 +173,7 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 	command.Flags().StringVarP(&opts.output, "output", "o", "", "write transactionally to a file instead of stdout")
 	command.AddCommand(newConfigCommand(stdout, loader, &sources))
 	command.AddCommand(newPresetCommand(stdout, &sources))
+	command.AddCommand(newThemeCommand(stdout, &sources))
 
 	return command
 }
@@ -150,6 +188,9 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
 	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, or json")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
+	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto")
+	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto")
+	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, or a YAML path")
 }
 
 func resolveOptions(command *cobra.Command, loader *configuration.Loader, root string, sources sourceOptions, opts *options) (configuration.Resolution, configuration.Overrides, error) {
@@ -212,6 +253,24 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 	if command.Flags().Changed("ignore") {
 		result.IgnorePatterns = append([]string(nil), opts.ignorePatterns...)
 	}
+	if command.Flags().Changed("color") {
+		if opts.color == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--color requires a non-empty value")}
+		}
+		result.Color = configuration.Optional[string]{Set: true, Value: opts.color}
+	}
+	if command.Flags().Changed("icons") {
+		if opts.icons == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--icons requires a non-empty value")}
+		}
+		result.Icons = configuration.Optional[string]{Set: true, Value: opts.icons}
+	}
+	if command.Flags().Changed("theme") {
+		if opts.theme == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--theme requires a non-empty value")}
+		}
+		result.Theme = configuration.ThemeSelection{Set: true, Value: opts.theme}
+	}
 	return result, nil
 }
 
@@ -249,9 +308,14 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 			if err != nil {
 				return err
 			}
-			if styleIsInactive(resolved.Effective.Format) && overrides.Style.Set {
-				return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolved.Effective.Format)}
+			if err := validateFormatOptions(resolved, overrides); err != nil {
+				return err
 			}
+			theme, _, err := loadEffectiveTheme(resolved)
+			if err != nil {
+				return classifyPresentationError(err)
+			}
+			resolved.SetThemeInfo(theme)
 			switch outputFormat {
 			case "text":
 				if err := resolved.WriteText(stdout); err != nil {
@@ -271,10 +335,6 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
 	command.AddCommand(explain)
 	return command
-}
-
-func styleIsInactive(format string) bool {
-	return format == render.FormatJSON || format == render.FormatMarkdownTree
 }
 
 func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
@@ -335,20 +395,7 @@ func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
 }
 
 func rejectPresetSourceFlags(command *cobra.Command, sources *sourceOptions) error {
-	checks := []struct {
-		name    string
-		changed bool
-	}{
-		{name: "config", changed: command.Flags().Changed("config") || sources.path != ""},
-		{name: "no-user-config", changed: command.Flags().Changed("no-user-config") || sources.noUser},
-		{name: "no-config", changed: command.Flags().Changed("no-config") || sources.noConfig},
-	}
-	for _, check := range checks {
-		if check.changed {
-			return &usageError{err: fmt.Errorf("--%s cannot be used with preset inspection", check.name)}
-		}
-	}
-	return nil
+	return rejectSourceFlags(command, sources, "preset inspection")
 }
 
 func writeAll(writer io.Writer, data []byte) error {

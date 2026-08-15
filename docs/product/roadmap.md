@@ -251,7 +251,7 @@ La v0.1 constitue le **contrat de confiance** sans lequel les fonctions de diff,
 
 **Niveau : Foundation / Adoption**
 
-**Statut : socle implémenté dans l'incrément initial de v0.2.** Les presets intégrés ont été livrés dans l'incrément suivant ; la présentation thématique reste une capacité distincte.
+**Statut : socle implémenté dans l'incrément initial de v0.2.** Les presets intégrés puis la présentation thématique ont été livrés dans les incréments suivants, avec des moteurs distincts et une résolution commune inspectable.
 
 Ordre livré :
 
@@ -283,7 +283,7 @@ ignore:
 
 Le schéma v1, la découverte bornée par Git, les contrôles `--config`, `--no-user-config`, `--no-config`, `--depth unlimited` et `dirloom config explain` sont couverts par des contrats publics et des tests multiplateformes. Les listes `ignore` sont additives dans l'ordre utilisateur, projet puis CLI ; les scalaires suivent la priorité générale.
 
-Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible. La propriété prospective `presentation.theme` appartient au Visual Theme Engine de la section 6.4 et n'est pas acceptée par le schéma initial.
+Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible. Le schéma v1 accepte désormais `presentation.color`, `presentation.icons` et `presentation.theme`, ajoutés avant la première publication de v0.2. Les presets ne définissent aucune de ces valeurs.
 
 ## 6.3 Presets
 
@@ -314,6 +314,8 @@ Les presets réduisent le coût d’entrée sans retirer la puissance de la CLI.
 
 **Niveau : Adoption / UX amplifier**
 
+**Statut : socle terminal livré dans v0.2.** Le rendu texte interactif dispose des modes automatiques, des trois thèmes intégrés, des thèmes YAML confinés, de l'inspection et de la validation. Les tokens liés au diff, à la conformité, aux sévérités et aux annotations restent réservés aux capacités qui produiront réellement ces états.
+
 Objectif :
 
 ```bash
@@ -325,11 +327,11 @@ Exemple illustratif :
 ```text
 󰉋 src/
 ├── 󰉋 features/
-│   ├── 󰊢 auth/
-│   └── 󰊢 payments/
-├──  main.go
-├──  config.ts
-└──  README.md
+│   ├── 󰉋 auth/
+│   └── 󰉋 payments/
+├── 󰟓 main.go
+├── 󰛦 config.ts
+└── 󰍔 README.md
 ```
 
 ### Canonical Mode vs Presentation Mode
@@ -351,7 +353,7 @@ Presentation Layer
     └── semantic decorations
 ```
 
-Modes envisagés :
+Modes livrés :
 
 ```text
 --color never|always|auto
@@ -359,7 +361,7 @@ Modes envisagés :
 --theme <name|path>
 ```
 
-Support attendu :
+Support livré :
 
 - `NO_COLOR` ;
 - thèmes utilisateur et projet ;
@@ -368,34 +370,50 @@ Support attendu :
 - rendu pipeline-safe ;
 - thèmes partageables.
 
-Exemple de thème :
+Commandes d'inspection livrées :
+
+```bash
+dirloom theme list
+dirloom theme explain midnight
+dirloom theme validate .dirloom/themes/team.yaml
+```
+
+Le mode `auto` n'active la présentation que pour le texte sur un TTY utilisable. Pipes, redirections, `--output`, CI et `TERM=dumb` conservent le rendu historique neutre. `NO_COLOR` désactive l'ANSI sauf surclassement explicite par `--color always` en CLI. Markdown, JSON, diagnostics, aides et erreurs restent canoniques et non décorés.
+
+Exemple du schéma livré :
 
 ```yaml
 schemaVersion: 1
-name: midnight
+name: team
+description: Team terminal theme
+appearance: dark
 
-colors:
-  directory: "#7aa2f7"
-  symlink: "#bb9af7"
-  file.default: "#c0caf5"
-  diff.added: "#9ece6a"
-  diff.removed: "#f7768e"
-  diff.moved: "#e0af68"
-  contract.error: "#f7768e"
-  contract.warning: "#e0af68"
-  drift.high: "#f7768e"
+palette:
+  directory: "#7AA2F7"
+  file: "#C0CAF5"
+
+tokens:
+  node.directory:
+    color: directory
+    styles: [bold]
+    icons:
+      unicode: "▸"
+      nerd: "󰉋"
+
+rules:
+  - match: { extension: .go }
+    color: file
+    icons:
+      unicode: "•"
+      nerd: "󰟓"
 
 icons:
-  directory: "󰉋"
-  symlink: ""
-  extension:
-    dart: ""
-    go: ""
-    ts: ""
-    md: ""
+  spacing: 1
 ```
 
-Dirloom peut dépasser le simple thème de fichiers en colorant des **concepts architecturaux**. Exemples : nœuds ajoutés, supprimés ou déplacés ; violations et dérives ; modules obsolètes ; responsabilités ; éléments gérés par template, générés ou sélectionnés pour le contexte ; impacts directs ou transitifs.
+Le schéma v1 actif cible `tree.edge`, `node.directory`, `node.file` et `node.symlink`, puis résout les règles par chemin exact, nom, glob, extension et type. La configuration peut référencer un thème local, mais un chemin provenant d'un fichier doit rester sous son dossier après résolution des liens symboliques. Aucun include, template, téléchargement, appel réseau ou code exécutable n'est permis.
+
+Dirloom pourra dépasser ce premier socle en colorant des **concepts architecturaux** lorsque le moteur les produira. Exemples préservés pour l'évolution : nœuds ajoutés, supprimés ou déplacés ; violations et dérives ; modules obsolètes ; responsabilités ; éléments gérés par template, générés ou sélectionnés pour le contexte ; impacts directs ou transitifs. Ces tokens futurs sont aujourd'hui ignorés à l'inspection et signalés par `theme validate`, sans être présentés comme disponibles.
 
 ## 6.5 Exports visuels
 
@@ -1956,6 +1974,8 @@ Critères de sortie :
 ## v0.2 — Product UX, Configuration & Visual Identity
 
 **Objectif :** faire de Dirloom un outil agréable à utiliser quotidiennement.
+
+**État au 15 août 2026 :** configuration persistante, presets inspectables et socle Visual Theme Engine réalisés par incréments dans le périmètre v0.2. `--copy`, complétions et exports graphiques restent à réaliser avant de considérer l'ensemble du périmètre ci-dessous terminé.
 
 Fonctions :
 
