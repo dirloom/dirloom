@@ -6,6 +6,7 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ### Added
 
+- Add official Scoop distribution for Windows x64 and ARM64 with automatic updates from published stable releases.
 - Add strict layered configuration through `.dirloom.yaml`, the native user configuration directory and explicit CLI overrides.
 - Add Git-bounded project discovery, additive ignore rules and `dirloom config explain` diagnostics with value provenance.
 - Add `--config`, `--no-user-config`, `--no-config` and `--depth unlimited`.
