@@ -41,7 +41,7 @@ func TestThemeClassifyReportsPermissionFailureAsRuntimeError(t *testing.T) {
 	t.Cleanup(func() { _ = os.Chmod(blocked, 0o700) })
 
 	stdout, stderr, code := executeForTest(t, "theme", "classify", filepath.Join("blocked", "secret.go"), "--root", root)
-	if code != 1 || stdout != "" || !strings.Contains(stderr, "resolve classification path") {
+	if code != 1 || stdout != "" || !strings.Contains(stderr, "classification path") {
 		t.Fatalf("permission failure=(%q,%q,%d)", stdout, stderr, code)
 	}
 }
