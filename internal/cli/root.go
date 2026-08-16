@@ -190,7 +190,7 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
 	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto")
 	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto")
-	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, or a YAML path")
+	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, vivid, or a YAML path")
 }
 
 func resolveOptions(command *cobra.Command, loader *configuration.Loader, root string, sources sourceOptions, opts *options) (configuration.Resolution, configuration.Overrides, error) {
