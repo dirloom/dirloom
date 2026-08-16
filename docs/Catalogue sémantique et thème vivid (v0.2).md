@@ -23,7 +23,7 @@ todos:
     status: completed
   - id: tests-docs-gitops
     content: Livrer tests, documentation publique, notices, draft PR et CI 6/6
-    status: in_progress
+    status: completed
 isProject: false
 ---
 
