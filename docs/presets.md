@@ -37,7 +37,7 @@ Every preset also sets:
 
 Preset ignore rules are additive. They do not remove exclusions inherited from user or project configuration.
 
-Presets intentionally do not select terminal colors, icons, or a theme. Presentation follows its own CLI and configuration precedence; see [Terminal colors, icons, and themes](themes.md).
+Presets intentionally do not select terminal colors, icons, or a theme. The built-in icon mode remains `never` unless the user or configuration activates it. Presentation and [semantic classification](catalog.md) are independent of preset expansion; see [Terminal colors, icons, and themes](themes.md).
 
 ### `docs`
 

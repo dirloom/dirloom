@@ -17,10 +17,18 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Add the deterministic `markdown-tree` format for native nested Markdown lists while preserving existing text, fenced Markdown and JSON contracts.
 - Publish and automatically validate the semantic Markdown guide.
 - Add terminal-safe `--color`, `--icons`, and `--theme` controls with TTY-aware defaults and `NO_COLOR` support.
-- Add immutable `default`, `midnight`, and `daylight` themes plus strict, confined custom YAML themes.
-- Add `dirloom theme list`, `theme explain`, and `theme validate` text and JSON contracts.
+- Add immutable `default`, `midnight`, `daylight`, and `vivid` themes plus strict, confined custom YAML themes.
+- Add the semantic catalog v1 with 256 matchers, 96 hierarchical technical kinds, 16 ordered structural roles, and portable Unicode/Nerd glyph fallbacks.
+- Add `dirloom theme list`, `theme explain`, `theme validate`, and bounded filesystem-aware `theme classify` text and JSON contracts.
 - Preserve canonical text, Markdown, and tree JSON through a presentation-only renderer projection.
 - Publish and automatically validate the terminal themes guide, icon provenance, and pipeline guarantees.
+- Publish and automatically validate the semantic catalog guide, kind/role theme bindings, and classification examples.
+
+### Changed
+
+- Replace the pre-release theme prototype with the definitive public theme schema v1; `catalogVersion: 1` is now required and no legacy loader is retained.
+- Change the built-in icon mode from `auto` to `never`; Unicode and Nerd glyphs are now explicitly activated while automatic color remains unchanged.
+- Resolve icon color separately from text color and emit independent ANSI spans and resets.
 
 ## [0.1.1] - 2026-08-11
 

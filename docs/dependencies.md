@@ -26,9 +26,9 @@ Version `v0.45.0` targets Go 1.25 and uses the already pinned `x/sys v0.47.0`. T
 
 ## yaml v3.0.4
 
-`go.yaml.in/yaml/v3` parses the single public `.dirloom.yaml` format. Version 3 provides typed decoding, an inspectable node tree and strict known-field validation, which Dirloom combines with its own rejection of duplicate keys, multiple documents, anchors, aliases, merge keys and custom tags.
+`go.yaml.in/yaml/v3` parses the independent public `.dirloom.yaml` and custom-theme YAML formats. Version 3 provides typed decoding, an inspectable node tree and strict known-field validation, which Dirloom combines with its own rejection of duplicate keys, multiple documents, anchors, aliases, merge keys and custom tags.
 
-The dependency is isolated in `internal/config`. Dirloom does not enable YAML-based execution, includes, templates or environment interpolation. The module is dual-licensed under MIT and Apache-2.0.
+The dependency is isolated behind `internal/config` and `internal/presentation` loaders. Dirloom does not enable YAML-based execution, includes, templates or environment interpolation. Configuration and theme schema versions remain independent. The module is dual-licensed under MIT and Apache-2.0.
 
 ## Review policy
 

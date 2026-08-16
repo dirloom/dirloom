@@ -283,7 +283,7 @@ ignore:
 
 Le schéma v1, la découverte bornée par Git, les contrôles `--config`, `--no-user-config`, `--no-config`, `--depth unlimited` et `dirloom config explain` sont couverts par des contrats publics et des tests multiplateformes. Les listes `ignore` sont additives dans l'ordre utilisateur, projet puis CLI ; les scalaires suivent la priorité générale.
 
-Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible. Le schéma v1 accepte désormais `presentation.color`, `presentation.icons` et `presentation.theme`, ajoutés avant la première publication de v0.2. Les presets ne définissent aucune de ces valeurs.
+Usages : exclusions partagées, préférences personnelles, monorepos, CI reproductible. Le schéma v1 accepte `presentation.color`, `presentation.icons` et `presentation.theme`, avec les défauts `auto`, `never` et `default`, ajoutés avant la première publication de v0.2. Les presets ne définissent aucune de ces valeurs.
 
 ## 6.3 Presets
 
@@ -310,110 +310,104 @@ Le preset `ai` livré compose uniquement les capacités existantes. Statistiques
 
 Les presets réduisent le coût d’entrée sans retirer la puissance de la CLI.
 
-## 6.4 Visual Theme Engine — couleurs et icônes de niveau eza
+## 6.4 Visual Theme Engine — catalogue sémantique, couleurs et icônes
 
 **Niveau : Adoption / UX amplifier**
 
-**Statut : socle terminal livré dans v0.2.** Le rendu texte interactif dispose des modes automatiques, des trois thèmes intégrés, des thèmes YAML confinés, de l'inspection et de la validation. Les tokens liés au diff, à la conformité, aux sévérités et aux annotations restent réservés aux capacités qui produiront réellement ces états.
+**Statut : socle livré dans v0.2.** Le moteur comprend le catalogue sémantique v1, le schéma public de thème v1, quatre thèmes intégrés, les thèmes YAML confinés, les diagnostics et la projection terminal sûre. Les états de diff, conformité, sévérité et annotation restent réservés aux capacités qui les produiront.
 
-Objectif :
+Showcase :
 
 ```bash
-dirloom --color auto --icons nerd --theme midnight
+dirloom --theme vivid --icons nerd
 ```
 
-Exemple illustratif :
+Le catalogue décrit le projet sur deux axes : un kind technique pour le glyphe et des rôles structurels ordonnés pour la couleur et les styles. Le contrat v1 contient exactement 256 matchers, 96 kinds hiérarchiques et 16 rôles. `_test.go` conserve ainsi une icône Go avec le rôle `test`, tandis que `.pb.go` conserve Go avec `generated`.
 
-```text
-󰉋 src/
-├── 󰉋 features/
-│   ├── 󰉋 auth/
-│   └── 󰉋 payments/
-├── 󰟓 main.go
-├── 󰛦 config.ts
-└── 󰍔 README.md
-```
+Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` consomment ce catalogue unique. La classification intégrée suit symlink, dossier exact, nom exact, suffixe composé le plus long, extension puis fallback. Elle ne lit ni contenu, shebang, MIME, état Git ou métadonnée étendue.
 
 ### Canonical Mode vs Presentation Mode
 
-La présentation ne doit jamais corrompre l’artefact canonique.
+La présentation ne modifie jamais l'artefact canonique.
 
 ```text
 Canonical Artifact
-    ├── stable bytes
-    ├── no ANSI
+    ├── stable bytes and order
+    ├── no ANSI or presentation glyph
     ├── no terminal detection
     └── machine-safe
 
 Presentation Layer
-    ├── colors
-    ├── icons
+    ├── semantic Kind + roles
+    ├── colors and text styles
+    ├── Unicode or Nerd glyphs
     ├── terminal capabilities
-    ├── themes
-    └── semantic decorations
+    └── built-in or confined custom theme
 ```
 
-Modes livrés :
+Défauts livrés :
+
+```text
+color: auto
+icons: never
+theme: default
+```
+
+Modes publics :
 
 ```text
 --color never|always|auto
 --icons never|unicode|nerd|auto
---theme <name|path>
+--theme default|midnight|daylight|vivid|<path>
 ```
 
-Support livré :
+`--icons auto` active Unicode seulement sur un TTY éligible ; Nerd reste explicite. Le thème seul n'active aucune icône. Pipes, redirections, `--output`, CI et `TERM=dumb` restent neutres en mode automatique. `NO_COLOR` désactive l'ANSI sauf surclassement CLI explicite par `--color always`. Markdown, Markdown sémantique, JSON, diagnostics, aides et erreurs restent canoniques.
 
-- `NO_COLOR` ;
-- thèmes utilisateur et projet ;
-- palette claire/sombre ;
-- fallback sans Nerd Font ;
-- rendu pipeline-safe ;
-- thèmes partageables.
-
-Commandes d'inspection livrées :
+Commandes livrées :
 
 ```bash
 dirloom theme list
-dirloom theme explain midnight
+dirloom theme explain vivid
 dirloom theme validate .dirloom/themes/team.yaml
+dirloom theme classify src/main.go --theme vivid --as json
 ```
 
-Le mode `auto` n'active la présentation que pour le texte sur un TTY utilisable. Pipes, redirections, `--output`, CI et `TERM=dumb` conservent le rendu historique neutre. `NO_COLOR` désactive l'ANSI sauf surclassement explicite par `--color always` en CLI. Markdown, JSON, diagnostics, aides et erreurs restent canoniques et non décorés.
+`theme classify` charge le thème avant la cible, confine l'entrée à `--root`, utilise `Lstat`, ne suit pas le symlink final, ne lit aucun contenu et ne scanne aucun descendant.
 
-Exemple du schéma livré :
+Le schéma public de thème v1 remplace le prototype pré-release sans compatibilité. Il exige les deux versions indépendantes :
 
 ```yaml
 schemaVersion: 1
+catalogVersion: 1
 name: team
-description: Team terminal theme
 appearance: dark
 
 palette:
-  directory: "#7AA2F7"
-  file: "#C0CAF5"
+  source: "#65D6BA"
+  generated: "#9AA4B6"
 
-tokens:
-  node.directory:
-    color: directory
-    styles: [bold]
-    icons:
-      unicode: "▸"
-      nerd: "󰉋"
+kinds:
+  source:
+    iconColor: source
+
+roles:
+  source:
+    color: source
+  generated:
+    color: generated
+    styles: [dim]
 
 rules:
-  - match: { extension: .go }
-    color: file
-    icons:
-      unicode: "•"
-      nerd: "󰟓"
-
-icons:
-  spacing: 1
+  - match: { path: "tools/codegen.go" }
+    kind: source.go
+    role: generated
+    iconColor: null
+    styles: []
 ```
 
-Le schéma v1 actif cible `tree.edge`, `node.directory`, `node.file` et `node.symlink`, puis résout les règles par chemin exact, nom, glob, extension et type. La configuration peut référencer un thème local, mais un chemin provenant d'un fichier doit rester sous son dossier après résolution des liens symboliques. Aucun include, template, téléchargement, appel réseau ou code exécutable n'est permis.
+Le schéma distingue propriété absente, valeur explicite et `null`; applique les bindings token, parents de kind, kind spécifique, rôle puis overrides directs ; et sépare les spans ANSI d'icône et de texte. Un binding de kind/rôle futur produit un warning stable ; une action `kind:` ou `role:` inconnue dans une règle échoue.
 
-Dirloom pourra dépasser ce premier socle en colorant des **concepts architecturaux** lorsque le moteur les produira. Exemples préservés pour l'évolution : nœuds ajoutés, supprimés ou déplacés ; violations et dérives ; modules obsolètes ; responsabilités ; éléments gérés par template, générés ou sélectionnés pour le contexte ; impacts directs ou transitifs. Ces tokens futurs sont aujourd'hui ignorés à l'inspection et signalés par `theme validate`, sans être présentés comme disponibles.
+Dirloom pourra dépasser ce socle en colorant des concepts architecturaux lorsque le moteur les produira : nœuds ajoutés, supprimés ou déplacés ; violations et dérives ; modules obsolètes ; responsabilités ; éléments gérés par template ; impacts directs ou transitifs. Ils ne sont pas présentés comme disponibles en v0.2.
 
 ## 6.5 Exports visuels
 
