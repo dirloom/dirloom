@@ -17,7 +17,7 @@ func TestDecoratorColorIconAndFallback(t *testing.T) {
 	context := render.NodeContext{Path: "src/main.go", Name: "main.go", Display: "main.go", Type: tree.NodeFile}
 	decorator := NewDecorator(compiled, true, IconsNerd, ProfileTrueColor)
 	got := decorator.Node(context)
-	if !strings.Contains(got, "\x1b[38;2;192;202;245m") || !strings.Contains(got, "󰟓 main.go") || !strings.HasSuffix(got, "\x1b[0m") {
+	if got != "\x1b[38;2;122;162;247m󰟓\x1b[0m \x1b[38;2;122;162;247mmain.go\x1b[0m" {
 		t.Fatalf("decorated = %q", got)
 	}
 	edge := decorator.Edge("├── ")
@@ -25,7 +25,7 @@ func TestDecoratorColorIconAndFallback(t *testing.T) {
 		t.Fatalf("edge = %q", edge)
 	}
 
-	theme.Tokens["node.file"] = Token{Color: "file", Icons: IconPair{Unicode: "·"}, Styles: []string{}}
+	theme.Kinds["file"] = Binding{Icons: IconPair{Unicode: "·"}, unicodeIconSet: true, nerdIconSet: true}
 	compiled, err = Compile(theme)
 	if err != nil {
 		t.Fatal(err)

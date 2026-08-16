@@ -122,7 +122,7 @@ presentation:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if withoutConfig.Effective.Color != "auto" || withoutConfig.Effective.Icons != "auto" || withoutConfig.Effective.Theme != "default" {
+	if withoutConfig.Effective.Color != "auto" || withoutConfig.Effective.Icons != "never" || withoutConfig.Effective.Theme != "default" {
 		t.Fatalf("preset changed presentation = %#v", withoutConfig.Effective)
 	}
 }

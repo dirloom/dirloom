@@ -11,24 +11,41 @@ import (
 	"strings"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/presentation/catalog"
 	"go.yaml.in/yaml/v3"
 )
 
 const (
-	maxThemeSize = 1 << 20
-	maxPalette   = 64
-	maxRules     = 512
+	maxThemeSize    = 1 << 20
+	maxPalette      = 128
+	maxKindBindings = 256
+	maxRoleBindings = 64
+	maxRules        = 512
 )
 
+type nullableStringDocument struct {
+	Present bool
+	Null    bool
+	Value   string
+}
+
 type iconDocument struct {
-	Unicode *string `yaml:"unicode"`
-	Nerd    *string `yaml:"nerd"`
+	Unicode nullableStringDocument `yaml:"unicode"`
+	Nerd    nullableStringDocument `yaml:"nerd"`
 }
 
 type tokenDocument struct {
-	Color  *string       `yaml:"color"`
-	Styles *[]string     `yaml:"styles"`
-	Icons  *iconDocument `yaml:"icons"`
+	Color     *string                `yaml:"color"`
+	IconColor nullableStringDocument `yaml:"iconColor"`
+	Styles    *[]string              `yaml:"styles"`
+	Icons     *iconDocument          `yaml:"icons"`
+}
+
+type bindingDocument struct {
+	Color     *string                `yaml:"color"`
+	IconColor nullableStringDocument `yaml:"iconColor"`
+	Styles    *[]string              `yaml:"styles"`
+	Icons     *iconDocument          `yaml:"icons"`
 }
 
 type matchDocument struct {
@@ -40,10 +57,13 @@ type matchDocument struct {
 }
 
 type ruleDocument struct {
-	Match  matchDocument `yaml:"match"`
-	Color  *string       `yaml:"color"`
-	Styles *[]string     `yaml:"styles"`
-	Icons  *iconDocument `yaml:"icons"`
+	Match     matchDocument          `yaml:"match"`
+	Kind      *string                `yaml:"kind"`
+	Role      *string                `yaml:"role"`
+	Color     *string                `yaml:"color"`
+	IconColor nullableStringDocument `yaml:"iconColor"`
+	Styles    *[]string              `yaml:"styles"`
+	Icons     *iconDocument          `yaml:"icons"`
 }
 
 type iconsDocument struct {
@@ -51,34 +71,17 @@ type iconsDocument struct {
 }
 
 type themeDocument struct {
-	SchemaVersion *int                     `yaml:"schemaVersion"`
-	Name          *string                  `yaml:"name"`
-	Description   string                   `yaml:"description"`
-	Appearance    *string                  `yaml:"appearance"`
-	Palette       map[string]string        `yaml:"palette"`
-	Tokens        map[string]tokenDocument `yaml:"tokens"`
-	Rules         []ruleDocument           `yaml:"rules"`
-	Icons         iconsDocument            `yaml:"icons"`
-}
-
-func cloneTokenDocuments(values map[string]tokenDocument) map[string]tokenDocument {
-	if values == nil {
-		return nil
-	}
-	result := make(map[string]tokenDocument, len(values))
-	for key, value := range values {
-		copyValue := value
-		if value.Styles != nil {
-			styles := append([]string(nil), (*value.Styles)...)
-			copyValue.Styles = &styles
-		}
-		if value.Icons != nil {
-			icons := *value.Icons
-			copyValue.Icons = &icons
-		}
-		result[key] = copyValue
-	}
-	return result
+	SchemaVersion  *int                       `yaml:"schemaVersion"`
+	CatalogVersion *int                       `yaml:"catalogVersion"`
+	Name           *string                    `yaml:"name"`
+	Description    string                     `yaml:"description"`
+	Appearance     *string                    `yaml:"appearance"`
+	Palette        map[string]string          `yaml:"palette"`
+	Tokens         map[string]tokenDocument   `yaml:"tokens"`
+	Kinds          map[string]bindingDocument `yaml:"kinds"`
+	Roles          map[string]bindingDocument `yaml:"roles"`
+	Rules          []ruleDocument             `yaml:"rules"`
+	Icons          iconsDocument              `yaml:"icons"`
 }
 
 func cloneRuleDocuments(values []ruleDocument) []ruleDocument {
@@ -102,11 +105,8 @@ func cloneRuleDocuments(values []ruleDocument) []ruleDocument {
 
 // ReferenceContext supplies the authority used to resolve a selected theme.
 type ReferenceContext struct {
-	// Kind is "cli", "user", "project", or "built-in".
-	Kind string
-	// ConfigPath is required for a path selected by a configuration file.
-	ConfigPath string
-	// WorkingDirectory resolves relative CLI paths. Empty uses os.Getwd.
+	Kind             string
+	ConfigPath       string
 	WorkingDirectory string
 }
 
@@ -197,7 +197,7 @@ func loadFile(path string) (Theme, error) {
 	if info.Size() > maxThemeSize {
 		return Theme{}, invalidf("invalid theme %q: file exceeds the 1 MiB limit", path)
 	}
-	// #nosec G304 -- path is explicitly selected and confined above when config-backed.
+	// #nosec G304 -- the explicitly selected path is confined for config-backed themes.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return Theme{}, fmt.Errorf("read theme %q: %w", path, err)
@@ -239,8 +239,14 @@ func parseTheme(data []byte, path string) (Theme, error) {
 	if document.SchemaVersion == nil {
 		return Theme{}, invalidf("invalid theme %q: schemaVersion is required", path)
 	}
-	if *document.SchemaVersion != SchemaVersion {
-		return Theme{}, invalidf("invalid theme %q: unsupported schemaVersion %d (expected %d)", path, *document.SchemaVersion, SchemaVersion)
+	if *document.SchemaVersion != ThemeFileSchemaVersion {
+		return Theme{}, invalidf("invalid theme %q: unsupported schemaVersion %d (expected %d)", path, *document.SchemaVersion, ThemeFileSchemaVersion)
+	}
+	if document.CatalogVersion == nil {
+		return Theme{}, invalidf("invalid theme %q: catalogVersion is required for theme schemaVersion 1", path)
+	}
+	if *document.CatalogVersion != catalog.Version {
+		return Theme{}, invalidf("invalid theme %q: unsupported catalogVersion %d (expected %d)", path, *document.CatalogVersion, catalog.Version)
 	}
 	if document.Name == nil || strings.TrimSpace(*document.Name) == "" {
 		return Theme{}, invalidf("invalid theme %q: name is required and must not be empty", path)
@@ -256,38 +262,75 @@ func parseTheme(data []byte, path string) (Theme, error) {
 	if len(document.Palette) > maxPalette {
 		return Theme{}, invalidf("invalid theme %q: palette exceeds the %d-color limit", path, maxPalette)
 	}
-	for name, value := range document.Palette {
+	if len(document.Kinds) > maxKindBindings {
+		return Theme{}, invalidf("invalid theme %q: kinds exceed the %d-binding limit", path, maxKindBindings)
+	}
+	if len(document.Roles) > maxRoleBindings {
+		return Theme{}, invalidf("invalid theme %q: roles exceed the %d-binding limit", path, maxRoleBindings)
+	}
+	if len(document.Rules) > maxRules {
+		return Theme{}, invalidf("invalid theme %q: rules exceed the %d-rule limit", path, maxRules)
+	}
+
+	baseTheme, _ := Lookup(ThemeDefault)
+	theme := cloneTheme(baseTheme)
+	theme.SchemaVersion = ThemeFileSchemaVersion
+	theme.CatalogVersion = catalog.Version
+	theme.Name = *document.Name
+	theme.Description = document.Description
+	theme.Appearance = *document.Appearance
+	theme.Source = Source{Kind: "file", Path: path}
+	theme.Catalog = semanticCatalogSummary()
+	theme.Warnings = []Warning{}
+
+	for _, name := range sortedKeys(document.Palette) {
+		value := document.Palette[name]
 		if strings.TrimSpace(name) == "" {
 			return Theme{}, invalidf("invalid theme %q: palette names must not be empty", path)
 		}
 		if _, err := parseLiteralColor(value); err != nil {
 			return Theme{}, invalidf("invalid theme %q: palette.%s: %v", path, name, err)
 		}
+		theme.Palette[name] = value
 	}
-	baseTheme, _ := Lookup(ThemeDefault)
-	validationPalette := make(map[string]string, len(baseTheme.Palette)+len(document.Palette))
-	for name, value := range baseTheme.Palette {
-		validationPalette[name] = value
-	}
-	for name, value := range document.Palette {
-		validationPalette[name] = value
-	}
-	if len(document.Rules) > maxRules {
-		return Theme{}, invalidf("invalid theme %q: rules exceed the %d-rule limit", path, maxRules)
-	}
-	warnings := make([]Warning, 0)
-	for name, token := range document.Tokens {
+
+	for _, name := range sortedKeys(document.Tokens) {
+		value := document.Tokens[name]
 		if _, active := activeTokens[name]; !active {
-			warnings = append(warnings, Warning{Code: "unknown-token", Message: fmt.Sprintf("token %q is not active in theme schema v1 and was ignored", name)})
+			theme.Warnings = append(theme.Warnings, Warning{Code: "unknown-token", Message: fmt.Sprintf("token %q is not active in theme schema v1 and was ignored", name)})
 			continue
 		}
-		if err := validateTokenDocument(token, validationPalette); err != nil {
+		if err := validateTokenDocument(value, theme.Palette); err != nil {
 			return Theme{}, invalidf("invalid theme %q: token %s: %v", path, name, err)
 		}
+		theme.Tokens[name] = mergeToken(theme.Tokens[name], value)
 	}
+	for _, name := range sortedKeys(document.Kinds) {
+		value := document.Kinds[name]
+		if !catalog.IsKind(name) {
+			theme.Warnings = append(theme.Warnings, Warning{Code: "unknown-kind-binding", Message: fmt.Sprintf("kind binding %q is not present in catalog v1 and was ignored", name)})
+			continue
+		}
+		if err := validateBindingDocument(value, theme.Palette); err != nil {
+			return Theme{}, invalidf("invalid theme %q: kinds.%s: %v", path, name, err)
+		}
+		theme.Kinds[name] = mergeBinding(theme.Kinds[name], value)
+	}
+	for _, name := range sortedKeys(document.Roles) {
+		value := document.Roles[name]
+		if !catalog.IsRole(name) {
+			theme.Warnings = append(theme.Warnings, Warning{Code: "unknown-role-binding", Message: fmt.Sprintf("role binding %q is not present in catalog v1 and was ignored", name)})
+			continue
+		}
+		if err := validateBindingDocument(value, theme.Palette); err != nil {
+			return Theme{}, invalidf("invalid theme %q: roles.%s: %v", path, name, err)
+		}
+		theme.Roles[name] = mergeBinding(theme.Roles[name], value)
+	}
+
 	seenMatchers := make(map[string]struct{}, len(document.Rules))
 	for index, rule := range document.Rules {
-		identity, err := validateRuleDocument(rule, validationPalette)
+		identity, err := validateRuleDocument(rule, theme.Palette)
 		if err != nil {
 			return Theme{}, invalidf("invalid theme %q: rule %d: %v", path, index+1, err)
 		}
@@ -303,29 +346,11 @@ func parseTheme(data []byte, path string) (Theme, error) {
 	if spacing < 0 || spacing > 4 {
 		return Theme{}, invalidf("invalid theme %q: icons.spacing must be between 0 and 4", path)
 	}
-	theme := baseTheme
-	theme.Name = *document.Name
-	theme.Description = document.Description
-	theme.Appearance = *document.Appearance
-	theme.Source = Source{Kind: "file", Path: path}
-	theme.Warnings = warnings
 	theme.Icons.Spacing = spacing
-	for key, value := range document.Palette {
-		theme.Palette[key] = value
-	}
-	for key, value := range document.Tokens {
-		if _, active := activeTokens[key]; !active {
-			continue
-		}
-		token := theme.Tokens[key]
-		theme.Tokens[key] = mergeToken(token, value)
-	}
-	customRules := make([]Rule, 0, len(document.Rules))
+	theme.Rules = make([]Rule, 0, len(document.Rules))
 	for _, value := range document.Rules {
-		customRules = append(customRules, publicRule(value))
+		theme.Rules = append(theme.Rules, publicRule(value))
 	}
-	theme.Rules = append(customRules, theme.Rules...)
-	theme.customTokens = cloneTokenDocuments(document.Tokens)
 	theme.customRules = cloneRuleDocuments(document.Rules)
 	return cloneTheme(theme), nil
 }
@@ -336,6 +361,11 @@ func validateTokenDocument(document tokenDocument, palette map[string]string) er
 			return err
 		}
 	}
+	if document.IconColor.Present && !document.IconColor.Null {
+		if err := validateColorReference(document.IconColor.Value, palette); err != nil {
+			return fmt.Errorf("iconColor: %w", err)
+		}
+	}
 	if document.Styles != nil {
 		if err := validateStyles(*document.Styles); err != nil {
 			return err
@@ -344,14 +374,29 @@ func validateTokenDocument(document tokenDocument, palette map[string]string) er
 	return validateIconDocument(document.Icons)
 }
 
+func validateBindingDocument(document bindingDocument, palette map[string]string) error {
+	return validateTokenDocument(tokenDocument(document), palette)
+}
+
 func validateRuleDocument(document ruleDocument, palette map[string]string) (string, error) {
 	identity, err := validateMatch(document.Match)
 	if err != nil {
 		return "", err
 	}
+	if document.Kind != nil && !catalog.IsKind(*document.Kind) {
+		return "", fmt.Errorf("unknown kind %q", *document.Kind)
+	}
+	if document.Role != nil && !catalog.IsRole(*document.Role) {
+		return "", fmt.Errorf("unknown role %q", *document.Role)
+	}
 	if document.Color != nil {
 		if err := validateColorReference(*document.Color, palette); err != nil {
 			return "", err
+		}
+	}
+	if document.IconColor.Present && !document.IconColor.Null {
+		if err := validateColorReference(document.IconColor.Value, palette); err != nil {
+			return "", fmt.Errorf("iconColor: %w", err)
 		}
 	}
 	if document.Styles != nil {
@@ -361,6 +406,10 @@ func validateRuleDocument(document ruleDocument, palette map[string]string) (str
 	}
 	if err := validateIconDocument(document.Icons); err != nil {
 		return "", err
+	}
+	hasAction := document.Kind != nil || document.Role != nil || document.Color != nil || document.IconColor.Present || document.Styles != nil || document.Icons != nil
+	if !hasAction {
+		return "", fmt.Errorf("rule must define at least one action")
 	}
 	return identity, nil
 }
@@ -393,14 +442,12 @@ func validateIconDocument(document *iconDocument) error {
 	if document == nil {
 		return nil
 	}
-	if document.Unicode != nil {
-		if err := validateGlyph(*document.Unicode); err != nil {
-			return fmt.Errorf("unicode icon: %w", err)
+	for name, value := range map[string]nullableStringDocument{"unicode": document.Unicode, "nerd": document.Nerd} {
+		if !value.Present || value.Null {
+			continue
 		}
-	}
-	if document.Nerd != nil {
-		if err := validateGlyph(*document.Nerd); err != nil {
-			return fmt.Errorf("nerd icon: %w", err)
+		if err := validateGlyph(value.Value); err != nil {
+			return fmt.Errorf("%s icon: %w", name, err)
 		}
 	}
 	return nil
@@ -434,7 +481,7 @@ func validateMatch(match matchDocument) (string, error) {
 			return "", fmt.Errorf("path: %w", err)
 		}
 	case "name":
-		if strings.ContainsAny(value, `/\\`) {
+		if strings.ContainsAny(value, `/\`) {
 			return "", fmt.Errorf("name %q must not contain a path separator", value)
 		}
 	case "glob":
@@ -442,7 +489,7 @@ func validateMatch(match matchDocument) (string, error) {
 			return "", fmt.Errorf("glob: %w", err)
 		}
 	case "extension":
-		if !strings.HasPrefix(value, ".") || len(value) == 1 || strings.ContainsAny(value, `/\\`) {
+		if !strings.HasPrefix(value, ".") || len(value) == 1 || strings.ContainsAny(value, `/\`) {
 			return "", fmt.Errorf("extension %q must start with '.' and contain no path separator", value)
 		}
 	case "type":
@@ -469,15 +516,66 @@ func mergeToken(base Token, document tokenDocument) Token {
 	if document.Color != nil {
 		base.Color = *document.Color
 	}
+	if document.IconColor.Present {
+		if document.IconColor.Null {
+			base.IconColor = ""
+		} else {
+			base.IconColor = document.IconColor.Value
+		}
+	}
 	if document.Styles != nil {
 		base.Styles = append([]string(nil), (*document.Styles)...)
 	}
 	if document.Icons != nil {
-		if document.Icons.Unicode != nil {
-			base.Icons.Unicode = *document.Icons.Unicode
+		if document.Icons.Unicode.Present {
+			if document.Icons.Unicode.Null {
+				base.Icons.Unicode = ""
+			} else {
+				base.Icons.Unicode = document.Icons.Unicode.Value
+			}
 		}
-		if document.Icons.Nerd != nil {
-			base.Icons.Nerd = *document.Icons.Nerd
+		if document.Icons.Nerd.Present {
+			if document.Icons.Nerd.Null {
+				base.Icons.Nerd = ""
+			} else {
+				base.Icons.Nerd = document.Icons.Nerd.Value
+			}
+		}
+	}
+	return base
+}
+
+func mergeBinding(base Binding, document bindingDocument) Binding {
+	if document.Color != nil {
+		base.Color, base.colorSet = *document.Color, true
+	}
+	if document.IconColor.Present {
+		base.iconColorSet = true
+		if document.IconColor.Null {
+			base.IconColor = ""
+		} else {
+			base.IconColor = document.IconColor.Value
+		}
+	}
+	if document.Styles != nil {
+		base.Styles, base.stylesSet = append([]string(nil), (*document.Styles)...), true
+	}
+	if document.Icons != nil {
+		if document.Icons.Unicode.Present {
+			base.unicodeIconSet = true
+			if document.Icons.Unicode.Null {
+				base.Icons.Unicode = ""
+			} else {
+				base.Icons.Unicode = document.Icons.Unicode.Value
+			}
+		}
+		if document.Icons.Nerd.Present {
+			base.nerdIconSet = true
+			if document.Icons.Nerd.Null {
+				base.Icons.Nerd = ""
+			} else {
+				base.Icons.Nerd = document.Icons.Nerd.Value
+			}
 		}
 	}
 	return base
@@ -485,18 +583,27 @@ func mergeToken(base Token, document tokenDocument) Token {
 
 func publicRule(document ruleDocument) Rule {
 	result := Rule{Match: publicMatch(document.Match), Styles: []string{}}
+	if document.Kind != nil {
+		result.Kind = *document.Kind
+	}
+	if document.Role != nil {
+		result.Role = *document.Role
+	}
 	if document.Color != nil {
 		result.Color = *document.Color
+	}
+	if document.IconColor.Present && !document.IconColor.Null {
+		result.IconColor = document.IconColor.Value
 	}
 	if document.Styles != nil {
 		result.Styles = append([]string(nil), (*document.Styles)...)
 	}
 	if document.Icons != nil {
-		if document.Icons.Unicode != nil {
-			result.Icons.Unicode = *document.Icons.Unicode
+		if document.Icons.Unicode.Present && !document.Icons.Unicode.Null {
+			result.Icons.Unicode = document.Icons.Unicode.Value
 		}
-		if document.Icons.Nerd != nil {
-			result.Icons.Nerd = *document.Icons.Nerd
+		if document.Icons.Nerd.Present && !document.Icons.Nerd.Null {
+			result.Icons.Nerd = document.Icons.Nerd.Value
 		}
 	}
 	return result

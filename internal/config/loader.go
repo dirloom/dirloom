@@ -256,7 +256,7 @@ func defaultResolution(root string) Resolution {
 			UseDefaultIgnores: true,
 			UseGitIgnore:      true,
 			Color:             presentation.ColorAuto,
-			Icons:             presentation.IconsAuto,
+			Icons:             presentation.IconsNever,
 			Theme:             presentation.ThemeDefault,
 		},
 		Provenance: map[string]Origin{

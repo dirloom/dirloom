@@ -21,7 +21,7 @@ func WriteListText(writer io.Writer) error {
 
 // WriteListJSON writes the stable built-in theme list contract.
 func WriteListJSON(writer io.Writer) error {
-	document := ListDocument{SchemaVersion: SchemaVersion, Themes: BuiltIns()}
+	document := ListDocument{SchemaVersion: ThemeListSchemaVersion, Themes: BuiltIns()}
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
 	encoder.SetEscapeHTML(false)
@@ -34,7 +34,11 @@ func Validation(theme Theme) ValidationResult {
 	if warnings == nil {
 		warnings = []Warning{}
 	}
-	return ValidationResult{SchemaVersion: SchemaVersion, Valid: true, Source: theme.Source, Name: theme.Name, Warnings: warnings}
+	return ValidationResult{
+		SchemaVersion: ThemeValidateSchemaVersion, ThemeSchemaVersion: ThemeFileSchemaVersion,
+		CatalogVersion: theme.CatalogVersion, Valid: true, Source: theme.Source,
+		Name: theme.Name, Warnings: warnings,
+	}
 }
 
 // WriteJSON writes the stable validation contract.
@@ -57,6 +61,9 @@ func (result ValidationResult) WriteText(writer io.Writer) error {
 		if _, err := fmt.Fprintf(writer, " (%s)", result.Source.Path); err != nil {
 			return err
 		}
+	}
+	if _, err := fmt.Fprintf(writer, "\nTheme schema: v%d\nCatalog: v%d", result.ThemeSchemaVersion, result.CatalogVersion); err != nil {
+		return err
 	}
 	if len(result.Warnings) == 0 {
 		_, err := fmt.Fprintln(writer, "\nWarnings: none")

@@ -45,11 +45,18 @@ func (decorator *Decorator) Node(context render.NodeContext) string {
 	case IconsUnicode:
 		icon = style.icons.Unicode
 	}
-	if icon != "" {
-		display = icon + strings.Repeat(" ", decorator.theme.iconSpacing) + display
+	if icon == "" {
+		if decorator.color {
+			return ansiStyle(display, style.color, style.styles, decorator.profile)
+		}
+		return display
 	}
+	iconSegment := icon
+	textSegment := display
 	if decorator.color {
-		display = ansiStyle(display, style.color, style.styles, decorator.profile)
+		// Icons are deliberately color-only: text emphasis never leaks into glyphs.
+		iconSegment = ansiStyle(iconSegment, style.iconColor, nil, decorator.profile)
+		textSegment = ansiStyle(textSegment, style.color, style.styles, decorator.profile)
 	}
-	return display
+	return iconSegment + strings.Repeat(" ", decorator.theme.iconSpacing) + textSegment
 }

@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	semanticcatalog "github.com/dirloom/dirloom/internal/presentation/catalog"
 )
 
 func TestPublicThemeDocumentationUsesRealContracts(t *testing.T) {
@@ -44,15 +46,16 @@ func TestPublicThemeDocumentationUsesRealContracts(t *testing.T) {
 		}
 	}
 	sort.Strings(ids)
-	wantIDs := []string{"explain", "nerd", "no-color", "pipeline", "quick-start", "validate"}
+	wantIDs := []string{"classify", "explain", "nerd", "no-color", "pipeline", "quick-start", "validate"}
 	if !reflect.DeepEqual(ids, wantIDs) {
 		t.Fatalf("command IDs = %#v, want %#v", ids, wantIDs)
 	}
 
 	for _, row := range []string{
 		"| `default` | Universal | `default` | `ansi:blue` | `default` | `ansi:magenta` | `ansi:cyan` |",
-		"| `midnight` | Dark (`#1A1B26` reference) | `#9AA5CE` | `#7AA2F7` | `#C0CAF5` | `#BB9AF7` | `#7DCFFF` |",
-		"| `daylight` | Light (`#FFFFFF` reference) | `#4B5563` | `#1D4ED8` | `#111827` | `#6B21A8` | `#0369A1` |",
+		"| `midnight` | Dark (`#1A1B26`) | `#9AA5CE` | `#7AA2F7` | `#C0CAF5` | `#BB9AF7` | `#7DCFFF` |",
+		"| `daylight` | Light (`#FFFFFF`) | `#4B5563` | `#1D4ED8` | `#111827` | `#6B21A8` | `#0369A1` |",
+		"| `vivid` | Dark (`#10131A`) | `#96A0B5` | `#7EB6FF` | `#E5E9F0` | `#C6A0FF` | `#6ED6FF` |",
 	} {
 		if !strings.Contains(text, row) {
 			t.Errorf("missing catalog row %q", row)
@@ -71,6 +74,7 @@ func TestPublicThemeDocumentationRelativeLinksExist(t *testing.T) {
 	paths := []string{
 		filepath.Join("..", "..", "README.md"),
 		filepath.Join("..", "..", "docs", "themes.md"),
+		filepath.Join("..", "..", "docs", "catalog.md"),
 		filepath.Join("..", "..", "docs", "markdown-tree.md"),
 		filepath.Join("..", "..", "docs", "configuration.md"),
 		filepath.Join("..", "..", "docs", "presets.md"),
@@ -87,5 +91,37 @@ func TestPublicThemeDocumentationRelativeLinksExist(t *testing.T) {
 				t.Errorf("%s links to missing %s: %v", documentPath, target, err)
 			}
 		}
+	}
+}
+
+func TestPublicCatalogDocumentationUsesRealContracts(t *testing.T) {
+	path := filepath.Join("..", "..", "docs", "catalog.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, want := range []string{"| **Matchers** | **256** |", "| Technical kinds | 96 |", "| Structural roles | 16 |", "dirloom theme classify src/main.go --theme vivid"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("catalog documentation missing %q", want)
+		}
+	}
+	if semanticcatalog.EntryCount != 256 || semanticcatalog.KindCount != 96 || semanticcatalog.RoleCount != 16 {
+		t.Fatal("compiled catalog counters changed without documentation review")
+	}
+	pattern := regexp.MustCompile(`(?s)<!-- dirloom-catalog-theme-example:bindings -->\r?\n` + "```yaml" + `\r?\n(.*?)\r?\n` + "```")
+	match := pattern.FindSubmatch(data)
+	if len(match) != 2 {
+		t.Fatal("catalog binding example marker is missing")
+	}
+	theme, err := parseTheme(match[1], path+"#bindings")
+	if err != nil {
+		t.Fatalf("catalog binding example is invalid: %v", err)
+	}
+	if theme.CatalogVersion != semanticcatalog.Version || len(theme.Kinds) == 0 || len(theme.Roles) == 0 || len(theme.Rules) != 1 {
+		t.Fatalf("catalog binding example = %#v", theme)
+	}
+	if _, err := Compile(theme); err != nil {
+		t.Fatalf("catalog binding example does not compile: %v", err)
 	}
 }
