@@ -343,6 +343,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 ## Release
 
+Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
+`main` tracks the last published tag until the release candidate merges.
+See [Release workflow](docs/release-workflow.md).
+
 Tags matching `v*` invoke GoReleaser. A `v0.1.0` tag builds:
 
 ```text

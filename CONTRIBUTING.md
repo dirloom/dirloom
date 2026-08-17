@@ -11,6 +11,10 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
+While `release/v0.2.0` is open, base feature and fix branches on
+`release/v0.2.0` and open pull requests against that branch. See
+[Release workflow](docs/release-workflow.md).
+
 1. Create a focused branch.
 2. Add or update tests with every behavior change.
 3. Keep filesystem scanning, filtering, the tree model and rendering separated.
