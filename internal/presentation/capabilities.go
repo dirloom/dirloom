@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"golang.org/x/term"
 )
 
@@ -92,7 +93,7 @@ func NewEvaluator(options ...EvaluatorOption) *Evaluator {
 
 // Evaluate resolves auto modes, NO_COLOR, color depth, and platform setup.
 func (evaluator *Evaluator) Evaluate(request CapabilityRequest) (Capabilities, error) {
-	if request.Format != "text" {
+	if !outputformat.UsesPresentation(request.Format) {
 		return Capabilities{IconMode: IconsNever, Profile: ProfileTrueColor}, nil
 	}
 	tty := request.OutputPath == "" && evaluator.isTTY(request.Writer)
