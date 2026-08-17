@@ -413,13 +413,15 @@ Dirloom pourra dépasser ce socle en colorant des concepts architecturaux lorsqu
 
 **Niveau : Ecosystem amplifier**
 
+**Statut : socle livré dans v0.2.** Les formats `mermaid`, `graphviz` (alias `dot`) et `d2` projettent la vue `structure` depuis `diagram.Document`. Dirloom n'émet que des sources DSL ; le rendu SVG/PNG reste externe. `maxNodes` est illimité par défaut, avec warning à 500 nœuds.
+
 ```bash
 dirloom --format mermaid
 dirloom --format graphviz
 dirloom --format d2
 ```
 
-Usages : README, documentation d’architecture, rapports, présentations.
+Usages : README, documentation d’architecture, rapports, présentations. Contrat, échappement et budget : [exports graphiques](../graph-exports.md).
 
 Le socle `markdown-tree` est livré séparément : il couvre la documentation Markdown sémantique sans devenir un export graphique, sans HTML et sans réutiliser la présentation terminal.
 
@@ -1969,7 +1971,7 @@ Critères de sortie :
 
 **Objectif :** faire de Dirloom un outil agréable à utiliser quotidiennement.
 
-**État au 15 août 2026 :** configuration persistante, presets inspectables et socle Visual Theme Engine réalisés par incréments dans le périmètre v0.2. `--copy`, complétions et exports graphiques restent à réaliser avant de considérer l'ensemble du périmètre ci-dessous terminé.
+**État au 17 août 2026 :** configuration persistante, presets inspectables, socle Visual Theme Engine et exports graphiques Mermaid/Graphviz/D2 réalisés par incréments dans le périmètre v0.2. `--copy` et les complétions restent à réaliser avant de considérer l'ensemble du périmètre ci-dessous terminé.
 
 Fonctions :
 

@@ -836,7 +836,15 @@ Wireframe conceptuel :
 
 ### 11.3 Mermaid, Graphviz et D2
 
-Les exports DOIVENT être dérivés de vues explicites, pas de l'arbre brut entier par défaut. L'utilisateur DEVRAIT pouvoir choisir profondeur, filtre, type de relation et regroupement. Chaque export DOIT rester reproductible à artefact et options identiques.
+Les exports graphiques v0.2 DOIVENT être des sources DSL déterministes (`mermaid`, `graphviz`/`dot`, `d2`), sans rendu d'image intégré. Ils DOIVENT provenir d'une projection intermédiaire `diagram.Document` portant `ContractVersion`, et non d'un parcours dialecte-spécifique de `tree.Node`.
+
+La vue livrée DOIT être `structure` : un nœud par entrée inspectée, une arête `contains` par relation parent-enfant, des identifiants stables, des libellés lisibles sans couleur, et des symlinks terminaux dont la cible reste dans le libellé. Dirloom NE DOIT PAS inventer de dépendances d'imports ou d'architecture absentes du modèle.
+
+`maxNodes` DOIT valoir `null` par défaut. Un graphe de 500 nœuds ou plus SANS limite explicite DOIT produire un warning stderr non bloquant. Une limite CLI ou YAML explicite dépassée DOIT échouer avec le code `1`, sans troncature silencieuse et sans modifier une destination existante.
+
+Les trois encodeurs DOIVENT recevoir le même `Document`, rester hors présentation terminal, et confiner toute donnée utilisateur dans des labels quotés. L'extension d'un fichier de sortie NE DOIT JAMAIS inférer le format.
+
+L'utilisateur DEVRAIT pouvoir choisir profondeur, filtre et direction (`top-down` ou `left-right`) avant projection. Chaque export DOIT rester reproductible à artefact et options identiques.
 
 ### 11.4 Parité
 

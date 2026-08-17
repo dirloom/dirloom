@@ -3,7 +3,7 @@
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
 > **Dernière vérification :** 16 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [thèmes](themes.md), [catalogue sémantique](catalog.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [exports graphiques](graph-exports.md), [thèmes](themes.md), [catalogue sémantique](catalog.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -48,6 +48,9 @@ dirloom --help
 | Produire du Markdown prêt à insérer | `dirloom --format markdown` |
 | Produire une liste Markdown sémantique | `dirloom --format markdown-tree` |
 | Produire un document machine versionné | `dirloom --format json` |
+| Produire un graphe Mermaid | `dirloom --format mermaid` |
+| Produire une source Graphviz | `dirloom --format graphviz` |
+| Produire une source D2 | `dirloom --format d2` |
 | Écrire sûrement dans un fichier | `dirloom --output structure.txt` |
 | Générer une documentation d’architecture | `dirloom --format markdown --output structure.md` |
 | Générer un artefact pour la CI | `dirloom --format json --output structure.json` |
@@ -435,7 +438,7 @@ dirloom . --color never --icons never
 
 Un pipe, une redirection, `--output`, `CI` ou `TERM=dumb` désactive les modes automatiques. `NO_COLOR` non vide désactive les couleurs issues des défauts et de la configuration ; seul `--color always` explicitement fourni en CLI le surclasse.
 
-Le Markdown clôturé, le Markdown sémantique et le JSON ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
+Le Markdown clôturé, le Markdown sémantique, le JSON et les sources diagramme ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
 
 ### 5.4 Markdown prêt à insérer
 
@@ -515,6 +518,20 @@ JSON n’a pas de style de dessin. Cette combinaison est donc volontairement inv
 dirloom --format json --style ascii
 ```
 
+### 5.6 Exports graphiques Mermaid, Graphviz et D2
+
+```bash
+dirloom --format mermaid
+dirloom --format graphviz
+dirloom --format d2
+```
+
+`--format dot` est un alias de `graphviz`. Dirloom n’émet que des sources DSL : aucun SVG ni PNG n’est rendu au runtime. Les trois formats projettent la même vue `structure` (hiérarchie filesystem et relations `contains`) depuis un graphe intermédiaire canonique. Ils restent hors présentation terminal : pas d’ANSI, de thème, d’icône ni de style de dessin.
+
+Un symlink reste terminal : sa cible apparaît dans le libellé, jamais comme arête résolue. `--diagram-direction left-right` oriente le graphe ; `maxNodes` vaut `null` par défaut, un warning stderr apparaît à 500 nœuds, et seule une limite explicite dépassée échoue avec le code `1`.
+
+Le contrat, l’échappement et les exemples exécutables sont dans le [guide des exports graphiques](graph-exports.md).
+
 ## 6. Enregistrer, partager et intégrer la sortie
 
 ### 6.1 Écrire transactionnellement dans un fichier
@@ -523,6 +540,7 @@ dirloom --format json --style ascii
 dirloom --output structure.txt
 dirloom --format markdown --output docs/structure.md
 dirloom --format markdown-tree --output docs/project-tree.md
+dirloom --format mermaid --output docs/structure.mmd
 dirloom --format json --output structure.json
 ```
 

@@ -18,6 +18,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Cas d’usage et exemples pratiques](../use-cases.md) | Que permet réellement la version actuelle et comment l’utiliser ? | Utilisateurs, contributeurs, intégrateurs |
 | [Presets intégrés](../presets.md) | Quels profils sont disponibles, comment les activer et comment inspecter leurs effets ? | Utilisateurs, contributeurs, intégrateurs |
 | [Arbres Markdown sémantiques](../markdown-tree.md) | Comment produire une liste Markdown native, sûre et déterministe ? | Utilisateurs, rédacteurs techniques, intégrateurs |
+| [Exports graphiques](../graph-exports.md) | Comment produire des sources Mermaid, Graphviz et D2 déterministes ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
 | [Catalogue sémantique](../catalog.md) | Comment Dirloom classe-t-il kinds, rôles et matchers, et comment diagnostiquer une entrée réelle ? | Utilisateurs, concepteurs de thèmes, contributeurs |
 
@@ -48,7 +49,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
-| Exports graphiques | Mermaid, Graphviz et D2 dans le jalon d'identité visuelle `v0.2` |
+| Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |
 | Extensibilité | Analyzer SDK, Pack SDK, registries de packs et de thèmes, intégrations IDE/CI |
 | Cloud et télémétrie | Aucun besoin pour le cœur ; local-first et aucune exfiltration par défaut |
 

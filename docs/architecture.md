@@ -7,11 +7,16 @@ cmd/dirloom
   └─ internal/cli
        ├─ internal/config
        │    ├─ internal/filter
+       │    ├─ internal/outputformat
        │    └─ internal/presentation
        ├─ internal/app
        │    ├─ internal/filter
        │    └─ internal/tree
        ├─ internal/render
+       │    ├─ internal/diagram
+       │    └─ internal/outputformat
+       ├─ internal/diagram
+       │    └─ internal/tree   # project_structure adapter only
        ├─ internal/presentation
        │    └─ internal/presentation/catalog
        └─ internal/output
@@ -24,7 +29,9 @@ cmd/dirloom
 - `internal/app`: root and output resolution plus the reusable `Inspect` application service.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
-- `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown and JSON schema v1 contracts plus a presentation-neutral text decorator boundary.
+- `internal/diagram`: canonical graph projection (`Document`, `ContractVersion`, `structure` view) with a single `tree` adapter.
+- `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
+- `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
 - `internal/presentation`: immutable built-in themes, strict public theme-schema v1 loading, kind/role/rule compilation, terminal capability resolution, ANSI generation, icon fallback and versioned diagnostics.
 - `internal/presentation/catalog`: pure immutable classification with 256 indexed matchers, 96 hierarchical technical kinds, 16 ordered structural roles and no filesystem, YAML, ANSI or Cobra dependency.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
@@ -44,7 +51,7 @@ After the canonical scanner identifies a node type, presentation applies the pur
 
 `theme classify` is the only diagnostic adapter that accesses a target directly. It validates the theme first, confines the target to `--root`, performs one `Lstat`, does not follow the final symlink, and does not read contents or descendants.
 
-`app.Inspect` receives only inspection settings and remains independent from Cobra, YAML, themes, ANSI and terminal state. It returns the same canonical tree for every theme. Text rendering shares one traversal: a neutral decorator preserves historical bytes, while the terminal decorator styles connector and node segments after escaping dangerous controls. Markdown always selects the neutral path, and JSON serializes the tree model directly.
+`app.Inspect` receives only inspection settings and remains independent from Cobra, YAML, themes, ANSI and terminal state. It returns the same canonical tree for every theme. Text rendering shares one traversal: a neutral decorator preserves historical bytes, while the terminal decorator styles connector and node segments after escaping dangerous controls. Markdown always selects the neutral path, JSON serializes the tree model directly, and diagram formats project once through `diagram.ProjectStructure` before dialect-specific encoding.
 
 Filter priority is encoded in `filter.Policy`; nested `.gitignore` state is loaded only when the scanner actually enters a directory. This preserves pruning and prevents ignored branches from influencing the scan.
 

@@ -66,6 +66,9 @@ dirloom --preset compact
 # Produce the versioned machine contract
 dirloom --format json
 
+# Emit a README-ready Mermaid structure graph
+dirloom --format mermaid --output docs/structure.mmd
+
 # Write safely to a file (stdout remains empty)
 dirloom --format markdown --output structure.md
 ```
@@ -163,8 +166,11 @@ dirloom [directory] [flags]
 | `--ignore PATTERN` | Add an exclusion. Repeat the option to add more rules. |
 | `--no-default-ignore` | Disable built-in directory exclusions. |
 | `--no-gitignore` | Do not load `.gitignore` files. |
-| `--format text\|markdown\|markdown-tree\|json` | Select the public output contract. Default: `text`. |
+| `--format text\|markdown\|markdown-tree\|json\|mermaid\|graphviz\|d2` | Select the public output contract. Default: `text`. `--format dot` is an alias for `graphviz`. |
 | `--style unicode\|ascii` | Select the drawing style for text and fenced Markdown. Default: `unicode`. |
+| `--diagram-view structure` | Select the diagram projection. Default: `structure`. Active only for diagram formats. |
+| `--diagram-direction top-down\|left-right` | Select diagram flow. Default: `top-down`. |
+| `--diagram-max-nodes N\|unlimited` | Fail if an explicit diagram node budget is exceeded. Default: unlimited. |
 | `--config FILE` | Use an explicit project configuration file instead of automatic discovery. |
 | `--no-user-config` | Skip personal configuration while retaining project configuration. |
 | `--no-config` | Disable user and project configuration files. |
@@ -176,7 +182,7 @@ dirloom [directory] [flags]
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
-`--style` is intentionally rejected when explicitly combined with `--format json` or `--format markdown-tree`; neither contract has a drawing style.
+`--style` is intentionally rejected when explicitly combined with `--format json`, `--format markdown-tree`, `--format mermaid`, `--format graphviz` or `--format d2`; those contracts have no drawing style.
 
 `dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
 
@@ -271,6 +277,18 @@ dirloom --format markdown-tree
 
 This format is deterministic, contains no ANSI or terminal icons, and does not use `--style`. See the [semantic Markdown guide](docs/markdown-tree.md) for its escaping, symlink and compatibility contracts.
 
+### Mermaid, Graphviz and D2
+
+Canonical structure graphs are available as DSL sources. Dirloom does not render images:
+
+```bash
+dirloom --format mermaid
+dirloom --format graphviz
+dirloom --format d2
+```
+
+See the [graphical export guide](docs/graph-exports.md) for the `structure` contract, direction, node budget, alias `dot`, and escaping rules.
+
 ### JSON schema v1
 
 ```json
@@ -337,7 +355,7 @@ go test -race ./...
 go build ./cmd/dirloom
 ```
 
-CI repeats formatting, vet, tests and builds on Windows, Linux and macOS. It also runs the race detector, `golangci-lint` and `govulncheck` on Linux.
+CI repeats formatting, vet, tests and builds on Windows, Linux and macOS. It also runs the race detector, `golangci-lint`, `govulncheck` and official Mermaid/Graphviz/D2 parser checks on Linux.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 

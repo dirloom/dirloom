@@ -20,7 +20,7 @@ Dirloom creates the matcher with an empty root and feeds only `.gitignore` files
 
 ## x/term v0.45.0
 
-`golang.org/x/term` provides cross-platform terminal detection through `IsTerminal`. Dirloom uses it only at the presentation boundary: scanning, canonical Markdown and JSON, theme inspection, diagnostics, help, and errors do not depend on terminal state.
+`golang.org/x/term` provides cross-platform terminal detection through `IsTerminal`. Dirloom uses it only at the presentation boundary: scanning, canonical Markdown, JSON, diagram sources, theme inspection, diagnostics, help, and errors do not depend on terminal state.
 
 Version `v0.45.0` targets Go 1.25 and uses the already pinned `x/sys v0.47.0`. The dependency is maintained by the Go project and licensed under BSD-3-Clause.
 

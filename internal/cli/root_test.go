@@ -19,7 +19,7 @@ func TestHelpAndVersion(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "markdown-tree", "config", "preset", "theme"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "markdown-tree", "mermaid", "graphviz", "d2", "--diagram-view", "--diagram-direction", "--diagram-max-nodes", "config", "preset", "theme"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}
@@ -300,6 +300,8 @@ func TestInvalidArgumentsReturnExitCodeTwo(t *testing.T) {
 		{"--depth", "-1"},
 		{"--format", "json", "--style", "ascii"},
 		{"--format", "markdown-tree", "--style", "ascii"},
+		{"--format", "mermaid", "--style", "ascii"},
+		{"--format", "text", "--diagram-direction", "left-right"},
 		{"--format", "yaml"},
 		{"--style", "auto"},
 		{"--ignore", "../outside"},
@@ -824,11 +826,18 @@ func TestPublicConfigurationDocumentationMatchesCLI(t *testing.T) {
 	if !strings.Contains(string(readme), "docs/themes.md") {
 		t.Fatal("README does not link to docs/themes.md")
 	}
+	graphDocumentation, err := os.ReadFile(filepath.Join("..", "..", "docs", "graph-exports.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "docs/graph-exports.md") || !strings.Contains(string(graphDocumentation), "dirloom --format mermaid") {
+		t.Fatal("README or graphical export documentation is missing")
+	}
 	stdout, stderr, code := executeForTest(t, "--help")
 	if code != 0 || stderr != "" {
 		t.Fatalf("help=(%q, %q, %d)", stdout, stderr, code)
 	}
-	for _, option := range []string{"--config", "--no-user-config", "--no-config", "--preset", "--depth", "--dirs-only", "--hidden", "--format", "--style", "--no-default-ignore", "--no-gitignore"} {
+	for _, option := range []string{"--config", "--no-user-config", "--no-config", "--preset", "--depth", "--dirs-only", "--hidden", "--format", "--style", "--no-default-ignore", "--no-gitignore", "--diagram-view", "--diagram-direction", "--diagram-max-nodes"} {
 		if !strings.Contains(stdout, option) {
 			t.Errorf("CLI help is missing documented option %q", option)
 		}

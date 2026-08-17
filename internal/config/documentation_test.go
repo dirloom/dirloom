@@ -195,3 +195,23 @@ func TestPublicPresentationConfigurationExampleUsesRealSchema(t *testing.T) {
 		t.Fatalf("presentation example = %#v", values)
 	}
 }
+
+func TestGraphExportConfigurationExampleUsesRealSchema(t *testing.T) {
+	path := filepath.Join("..", "..", "docs", "graph-exports.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pattern := regexp.MustCompile(`(?s)<!-- dirloom-graph-config:project -->\r?\n` + "```yaml" + `\r?\n(.*?)\r?\n` + "```")
+	match := pattern.FindSubmatch(data)
+	if match == nil {
+		t.Fatal("graphical export configuration example was not found")
+	}
+	values, err := parseDocument(match[1], path+"#project")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !values.Format.Set || values.Format.Value != FormatMermaid || !values.DiagramDirection.Set || values.DiagramDirection.Value != DiagramDirectionLeftRight || !values.DiagramMaxNodes.Set || !values.DiagramMaxNodes.Unlimited {
+		t.Fatalf("graphical export configuration = %#v", values)
+	}
+}

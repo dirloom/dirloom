@@ -22,7 +22,8 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Add `dirloom theme list`, `theme explain`, `theme validate`, and bounded filesystem-aware `theme classify` text and JSON contracts.
 - Preserve canonical text, Markdown, and tree JSON through a presentation-only renderer projection.
 - Publish and automatically validate the terminal themes guide, icon provenance, and pipeline guarantees.
-- Publish and automatically validate the semantic catalog guide, kind/role theme bindings, and classification examples.
+- Add deterministic `mermaid`, `graphviz` (alias `dot`) and `d2` structure-graph sources from a canonical `diagram.Document`.
+- Publish and automatically validate the graphical export guide, including official parser checks in CI.
 
 ### Changed
 
