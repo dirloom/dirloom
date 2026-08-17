@@ -61,7 +61,7 @@ func TestResolutionDiagnostics(t *testing.T) {
 		t.Fatalf("inactive = %#v", document["inactive"])
 	}
 	presentation, ok := document["presentation"].(map[string]any)
-	if !ok || presentation["color"] != "auto" || presentation["icons"] != "auto" {
+	if !ok || presentation["color"] != "auto" || presentation["icons"] != "never" {
 		t.Fatalf("presentation = %#v", document["presentation"])
 	}
 }

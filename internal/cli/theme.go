@@ -90,6 +90,7 @@ func newThemeCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
 	command.AddCommand(newThemeListCommand(stdout, sources))
 	command.AddCommand(newThemeExplainCommand(stdout, sources))
 	command.AddCommand(newThemeValidateCommand(stdout, sources))
+	command.AddCommand(newThemeClassifyCommand(stdout, sources))
 	return command
 }
 

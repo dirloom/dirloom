@@ -66,8 +66,8 @@ func TestVisualPresentationCanonicalAndInteractiveContracts(t *testing.T) {
 		presentation.WithWindowsTerminalCompatibility(false),
 	)
 	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return "", errors.New("disabled") }))
-	interactive, stderr, code := executeForTestWithDependencies(t, loader, evaluator, root, "--no-config", "--theme", "midnight")
-	if code != 0 || stderr != "" || !strings.ContainsRune(interactive, '\x1b') || !strings.Contains(interactive, "¶ README.md") || !strings.Contains(interactive, "• main.go") || !strings.Contains(interactive, "◇ data.json") {
+	interactive, stderr, code := executeForTestWithDependencies(t, loader, evaluator, root, "--no-config", "--theme", "midnight", "--icons", "unicode")
+	if code != 0 || stderr != "" || !strings.ContainsRune(interactive, '\x1b') || !strings.Contains(interactive, "¶") || !strings.Contains(interactive, "README.md") || !strings.Contains(interactive, "•") || !strings.Contains(interactive, "main.go") || !strings.Contains(interactive, "◇") || !strings.Contains(interactive, "data.json") {
 		t.Fatalf("interactive=(%q,%q,%d)", interactive, stderr, code)
 	}
 	for _, line := range strings.Split(strings.TrimSuffix(interactive, "\n"), "\n") {
@@ -75,10 +75,19 @@ func TestVisualPresentationCanonicalAndInteractiveContracts(t *testing.T) {
 			t.Errorf("style leaked or reset missing in %q", line)
 		}
 	}
+	vividOnly, stderr, code := executeForTestWithDependencies(t, loader, evaluator, root, "--no-config", "--theme", "vivid")
+	if code != 0 || stderr != "" || !strings.ContainsRune(vividOnly, '\x1b') || strings.Contains(vividOnly, "•") || strings.Contains(vividOnly, "¶") || strings.Contains(vividOnly, "◇") {
+		t.Fatalf("vivid alone must keep icons disabled=(%q,%q,%d)", vividOnly, stderr, code)
+	}
+	autoIcons, stderr, code := executeForTestWithDependencies(t, loader, evaluator, root, "--no-config", "--theme", "vivid", "--icons", "auto")
+	if code != 0 || stderr != "" || !strings.Contains(autoIcons, "•") || !strings.Contains(autoIcons, "¶") || !strings.Contains(autoIcons, "◇") {
+		t.Fatalf("explicit auto icons on TTY=(%q,%q,%d)", autoIcons, stderr, code)
+	}
+
 	outputPath := filepath.Join(t.TempDir(), "colored tree.txt")
 	fileStdout, fileStderr, fileCode := executeForTest(t, root, "--no-config", "--color", "always", "--icons", "unicode", "--theme", "daylight", "--output", outputPath)
 	data, err := os.ReadFile(outputPath)
-	if err != nil || fileCode != 0 || fileStdout != "" || fileStderr != "" || !bytes.Contains(data, []byte("\x1b[")) || !bytes.Contains(data, []byte("¶ README.md")) {
+	if err != nil || fileCode != 0 || fileStdout != "" || fileStderr != "" || !bytes.Contains(data, []byte("\x1b[")) || !bytes.Contains(data, []byte("¶")) || !bytes.Contains(data, []byte("README.md")) {
 		t.Fatalf("forced file stdout=%q stderr=%q code=%d data=%q err=%v", fileStdout, fileStderr, fileCode, data, err)
 	}
 }
@@ -112,7 +121,7 @@ func TestVisualPresentationNoColorAndForcedModes(t *testing.T) {
 		t.Fatalf("configured NO_COLOR=(%q,%q,%d)", configured, stderr, code)
 	}
 	forced, stderr, code := executeForTestWithDependencies(t, loader, newEvaluator(true), root, "--no-config", "--color", "always", "--icons", "nerd")
-	if code != 0 || stderr != "" || !strings.ContainsRune(forced, '\x1b') || !strings.Contains(forced, "󰟓 main.go") {
+	if code != 0 || stderr != "" || !strings.ContainsRune(forced, '\x1b') || !strings.Contains(forced, "󰟓") || !strings.Contains(forced, "main.go") {
 		t.Fatalf("forced=(%q,%q,%d)", forced, stderr, code)
 	}
 }
@@ -175,6 +184,7 @@ presentation:
 func TestThemeCommandsAndCustomThemeLifecycle(t *testing.T) {
 	themePath := filepath.Join(t.TempDir(), "team theme é.yaml")
 	writeCLIConfig(t, themePath, `schemaVersion: 1
+catalogVersion: 1
 name: team
 description: Team theme
 appearance: dark

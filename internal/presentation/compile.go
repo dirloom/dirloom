@@ -8,97 +8,130 @@ import (
 	"unicode/utf8"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/presentation/catalog"
 	"github.com/dirloom/dirloom/internal/tree"
 )
 
 type compiledToken struct {
-	color  colorSpec
-	styles []string
-	icons  IconPair
+	color           colorSpec
+	iconColor       colorSpec
+	iconFollowsText bool
+	styles          []string
+	icons           IconPair
+}
+
+type compiledBinding struct {
+	color          *colorSpec
+	iconColor      *colorSpec
+	iconColorReset bool
+	styles         []string
+	stylesSet      bool
+	unicodeIcon    string
+	unicodeIconSet bool
+	nerdIcon       string
+	nerdIconSet    bool
 }
 
 type compiledRule struct {
 	document ruleDocument
 	matcher  *filter.IgnoreMatcher
-	color    *colorSpec
+	binding  compiledBinding
+	kind     *catalog.Kind
+	role     *catalog.Role
 }
 
 // CompiledTheme is an immutable renderer-ready theme.
 type CompiledTheme struct {
 	theme       Theme
 	tokens      map[string]compiledToken
+	kinds       map[catalog.Kind]compiledBinding
+	roles       map[catalog.Role]compiledBinding
 	rules       []compiledRule
-	fallback    *CompiledTheme
 	iconSpacing int
+}
+
+// StyleOrigins explains the source of every semantic presentation choice.
+type StyleOrigins struct {
+	Kind      string `json:"kind"`
+	Role      string `json:"role"`
+	TextColor string `json:"textColor"`
+	IconColor string `json:"iconColor"`
+	Icons     string `json:"icons"`
 }
 
 // NodeStyle is the complete presentation selected for one tree node.
 type NodeStyle struct {
-	color  colorSpec
-	styles []string
-	icons  IconPair
+	color           colorSpec
+	iconColor       colorSpec
+	iconFollowsText bool
+	styles          []string
+	icons           IconPair
+	classification  catalog.Classification
+	visualRole      catalog.Role
+	origins         StyleOrigins
+}
+
+// StyleInspection is the stable, serializable result used by theme classify.
+type StyleInspection struct {
+	Classification catalog.Classification `json:"classification"`
+	VisualRole     catalog.Role           `json:"visualRole"`
+	TextColor      string                 `json:"textColor"`
+	IconColor      string                 `json:"iconColor"`
+	Styles         []string               `json:"styles"`
+	Icons          IconPair               `json:"icons"`
+	Origins        StyleOrigins           `json:"origins"`
 }
 
 // Compile validates all palette references and creates deterministic matchers.
 func Compile(theme Theme) (*CompiledTheme, error) {
-	compiled := &CompiledTheme{theme: cloneTheme(theme), tokens: make(map[string]compiledToken), iconSpacing: theme.Icons.Spacing}
+	if theme.CatalogVersion != catalog.Version {
+		return nil, invalidf("theme %q targets catalogVersion %d (expected %d)", theme.Name, theme.CatalogVersion, catalog.Version)
+	}
+	compiled := &CompiledTheme{
+		theme: cloneTheme(theme), tokens: make(map[string]compiledToken),
+		kinds: make(map[catalog.Kind]compiledBinding), roles: make(map[catalog.Role]compiledBinding),
+		iconSpacing: theme.Icons.Spacing,
+	}
 	for name, token := range theme.Tokens {
 		color, err := resolveColor(token.Color, theme.Palette)
 		if err != nil {
 			return nil, invalidf("theme %q token %s: %v", theme.Name, name, err)
 		}
-		compiled.tokens[name] = compiledToken{color: color, styles: append([]string(nil), token.Styles...), icons: token.Icons}
-	}
-	if theme.Source.Kind == "file" {
-		base, _ := Lookup(ThemeDefault)
-		base.Palette = make(map[string]string, len(theme.Palette))
-		for name, value := range theme.Palette {
-			base.Palette[name] = value
-		}
-		fallback, err := Compile(base)
-		if err != nil {
-			return nil, err
-		}
-		compiled.fallback = fallback
-		for name, document := range theme.customTokens {
-			if _, active := activeTokens[name]; !active {
-				continue
-			}
-			baseToken := compiled.tokens[name]
-			if document.Color != nil {
-				color, colorErr := resolveColor(*document.Color, theme.Palette)
-				if colorErr != nil {
-					return nil, colorErr
-				}
-				baseToken.color = color
-			}
-			if document.Styles != nil {
-				baseToken.styles = append([]string(nil), (*document.Styles)...)
-			}
-			if document.Icons != nil {
-				if document.Icons.Unicode != nil {
-					baseToken.icons.Unicode = *document.Icons.Unicode
-				}
-				if document.Icons.Nerd != nil {
-					baseToken.icons.Nerd = *document.Icons.Nerd
-				}
-			}
-			compiled.tokens[name] = baseToken
-		}
-		for _, rule := range theme.customRules {
-			value, err := compileRule(rule, theme.Palette)
+		iconColor := color
+		iconFollowsText := token.IconColor == ""
+		if token.IconColor != "" {
+			iconColor, err = resolveColor(token.IconColor, theme.Palette)
 			if err != nil {
-				return nil, err
+				return nil, invalidf("theme %q token %s iconColor: %v", theme.Name, name, err)
 			}
-			compiled.rules = append(compiled.rules, value)
 		}
-		return compiled, nil
+		compiled.tokens[name] = compiledToken{color: color, iconColor: iconColor, iconFollowsText: iconFollowsText, styles: append([]string(nil), token.Styles...), icons: token.Icons}
 	}
-	for _, rule := range theme.Rules {
-		document := ruleDocumentFromPublic(rule)
+	for name, value := range theme.Kinds {
+		binding, err := compileBinding(value, theme.Palette)
+		if err != nil {
+			return nil, invalidf("theme %q kind %s: %v", theme.Name, name, err)
+		}
+		compiled.kinds[catalog.Kind(name)] = binding
+	}
+	for name, value := range theme.Roles {
+		binding, err := compileBinding(value, theme.Palette)
+		if err != nil {
+			return nil, invalidf("theme %q role %s: %v", theme.Name, name, err)
+		}
+		compiled.roles[catalog.Role(name)] = binding
+	}
+	rules := theme.customRules
+	if rules == nil && len(theme.Rules) > 0 {
+		rules = make([]ruleDocument, 0, len(theme.Rules))
+		for _, value := range theme.Rules {
+			rules = append(rules, ruleDocumentFromPublic(value))
+		}
+	}
+	for _, document := range rules {
 		value, err := compileRule(document, theme.Palette)
 		if err != nil {
-			return nil, err
+			return nil, invalidf("theme %q rule: %v", theme.Name, err)
 		}
 		compiled.rules = append(compiled.rules, value)
 	}
@@ -112,15 +145,35 @@ func resolveColor(value string, palette map[string]string) (colorSpec, error) {
 	return parseLiteralColor(value)
 }
 
-func compileRule(document ruleDocument, palette map[string]string) (compiledRule, error) {
-	result := compiledRule{document: document}
-	if document.Color != nil {
-		color, err := resolveColor(*document.Color, palette)
+func compileBinding(value Binding, palette map[string]string) (compiledBinding, error) {
+	result := compiledBinding{
+		styles: append([]string(nil), value.Styles...), stylesSet: value.stylesSet,
+		unicodeIcon: value.Icons.Unicode, unicodeIconSet: value.unicodeIconSet,
+		nerdIcon: value.Icons.Nerd, nerdIconSet: value.nerdIconSet,
+	}
+	if value.colorSet || value.Color != "" {
+		color, err := resolveColor(value.Color, palette)
 		if err != nil {
-			return compiledRule{}, err
+			return compiledBinding{}, err
 		}
 		result.color = &color
 	}
+	if value.iconColorSet {
+		if value.IconColor == "" {
+			result.iconColorReset = true
+		} else {
+			color, err := resolveColor(value.IconColor, palette)
+			if err != nil {
+				return compiledBinding{}, err
+			}
+			result.iconColor = &color
+		}
+	}
+	return result, nil
+}
+
+func compileRule(document ruleDocument, palette map[string]string) (compiledRule, error) {
+	result := compiledRule{document: document}
 	if document.Match.Glob != nil {
 		matcher, err := filter.NewIgnoreMatcher([]string{*document.Match.Glob})
 		if err != nil {
@@ -128,28 +181,77 @@ func compileRule(document ruleDocument, palette map[string]string) (compiledRule
 		}
 		result.matcher = matcher
 	}
+	value := Binding{}
+	if document.Color != nil {
+		value.Color, value.colorSet = *document.Color, true
+	}
+	if document.IconColor.Present {
+		value.iconColorSet = true
+		if !document.IconColor.Null {
+			value.IconColor = document.IconColor.Value
+		}
+	}
+	if document.Styles != nil {
+		value.Styles, value.stylesSet = append([]string(nil), (*document.Styles)...), true
+	}
+	if document.Icons != nil {
+		if document.Icons.Unicode.Present {
+			value.unicodeIconSet = true
+			if !document.Icons.Unicode.Null {
+				value.Icons.Unicode = document.Icons.Unicode.Value
+			}
+		}
+		if document.Icons.Nerd.Present {
+			value.nerdIconSet = true
+			if !document.Icons.Nerd.Null {
+				value.Icons.Nerd = document.Icons.Nerd.Value
+			}
+		}
+	}
+	binding, err := compileBinding(value, palette)
+	if err != nil {
+		return compiledRule{}, err
+	}
+	result.binding = binding
+	if document.Kind != nil {
+		kind := catalog.Kind(*document.Kind)
+		result.kind = &kind
+	}
+	if document.Role != nil {
+		role := catalog.Role(*document.Role)
+		result.role = &role
+	}
 	return result, nil
 }
 
 func ruleDocumentFromPublic(rule Rule) ruleDocument {
 	result := ruleDocument{Match: matchDocumentFromPublic(rule.Match)}
-	if rule.Color != "" {
-		color := rule.Color
-		result.Color = &color
+	if rule.Kind != "" {
+		value := rule.Kind
+		result.Kind = &value
 	}
-	if len(rule.Styles) > 0 {
+	if rule.Role != "" {
+		value := rule.Role
+		result.Role = &value
+	}
+	if rule.Color != "" {
+		value := rule.Color
+		result.Color = &value
+	}
+	if rule.IconColor != "" {
+		result.IconColor = nullableStringDocument{Present: true, Value: rule.IconColor}
+	}
+	if rule.Styles != nil {
 		styles := append([]string(nil), rule.Styles...)
 		result.Styles = &styles
 	}
 	if rule.Icons.Unicode != "" || rule.Icons.Nerd != "" {
 		icons := iconDocument{}
 		if rule.Icons.Unicode != "" {
-			value := rule.Icons.Unicode
-			icons.Unicode = &value
+			icons.Unicode = nullableStringDocument{Present: true, Value: rule.Icons.Unicode}
 		}
 		if rule.Icons.Nerd != "" {
-			value := rule.Icons.Nerd
-			icons.Nerd = &value
+			icons.Nerd = nullableStringDocument{Present: true, Value: rule.Icons.Nerd}
 		}
 		result.Icons = &icons
 	}
@@ -181,106 +283,112 @@ func matchDocumentFromPublic(match Match) matchDocument {
 	return result
 }
 
-func (theme *CompiledTheme) resolve(pathValue, name string, kind tree.NodeType) NodeStyle {
-	semanticRole := "node.file"
-	switch kind {
+func (theme *CompiledTheme) resolve(pathValue, name string, nodeType tree.NodeType) NodeStyle {
+	classification := catalog.Classify(name, pathValue, nodeType)
+	rule := theme.bestRule(pathValue, name, nodeType)
+	effectiveKind := classification.Kind
+	kindOrigin := "catalog"
+	if rule != nil && rule.kind != nil {
+		effectiveKind = *rule.kind
+		kindOrigin = "theme-rule"
+		classification.Kind = effectiveKind
+	}
+	visualRole := catalog.RoleGeneric
+	for _, role := range classification.Roles {
+		if _, ok := theme.roles[role]; ok {
+			visualRole = role
+			break
+		}
+	}
+	roleOrigin := "catalog"
+	if rule != nil && rule.role != nil {
+		visualRole = *rule.role
+		roleOrigin = "theme-rule"
+	}
+
+	tokenName := "node.file"
+	switch nodeType {
 	case tree.NodeDirectory:
-		semanticRole = "node.directory"
+		tokenName = "node.directory"
 	case tree.NodeSymlink:
-		semanticRole = "node.symlink"
+		tokenName = "node.symlink" //nolint:gosec // Public semantic token identifier, not a credential.
 	}
-	var result NodeStyle
-	if theme.fallback != nil {
-		result = theme.fallback.baseStyle(semanticRole)
-		if document, customized := theme.theme.customTokens[semanticRole]; customized {
-			token := theme.tokens[semanticRole]
-			if document.Color != nil {
-				result.color = token.color
-			}
-			if document.Styles != nil {
-				result.styles = append([]string(nil), token.styles...)
-			}
-			if document.Icons != nil {
-				if document.Icons.Unicode != nil {
-					result.icons.Unicode = token.icons.Unicode
-				}
-				if document.Icons.Nerd != nil {
-					result.icons.Nerd = token.icons.Nerd
-				}
-			}
-		}
-	} else if token, ok := theme.tokens[semanticRole]; ok {
-		result = NodeStyle{color: token.color, styles: append([]string(nil), token.styles...), icons: token.icons}
+	result := theme.baseStyle(tokenName)
+	result.classification = classification
+	result.visualRole = visualRole
+	result.origins.Kind = kindOrigin
+	result.origins.Role = roleOrigin
+	unicodeGlyph, nerdGlyph := catalog.Glyphs(effectiveKind)
+	if unicodeGlyph != "" {
+		result.icons.Unicode = unicodeGlyph
 	}
-	rule := theme.bestRule(pathValue, name, kind)
-	var inheritedRule *compiledRule
-	if theme.fallback != nil {
-		fallbackRule := theme.fallback.bestRule(pathValue, name, kind)
-		if rule == nil || fallbackRule != nil && matcherRank(fallbackRule.document.Match) < matcherRank(rule.document.Match) {
-			rule = fallbackRule
-		} else if rule != nil && fallbackRule != nil && sameMatcher(rule.document.Match, fallbackRule.document.Match) {
-			inheritedRule = fallbackRule
+	if nerdGlyph != "" {
+		result.icons.Nerd = nerdGlyph
+	}
+	result.origins.Icons = "catalog-kind"
+
+	for _, kind := range catalog.KindChain(effectiveKind) {
+		if binding, ok := theme.kinds[kind]; ok {
+			result = applyCompiledBinding(result, binding, "theme-kind")
 		}
 	}
-	if inheritedRule != nil {
-		result = applyCompiledRule(result, inheritedRule)
+	if binding, ok := theme.roles[visualRole]; ok {
+		result = applyCompiledBinding(result, binding, "theme-role")
 	}
 	if rule != nil {
-		result = applyCompiledRule(result, rule)
+		result = applyCompiledBinding(result, rule.binding, "theme-rule")
 	}
 	return result
 }
 
-func applyCompiledRule(result NodeStyle, rule *compiledRule) NodeStyle {
-	if rule.color != nil {
-		result.color = *rule.color
-	}
-	if rule.document.Styles != nil {
-		result.styles = append([]string(nil), (*rule.document.Styles)...)
-	}
-	if rule.document.Icons != nil {
-		if rule.document.Icons.Unicode != nil {
-			result.icons.Unicode = *rule.document.Icons.Unicode
+func applyCompiledBinding(result NodeStyle, binding compiledBinding, origin string) NodeStyle {
+	if binding.color != nil {
+		result.color = *binding.color
+		result.origins.TextColor = origin
+		if result.iconFollowsText {
+			result.iconColor = result.color
+			result.origins.IconColor = origin
 		}
-		if rule.document.Icons.Nerd != nil {
-			result.icons.Nerd = *rule.document.Icons.Nerd
-		}
+	}
+	if binding.iconColorReset {
+		result.iconColor = result.color
+		result.iconFollowsText = true
+		result.origins.IconColor = origin
+	} else if binding.iconColor != nil {
+		result.iconColor = *binding.iconColor
+		result.iconFollowsText = false
+		result.origins.IconColor = origin
+	}
+	if binding.stylesSet {
+		result.styles = append([]string(nil), binding.styles...)
+	}
+	if binding.unicodeIconSet {
+		result.icons.Unicode = binding.unicodeIcon
+		result.origins.Icons = origin
+	}
+	if binding.nerdIconSet {
+		result.icons.Nerd = binding.nerdIcon
+		result.origins.Icons = origin
 	}
 	return result
-}
-
-func sameMatcher(left, right matchDocument) bool {
-	switch {
-	case left.Path != nil && right.Path != nil:
-		return *left.Path == *right.Path
-	case left.Name != nil && right.Name != nil:
-		return *left.Name == *right.Name
-	case left.Glob != nil && right.Glob != nil:
-		return *left.Glob == *right.Glob
-	case left.Extension != nil && right.Extension != nil:
-		return *left.Extension == *right.Extension
-	case left.Type != nil && right.Type != nil:
-		return *left.Type == *right.Type
-	default:
-		return false
-	}
 }
 
 func (theme *CompiledTheme) baseStyle(tokenName string) NodeStyle {
-	if token, ok := theme.tokens[tokenName]; ok {
-		return NodeStyle{color: token.color, styles: append([]string(nil), token.styles...), icons: token.icons}
+	token, ok := theme.tokens[tokenName]
+	if !ok {
+		return NodeStyle{color: colorSpec{kind: colorDefault}, iconColor: colorSpec{kind: colorDefault}, iconFollowsText: true, styles: []string{}, origins: StyleOrigins{TextColor: "theme-token", IconColor: "theme-token", Icons: "theme-token"}}
 	}
-	return NodeStyle{color: colorSpec{kind: colorDefault}}
+	return NodeStyle{
+		color: token.color, iconColor: token.iconColor, iconFollowsText: token.iconFollowsText, styles: append([]string(nil), token.styles...), icons: token.icons,
+		origins: StyleOrigins{TextColor: "theme-token", IconColor: "theme-token", Icons: "theme-token"},
+	}
 }
 
 func (theme *CompiledTheme) bestRule(pathValue, name string, kind tree.NodeType) *compiledRule {
 	for rank := 0; rank < 5; rank++ {
 		for index := range theme.rules {
 			rule := &theme.rules[index]
-			if matcherRank(rule.document.Match) != rank {
-				continue
-			}
-			if ruleMatches(*rule, pathValue, name, kind) {
+			if matcherRank(rule.document.Match) == rank && ruleMatches(*rule, pathValue, name, kind) {
 				return rule
 			}
 		}
@@ -322,23 +430,34 @@ func ruleMatches(rule compiledRule, pathValue, name string, kind tree.NodeType) 
 }
 
 func (theme *CompiledTheme) edge() compiledToken {
-	if theme.fallback != nil {
-		result := theme.fallback.edge()
-		if document, customized := theme.theme.customTokens["tree.edge"]; customized {
-			token := theme.tokens["tree.edge"]
-			if document.Color != nil {
-				result.color = token.color
-			}
-			if document.Styles != nil {
-				result.styles = append([]string(nil), token.styles...)
-			}
-		}
-		return result
-	}
 	if token, ok := theme.tokens["tree.edge"]; ok {
 		return token
 	}
-	return compiledToken{color: colorSpec{kind: colorDefault}}
+	return compiledToken{color: colorSpec{kind: colorDefault}, iconColor: colorSpec{kind: colorDefault}, styles: []string{}}
+}
+
+// Inspect resolves one entry without decorating or touching the filesystem.
+func (theme *CompiledTheme) Inspect(pathValue, name string, nodeType tree.NodeType) StyleInspection {
+	style := theme.resolve(pathValue, name, nodeType)
+	return StyleInspection{
+		Classification: style.classification, VisualRole: style.visualRole,
+		TextColor: formatColor(style.color), IconColor: formatColor(style.iconColor),
+		Styles: append([]string(nil), style.styles...), Icons: style.icons, Origins: style.origins,
+	}
+}
+
+func formatColor(value colorSpec) string {
+	switch value.kind {
+	case colorDefault:
+		return "default"
+	case colorANSI:
+		for name, index := range ansiNames {
+			if index == value.ansiIndex {
+				return "ansi:" + name
+			}
+		}
+	}
+	return fmt.Sprintf("#%02X%02X%02X", value.r, value.g, value.b)
 }
 
 func validateGlyph(value string) error {
@@ -369,8 +488,7 @@ func isBidiControl(char rune) bool {
 		char >= '\u202a' && char <= '\u202e' || char >= '\u2066' && char <= '\u2069'
 }
 
-// EscapeTerminalText replaces control and bidirectional formatting characters
-// in decorated output. Canonical neutral output remains byte-for-byte unchanged.
+// EscapeTerminalText replaces controls in decorated output only.
 func EscapeTerminalText(value string) string {
 	var builder strings.Builder
 	for _, char := range value {

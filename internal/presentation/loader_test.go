@@ -10,6 +10,7 @@ import (
 )
 
 const validCustomTheme = `schemaVersion: 1
+catalogVersion: 1
 name: team
 description: Team terminal theme
 appearance: dark
@@ -68,16 +69,16 @@ func TestThemeParserRejectsUnsafeAndAmbiguousDocuments(t *testing.T) {
 	tests := map[string]string{
 		"empty":           "",
 		"version":         "schemaVersion: 2\nname: x\nappearance: dark\n",
-		"unknown-field":   "schemaVersion: 1\nname: x\nappearance: dark\nfuture: true\n",
-		"duplicate-key":   "schemaVersion: 1\nname: x\nname: y\nappearance: dark\n",
-		"anchor":          "schemaVersion: 1\nname: x\nappearance: dark\npalette: &p {x: default}\n",
-		"multiple":        "schemaVersion: 1\nname: x\nappearance: dark\n---\nschemaVersion: 1\nname: y\nappearance: light\n",
-		"bad-color":       "schemaVersion: 1\nname: x\nappearance: dark\npalette: {x: red}\n",
-		"bad-style":       "schemaVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {styles: [blink]}}\n",
-		"bad-icon":        "schemaVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {icons: {unicode: \"\\u001b[31m\"}}}\n",
-		"two-matchers":    "schemaVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a, extension: .go}}]\n",
-		"duplicate-match": "schemaVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a}}, {match: {name: a}}]\n",
-		"bad-spacing":     "schemaVersion: 1\nname: x\nappearance: dark\nicons: {spacing: 5}\n",
+		"unknown-field":   "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nfuture: true\n",
+		"duplicate-key":   "schemaVersion: 1\ncatalogVersion: 1\nname: x\nname: y\nappearance: dark\n",
+		"anchor":          "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\npalette: &p {x: default}\n",
+		"multiple":        "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\n---\nschemaVersion: 1\ncatalogVersion: 1\nname: y\nappearance: light\n",
+		"bad-color":       "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\npalette: {x: red}\n",
+		"bad-style":       "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {styles: [blink]}}\n",
+		"bad-icon":        "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {icons: {unicode: \"\\u001b[31m\"}}}\n",
+		"two-matchers":    "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a, extension: .go}}]\n",
+		"duplicate-match": "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a}}, {match: {name: a}}]\n",
+		"bad-spacing":     "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nicons: {spacing: 5}\n",
 	}
 	for name, content := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -90,7 +91,7 @@ func TestThemeParserRejectsUnsafeAndAmbiguousDocuments(t *testing.T) {
 }
 
 func TestUnknownTokenWarnsAndIsIgnored(t *testing.T) {
-	path := writeTheme(t, "future.yaml", "schemaVersion: 1\nname: future\nappearance: universal\ntokens:\n  node.future:\n    color: default\n")
+	path := writeTheme(t, "future.yaml", "schemaVersion: 1\ncatalogVersion: 1\nname: future\nappearance: universal\ntokens:\n  node.future:\n    color: default\n")
 	theme, err := LoadReference(path, ReferenceContext{Kind: "cli"})
 	if err != nil {
 		t.Fatal(err)
@@ -105,6 +106,7 @@ func TestUnknownTokenWarnsAndIsIgnored(t *testing.T) {
 
 func TestRulePrecedenceAndFirstDeclaration(t *testing.T) {
 	path := writeTheme(t, "rules.yaml", `schemaVersion: 1
+catalogVersion: 1
 name: rules
 appearance: universal
 rules:

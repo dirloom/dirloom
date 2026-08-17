@@ -4,7 +4,7 @@ Dirloom can keep repeatable inspection settings in YAML while preserving explici
 
 Built-in presets can also provide a named starting point. See [Built-in presets](presets.md) for their exact definitions and usage recipes.
 
-Terminal colors, icons, and themes use the same layered resolution while remaining inactive for fenced Markdown, semantic Markdown and JSON. See [Terminal colors, icons, and themes](themes.md) for their rendering and security contracts.
+Terminal colors, icons, and themes use the same layered resolution while remaining inactive for fenced Markdown, semantic Markdown and JSON. Color defaults to `auto`; icons default to `never` and require explicit activation. See [Terminal colors, icons, and themes](themes.md) for rendering and security, and [Semantic catalog](catalog.md) for kind/role classification.
 
 Configuration is optional. If no configuration file exists, Dirloom behaves exactly as it does with its built-in defaults.
 
@@ -137,8 +137,8 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
 | `presentation.color` | `never`, `always`, or `auto` | `auto` | Select the requested text color mode. Runtime TTY and environment resolution happens at output time. |
-| `presentation.icons` | `never`, `unicode`, `nerd`, or `auto` | `auto` | Select the requested text icon mode. |
-| `presentation.theme` | built-in name, explicit relative path, or `null` | `default` | Select `default`, `midnight`, `daylight`, a confined local theme, or reset an inherited theme. |
+| `presentation.icons` | `never`, `unicode`, `nerd`, or `auto` | `never` | Select the requested text icon mode. Icons remain opt-in; `auto` uses Unicode only on an eligible TTY. |
+| `presentation.theme` | built-in name, explicit relative path, or `null` | `default` | Select `default`, `midnight`, `daylight`, `vivid`, a confined local theme, or reset an inherited theme. |
 
 `directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
 

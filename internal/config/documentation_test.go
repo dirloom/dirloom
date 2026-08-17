@@ -191,7 +191,7 @@ func TestPublicPresentationConfigurationExampleUsesRealSchema(t *testing.T) {
 	if err != nil {
 		t.Fatalf("presentation configuration example is invalid: %v", err)
 	}
-	if !values.Color.Set || values.Color.Value != "auto" || !values.Icons.Set || values.Icons.Value != "unicode" || !values.Theme.Set || values.Theme.Reset || values.Theme.Value != "midnight" {
+	if !values.Color.Set || values.Color.Value != "auto" || !values.Icons.Set || values.Icons.Value != "unicode" || !values.Theme.Set || values.Theme.Reset || values.Theme.Value != "vivid" {
 		t.Fatalf("presentation example = %#v", values)
 	}
 }

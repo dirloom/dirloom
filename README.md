@@ -131,21 +131,21 @@ Explicit options override individual preset values. Use `--preset none` to neutr
 
 ## Terminal presentation
 
-Interactive text output uses terminal colors and portable Unicode icons automatically. Choose a built-in theme or force a specific icon set when the destination supports it:
+Interactive text uses automatic color and keeps icons disabled until requested. The independent `vivid` theme uses a two-tone neon system: structural roles color text while technical kinds color glyphs:
 
 ```bash
-dirloom --theme midnight
-dirloom --icons nerd --theme midnight
-dirloom theme explain daylight
+dirloom --theme vivid
+dirloom --theme vivid --icons nerd
+dirloom theme classify README.md --theme vivid
 ```
 
-Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown and JSON are always canonical and never contain ANSI or presentation icons. Reproduce the historical text bytes explicitly with:
+Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Reproduce canonical historical text explicitly with:
 
 ```bash
 dirloom --color never --icons never
 ```
 
-Dirloom respects `NO_COLOR`; only an explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for built-in palettes, the custom-theme schema, Nerd Font fallback, pipeline guarantees, security boundaries, and validation commands.
+Dirloom respects `NO_COLOR`; only explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for the public theme schema and [Semantic catalog](docs/catalog.md) for the 256 matchers, 96 kinds, 16 roles, and classification diagnostics.
 
 ## CLI reference
 
@@ -170,8 +170,8 @@ dirloom [directory] [flags]
 | `--no-config` | Disable user and project configuration files. |
 | `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
 | `--color never\|always\|auto` | Control ANSI color for text output. Default: `auto`. |
-| `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `auto`. |
-| `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, or a local YAML theme. |
+| `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `never`. |
+| `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, `vivid`, or a local YAML theme. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
@@ -179,6 +179,8 @@ dirloom [directory] [flags]
 `--style` is intentionally rejected when explicitly combined with `--format json` or `--format markdown-tree`; neither contract has a drawing style.
 
 `dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
+
+`dirloom theme classify <path>` performs one bounded `Lstat` and explains the real entry type, semantic kind, roles, winning matcher, and resolved theme style without reading file content or scanning recursively.
 
 ## Filtering
 
@@ -317,7 +319,7 @@ CLI arguments
     → renderer-independent tree model
     → deterministic sort
     → canonical text / fenced Markdown / semantic Markdown / JSON renderer
-    → optional terminal-only text projection
+    → optional semantic catalog classification and terminal-only text projection
     → stdout or transactional file output
 ```
 

@@ -13,6 +13,7 @@ cmd/dirloom
        │    └─ internal/tree
        ├─ internal/render
        ├─ internal/presentation
+       │    └─ internal/presentation/catalog
        └─ internal/output
 ```
 
@@ -24,7 +25,8 @@ cmd/dirloom
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown and JSON schema v1 contracts plus a presentation-neutral text decorator boundary.
-- `internal/presentation`: immutable built-in themes, strict custom-theme loading, rule compilation, terminal capability resolution, ANSI generation, icon fallback and theme diagnostics.
+- `internal/presentation`: immutable built-in themes, strict public theme-schema v1 loading, kind/role/rule compilation, terminal capability resolution, ANSI generation, icon fallback and versioned diagnostics.
+- `internal/presentation/catalog`: pure immutable classification with 256 indexed matchers, 96 hierarchical technical kinds, 16 ordered structural roles and no filesystem, YAML, ANSI or Cobra dependency.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
 - `internal/buildinfo`: version metadata injected once at link time.
 
@@ -37,6 +39,10 @@ The root selected by the caller is resolved before configuration discovery and r
 Configuration is resolved before the application service starts scanning. The resolver is independent from Cobra, distinguishes omitted and explicit zero values, selects at most one preset, expands it in its source layer, and returns a complete effective request. Project discovery is bounded by the nearest Git worktree; configuration and presets never select the inspected root or an output path.
 
 The winning presentation reference is validated and compiled before `app.Inspect` runs. A configuration-backed theme path is confined to its configuration directory after symlink resolution; masked paths are never opened. Terminal capability evaluation is also complete before scanning, including `NO_COLOR` and Windows virtual-terminal preparation.
+
+After the canonical scanner identifies a node type, presentation applies the pure semantic catalog to its name and normalized relative path. A winning user rule may replace the effective kind or visual role; the renderer then resolves base token, catalog glyph, parent-to-child kind bindings, role binding and direct rule fields. Icons and text use separate ANSI spans and resets. This projection cannot mutate node identity, membership or order.
+
+`theme classify` is the only diagnostic adapter that accesses a target directly. It validates the theme first, confines the target to `--root`, performs one `Lstat`, does not follow the final symlink, and does not read contents or descendants.
 
 `app.Inspect` receives only inspection settings and remains independent from Cobra, YAML, themes, ANSI and terminal state. It returns the same canonical tree for every theme. Text rendering shares one traversal: a neutral decorator preserves historical bytes, while the terminal decorator styles connector and node segments after escaping dangerous controls. Markdown always selects the neutral path, and JSON serializes the tree model directly.
 

@@ -24,7 +24,7 @@ func TestThemeDiagnosticsAreStableAndNonNull(t *testing.T) {
 	if err := json.Unmarshal(jsonOutput.Bytes(), &list); err != nil {
 		t.Fatal(err)
 	}
-	if list.SchemaVersion != 1 || len(list.Themes) != 3 || list.Themes[0].Name != "daylight" || list.Themes[1].Name != "default" || list.Themes[2].Name != "midnight" {
+	if list.SchemaVersion != 1 || len(list.Themes) != 4 || list.Themes[0].Name != "daylight" || list.Themes[1].Name != "default" || list.Themes[2].Name != "midnight" || list.Themes[3].Name != "vivid" {
 		t.Fatalf("list = %#v", list)
 	}
 	if list.Themes[0].Rules == nil || list.Themes[0].Warnings == nil {
@@ -45,11 +45,11 @@ func TestThemeDiagnosticsAreStableAndNonNull(t *testing.T) {
 	if err := theme.WriteJSON(&jsonOutput); err != nil {
 		t.Fatal(err)
 	}
-	var decoded Theme
+	var decoded ExplainDocument
 	if err := json.Unmarshal(jsonOutput.Bytes(), &decoded); err != nil {
 		t.Fatal(err)
 	}
-	if decoded.Name != "midnight" || decoded.Rules == nil || decoded.Warnings == nil {
+	if decoded.SchemaVersion != 1 || decoded.ThemeSchemaVersion != 1 || decoded.Catalog.EntryCount != 256 || decoded.Theme.Name != "midnight" || decoded.Theme.Rules == nil || decoded.Theme.Warnings == nil {
 		t.Fatalf("theme JSON = %#v", decoded)
 	}
 }

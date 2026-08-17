@@ -129,7 +129,7 @@ dirloom --color always --icons never
 dirloom --theme midnight
 ```
 
-Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe les défauts à `auto` : un TTY interactif utilisable reçoit couleurs et icônes Unicode, tandis qu'un pipe, une redirection, `--output`, CI ou `TERM=dumb` conserve exactement le rendu historique non décoré. Les presets NE DOIVENT PAS modifier ces valeurs.
+Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe `color: auto`, `icons: never` et `theme: default` comme défauts intégrés. Un TTY interactif utilisable reçoit donc la couleur mais aucune icône sans activation explicite. `--icons auto` active Unicode seulement sur un TTY éligible ; un pipe, une redirection, `--output`, CI ou `TERM=dumb` reste neutre. Les presets NE DOIVENT PAS modifier ces valeurs.
 
 - `never` n'émet aucune séquence ANSI ni icône décorative ;
 - `auto` active la décoration seulement sur une surface compatible ;
@@ -139,78 +139,92 @@ Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT 
 - `NO_COLOR` DOIT désactiver la couleur sauf si une option CLI explicite et documentée a priorité ;
 - les formats JSON canoniques NE DOIVENT jamais contenir d'ANSI ou d'icône de présentation.
 
-### 5.3 Tokens sémantiques
+### 5.3 Catalogue sémantique v1
 
-Le thème DOIT cibler des rôles stables, et non des positions d'écran :
+Le socle v0.2 DOIT classifier chaque entrée sur deux axes avant toute décoration :
+
+- un `Kind` technique hiérarchique détermine l'identité et le glyphe, par exemple `source.go`, `data.json`, `document.markdown`, `directory` ou `symlink` ;
+- une liste ordonnée de rôles structurels détermine la fonction visuelle, par exemple `test`, `generated`, `contract`, `source` ou `document`.
+
+Le catalogue public v1 contient exactement 256 matchers, 96 kinds et 16 rôles. Les rôles suivent cet ordre contractuel :
+
+```text
+security > generated > vendor > test > contract > lock > infra > config
+> executable > archive > media > data > source > document > tooling > generic
+```
+
+Un fichier `_test.go` DOIT conserver le kind `source.go` tout en recevant les rôles `test` et `source`. Un fichier `.pb.go` DOIT conserver `source.go` avec `generated` et `source`. Les glyphes appartiennent aux kinds, pas aux matchers.
+
+La classification intégrée DOIT appliquer : symlink, dossier exact, nom exact, suffixe composé le plus long, extension, puis fallback. Les clés intégrées sont ASCII et insensibles à la casse sur toutes les plateformes. Les règles YAML utilisateur restent sensibles à la casse. Le catalogue NE DOIT lire ni contenu, shebang, MIME, état Git, permissions, taille, owner ou date.
+
+Les tokens de base actifs restent :
 
 ```text
 tree.edge
 node.directory
 node.file
 node.symlink
-node.generated
-node.hidden
-state.added
-state.removed
-state.moved
-state.changed
-status.pass
-status.warn
-status.fail
-severity.low
-severity.medium
-severity.high
-annotation.owner
-annotation.deprecated
 ```
 
-Le schéma v1 livré active `tree.edge`, `node.directory`, `node.file` et `node.symlink`. Les autres rôles de la liste décrivent l'évolution sémantique attendue lorsque diff, contracts, drift et annotations existeront. La liste PEUT évoluer avec une version de thème. Un token inconnu DOIT être ignoré avec un avertissement en mode validation, sans faire échouer une simple inspection si un fallback existe.
+Les états de diff, sévérités, conformité et annotations constituent des capacités futures. Ils NE DOIVENT PAS être présentés comme actifs avant l'existence des moteurs qui les produisent.
 
-### 5.4 Résolution des règles
+### 5.4 Schéma de thème v1 et résolution
 
-Pour les noms et icônes, la priorité cible est :
+Le premier schéma public de thème livré avec v0.2 utilise `schemaVersion: 1` et `catalogVersion: 1`. Il remplace le prototype pré-release sans loader de compatibilité. Les versions du YAML thème, du catalogue, des diagnostics thème, du diagnostic `theme classify`, de la configuration et du JSON d'arbre DOIVENT rester indépendantes dans le code.
 
-```text
-chemin exact
-  > nom exact
-  > motif de chemin
-  > extension
-  > type de nœud
-  > fallback
-```
-
-Les états fonctionnels — erreur, ajout, suppression, dérive — s'appliquent comme une couche sémantique distincte et prioritaire. La résolution DOIT être documentée et déterministe.
-
-Exemple exploratoire :
+Exemple contractuel :
 
 ```yaml
 schemaVersion: 1
+catalogVersion: 1
 name: midnight
 description: Thème sombre partagé
 appearance: dark
 
 palette:
-  directory: "#7AA2F7"
-  file: "#C0CAF5"
+  source: "#7AA2F7"
+  generated: "#9AA5CE"
 
-tokens:
-  node.directory:
-    color: directory
-    styles: [bold]
-    icons:
-      unicode: "▸"
-      nerd: "󰉋"
+kinds:
+  source:
+    iconColor: source
+
+roles:
+  source:
+    color: source
+  generated:
+    color: generated
+    styles: [dim]
 
 rules:
-  - match: { extension: ".go" }
-    color: file
-    icons:
-      unicode: "•"
-      nerd: "󰟓"
+  - match: { path: "tools/codegen.go" }
+    kind: source.go
+    role: generated
+    iconColor: null
+    styles: []
 
 icons:
   spacing: 1
 ```
+
+`iconColor` DOIT être accepté sur tokens, kinds, rôles et règles. Une propriété absente hérite ; `iconColor: null` suit la couleur de texte effective ; `styles: []` efface les styles hérités ; un glyphe `null` supprime le canal hérité à ce binding.
+
+La résolution DOIT être déterministe et propriété par propriété :
+
+```text
+classification catalogue
+  → règle utilisateur gagnante et remplacement éventuel du kind/rôle
+  → token de base et glyphe du kind
+  → bindings des parents du kind vers le kind spécifique
+  → binding du rôle visuel effectif
+  → overrides visuels directs de la règle
+```
+
+Une règle conserve la priorité chemin exact, nom exact, glob, extension, type ; à priorité égale, la première déclaration gagne. Un `kind:` ou `role:` inconnu dans une règle est une erreur. Une clé inconnue dans les blocs `kinds` ou `roles` est ignorée avec un warning stable pour permettre l'inspection d'un thème destiné à un catalogue futur.
+
+Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` DOIVENT utiliser le même catalogue. Le thème `vivid` constitue une vitrine sombre two-tone indépendante : les rôles pilotent le texte et les kinds la couleur des glyphes ; le thème seul NE DOIT jamais activer les icônes. Les spans ANSI d'icône et de texte DOIVENT être séparés et réinitialisés indépendamment ; les styles de texte NE DOIVENT pas s'appliquer au glyphe.
+
+`dirloom theme classify <path>` DOIT charger le thème avant l'accès cible, confiner la cible à `--root`, utiliser `Lstat`, ne pas suivre le symlink final, ne lire aucun contenu et ne parcourir aucun descendant. Son JSON possède son propre `schemaVersion: 1` et NE DOIT exposer aucun chemin absolu cible ou thème.
 
 ### 5.5 Validation et fallback
 
@@ -222,7 +236,7 @@ Si la police ne rend pas une icône correctement, l'utilisateur DOIT pouvoir cho
 
 - La même structure sans décoration conserve le même ordre et le même JSON qu'avant l'activation d'un thème.
 - Le socle v0.2 différencie au minimum bordures, dossiers, fichiers, symlinks, noms, chemins, globs, extensions et types. Les états de diff et sévérités de contrat deviendront obligatoires avec les moteurs qui les produisent.
-- `NO_COLOR` et les trois modes sont couverts par des tests TTY et non-TTY.
+- `NO_COLOR`, les trois modes de couleur et les quatre modes d'icônes sont couverts par des tests TTY et non-TTY.
 - Un thème invalide produit un diagnostic localisé et ne corrompt aucune sortie.
 - Les thèmes fournis restent lisibles en thème clair, sombre et sans couleur.
 - La licence et la provenance de chaque jeu d'icônes embarqué sont documentées ; aucun thème n'est téléchargé implicitement.
@@ -916,7 +930,7 @@ La configuration utilisateur DOIT suivre le répertoire de configuration natif d
 
 Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. Une seule sélection est active selon la priorité CLI, projet, utilisateur ; `preset: null` et `--preset none` neutralisent une sélection héritée sans retirer les autres valeurs. Le preset gagnant est développé dans sa couche avant les valeurs explicites de cette couche. `dirloom preset explain <name>` DOIT rendre sa définition intrinsèque visible en texte et en JSON versionné, tandis que `dirloom config explain` DOIT exposer la sélection effective et la provenance de chaque effet.
 
-Les options qui affectent un artefact persistant DOIVENT être enregistrées avec lui. Les secrets NE DOIVENT pas être sérialisés. Le schéma v1 accepte `presentation.color`, `presentation.icons` et `presentation.theme` avec la priorité générale ; `theme: null` rétablit le thème `default` sans toucher aux autres valeurs. Un thème référencé par la configuration DOIT rester sous le dossier du fichier source après résolution des liens symboliques. La configuration PEUT référencer plus tard des fichiers séparés pour packs, contracts ou annotations sans créer une seconde priorité implicite.
+Les options qui affectent un artefact persistant DOIVENT être enregistrées avec lui. Les secrets NE DOIVENT pas être sérialisés. Le schéma de configuration v1 accepte `presentation.color`, `presentation.icons` et `presentation.theme` avec la priorité générale ; leurs défauts sont `auto`, `never` et `default`. `theme: null` rétablit `default` sans toucher aux autres valeurs. Un thème référencé par la configuration DOIT rester sous le dossier du fichier source après résolution des liens symboliques. Le fichier thème utilise son propre schéma public v1 et exige `catalogVersion: 1`. La configuration PEUT référencer plus tard des fichiers séparés pour packs, contracts ou annotations sans créer une seconde priorité implicite.
 
 ## 14. Definition of Done d'une capacité produit
 

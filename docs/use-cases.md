@@ -2,8 +2,8 @@
 
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
-> **Dernière vérification :** 15 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [thèmes](themes.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Dernière vérification :** 16 août 2026<br>
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [thèmes](themes.md), [catalogue sémantique](catalog.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -62,6 +62,8 @@ dirloom --help
 | Préparer un contexte structurel pour une IA | `dirloom --preset ai` |
 | Expliquer un preset intégré | `dirloom preset explain ai` |
 | Choisir un thème sombre ou clair | `dirloom --theme midnight` ou `dirloom --theme daylight` |
+| Présenter le catalogue en mode showcase | `dirloom --theme vivid --icons nerd` |
+| Expliquer la classification réelle d'une entrée | `dirloom theme classify src/main.go --theme vivid` |
 | Utiliser une Nerd Font | `dirloom --icons nerd` |
 | Garantir un texte canonique sans décoration | `dirloom --color never --icons never` |
 | Inspecter ou valider un thème | `dirloom theme explain midnight` ou `dirloom theme validate theme.yaml` |
@@ -406,28 +408,32 @@ Utilisez-le pour des consoles limitées, certains logs, des systèmes anciens ou
 
 ### 5.3 Présentation terminal : couleurs, icônes et thèmes
 
-Sur un TTY interactif utilisable, les modes `auto` activent les couleurs et les icônes Unicode portables. Un pipe, une redirection, `--output`, `CI` ou `TERM=dumb` conserve automatiquement le rendu historique neutre.
-
-Choisir une palette sombre ou claire :
+Sur un TTY éligible, la couleur `auto` est active mais les icônes restent désactivées par défaut. Activez-les explicitement :
 
 ```bash
-dirloom . --theme midnight
-dirloom . --theme daylight
+dirloom . --icons unicode
+dirloom . --theme vivid --icons nerd
+dirloom . --theme daylight --icons unicode
 ```
 
-Utiliser une Nerd Font déjà configurée dans le terminal :
+`--icons auto` sélectionne Unicode uniquement sur un TTY éligible. Dirloom ne détecte ni la police installée ni le fond du terminal. En cas de glyphes absents, utilisez `--icons unicode` ou `--icons never`.
+
+Pour expliquer pourquoi `README.md`, `_test.go` ou `.pb.go` reçoit une icône, une couleur ou un rôle :
 
 ```bash
-dirloom . --icons nerd --theme midnight
+dirloom theme classify README.md --theme vivid
+dirloom theme classify internal/api/user_test.go --theme vivid --as json
 ```
 
-Dirloom ne détecte ni la police installée ni le fond du terminal. En cas de glyphes absents, utilisez `--icons unicode` ou `--icons never`. Pour une sortie texte reproductible :
+Cette commande effectue un seul `Lstat`, ne suit pas le symlink final et ne lit pas le contenu. Le [catalogue sémantique](catalog.md) détaille les 256 matchers, 96 kinds et 16 rôles.
+
+Pour une sortie texte reproductible :
 
 ```bash
 dirloom . --color never --icons never
 ```
 
-`NO_COLOR` non vide désactive les couleurs issues des défauts et de la configuration. Seul `--color always` explicitement fourni en CLI le surclasse. Les icônes restent indépendantes.
+Un pipe, une redirection, `--output`, `CI` ou `TERM=dumb` désactive les modes automatiques. `NO_COLOR` non vide désactive les couleurs issues des défauts et de la configuration ; seul `--color always` explicitement fourni en CLI le surclasse.
 
 Le Markdown clôturé, le Markdown sémantique et le JSON ne reçoivent jamais de décoration. Une option visuelle active fournie explicitement avec ces formats est rejetée ; une préférence héritée reste simplement inactive. Le schéma, les palettes, les fallbacks et les commandes `theme` sont détaillés dans [Couleurs, icônes et thèmes](themes.md).
 
@@ -778,10 +784,21 @@ Validez-le sans scanner le dépôt :
 
 ```bash
 dirloom theme validate .dirloom/themes/team.yaml
+dirloom theme classify README.md --theme .dirloom/themes/team.yaml
 dirloom config explain
 ```
 
 Le chemin configuré doit rester sous le dossier contenant `.dirloom.yaml`, y compris après résolution des liens symboliques. Un preset ne remplace aucune préférence visuelle.
+
+### 7.14 Diagnostiquer une classification sans scanner le projet
+
+Utilisez une racine explicite pour examiner une entrée réelle de façon bornée :
+
+```bash
+dirloom theme classify packages/api/src/handler_test.go --root . --theme vivid
+```
+
+Le diagnostic conserve le kind technique, tous les rôles ordonnés, le matcher gagnant, le rôle visuel et l'origine de chaque propriété. Il est adapté aux revues de thème et aux issues de classification ; il ne remplace pas une inspection récursive.
 
 ## 8. Recettes par écosystème
 
