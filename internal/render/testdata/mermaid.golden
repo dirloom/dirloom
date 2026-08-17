@@ -1,0 +1,13 @@
+%% dirloom-diagram-contract: 1; view: structure; direction: top-down
+flowchart TB
+  n_root["project/"]
+  n_e0bfc4055d108470c31075a1d817fe54["empty/"]
+  n_64b2cdb21b87ca363f9c4f912dd9b856["src/"]
+  n_fdb45ec835624d3a17b5bac915a25ed6["link -&gt; ../shared"]
+  n_1288e17cf5fc31d3297c21327237d5b3["index.ts"]
+  n_a451623ea511a512c23c810fe86e25a0["README.md"]
+  n_root --> n_e0bfc4055d108470c31075a1d817fe54
+  n_root --> n_64b2cdb21b87ca363f9c4f912dd9b856
+  n_64b2cdb21b87ca363f9c4f912dd9b856 --> n_fdb45ec835624d3a17b5bac915a25ed6
+  n_64b2cdb21b87ca363f9c4f912dd9b856 --> n_1288e17cf5fc31d3297c21327237d5b3
+  n_root --> n_a451623ea511a512c23c810fe86e25a0
