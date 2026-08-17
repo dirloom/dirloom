@@ -6,8 +6,8 @@ import (
 	"io"
 
 	configuration "github.com/dirloom/dirloom/internal/config"
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
-	"github.com/dirloom/dirloom/internal/render"
 	"github.com/spf13/cobra"
 )
 
@@ -29,10 +29,20 @@ func rejectSourceFlags(command *cobra.Command, sources *sourceOptions, context s
 }
 
 func validateFormatOptions(resolution configuration.Resolution, overrides configuration.Overrides) error {
-	if (resolution.Effective.Format == render.FormatJSON || resolution.Effective.Format == render.FormatMarkdownTree) && overrides.Style.Set {
+	if !outputformat.UsesStyle(resolution.Effective.Format) && overrides.Style.Set {
 		return &usageError{err: fmt.Errorf("--style cannot be used with --format %s", resolution.Effective.Format)}
 	}
-	if resolution.Effective.Format == render.FormatText {
+	if !outputformat.IsDiagram(resolution.Effective.Format) {
+		switch {
+		case overrides.DiagramView.Set:
+			return &usageError{err: fmt.Errorf("--diagram-view cannot be used with --format %s", resolution.Effective.Format)}
+		case overrides.DiagramDirection.Set:
+			return &usageError{err: fmt.Errorf("--diagram-direction cannot be used with --format %s", resolution.Effective.Format)}
+		case overrides.DiagramMaxNodes.Set:
+			return &usageError{err: fmt.Errorf("--diagram-max-nodes cannot be used with --format %s", resolution.Effective.Format)}
+		}
+	}
+	if outputformat.UsesPresentation(resolution.Effective.Format) {
 		return nil
 	}
 	if overrides.Color.Set && overrides.Color.Value != presentation.ColorNever {

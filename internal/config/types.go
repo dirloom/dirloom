@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/dirloom/dirloom/internal/diagram"
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
 )
 
@@ -12,12 +14,19 @@ const (
 	// SchemaVersion is the only supported .dirloom.yaml schema version.
 	SchemaVersion = 1
 
-	FormatText         = "text"
-	FormatMarkdown     = "markdown"
-	FormatMarkdownTree = "markdown-tree"
-	FormatJSON         = "json"
+	FormatText         = outputformat.Text
+	FormatMarkdown     = outputformat.Markdown
+	FormatMarkdownTree = outputformat.MarkdownTree
+	FormatJSON         = outputformat.JSON
+	FormatMermaid      = outputformat.Mermaid
+	FormatGraphviz     = outputformat.Graphviz
+	FormatD2           = outputformat.D2
 	StyleUnicode       = "unicode"
 	StyleASCII         = "ascii"
+
+	DiagramViewStructure      = string(diagram.ViewStructure)
+	DiagramDirectionTopDown   = string(diagram.DirectionTopDown)
+	DiagramDirectionLeftRight = string(diagram.DirectionLeftRight)
 )
 
 type SourceKind string
@@ -78,6 +87,9 @@ type Effective struct {
 	Color             string
 	Icons             string
 	Theme             string
+	DiagramView       string
+	DiagramDirection  string
+	DiagramMaxNodes   *int
 }
 
 // Resolution contains effective values and enough metadata to explain them.
@@ -106,6 +118,13 @@ type Optional[T any] struct {
 
 // DepthOverride distinguishes an omitted depth from an explicit unlimited one.
 type DepthOverride struct {
+	Set       bool
+	Unlimited bool
+	Value     int
+}
+
+// LimitOverride distinguishes an omitted limit from explicit unlimited.
+type LimitOverride struct {
 	Set       bool
 	Unlimited bool
 	Value     int
@@ -141,6 +160,9 @@ type Overrides struct {
 	Color             Optional[string]
 	Icons             Optional[string]
 	Theme             ThemeSelection
+	DiagramView       Optional[string]
+	DiagramDirection  Optional[string]
+	DiagramMaxNodes   LimitOverride
 }
 
 // ResolveOptions controls source selection and supplies explicit CLI values.

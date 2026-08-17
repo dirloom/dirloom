@@ -43,9 +43,9 @@ Windows, Linux and macOS are first-class targets. Do not introduce shell-specifi
 
 Changes to JSON fields, CLI flags, default exclusions, filter priority or ordering are public-contract changes and require explicit discussion plus contract tests.
 
-Changes to `.dirloom.yaml`, configuration discovery, precedence, diagnostic fields, source statuses, preset names, preset definitions, visual defaults, built-in themes, icon mappings, rule priority, or theme schema are also public-contract changes. Update implementation tests, CLI tests, the relevant public guide (`docs/configuration.md`, `docs/presets.md`, or `docs/themes.md`), README and changelog together. Marked YAML, JSON and command examples in the public guides are checked by the test suite and must remain executable.
+Changes to `.dirloom.yaml`, configuration discovery, precedence, diagnostic fields, source statuses, preset names, preset definitions, visual defaults, built-in themes, icon mappings, rule priority, theme schema, or diagram export contracts are also public-contract changes. Update implementation tests, CLI tests, the relevant public guide (`docs/configuration.md`, `docs/presets.md`, `docs/themes.md`, or `docs/graph-exports.md`), README and changelog together. Marked YAML, JSON and command examples in the public guides are checked by the test suite and must remain executable.
 
-Presentation changes must prove that neutral text goldens, Markdown, and tree JSON remain unchanged. Test `NO_COLOR`, TTY and non-TTY behavior, forced modes, custom-theme safety limits, and Windows terminal setup where applicable. Never make the scanner or `app.Inspect` depend on ANSI, glyphs, themes, or terminal state.
+Presentation changes must prove that neutral text goldens, Markdown, and tree JSON remain unchanged. Diagram encoder changes must prove Mermaid, Graphviz and D2 goldens, hostile-name escaping, and that no encoder accepts `tree.Node` directly. Test `NO_COLOR`, TTY and non-TTY behavior, forced modes, custom-theme safety limits, and Windows terminal setup where applicable. Never make the scanner or `app.Inspect` depend on ANSI, glyphs, themes, or terminal state. Official Mermaid CLI, Graphviz `dot` and D2 parsers belong in CI only; do not add them to the Dirloom binary.
 
 ## Pull requests
 

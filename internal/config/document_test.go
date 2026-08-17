@@ -124,6 +124,40 @@ func TestParseDocumentDistinguishesAbsentAndUnlimitedDepth(t *testing.T) {
 	}
 }
 
+func TestParseDocumentAcceptsDiagramSettingsAndGraphvizAlias(t *testing.T) {
+	values, err := parseDocument([]byte(`schemaVersion: 1
+defaults:
+  format: dot
+diagram:
+  view: structure
+  direction: left-right
+  maxNodes: 80
+`), ".dirloom.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !values.Format.Set || values.Format.Value != FormatGraphviz {
+		t.Fatalf("format = %#v", values.Format)
+	}
+	if !values.DiagramView.Set || values.DiagramView.Value != DiagramViewStructure {
+		t.Fatalf("view = %#v", values.DiagramView)
+	}
+	if !values.DiagramDirection.Set || values.DiagramDirection.Value != DiagramDirectionLeftRight {
+		t.Fatalf("direction = %#v", values.DiagramDirection)
+	}
+	if !values.DiagramMaxNodes.Set || values.DiagramMaxNodes.Unlimited || values.DiagramMaxNodes.Value != 80 {
+		t.Fatalf("maxNodes = %#v", values.DiagramMaxNodes)
+	}
+
+	unlimited, err := parseDocument([]byte("schemaVersion: 1\ndiagram:\n  maxNodes: null\n"), "unlimited.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !unlimited.DiagramMaxNodes.Set || !unlimited.DiagramMaxNodes.Unlimited {
+		t.Fatalf("unlimited maxNodes = %#v", unlimited.DiagramMaxNodes)
+	}
+}
+
 func TestParseDocumentAcceptsSemanticMarkdownFormat(t *testing.T) {
 	values, err := parseDocument([]byte("schemaVersion: 1\ndefaults:\n  format: markdown-tree\n"), ".dirloom.yaml")
 	if err != nil {
@@ -171,6 +205,10 @@ func TestParseDocumentRejectsInvalidYAMLContracts(t *testing.T) {
 		{"escaping-theme", "schemaVersion: 1\npresentation:\n  theme: ../outside.yaml\n", "must remain inside"},
 		{"theme-number", "schemaVersion: 1\npresentation:\n  theme: 42\n", "presentation.theme must be"},
 		{"unknown-presentation-field", "schemaVersion: 1\npresentation:\n  future: true\n", "field future not found"},
+		{"bad-diagram-view", "schemaVersion: 1\ndiagram:\n  view: imports\n", "unsupported diagram.view"},
+		{"bad-diagram-direction", "schemaVersion: 1\ndiagram:\n  direction: radial\n", "unsupported diagram.direction"},
+		{"zero-diagram-max-nodes", "schemaVersion: 1\ndiagram:\n  maxNodes: 0\n", "diagram.maxNodes must be a positive integer or null"},
+		{"unknown-diagram-field", "schemaVersion: 1\ndiagram:\n  future: true\n", "field future not found"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

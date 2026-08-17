@@ -11,7 +11,9 @@ import (
 
 	"github.com/dirloom/dirloom/internal/app"
 	configuration "github.com/dirloom/dirloom/internal/config"
+	"github.com/dirloom/dirloom/internal/diagram"
 	"github.com/dirloom/dirloom/internal/output"
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
 	"github.com/dirloom/dirloom/internal/render"
 	"github.com/spf13/cobra"
@@ -75,6 +77,9 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
   dirloom --theme midnight --icons unicode
   dirloom --format markdown
   dirloom --format markdown-tree
+  dirloom --format mermaid --diagram-direction left-right
+  dirloom --format graphviz --output structure.dot
+  dirloom --format d2 --output structure.d2
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown`,
 		Version:       version,
@@ -135,7 +140,19 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 			if capabilities.ColorEnabled || capabilities.IconMode != presentation.IconsNever {
 				decorator = presentation.NewDecorator(compiled, capabilities.ColorEnabled, capabilities.IconMode, capabilities.Profile)
 			}
-			renderer, err := render.New(resolved.Effective.Format, resolved.Effective.Style, decorator)
+			nodeCount := diagram.CountNodes(model)
+			if outputformat.IsDiagram(resolved.Effective.Format) && resolved.Effective.DiagramMaxNodes == nil &&
+				nodeCount >= diagram.LargeGraphWarningThreshold {
+				_, _ = fmt.Fprintf(stderr, "Warning: diagram contains %d nodes; consider --depth, --dirs-only, --ignore, or an explicit --diagram-max-nodes limit\n", nodeCount)
+			}
+			renderer, err := render.NewConfigured(render.Options{
+				Format: resolved.Effective.Format, Style: resolved.Effective.Style, Decorator: decorator,
+				Diagram: diagram.Options{
+					View:      diagram.View(resolved.Effective.DiagramView),
+					Direction: diagram.Direction(resolved.Effective.DiagramDirection),
+					MaxNodes:  resolved.Effective.DiagramMaxNodes,
+				},
+			})
 			if err != nil {
 				return err
 			}
@@ -186,11 +203,14 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, or json")
+	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, json, mermaid, graphviz (dot), or d2")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
 	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto")
 	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto")
 	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, vivid, or a YAML path")
+	command.Flags().StringVar(&opts.diagramView, "diagram-view", "", "diagram view: structure")
+	command.Flags().StringVar(&opts.diagramDirection, "diagram-direction", "", "diagram direction: top-down or left-right")
+	command.Flags().Var(&opts.diagramMaxNodes, "diagram-max-nodes", "maximum diagram nodes (positive integer or unlimited)")
 }
 
 func resolveOptions(command *cobra.Command, loader *configuration.Loader, root string, sources sourceOptions, opts *options) (configuration.Resolution, configuration.Overrides, error) {
@@ -239,7 +259,11 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 		result.IncludeHidden = configuration.Optional[bool]{Set: true, Value: opts.includeHidden}
 	}
 	if command.Flags().Changed("format") {
-		result.Format = configuration.Optional[string]{Set: true, Value: opts.format}
+		canonical, ok := outputformat.Canonical(opts.format)
+		if !ok {
+			return configuration.Overrides{}, &usageError{err: outputformat.Validate(opts.format)}
+		}
+		result.Format = configuration.Optional[string]{Set: true, Value: canonical}
 	}
 	if command.Flags().Changed("style") {
 		result.Style = configuration.Optional[string]{Set: true, Value: opts.style}
@@ -270,6 +294,23 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--theme requires a non-empty value")}
 		}
 		result.Theme = configuration.ThemeSelection{Set: true, Value: opts.theme}
+	}
+	if command.Flags().Changed("diagram-view") {
+		if opts.diagramView == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--diagram-view requires a non-empty value")}
+		}
+		result.DiagramView = configuration.Optional[string]{Set: true, Value: opts.diagramView}
+	}
+	if command.Flags().Changed("diagram-direction") {
+		if opts.diagramDirection == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--diagram-direction requires a non-empty value")}
+		}
+		result.DiagramDirection = configuration.Optional[string]{Set: true, Value: opts.diagramDirection}
+	}
+	if command.Flags().Changed("diagram-max-nodes") {
+		result.DiagramMaxNodes = configuration.LimitOverride{
+			Set: true, Unlimited: opts.diagramMaxNodes.unlimited, Value: opts.diagramMaxNodes.value,
+		}
 	}
 	return result, nil
 }

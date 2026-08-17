@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
 )
 
@@ -40,14 +42,21 @@ type diagnosticThemeSource struct {
 }
 
 type diagnosticEffective struct {
-	Depth             *int         `json:"depth"`
-	DirectoriesOnly   bool         `json:"dirsOnly"`
-	IncludeHidden     bool         `json:"hidden"`
-	Format            string       `json:"format"`
-	Style             string       `json:"style"`
-	UseDefaultIgnores bool         `json:"useDefaultIgnores"`
-	UseGitIgnore      bool         `json:"useGitignore"`
-	Ignore            []IgnoreRule `json:"ignore"`
+	Depth             *int              `json:"depth"`
+	DirectoriesOnly   bool              `json:"dirsOnly"`
+	IncludeHidden     bool              `json:"hidden"`
+	Format            string            `json:"format"`
+	Style             string            `json:"style"`
+	UseDefaultIgnores bool              `json:"useDefaultIgnores"`
+	UseGitIgnore      bool              `json:"useGitignore"`
+	Ignore            []IgnoreRule      `json:"ignore"`
+	Diagram           diagnosticDiagram `json:"diagram"`
+}
+
+type diagnosticDiagram struct {
+	View      string `json:"view"`
+	Direction string `json:"direction"`
+	MaxNodes  *int   `json:"maxNodes"`
 }
 
 // WriteJSON writes the stable machine-readable configuration diagnostic.
@@ -91,6 +100,10 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 	if resolution.Effective.MaxDepth != nil {
 		depth = strconv.Itoa(*resolution.Effective.MaxDepth)
 	}
+	maxNodes := "unlimited"
+	if resolution.Effective.DiagramMaxNodes != nil {
+		maxNodes = strconv.Itoa(*resolution.Effective.DiagramMaxNodes)
+	}
 	values := []struct {
 		name  string
 		value string
@@ -102,10 +115,16 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 		{"style", resolution.Effective.Style},
 		{"useDefaultIgnores", strconv.FormatBool(resolution.Effective.UseDefaultIgnores)},
 		{"useGitignore", strconv.FormatBool(resolution.Effective.UseGitIgnore)},
+		{"diagram.view", resolution.Effective.DiagramView},
+		{"diagram.direction", resolution.Effective.DiagramDirection},
+		{"diagram.maxNodes", maxNodes},
 	}
 	for _, value := range values {
 		inactive := ""
 		if value.name == "style" && styleInactive(resolution.Effective.Format) {
+			inactive = "; inactive for " + resolution.Effective.Format
+		}
+		if strings.HasPrefix(value.name, "diagram.") && !outputformat.IsDiagram(resolution.Effective.Format) {
 			inactive = "; inactive for " + resolution.Effective.Format
 		}
 		if _, err := fmt.Fprintf(writer, "  %s: %s (%s%s)\n", value.name, value.value, formatOrigin(resolution.Provenance[value.name]), inactive); err != nil {
@@ -156,8 +175,11 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 	if styleInactive(resolution.Effective.Format) {
 		inactive = append(inactive, "style")
 	}
-	if resolution.Effective.Format != FormatText {
+	if !outputformat.UsesPresentation(resolution.Effective.Format) {
 		inactive = append(inactive, "color", "icons", "theme")
+	}
+	if !outputformat.IsDiagram(resolution.Effective.Format) {
+		inactive = append(inactive, "diagram.view", "diagram.direction", "diagram.maxNodes")
 	}
 	ignores := append([]IgnoreRule(nil), resolution.Ignores...)
 	if ignores == nil {
@@ -181,6 +203,11 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 			UseDefaultIgnores: resolution.Effective.UseDefaultIgnores,
 			UseGitIgnore:      resolution.Effective.UseGitIgnore,
 			Ignore:            ignores,
+			Diagram: diagnosticDiagram{
+				View:      resolution.Effective.DiagramView,
+				Direction: resolution.Effective.DiagramDirection,
+				MaxNodes:  resolution.Effective.DiagramMaxNodes,
+			},
 		},
 		Provenance: resolution.Provenance,
 		Inactive:   inactive,
@@ -193,7 +220,7 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 }
 
 func styleInactive(format string) bool {
-	return format == FormatJSON || format == FormatMarkdownTree
+	return !outputformat.UsesStyle(format)
 }
 
 func (resolution Resolution) diagnosticTheme() diagnosticTheme {

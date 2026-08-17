@@ -31,6 +31,8 @@ func TestResolutionDiagnostics(t *testing.T) {
 		"Preset: none (built-in)",
 		"format: json (project: /workspace/.dirloom.yaml)",
 		"style: unicode (built-in; inactive for json)",
+		"diagram.view: structure (built-in; inactive for json)",
+		"diagram.maxNodes: unlimited (built-in; inactive for json)",
 		"generated/** (project: /workspace/.dirloom.yaml)",
 	} {
 		if !strings.Contains(textOutput.String(), want) {
@@ -57,8 +59,16 @@ func TestResolutionDiagnostics(t *testing.T) {
 		t.Fatalf("preset = %#v", document["preset"])
 	}
 	inactive, ok := document["inactive"].([]any)
-	if !ok || len(inactive) != 4 || inactive[0] != "style" || inactive[1] != "color" || inactive[2] != "icons" || inactive[3] != "theme" {
+	if !ok || !reflect.DeepEqual(inactive, []any{"style", "color", "icons", "theme", "diagram.view", "diagram.direction", "diagram.maxNodes"}) {
 		t.Fatalf("inactive = %#v", document["inactive"])
+	}
+	effective, ok := document["effective"].(map[string]any)
+	if !ok {
+		t.Fatalf("effective = %#v", document["effective"])
+	}
+	diagram, ok := effective["diagram"].(map[string]any)
+	if !ok || diagram["view"] != "structure" || diagram["direction"] != "top-down" || diagram["maxNodes"] != nil {
+		t.Fatalf("diagram = %#v", effective["diagram"])
 	}
 	presentation, ok := document["presentation"].(map[string]any)
 	if !ok || presentation["color"] != "auto" || presentation["icons"] != "never" {
@@ -139,8 +149,59 @@ func TestResolutionDiagnosticsMarkStyleInactiveForSemanticMarkdown(t *testing.T)
 	if err := json.Unmarshal(jsonOutput.Bytes(), &document); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"style", "color", "icons", "theme"}
+	want := []string{"style", "color", "icons", "theme", "diagram.view", "diagram.direction", "diagram.maxNodes"}
 	if !reflect.DeepEqual(document.Inactive, want) {
 		t.Fatalf("inactive = %#v", document.Inactive)
+	}
+}
+
+func TestResolutionDiagnosticsExposeActiveDiagramFields(t *testing.T) {
+	resolved := defaultResolution("/workspace")
+	limit := 40
+	if err := applyPartial(&resolved, partial{
+		Format:           Optional[string]{Set: true, Value: FormatMermaid},
+		DiagramDirection: Optional[string]{Set: true, Value: DiagramDirectionLeftRight},
+		DiagramMaxNodes:  LimitOverride{Set: true, Value: limit},
+	}, Origin{Source: SourceProject, Path: "/workspace/.dirloom.yaml"}); err != nil {
+		t.Fatal(err)
+	}
+
+	var textOutput bytes.Buffer
+	if err := resolved.WriteText(&textOutput); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"format: mermaid (project: /workspace/.dirloom.yaml)",
+		"style: unicode (built-in; inactive for mermaid)",
+		"diagram.view: structure (built-in)",
+		"diagram.direction: left-right (project: /workspace/.dirloom.yaml)",
+		"diagram.maxNodes: 40 (project: /workspace/.dirloom.yaml)",
+	} {
+		if !strings.Contains(textOutput.String(), want) {
+			t.Errorf("text diagnostic missing %q\n%s", want, textOutput.String())
+		}
+	}
+	if strings.Contains(textOutput.String(), "diagram.view: structure (built-in; inactive") {
+		t.Fatal("diagram fields must stay active for mermaid")
+	}
+
+	var jsonOutput bytes.Buffer
+	if err := resolved.WriteJSON(&jsonOutput); err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Inactive  []string `json:"inactive"`
+		Effective struct {
+			Diagram diagnosticDiagram `json:"diagram"`
+		} `json:"effective"`
+	}
+	if err := json.Unmarshal(jsonOutput.Bytes(), &document); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(document.Inactive, []string{"style", "color", "icons", "theme"}) {
+		t.Fatalf("inactive = %#v", document.Inactive)
+	}
+	if document.Effective.Diagram.View != DiagramViewStructure || document.Effective.Diagram.Direction != DiagramDirectionLeftRight || document.Effective.Diagram.MaxNodes == nil || *document.Effective.Diagram.MaxNodes != 40 {
+		t.Fatalf("diagram = %#v", document.Effective.Diagram)
 	}
 }

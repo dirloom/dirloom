@@ -84,3 +84,65 @@ jobs:
           cache: true
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+
+  diagram-syntax:
+    name: Diagram syntax compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+          dot -V
+
+      - name: Install D2
+        run: |
+          curl -fsSL https://d2lang.com/install.sh | sh -s -- --version v0.7.1
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+          d2 --version
+
+      - name: Install Mermaid CLI
+        run: |
+          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 libasound2t64 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libcups2
+          npm install --global @mermaid-js/mermaid-cli@11.12.0
+
+      - name: Generate fixtures and validate official parsers
+        run: |
+          set -euo pipefail
+          go build -trimpath -o /tmp/dirloom ./cmd/dirloom
+          fixture="$(mktemp -d)"
+          mkdir -p "$fixture/src" "$fixture/empty"
+          : > "$fixture/README.md"
+          : > "$fixture/src/index.ts"
+          generated="$(mktemp -d)"
+          /tmp/dirloom "$fixture" --no-config --no-default-ignore --format mermaid --output "$generated/structure.mmd"
+          /tmp/dirloom "$fixture" --no-config --no-default-ignore --format graphviz --output "$generated/structure.dot"
+          /tmp/dirloom "$fixture" --no-config --no-default-ignore --format d2 --output "$generated/structure.d2"
+          proof="$(mktemp -d)"
+          mmdc -p .github/mermaid-puppeteer.json -i "$generated/structure.mmd" -o "$proof/structure-mermaid.svg"
+          mmdc -p .github/mermaid-puppeteer.json -i internal/render/testdata/mermaid.golden -o "$proof/golden-mermaid.svg"
+          dot -Tsvg "$generated/structure.dot" -o "$proof/structure-graphviz.svg"
+          dot -Tsvg internal/render/testdata/graphviz.golden -o "$proof/golden-graphviz.svg"
+          d2 "$generated/structure.d2" "$proof/structure-d2.svg"
+          d2 internal/render/testdata/d2.golden "$proof/golden-d2.svg"
+          test -s "$proof/structure-mermaid.svg"
+          test -s "$proof/golden-mermaid.svg"
+          test -s "$proof/structure-graphviz.svg"
+          test -s "$proof/golden-graphviz.svg"
+          test -s "$proof/structure-d2.svg"
+          test -s "$proof/golden-d2.svg"

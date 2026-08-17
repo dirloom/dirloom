@@ -335,7 +335,7 @@ dirloom config explain
 dirloom config explain --as json
 ```
 
-The diagnostic reports the requested `auto` modes rather than depending on its current TTY. For fenced Markdown, semantic Markdown, and JSON tree formats, it reports `color`, `icons`, and `theme` as inactive; semantic Markdown also reports `style` as inactive.
+The diagnostic reports the requested `auto` modes rather than depending on its current TTY. For fenced Markdown, semantic Markdown, JSON tree and diagram source formats, it reports `color`, `icons`, and `theme` as inactive; semantic Markdown, JSON and diagrams also report `style` as inactive. Non-diagram formats report inherited `diagram.*` values as inactive.
 
 ## Inspect and validate themes
 
@@ -378,10 +378,11 @@ A missing target, traversal attempt, unsupported filesystem type, invalid theme,
 dirloom --color never --icons never > structure.txt
 dirloom --format markdown --output structure.md
 dirloom --format markdown-tree --output project-tree.md
+dirloom --format mermaid --output structure.mmd
 dirloom --format json --output structure.json
 ```
 
-Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Inherited presentation settings are inactive. Explicit active visual flags with those formats are rejected; neutral `--color never` and `--icons never` remain valid.
+Fenced Markdown, semantic Markdown, JSON and diagram sources never contain ANSI or presentation icons. Inherited presentation settings are inactive. Explicit active visual flags with those formats are rejected; neutral `--color never` and `--icons never` remain valid.
 
 Use forced presentation only for a text destination that intentionally accepts it:
 

@@ -4,7 +4,7 @@ Dirloom can keep repeatable inspection settings in YAML while preserving explici
 
 Built-in presets can also provide a named starting point. See [Built-in presets](presets.md) for their exact definitions and usage recipes.
 
-Terminal colors, icons, and themes use the same layered resolution while remaining inactive for fenced Markdown, semantic Markdown and JSON. Color defaults to `auto`; icons default to `never` and require explicit activation. See [Terminal colors, icons, and themes](themes.md) for rendering and security, and [Semantic catalog](catalog.md) for kind/role classification.
+Terminal colors, icons, and themes use the same layered resolution while remaining inactive for fenced Markdown, semantic Markdown, JSON and diagram sources. Color defaults to `auto`; icons default to `never` and require explicit activation. See [Terminal colors, icons, and themes](themes.md) for rendering and security, and [Semantic catalog](catalog.md) for kind/role classification. Graphical exports are documented in [Graphical exports](graph-exports.md).
 
 Configuration is optional. If no configuration file exists, Dirloom behaves exactly as it does with its built-in defaults.
 
@@ -131,18 +131,21 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `defaults.depth` | integer or `null` | unlimited | Maximum depth. `0` prints only the root; `null` removes an inherited limit. |
 | `defaults.dirsOnly` | Boolean | `false` | Include directories only. |
 | `defaults.hidden` | Boolean | `false` | Include hidden entries that survive the other filters. |
-| `defaults.format` | `text`, `markdown`, `markdown-tree`, or `json` | `text` | Select the public output contract. |
-| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and fenced Markdown. It is inactive for semantic Markdown and JSON. |
+| `defaults.format` | `text`, `markdown`, `markdown-tree`, `json`, `mermaid`, `graphviz`, `d2`, or `dot` | `text` | Select the public output contract. `dot` is stored as canonical `graphviz`. |
+| `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and fenced Markdown. It is inactive for semantic Markdown, JSON and diagram sources. |
 | `filters.useDefaultIgnores` | Boolean | `true` | Apply Dirloom's built-in directory exclusions. |
 | `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
 | `presentation.color` | `never`, `always`, or `auto` | `auto` | Select the requested text color mode. Runtime TTY and environment resolution happens at output time. |
 | `presentation.icons` | `never`, `unicode`, `nerd`, or `auto` | `never` | Select the requested text icon mode. Icons remain opt-in; `auto` uses Unicode only on an eligible TTY. |
 | `presentation.theme` | built-in name, explicit relative path, or `null` | `default` | Select `default`, `midnight`, `daylight`, `vivid`, a confined local theme, or reset an inherited theme. |
+| `diagram.view` | `structure` | `structure` | Select the diagram projection. Inactive for non-diagram formats. |
+| `diagram.direction` | `top-down` or `left-right` | `top-down` | Select diagram flow. Inactive for non-diagram formats. |
+| `diagram.maxNodes` | positive integer or `null` | `null` (unlimited) | Fail when an explicit node budget is exceeded. Inactive for non-diagram formats. |
 
 `directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
 
-`markdown` keeps the historical fenced text drawing. `markdown-tree` produces a native nested list and ignores inherited drawing style; see the [semantic Markdown guide](markdown-tree.md).
+`markdown` keeps the historical fenced text drawing. `markdown-tree` produces a native nested list and ignores inherited drawing style; see the [semantic Markdown guide](markdown-tree.md). `mermaid`, `graphviz` and `d2` emit canonical structure graphs; see [Graphical exports](graph-exports.md). Explicit `--diagram-view`, `--diagram-direction` and `--diagram-max-nodes` are rejected with non-diagram formats.
 
 ### Complete example
 
@@ -373,6 +376,6 @@ Configuration errors are written to stderr before rendering begins. Stdout stays
 
 Configuration is a public Dirloom contract. Schema version `1` keeps the documented meanings and types stable. A future optional field may be introduced with release notes, but an older strict binary will reject a field it does not recognize. A change to an existing field's meaning or type requires a new schema version.
 
-The optional `preset` and `presentation` fields were added before the first v0.2 release and remain part of schema version `1`. Preset explanation JSON, theme command JSON, and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
+The optional `preset`, `presentation` and `diagram` fields were added before the first v0.2 release and remain part of schema version `1`. Preset explanation JSON, theme command JSON, and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
 
 An older Dirloom binary fails clearly when it encounters an unsupported schema version or field. It never guesses how to interpret a newer contract. The CLI, configuration schema, diagnostic JSON, and tree JSON are versioned and tested independently.
