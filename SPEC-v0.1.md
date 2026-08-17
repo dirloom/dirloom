@@ -16,46 +16,46 @@
 
 # 1. Vision
 
-**Dirloom** est un outil CLI permettant de transformer l'arborescence réelle d'un répertoire en une représentation textuelle propre, déterministe, filtrable et directement exploitable dans :
+**Dirloom** est un outil CLI permettant de transformer l'arborescence réelle d'un répertoire en une représentation textuelle propre, déterministe, filtrable et directement exploitable dans : 
 
-- un terminal ;
-- une documentation Markdown ;
-- un README ;
-- une issue ou Pull Request ;
-- un prompt destiné à un LLM ;
-- un agent de développement ;
-- une CI/CD ;
-- un fichier ou autre pipeline automatisé.
+- un terminal ; 
+- une documentation Markdown ; 
+- un README ; 
+- une issue ou Pull Request ; 
+- un prompt destiné à un LLM ; 
+- un agent de développement ; 
+- une CI/CD ; 
+- un fichier ou autre pipeline automatisé. 
 
-Dirloom ne doit pas être pensé comme une simple réécriture de la commande `tree`.
+Dirloom ne doit pas être pensé comme une simple réécriture de la commande `tree`. 
 
-La vision à long terme est :
+La vision à long terme est : 
 
-> **Transformer la structure d'un projet en une représentation portable, lisible et exploitable aussi bien par les humains que par les outils.**
+> **Transformer la structure d'un projet en une représentation portable, lisible et exploitable aussi bien par les humains que par les outils.** 
 
 
 
-Le MVP doit rester volontairement simple, mais son architecture doit permettre cette évolution sans réécriture majeure.
+Le MVP doit rester volontairement simple, mais son architecture doit permettre cette évolution sans réécriture majeure. 
 
 ---
 
 # 2. Problème à résoudre
 
-Aujourd'hui, lorsqu'un développeur souhaite partager la structure d'un projet, il doit généralement :
+Aujourd'hui, lorsqu'un développeur souhaite partager la structure d'un projet, il doit généralement : 
 
-1. utiliser `tree` ou une commande spécifique à son OS ;
-2. nettoyer manuellement la sortie ;
-3. supprimer `node_modules`, `.git`, `dist`, caches et autres répertoires inutiles ;
-4. limiter manuellement la profondeur ;
-5. adapter le résultat au Markdown ;
-6. copier le résultat ;
-7. éventuellement le retraiter avant de le transmettre à un agent IA.
+1. utiliser `tree` ou une commande spécifique à son OS ; 
+2. nettoyer manuellement la sortie ; 
+3. supprimer `node_modules`, `.git`, `dist`, caches et autres répertoires inutiles ; 
+4. limiter manuellement la profondeur ; 
+5. adapter le résultat au Markdown ; 
+6. copier le résultat ; 
+7. éventuellement le retraiter avant de le transmettre à un agent IA. 
 
-Le résultat varie également selon le système d'exploitation et les outils installés.
+Le résultat varie également selon le système d'exploitation et les outils installés. 
 
-Dirloom doit fournir une commande unique, cohérente et portable.
+Dirloom doit fournir une commande unique, cohérente et portable. 
 
-Exemple :
+Exemple : 
 
 ```bash
 dirloom
@@ -361,21 +361,21 @@ src/
 ```
 ```
 
-Le Markdown doit être directement copiable dans :
+Le Markdown doit être directement copiable dans : 
 
-- GitHub ;
-- GitLab ;
-- documentation ;
-- README ;
-- prompt LLM.
+- GitHub ; 
+- GitLab ; 
+- documentation ; 
+- README ; 
+- prompt LLM. 
 
 ---
 
 ## 6.4 JSON
 
-Le format JSON fait partie du périmètre obligatoire de la v0.1 et doit être implémenté dès cette version.
+Le format JSON fait partie du périmètre obligatoire de la v0.1 et doit être implémenté dès cette version. 
 
-Il est exposé par :
+Il est exposé par : 
 
 ```bash
 dirloom --format json
@@ -769,13 +769,13 @@ En v0.1, toute erreur empêchant de lire une entrée ou d'énumérer un réperto
 
 Le message sur stderr doit identifier le chemin relatif concerné et la catégorie d'erreur, sans exposer de stack trace. Les erreurs apparues après un début de rendu ne doivent pas laisser une sortie présentée comme valide : le pipeline doit terminer scan, filtrage et tri avant d'écrire la sortie finale. Pour `--output`, l'écriture transactionnelle garantit que la destination précédente reste intacte.
 
-Une future option explicite de type `--continue-on-error` pourra autoriser des résultats partiels accompagnés d'avertissements et d'un statut machine-readable, mais elle est hors périmètre v0.1.
+Une future option explicite de type `--continue-on-error` pourra autoriser des résultats partiels accompagnés d'avertissements et d'un statut machine-readable, mais elle est hors périmètre v0.1. 
 
 ---
 
 # 18. Exit codes
 
-Au minimum :
+Au minimum : 
 
 ```text
 0 = succès
@@ -1169,9 +1169,108 @@ dirloom > tree.txt
 
 # 33. Roadmap produit
 
-Cette spécification reste normative pour le comportement de la ligne `v0.1`. Son ancienne mini-roadmap post-MVP est remplacée par la [roadmap produit stratégique votée](docs/product/roadmap.md), qui devient l'unique autorité pour les piliers, le séquencement `v0.2+`, les Architecture Packs, les surfaces interactives et les horizons long terme.
+## v0.1 — Foundation
 
-Les numéros de versions de cette roadmap restent indicatifs ; les dépendances produit, la qualité et les preuves d'usage priment sur le calendrier.
+Objectif :
+
+> Excellent générateur d'arborescence local.
+
+Fonctionnalités :
+
+scan, depth, ignore, `.gitignore`, dirs-only, hidden, Unicode, ASCII, Markdown, JSON schema v1, stdout, output file atomique, help, version, tests, CI, cross-platform builds
+
+---
+
+## v0.2 — Configuration & ergonomie
+
+Envisager :
+
+`.dirloom.yaml`, configuration utilisateur, presets, `--copy`, custom sorting, custom default excludes, completion bash/zsh/fish/PowerShell
+
+---
+
+## v0.3 — Interactive Explorer
+
+Introduire explicitement la seconde interface du produit :
+
+```bash
+dirloom browse
+```
+
+Objectifs :
+
+- navigation dans l'arbre ;
+- expand/collapse ;
+- recherche ;
+- modification interactive de la profondeur ;
+- activation/désactivation des filtres ;
+- sélection/exclusion temporaire de branches ;
+- preview Unicode/ASCII/Markdown/JSON ;
+- copy ;
+- export.
+
+Contraintes structurantes : `dirloom` reste strictement non interactif ; `dirloom browse` utilise le même scanner, les mêmes filtres, le même modèle, le même tri et les mêmes exports que le CLI. Bubble Tea et Bubbles sont les frameworks Go envisagés pour cette interface.
+
+```text
+CLI non interactif = contrat stable et scriptable
+TUI explicite         = composition et exploration interactives
+```
+
+---
+
+## v0.4 — AI & Automation
+
+Introduire éventuellement :
+
+```bash
+dirloom --preset ai --budget 12000
+```
+
+Objectifs :
+
+réduction du bruit, budgets de sortie, représentations compactes, statistiques, sorties orientées machines et agents
+
+Le preset AI doit rester une composition déterministe d’options et de règles documentées, sans appel réseau ni génération par modèle.
+
+---
+
+## v0.5 — Snapshots & Diff
+
+Permettre :
+
+```bash
+dirloom snapshot
+dirloom diff snapshot-a snapshot-b
+```
+
+Cas d’usage : documentation d’évolution d’architecture, review de refactoring, migrations, agents IA et CI.
+
+Les snapshots doivent reposer sur un contrat versionné et ne contenir aucune métadonnée sensible ou non déterministe par défaut.
+
+---
+
+## v0.6 — Annotations
+
+Permettre potentiellement d’enrichir une structure avec des commentaires ou métadonnées de projet, sans modifier les fichiers inspectés. Cette fonctionnalité pourra devenir une différenciation importante de Dirloom, mais son modèle de stockage devra être défini avant implémentation.
+
+```text
+features/
+├── occupancy/      # équipe indépendante
+├── revenues/       # domaine financier
+└── new-feature/    # en construction
+```
+
+---
+
+## v1.0
+
+Objectif :
+
+> CLI stable, documenté, cross-platform et publiquement distribuable.
+
+Exigences potentielles :
+
+API CLI stabilisée, config stabilisée, formats stabilisés, semver, packages officiels, checksums, SBOM, release signing, documentation complète, contribution guide, security policy, changelog
 
 ---
 

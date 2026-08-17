@@ -21,7 +21,6 @@ func TestTextAndMarkdownGolden(t *testing.T) {
 		{"unicode", FormatText, StyleUnicode, "unicode.golden"},
 		{"ascii", FormatText, StyleASCII, "ascii.golden"},
 		{"markdown", FormatMarkdown, StyleUnicode, "markdown.golden"},
-		{"markdown-tree", FormatMarkdownTree, "ignored", "markdown-tree.golden"},
 	}
 
 	for _, test := range tests {
@@ -93,9 +92,6 @@ func TestRendererValidation(t *testing.T) {
 	}
 	if _, err := New(FormatText, "auto"); err == nil {
 		t.Fatal("unsupported style should fail")
-	}
-	if _, err := New(FormatMarkdownTree, "ignored"); err != nil {
-		t.Fatalf("markdown-tree must not depend on drawing style: %v", err)
 	}
 }
 

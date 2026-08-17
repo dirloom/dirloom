@@ -1,6 +1,6 @@
 # Dirloom
 
-Clean project trees for humans and AI.
+Clean project trees for humans and tools.
 
 Dirloom turns a real directory into a clean, deterministic, filterable and shareable project structure. It is a local-only, cross-platform CLI: no telemetry, no network calls, no project files modified unless you explicitly use `--output`.
 
@@ -17,28 +17,13 @@ Unlike a raw `tree` listing, the output is designed to be a reproducible artifac
 
 ## Installation
 
-### Windows with Scoop
-
-```powershell
-scoop bucket add dirloom https://github.com/dirloom/scoop-bucket
-scoop install dirloom
-```
-
-The official bucket selects the x64 or ARM64 release, verifies its SHA-256 checksum and adds `dirloom` to `PATH`. Upgrade later with `scoop update dirloom`.
-
-### Release archives
-
-Download the archive for Windows, Linux or macOS from [GitHub Releases](https://github.com/dirloom/dirloom/releases), extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
-
-### Install with Go
+Download the archive for Windows, Linux or macOS from the GitHub release, extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
 
 With Go 1.25.12 or newer:
 
 ```bash
 go install github.com/dirloom/dirloom/cmd/dirloom@latest
 ```
-
-### Build from source
 
 For local development:
 
@@ -60,9 +45,6 @@ dirloom ./src --depth 3
 # Produce copy-ready Markdown
 dirloom --format markdown
 
-# Start from a documented built-in preset
-dirloom --preset compact
-
 # Produce the versioned machine contract
 dirloom --format json
 
@@ -77,76 +59,6 @@ dirloom --format markdown | Set-Clipboard
 dirloom --style ascii > structure.txt
 ```
 
-See [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
-
-## Persistent configuration
-
-Dirloom can load shared project settings from `.dirloom.yaml` and personal defaults from your operating system's configuration directory.
-
-<!-- dirloom-config-example:readme -->
-```yaml
-schemaVersion: 1
-
-defaults:
-  depth: 4
-  format: text
-
-ignore:
-  - generated/**
-```
-
-Explicit CLI options take priority over the project file, which takes priority over the user file and built-in defaults. Inspect the effective values and their sources with:
-
-```bash
-dirloom config explain
-```
-
-Keep CI independent of personal settings while retaining the committed project configuration:
-
-```bash
-dirloom . --no-user-config --format json --output structure.json
-```
-
-See [Persistent configuration](docs/configuration.md) for discovery rules, the complete schema, monorepo and CI recipes, diagnostics, security boundaries and troubleshooting.
-
-## Built-in presets
-
-Dirloom includes deterministic presets for common workflows:
-
-```bash
-dirloom --preset docs       # Markdown for documentation and reviews
-dirloom --preset compact    # Shallow directory-only overview
-dirloom --preset monorepo   # Workspace topology without dist/build noise
-dirloom --preset ai         # Markdown source structure for AI workflows
-```
-
-Inspect the exact built-in definition without scanning a directory:
-
-```bash
-dirloom preset explain ai
-dirloom preset explain ai --as json
-```
-
-Explicit options override individual preset values. Use `--preset none` to neutralize a preset inherited from configuration. See [Built-in presets](docs/presets.md) for exact definitions, precedence, YAML activation, diagnostics, security boundaries and recipes.
-
-## Terminal presentation
-
-Interactive text uses automatic color and keeps icons disabled until requested. The independent `vivid` theme uses a two-tone neon system: structural roles color text while technical kinds color glyphs:
-
-```bash
-dirloom --theme vivid
-dirloom --theme vivid --icons nerd
-dirloom theme classify README.md --theme vivid
-```
-
-Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Reproduce canonical historical text explicitly with:
-
-```bash
-dirloom --color never --icons never
-```
-
-Dirloom respects `NO_COLOR`; only explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for the public theme schema and [Semantic catalog](docs/catalog.md) for the 256 matchers, 96 kinds, 16 roles, and classification diagnostics.
-
 ## CLI reference
 
 ```text
@@ -157,30 +69,19 @@ dirloom [directory] [flags]
 
 | Option | Meaning |
 | --- | --- |
-| `-d, --depth N\|unlimited` | Maximum depth. `0` prints only the root; `unlimited` removes an inherited limit. |
+| `-d, --depth N` | Maximum depth. `0` prints only the root; omitted means unlimited. |
 | `--dirs-only` | Include directories only. |
 | `--hidden` | Include hidden entries that survive all other filters. |
 | `--ignore PATTERN` | Add an exclusion. Repeat the option to add more rules. |
 | `--no-default-ignore` | Disable built-in directory exclusions. |
 | `--no-gitignore` | Do not load `.gitignore` files. |
-| `--format text\|markdown\|markdown-tree\|json` | Select the public output contract. Default: `text`. |
-| `--style unicode\|ascii` | Select the drawing style for text and fenced Markdown. Default: `unicode`. |
-| `--config FILE` | Use an explicit project configuration file instead of automatic discovery. |
-| `--no-user-config` | Skip personal configuration while retaining project configuration. |
-| `--no-config` | Disable user and project configuration files. |
-| `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
-| `--color never\|always\|auto` | Control ANSI color for text output. Default: `auto`. |
-| `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `never`. |
-| `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, `vivid`, or a local YAML theme. |
+| `--format text\|markdown\|json` | Select the public output contract. Default: `text`. |
+| `--style unicode\|ascii` | Select the drawing style for text and Markdown. Default: `unicode`. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
-`--style` is intentionally rejected when explicitly combined with `--format json` or `--format markdown-tree`; neither contract has a drawing style.
-
-`dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
-
-`dirloom theme classify <path>` performs one bounded `Lstat` and explains the real entry type, semantic kind, roles, winning matcher, and resolved theme style without reading file content or scanning recursively.
+`--style` is intentionally rejected when explicitly combined with `--format json`; JSON has no drawing style.
 
 ## Filtering
 
@@ -188,7 +89,7 @@ Dirloom evaluates every descendant in this fixed order. The first exclusion is f
 
 1. the `--output` destination;
 2. built-in directory exclusions;
-3. preset and explicit ignore rules merged from user, project and CLI layers;
+3. repeated `--ignore` rules;
 4. scoped `.gitignore` rules;
 5. hidden-entry visibility.
 
@@ -204,7 +105,7 @@ The v0.1 list is deliberately conservative:
 
 `dist` and `build` are not excluded automatically. Use `--no-default-ignore` to disable the list.
 
-### Explicit ignore rules
+### `--ignore` rules
 
 Rules are case-sensitive and use `/` as their normalized separator:
 
@@ -219,9 +120,7 @@ dirloom --ignore node_modules --ignore "*.log" --ignore "src/**/generated?.go"
 - A matched directory is pruned immediately.
 - Commas are literal; each rule needs its own `--ignore` occurrence.
 - Absolute and root-escaping patterns are rejected.
-- There is no `!` re-inclusion syntax for explicit rules.
-
-Configuration ignore lists are additive: user rules come first, followed by project and CLI rules. Exact duplicates are removed without changing the first rule's position or source.
+- There is no `!` re-inclusion syntax for CLI rules in v0.1.
 
 ### `.gitignore`
 
@@ -238,12 +137,11 @@ All formats are UTF-8 without BOM, contain LF line endings on every platform, an
 
 ### Text
 
-Unicode tree drawing remains the default. Terminal presentation is automatic only on a usable interactive TTY; non-interactive output preserves the historical neutral bytes.
+Unicode is always the default; Dirloom never changes styles by inspecting the terminal or redirection target.
 
 ```bash
 dirloom --style unicode
 dirloom --style ascii
-dirloom --color never --icons never
 ```
 
 ### Markdown
@@ -253,23 +151,6 @@ Markdown wraps the selected text drawing in a fenced `text` block:
 ```bash
 dirloom --format markdown --style ascii
 ```
-
-### Semantic Markdown
-
-Use a native nested list when the destination should understand the tree as Markdown structure:
-
-```bash
-dirloom --format markdown-tree
-```
-
-```markdown
-- `my-project/`
-  - `src/`
-    - `index.ts`
-  - `README.md`
-```
-
-This format is deterministic, contains no ANSI or terminal icons, and does not use `--style`. See the [semantic Markdown guide](docs/markdown-tree.md) for its escaping, symlink and compatibility contracts.
 
 ### JSON schema v1
 
@@ -305,25 +186,21 @@ Directories always have `children`, including empty directories. Files never do.
 
 Directories are listed before terminal entries. Each group is sorted case-insensitively with deterministic Unicode casing, then by the original UTF-8 name and normalized relative path. Filesystem enumeration order, locale and platform do not control the output.
 
-Canonical output preserves filesystem names exactly and does not silently normalize Unicode between NFC and NFD. When terminal presentation is active, dangerous controls are escaped in the displayed projection without changing the tree model.
+Dirloom preserves filesystem names exactly and does not silently normalize Unicode between NFC and NFD.
 
 ## Architecture
 
 ```text
 CLI arguments
-    → configuration discovery and resolution
-    → built-in preset expansion
-    → presentation resolution and theme validation
     → application service
     → filter-aware filesystem scanner
     → renderer-independent tree model
     → deterministic sort
-    → canonical text / fenced Markdown / semantic Markdown / JSON renderer
-    → optional semantic catalog classification and terminal-only text projection
+    → text / Markdown / JSON renderer
     → stdout or transactional file output
 ```
 
-The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse`, snapshot and diff interfaces able to reuse the same core.
+The headless application service and model are independent from Cobra and from renderers, keeping the future `browse`, snapshot and diff interfaces able to reuse the same core.
 
 See [docs/architecture.md](docs/architecture.md) for package boundaries and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
@@ -356,25 +233,15 @@ dirloom_Darwin_arm64.tar.gz
 
 Releases are created as drafts so maintainers can verify artifacts and checksums before publication.
 
-The official [Scoop bucket](https://github.com/dirloom/scoop-bucket) checks published stable releases every six hours and updates its x64 and ARM64 manifest automatically.
-
 ## Roadmap
 
-The voted product sequence builds from the deterministic v0.1 foundation toward structural intelligence:
+- v0.2: configuration and ergonomic presets;
+- v0.3: explicit `dirloom browse` TUI reusing the same core;
+- v0.4: deterministic AI-oriented presets and budgets, still local-only;
+- v0.5: versioned snapshots and structural diffs;
+- v0.6: structural annotations.
 
-- v0.2: product UX, configuration and visual identity;
-- v0.3: interactive `dirloom browse` explorer;
-- v0.4: fingerprints, snapshots, verification and structural diff;
-- v0.5: scaffold, templates and Architecture Packs;
-- v0.6: architecture contracts, Shape Signatures and persistent knowledge;
-- v0.7: query, metrics and structural intelligence;
-- v0.8: drift, dependency analysis, impact and simulation foundations;
-- v0.9: local agent-context infrastructure, MCP and official skills;
-- v1.0: stable public structural-intelligence platform.
-
-See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
-
-TUI, Desktop, MCP, code analysis, watch mode and file-content summaries remain intentionally outside v0.1. Future networked capabilities must remain explicit; the core stays local-first.
+TUI, GUI, HTTP, MCP, cloud, telemetry, code analysis, watch mode and file-content summaries are intentionally outside v0.1.
 
 ## License
 
