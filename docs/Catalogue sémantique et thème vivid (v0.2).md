@@ -2,28 +2,28 @@
 name: Catalogue sémantique et thème vivid v0.2
 overview: >-
   Remplacer le mini-catalogue visuel par un classifieur Kind + rôles,
-  un catalogue immuable de 256 matchers, le schéma public de thème v1,
+  un catalogue immuable de 256 matchers, le schéma de thème v2,
   le thème vivid, iconColor et un diagnostic filesystem inspectable,
-  sans compatibilité avec le prototype pré-release qu’il remplace.
+  sans compatibilité avec le schéma de thème v1.
 todos:
   - id: catalog-contract
     content: Verrouiller Kind, rôles, manifest v1 de 256 matchers, index et fixtures indépendantes
-    status: completed
-  - id: theme-schema-v1
-    content: Séparer les versions de contrats et implémenter le schéma public de thème v1 sans loader du prototype
-    status: completed
+    status: pending
+  - id: theme-schema-v2
+    content: Séparer les versions de contrats et implémenter le schéma thème v2 sans loader legacy
+    status: pending
   - id: deterministic-resolver
     content: Implémenter la résolution Kind + rôles + règles + overrides et séparer icône/texte
-    status: completed
+    status: pending
   - id: builtins-vivid
     content: Brancher le catalogue sur les quatre thèmes et livrer la palette vivid vérifiée
-    status: completed
+    status: pending
   - id: classify-cli
     content: Ajouter theme classify avec inspection Lstat, root explicite et diagnostics v1
-    status: completed
+    status: pending
   - id: tests-docs-gitops
     content: Livrer tests, documentation publique, notices, draft PR et CI 6/6
-    status: completed
+    status: pending
 isProject: false
 ---
 
@@ -38,7 +38,7 @@ Ce chantier doit être intégré avant le tag `v0.2.0` et livre ensemble :
 - un catalogue sémantique immuable, compilé dans le binaire et partagé par tous les thèmes ;
 - une classification à deux axes : `Kind` technique pour l’icône, rôles structurels pour la couleur et les styles ;
 - exactement 256 matchers dans le catalogue v1, couvrant les projets modernes sans chercher l’exhaustivité artificielle ;
-- le schéma YAML public de thème v1, qui remplace le prototype pré-release sans le prendre en charge ;
+- le schéma YAML de thème v2, sans lecture ni compatibilité du schéma v1 ;
 - le champ `iconColor` et une décoration ANSI séparant icône et texte ;
 - les thèmes `default`, `midnight`, `daylight` et le nouveau thème `vivid` ;
 - `dirloom theme classify`, qui inspecte réellement une entrée du filesystem sans scanner récursivement un arbre ;
@@ -46,9 +46,8 @@ Ce chantier doit être intégré avant le tag `v0.2.0` et livre ensemble :
 
 Décisions produit :
 
-- `.dirloom.yaml` et les fichiers de thème utilisent chacun `schemaVersion: 1`, mais constituent des contrats indépendants, définis et versionnés dans des packages distincts ;
-- le nouveau format de thème remplace le prototype pré-release sans changer son numéro : `schemaVersion: 1` désigne désormais le premier contrat public livré avec v0.2 ;
-- aucun fichier conforme uniquement au prototype n’est accepté ou converti ; `catalogVersion: 1` est obligatoire et sert notamment de discriminant explicite ;
+- `.dirloom.yaml` reste en `schemaVersion: 1` ; seul le format des fichiers de thème passe à `schemaVersion: 2` ;
+- aucun fichier de thème v1 n’est accepté ou converti ; v0.2 n’étant pas encore publiée, le schéma v2 devient le premier contrat public livré ;
 - les versions des fichiers thème, diagnostics thème, diagnostics de classification, configuration et arbres JSON sont indépendantes ;
 - le catalogue est actif dans les quatre thèmes ; changer de thème ne change pas la classification ;
 - le thème sélectionné par défaut reste `default`, mais la préférence intégrée d’icônes devient `never` ;
@@ -71,7 +70,7 @@ La fonctionnalité est terminée lorsque :
 - tous les thèmes consomment le même catalogue sans dupliquer ses entrées dans `Theme.Rules` ;
 - le comportement sans option visuelle explicite utilise `theme=default`, `color=auto` et `icons=never` ;
 - `--icons auto` active Unicode uniquement sur un TTY éligible, tandis que `--icons nerd` reste toujours explicite ;
-- un thème conforme uniquement au prototype pré-release échoue avec le code `2`, stdout vide et une erreur actionnable indiquant que `catalogVersion` est requis par le schéma public v1 ;
+- un thème v1 échoue avec le code `2`, stdout vide et une erreur indiquant que le schéma v2 est requis ;
 - les diagnostics JSON possèdent leurs propres versions et ne changent pas lors d’une modification du schéma YAML ;
 - `theme classify` détermine le type réel par `Lstat`, ne suit pas les symlinks et ne parcourt aucun descendant ;
 - les règles utilisateur, le catalogue, les bindings de kind, les rôles et les overrides directs suivent une priorité testée propriété par propriété ;
@@ -317,7 +316,7 @@ Complexité annoncée :
 
 Le plan ne revendique donc pas un resolver global O(1). Il supprime le scan linéaire des centaines de règles intégrées et garde le coût utilisateur explicitement borné.
 
-## 6. Schéma public de thème v1, sans compatibilité avec le prototype
+## 6. Schéma de thème v2, sans compatibilité legacy
 
 ### 6.1 Versions indépendantes
 
@@ -325,7 +324,7 @@ Remplacer la constante globale actuelle par des constantes séparées :
 
 ```go
 const (
-    ThemeFileSchemaVersion       = 1
+    ThemeFileSchemaVersion       = 2
     SemanticCatalogVersion       = 1
     ThemeListSchemaVersion       = 1
     ThemeExplainSchemaVersion    = 1
@@ -336,31 +335,31 @@ const (
 
 Les versions existantes de `.dirloom.yaml`, `config explain` et du JSON d’arbre restent définies dans leurs packages respectifs. Aucune constante de présentation ne doit les piloter.
 
-Un fichier dont `schemaVersion` est absent ou différent de `1` est rejeté avant toute inspection. Un ancien fichier prototype portant déjà `schemaVersion: 1` est rejeté structurellement s’il ne satisfait pas le nouveau contrat, notamment si `catalogVersion` est absent. Dans les deux cas :
+Un fichier `schemaVersion: 1` est rejeté avant toute inspection avec :
 
 - code de sortie `2` ;
 - stdout vide ;
 - fichier `--output` intact ;
-- message précis, par exemple `catalogVersion is required for theme schemaVersion 1` pour un prototype reconnaissable ;
-- aucune détection heuristique, conversion, fallback ou lecture du prototype.
+- message indiquant `unsupported theme schemaVersion 1; expected 2` ;
+- aucune tentative de conversion, de fallback ou de lecture legacy.
 
-Ce remplacement ne nécessite pas de modifier la politique générale de versioning : le prototype de thème n’a jamais été publié dans une release Dirloom. Le changelog doit néanmoins rendre visible sa substitution par le schéma public v1 définitif. Après le tag `v0.2.0`, toute évolution de ce contrat sera gouvernée normalement par la politique de versioning.
+Ce remplacement ne nécessite pas de modifier la politique générale de versioning : le schéma de thème v1 n’a jamais été publié dans une release Dirloom. Le changelog doit néanmoins rendre visible le remplacement du contrat de développement pré-release.
 
 ### 6.2 Document YAML
 
 ```yaml
-schemaVersion: 1
+schemaVersion: 2
 catalogVersion: 1
 name: team
 description: Team terminal theme
 appearance: dark
 
 palette:
-  edge: "#7A869E"
-  file: "#F1F5F9"
-  source: "#66F0C0"
-  generated: "#A1AAC0"
-  image: "#FF75D8"
+  edge: "#96A0B5"
+  file: "#E5E9F0"
+  source: "#65D6BA"
+  generated: "#9AA4B6"
+  image: "#FF8FC1"
 
 tokens:
   tree.edge:
@@ -409,7 +408,7 @@ icons:
 
 Contrat :
 
-- `schemaVersion: 1` et `catalogVersion: 1` sont obligatoires ;
+- `schemaVersion: 2` et `catalogVersion: 1` sont obligatoires ;
 - `name` et `appearance` restent obligatoires ;
 - `iconColor` est accepté sur tokens, kinds, rôles et règles ; absent, il hérite ; explicitement `null`, il suit la couleur effective du texte ;
 - `icons.unicode` et `icons.nerd` acceptent une chaîne valide ou `null` pour supprimer explicitement le glyphe hérité de ce canal ;
@@ -531,61 +530,46 @@ Conséquences :
 - `--icons nerd` ne prétend toujours pas détecter la police installée ;
 - presets, thèmes et configuration d’inspection ne modifient jamais implicitement le mode d’icônes.
 
-### 9.2 Identité two-tone exacte de `vivid`
+### 9.2 Palette exacte de `vivid`
 
-`vivid` utilise le fond sombre de référence `#10131A`, sans l'émettre ni modifier le terminal. Il constitue un thème autonome et non une variante implicite de `default` ou `midnight`.
+`vivid` utilise le fond sombre de référence `#10131A`, sans l’émettre ni modifier le terminal. Sa palette publique v0.2 est :
 
-Son principe visuel est two-tone :
-
-- le rôle structurel pilote la couleur et les styles du texte ;
-- le kind technique pilote la couleur de l'icône ;
-- un même glyphe Go reste donc reconnaissable, tandis qu'un source, un test ou un fichier généré garde une intention textuelle distincte.
-
-Palette de base :
-
-| Token | Couleur |
+| Token/rôle | Couleur |
 | --- | --- |
-| `edge` | `#7A869E` |
-| `file` | `#F1F5F9` |
-| `directory` | `#44D7FF` |
-| `symlink` | `#F38BFF` |
-| `accent` | `#8B7CFF` |
+| `edge` | `#96A0B5` |
+| `file` | `#E5E9F0` |
+| `directory` | `#7EB6FF` |
+| `symlink` | `#C6A0FF` |
+| `accent` | `#6ED6FF` |
+| `security` | `#FF7C91` |
+| `generated` | `#9AA4B6` |
+| `vendor` | `#8F99AB` |
+| `test` | `#A8E063` |
+| `contract` | `#FFD166` |
+| `lock` | `#E8A66A` |
+| `infra` | `#FF927E` |
+| `config` | `#F2C879` |
+| `executable` | `#77DDB0` |
+| `archive` | `#DDB07A` |
+| `media` | `#FF8FC1` |
+| `data` | `#70D0F6` |
+| `source` | `#65D6BA` |
+| `document` | `#B8ACFF` |
+| `tooling` | `#B2BDCF` |
+| `generic` | `#C8D0DD` |
 
-Couleurs de texte par rôle :
-
-| Rôle | Couleur | Rôle | Couleur |
-| --- | --- | --- | --- |
-| `security` | `#FF5C7C` | `generated` | `#A1AAC0` |
-| `vendor` | `#8793AA` | `test` | `#B6F36B` |
-| `contract` | `#FFE066` | `lock` | `#FFB86B` |
-| `infra` | `#FF7A5C` | `config` | `#FFD166` |
-| `executable` | `#5CFFA9` | `archive` | `#F4B860` |
-| `media` | `#FF75D8` | `data` | `#45E0FF` |
-| `source` | `#66F0C0` | `document` | `#C9A7FF` |
-| `tooling` | `#AAB8D0` | `generic` | `#DEE6F2` |
-
-Couleurs d'icône par famille de kind :
-
-| Kind | Couleur | Kind | Couleur |
-| --- | --- | --- | --- |
-| `directory` | `#00D7FF` | `symlink` | `#FF6BEE` |
-| `source` | `#00FFD1` | `manifest` | `#FFB000` |
-| `data` | `#00D4FF` | `document` | `#A78BFA` |
-| `media` | `#FF4FB8` | `archive` | `#FF9F43` |
-| `binary` | `#2EF2A1` |  |  |
-
-Tous les coloris intégrés, y compris ceux des icônes et des connecteurs, doivent atteindre WCAG 2.1 AA `≥ 4.5:1` contre le fond de référence. Les tests calculent le contraste depuis les valeurs sRGB et vérifient que chaque couleur principale de `vivid` diffère de la couleur correspondante de `midnight`.
+Tous les coloris utilisés pour le texte doivent atteindre WCAG 2.1 AA `≥ 4.5:1` contre le fond de référence. Une `iconColor` décorative doit atteindre `≥ 3:1`. Les tests calculent le contraste à partir des valeurs sRGB, sans accepter une validation visuelle subjective comme seule preuve.
 
 Bindings `vivid` :
 
-- `security` et `contract` : bold + underline ;
-- `test`, `infra` et `executable` : bold ;
+- `contract` : bold + underline ;
+- `test` : couleur test, sans style additionnel ;
 - `generated` et `vendor` : dim ;
-- les autres rôles conservent le style du token de base ;
-- les familles `source`, `manifest`, `data`, `document`, `media`, `archive`, `binary`, `directory` et `symlink` utilisent leur `iconColor` dédiée ;
-- les styles de texte ne s'appliquent jamais au span de l'icône.
+- `security` : bold ;
+- `source`, `infra`, `config`, `lock`, `data`, `document`, `media`, `archive`, `executable`, `tooling` et `generic` : couleur dédiée ;
+- kinds de médias, langages et manifests : `iconColor` de famille ou accent spécifique, sans modifier la couleur du texte donnée par le rôle.
 
-La palette est originale, fortement différenciée de `midnight` et n'imite pas la combinaison d'eza. Aucune police n'est embarquée et `--theme vivid` seul ne réactive pas les icônes.
+La palette est originale et ne reprend pas la combinaison violette/jaune/rose d’eza. Aucune police n’est embarquée.
 
 ## 10. Inspection d’une classification réelle
 
@@ -599,13 +583,13 @@ dirloom theme classify ./src --root . --theme vivid --as json
 
 La commande inspecte exactement l’entrée demandée :
 
-1. valider les arguments et charger/compiler le thème demandé ; toute erreur de thème survient avant l’accès à la cible ;
-2. résoudre `--root` depuis le répertoire courant ; sa valeur par défaut est `.` ;
-3. résoudre le chemin cible relativement à cette racine, ou accepter un chemin absolu contenu dans la racine ;
-4. vérifier, après nettoyage et résolution des parents symlinkés, que la cible reste sous la racine ;
-5. appeler `os.Lstat` sur la cible ;
-6. classifier `file`, `directory` ou `symlink` sans suivre la cible d’un symlink ;
-7. normaliser le chemin relatif avec `/` pour les règles de thème et produire le diagnostic ;
+1. résoudre `--root` depuis le répertoire courant ; sa valeur par défaut est `.` ;
+2. résoudre le chemin cible relativement à cette racine, ou accepter un chemin absolu contenu dans la racine ;
+3. vérifier, après nettoyage et résolution des parents symlinkés, que la cible reste sous la racine ;
+4. appeler `os.Lstat` sur la cible ;
+5. classifier `file`, `directory` ou `symlink` sans suivre la cible d’un symlink ;
+6. normaliser le chemin relatif avec `/` pour les règles de thème ;
+7. charger le thème demandé, compiler les bindings et produire le diagnostic ;
 8. ne parcourir aucun enfant, ne lire aucun contenu de fichier et n’effectuer aucun accès réseau.
 
 Un socket, pipe, device ou type filesystem non pris en charge produit une erreur d’usage. Une cible absente produit le code `2`; une permission refusée ou autre erreur d’I/O produit le code `1`.
@@ -615,7 +599,7 @@ Options :
 | Option | Valeurs | Défaut |
 | --- | --- | --- |
 | `--root` | dossier existant | `.` |
-| `--theme` | built-in ou chemin YAML v1 public | `default` |
+| `--theme` | built-in ou chemin YAML v2 | `default` |
 | `--as` | `text`, `json` | `text` |
 
 Les flags `--config`, `--no-config`, `--no-user-config`, `--preset`, `--color`, `--icons`, `--format`, `--style`, `--depth`, `--ignore` et `--output` sont rejetés plutôt qu’ignorés. La commande n’utilise ni configuration projet/utilisateur ni preset.
@@ -629,8 +613,8 @@ Kind: source.go
 Roles: source
 Matched by: extension (.go)
 Theme: vivid (built-in)
-Text: color=#66F0C0 styles=none
-Icon: unicode="•" nerd="󰟓" color=#00FFD1
+Text: color=#65D6BA styles=none
+Icon: unicode="•" nerd="󰟓" color=#65D6BA
 ```
 
 La sortie reste non décorée pour pouvoir être copiée dans un rapport ou une issue.
@@ -653,8 +637,8 @@ La sortie reste non décorée pour pouvoir être copiée dans un rapport ou une 
     "source": { "kind": "built-in" }
   },
   "style": {
-    "textColor": "#66F0C0",
-    "iconColor": "#00FFD1",
+    "textColor": "#65D6BA",
+    "iconColor": "#65D6BA",
     "styles": [],
     "icons": {
       "unicode": "•",
@@ -671,7 +655,7 @@ La sortie reste non décorée pour pouvoir être copiée dans un rapport ou une 
 }
 ```
 
-Règles : tableaux jamais `null`, clés et rôles dans un ordre stable, chemin absolu absent du JSON, stdout vide en erreur, écriture transactionnelle en mémoire et `schemaVersion: 1` du diagnostic indépendant du `schemaVersion: 1` du thème YAML.
+Règles : tableaux jamais `null`, clés et rôles dans un ordre stable, chemin absolu absent du JSON, stdout vide en erreur, écriture transactionnelle en mémoire et `schemaVersion: 1` indépendant du thème YAML v2.
 
 ## 11. Diagnostics des thèmes
 
@@ -691,7 +675,7 @@ Exemple d’enveloppe :
 ```json
 {
   "schemaVersion": 1,
-  "themeSchemaVersion": 1,
+  "themeSchemaVersion": 2,
   "catalog": {
     "version": 1,
     "entryCount": 256,
@@ -705,7 +689,7 @@ Exemple d’enveloppe :
 }
 ```
 
-`theme validate` retourne également `themeSchemaVersion: 1` et `catalogVersion: 1`. Les warnings possèdent des codes stables, notamment `unknown-token`, `unknown-kind-binding` et `unknown-role-binding`.
+`theme validate` retourne également `themeSchemaVersion: 2` et `catalogVersion: 1`. Les warnings possèdent des codes stables, notamment `unknown-token`, `unknown-kind-binding` et `unknown-role-binding`.
 
 ## 12. Sécurité et compatibilité
 
@@ -720,7 +704,7 @@ Le catalogue et les thèmes intégrés sont compilés dans le binaire :
 - aucune influence sur le modèle canonique, l’ordre, les exclusions ou la profondeur ;
 - aucun changement du schéma JSON des arbres.
 
-Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2. Après publication, renommer/supprimer un kind, changer la classification d’un matcher ou modifier une définition de thème exige une analyse SemVer et une entrée de changelog. Le prototype pré-release antérieur n’est pas supporté et aucun code de compatibilité n’est conservé.
+Le catalogue v1 et le schéma thème v2 font partie du contrat public de v0.2. Après publication, renommer/supprimer un kind, changer la classification d’un matcher ou modifier une définition de thème exige une analyse SemVer et une entrée de changelog. Avant le tag v0.2.0, le schéma thème v1 reste volontairement non supporté et aucun code legacy n’est conservé.
 
 ## 13. Tests
 
@@ -740,12 +724,11 @@ Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2
 - fuzz tests sur noms, chemins slash et entrées Unicode : aucun panic et résultat déterministe ;
 - benchmarks séparant exact lookup, suffix trie et fallback ; aucune promesse de temps absolu fragile en CI.
 
-### 13.2 Schéma public de thème v1
+### 13.2 Schéma v2
 
-- v1 minimal, complet et avec valeurs explicitement réinitialisées ;
-- `schemaVersion` absent, `2`, inconnu ou mal typé ;
+- v2 minimal, complet et avec valeurs explicitement réinitialisées ;
+- `schemaVersion` absent, `1`, inconnu ou mal typé ;
 - `catalogVersion` absent ou inconnu ;
-- fixtures de l’ancien prototype `schemaVersion: 1` sans `catalogVersion` ou avec sa structure obsolète : rejet avant inspection, sans conversion ;
 - `iconColor` sur token, kind, rôle et règle ;
 - `null` explicite pour `iconColor` et glyphes ;
 - `styles: []` effaçant l’héritage ;
@@ -754,7 +737,7 @@ Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2
 - règles sans action, plusieurs matchers ou matchers dupliqués ;
 - limites palette/kinds/rôles/règles et fichier > 1 Mio ;
 - champs inconnus, clés dupliquées, ancres, alias, merge keys, tags et documents multiples ;
-- versions de diagnostic toujours égales à `1` lorsque le fichier de thème vaut lui aussi `1`, avec des constantes et tests de contrat distincts.
+- versions diagnostic toujours égales à `1` lorsque le thème fichier vaut `2`.
 
 ### 13.3 Résolution et rendu
 
@@ -785,8 +768,8 @@ Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2
 - racine relative/absolue, espaces et Unicode ;
 - traversal `..`, cible hors root et parent symlink sortant rejetés ;
 - entrée absente, permission refusée et type spécial ;
-- thèmes built-in et fichier YAML conforme au schéma public v1 ;
-- prototype pré-release rejeté avant diagnostic ;
+- thèmes built-in et fichier YAML v2 ;
+- v1 rejeté avant diagnostic ;
 - texte et JSON conformes aux contrats ;
 - flags d’inspection interdits ;
 - argument absent/surnuméraire et `--as` invalide ;
@@ -795,7 +778,7 @@ Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2
 
 ### 13.5 Documentation et couverture
 
-- exemples YAML marqués dans [`themes.md`](themes.md) chargés par le vrai loader du schéma public v1 ;
+- exemples YAML marqués dans [`themes.md`](themes.md) chargés par le vrai loader v2 ;
 - commandes `vivid` et `theme classify` exercées par les tests CLI ;
 - compteurs documentés comparés au catalogue compilé ;
 - liens relatifs du README et des guides vérifiés ;
@@ -807,7 +790,7 @@ Le catalogue v1 et le schéma public de thème v1 font partie du contrat de v0.2
 
 ## 14. Documentation publique
 
-Créer `docs/catalog.md` comme page canonique anglophone :
+Créer [`catalog.md`](catalog.md) comme page canonique anglophone :
 
 1. Overview.
 2. How classification works.
@@ -821,15 +804,15 @@ Créer `docs/catalog.md` comme page canonique anglophone :
 
 Mettre à jour dans la même PR :
 
-- [`themes.md`](themes.md) : schéma public v1, `catalogVersion`, kinds, rôles, `iconColor`, `null`, `vivid`, `theme classify` et quotas ;
+- [`themes.md`](themes.md) : schéma v2, `catalogVersion`, kinds, rôles, `iconColor`, `null`, `vivid`, `theme classify` et quotas ;
 - [`configuration.md`](configuration.md) : défaut `icons: never` et activation explicite ;
 - [`presets.md`](presets.md) : les presets ne sélectionnent jamais un mode d’icônes ;
 - [`use-cases.md`](use-cases.md) : revue de projet, diagnostic de classification, TTY sobre et showcase Nerd ;
 - [`architecture.md`](architecture.md) : pipeline Kind + rôles avant projection ;
 - [`README.md`](../README.md) : exemple court `vivid`, garantie canonique et liens ;
-- [`functional-specification.md`](product/functional-specification.md) : schéma public de thème v1, catalogue v1 et priorité complète ;
+- [`functional-specification.md`](product/functional-specification.md) : schéma v2, catalogue v1 et priorité complète ;
 - [`roadmap.md`](product/roadmap.md) : catalogue/vivid livrés en v0.2 ;
-- [`CHANGELOG.md`](../CHANGELOG.md) : `Added` pour catalogue/vivid/classify, `Changed` pour le remplacement du prototype par le schéma public de thème v1 et les icônes désactivées par défaut ;
+- [`CHANGELOG.md`](../CHANGELOG.md) : `Added` pour catalogue/vivid/classify, `Changed` pour schéma thème v2 et icônes désactivées par défaut ;
 - [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) : provenance MDI/Nerd Fonts, codepoints utilisés et absence de police embarquée ;
 - [`dependencies.md`](dependencies.md) si la documentation de provenance doit référencer une version de Nerd Fonts ;
 - ne pas modifier [`SPEC-v0.1.md`](../SPEC-v0.1.md), qui reste l’archive contractuelle v0.1.
@@ -880,7 +863,7 @@ Commits recommandés :
 
 ```text
 feat(catalog): add kind and role classification engine
-feat(theme)!: replace pre-release theme schema with public v1 catalog bindings
+feat(theme)!: adopt theme schema v2 and catalog bindings
 feat(theme): add vivid built-in theme
 feat(cli): inspect filesystem semantic classifications
 test(theme): cover catalog and canonical contracts
@@ -889,7 +872,7 @@ docs(theme): publish semantic catalog and vivid guide
 
 La PR explique explicitement :
 
-- le remplacement du prototype pré-release par le schéma public de thème v1 définitif, sans loader de compatibilité ;
+- le remplacement pré-release du schéma thème v1 par v2, sans loader legacy ;
 - l’indépendance des versions YAML, diagnostics et arbres JSON ;
 - le passage du défaut `icons:auto` à `icons:never` ;
 - l’activation du catalogue dans les quatre thèmes ;
@@ -897,7 +880,7 @@ La PR explique explicitement :
 - le scan non récursif et sans suivi de symlink de `theme classify` ;
 - les 256 matchers, 96 kinds et 16 rôles ;
 - les résultats de tests, contrastes, couverture et snapshot ;
-- le risque `medium-high`, principalement lié au nouveau contrat public de thème v1 et au rendu TTY explicite ;
+- le risque `medium-high`, principalement lié au contrat thème v2 et au rendu TTY explicite ;
 - le rollback avant release : revert du squash merge ;
 - l’absence de migration runtime, v1 n’ayant jamais été publiée.
 
@@ -921,7 +904,7 @@ Interdits dans ce chantier : tag `v0.2.0`, GitHub Release, GoReleaser non-snapsh
 
 1. Verrouiller le manifest de 256 matchers, les 96 kinds, les 16 rôles et la fixture indépendante.
 2. Implémenter le package pur `catalog`, ses validateurs, son index et ses tests.
-3. Séparer toutes les constantes de version et introduire le schéma public de thème v1 strict.
+3. Séparer toutes les constantes de version et introduire le schéma thème v2 strict.
 4. Implémenter bindings de kinds/rôles, `iconColor`, resets explicites et résolution propriété par propriété.
 5. Supprimer `baseIconRules` et brancher `default`, `midnight` et `daylight` sur le catalogue.
 6. Passer le défaut intégré d’icônes à `never` et verrouiller les régressions TTY/canoniques.
@@ -932,7 +915,7 @@ Interdits dans ce chantier : tag `v0.2.0`, GitHub Release, GoReleaser non-snapsh
 
 ## 18. Hors périmètre
 
-- compatibilité ou migration automatique des fichiers issus du prototype pré-release de thème ;
+- compatibilité ou migration automatique des thèmes YAML v1 ;
 - catalogue utilisateur ou overlay YAML `catalog:` ;
 - téléchargement de thèmes, catalogues ou polices ;
 - détection ou installation d’une Nerd Font ;

@@ -9,12 +9,11 @@ import (
 )
 
 const (
-	FormatText         = "text"
-	FormatMarkdown     = "markdown"
-	FormatMarkdownTree = "markdown-tree"
-	FormatJSON         = "json"
-	StyleUnicode       = "unicode"
-	StyleASCII         = "ascii"
+	FormatText     = "text"
+	FormatMarkdown = "markdown"
+	FormatJSON     = "json"
+	StyleUnicode   = "unicode"
+	StyleASCII     = "ascii"
 )
 
 // Renderer writes exactly one complete representation of a tree.
@@ -22,42 +21,20 @@ type Renderer interface {
 	Render(io.Writer, *tree.Node) error
 }
 
-// NodeContext supplies presentation-only metadata without changing the tree.
-type NodeContext struct {
-	Path    string
-	Name    string
-	Display string
-	Type    tree.NodeType
-}
-
-// Decorator projects terminal presentation onto canonical text segments.
-// Implementations must not add, remove, rename, or reorder nodes.
-type Decorator interface {
-	Edge(string) string
-	Node(NodeContext) string
-}
-
 // New selects a renderer for validated format and style values.
-func New(format, style string, decorators ...Decorator) (Renderer, error) {
-	var decorator Decorator
-	if len(decorators) > 0 {
-		decorator = decorators[0]
-	}
+func New(format, style string) (Renderer, error) {
 	switch format {
 	case FormatText:
-		return newTextRenderer(style, decorator)
+		return newTextRenderer(style)
 	case FormatMarkdown:
-		// Markdown is always canonical and deliberately ignores presentation.
-		text, err := newTextRenderer(style, nil)
+		text, err := newTextRenderer(style)
 		if err != nil {
 			return nil, err
 		}
 		return markdownRenderer{text: text}, nil
-	case FormatMarkdownTree:
-		return markdownTreeRenderer{}, nil
 	case FormatJSON:
 		return jsonRenderer{}, nil
 	default:
-		return nil, fmt.Errorf("unsupported format %q (expected text, markdown, markdown-tree, or json)", format)
+		return nil, fmt.Errorf("unsupported format %q (expected text, markdown, or json)", format)
 	}
 }

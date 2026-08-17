@@ -1,6 +1,6 @@
 # Dependency decisions
 
-Dirloom keeps its direct runtime dependencies small and encapsulated behind internal packages.
+Dirloom v0.1 intentionally has three direct runtime dependencies.
 
 ## Cobra v1.10.2
 
@@ -16,19 +16,7 @@ Dirloom creates the matcher with an empty root and feeds only `.gitignore` files
 
 ## x/sys v0.47.0
 
-`golang.org/x/sys/windows` provides the typed bindings needed for safe output replacement and temporary `ENABLE_VIRTUAL_TERMINAL_PROCESSING` setup on Windows. The standard library cannot guarantee replacement through `os.Rename` there and does not expose the required console-mode operations. Using the official Go extended-system package avoids maintaining unsafe local syscall wrappers. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause.
-
-## x/term v0.45.0
-
-`golang.org/x/term` provides cross-platform terminal detection through `IsTerminal`. Dirloom uses it only at the presentation boundary: scanning, canonical Markdown and JSON, theme inspection, diagnostics, help, and errors do not depend on terminal state.
-
-Version `v0.45.0` targets Go 1.25 and uses the already pinned `x/sys v0.47.0`. The dependency is maintained by the Go project and licensed under BSD-3-Clause.
-
-## yaml v3.0.4
-
-`go.yaml.in/yaml/v3` parses the independent public `.dirloom.yaml` and custom-theme YAML formats. Version 3 provides typed decoding, an inspectable node tree and strict known-field validation, which Dirloom combines with its own rejection of duplicate keys, multiple documents, anchors, aliases, merge keys and custom tags.
-
-The dependency is isolated behind `internal/config` and `internal/presentation` loaders. Dirloom does not enable YAML-based execution, includes, templates or environment interpolation. Configuration and theme schema versions remain independent. The module is dual-licensed under MIT and Apache-2.0.
+`golang.org/x/sys/windows` provides the typed `MoveFileEx` binding needed for safe replacement of an existing output file on Windows. The standard `os.Rename` contract cannot guarantee replacement there. Using the official Go extended-system package avoids maintaining an unsafe local syscall wrapper. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause.
 
 ## Review policy
 
