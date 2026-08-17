@@ -127,6 +127,47 @@ presentation:
 	}
 }
 
+func TestResolveDiagramPrecedenceAndGraphvizAlias(t *testing.T) {
+	root := t.TempDir()
+	userBase := t.TempDir()
+	writeConfig(t, filepath.Join(userBase, "dirloom", "config.yaml"), `schemaVersion: 1
+diagram:
+  direction: left-right
+  maxNodes: 20
+`)
+	writeConfig(t, filepath.Join(root, ".dirloom.yaml"), `schemaVersion: 1
+defaults:
+  format: dot
+diagram:
+  maxNodes: null
+`)
+	loader := NewLoader(WithUserConfigDir(func() (string, error) { return userBase, nil }))
+	resolved, err := loader.Resolve(ResolveOptions{Root: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Effective.Format != FormatGraphviz {
+		t.Fatalf("format = %q", resolved.Effective.Format)
+	}
+	if resolved.Effective.DiagramView != DiagramViewStructure || resolved.Effective.DiagramDirection != DiagramDirectionLeftRight || resolved.Effective.DiagramMaxNodes != nil {
+		t.Fatalf("diagram = %#v", resolved.Effective)
+	}
+	if resolved.Provenance["format"].Source != SourceProject || resolved.Provenance["diagram.direction"].Source != SourceUser || resolved.Provenance["diagram.maxNodes"].Source != SourceProject {
+		t.Fatalf("diagram provenance = %#v", resolved.Provenance)
+	}
+
+	limit := 12
+	resolved, err = loader.Resolve(ResolveOptions{Root: root, Overrides: Overrides{
+		DiagramMaxNodes: LimitOverride{Set: true, Value: limit},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved.Effective.DiagramMaxNodes == nil || *resolved.Effective.DiagramMaxNodes != 12 || resolved.Provenance["diagram.maxNodes"].Source != SourceCLI {
+		t.Fatalf("CLI diagram limit = %#v provenance=%#v", resolved.Effective.DiagramMaxNodes, resolved.Provenance["diagram.maxNodes"])
+	}
+}
+
 func TestResolvePresetPrecedenceAndExplicitOverrides(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
@@ -428,6 +469,9 @@ func TestResolveRejectsInvalidCLIValues(t *testing.T) {
 		{Style: Optional[string]{Set: true, Value: "auto"}},
 		{Depth: DepthOverride{Set: true, Value: -1}},
 		{IgnorePatterns: []string{"../outside"}},
+		{DiagramView: Optional[string]{Set: true, Value: "imports"}},
+		{DiagramDirection: Optional[string]{Set: true, Value: "radial"}},
+		{DiagramMaxNodes: LimitOverride{Set: true, Value: 0}},
 	}
 	for _, overrides := range tests {
 		if _, err := loaderWithoutUserConfig().Resolve(ResolveOptions{Root: root, Overrides: overrides}); err == nil || !IsInvalid(err) {

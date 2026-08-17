@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
 )
 
@@ -258,6 +259,8 @@ func defaultResolution(root string) Resolution {
 			Color:             presentation.ColorAuto,
 			Icons:             presentation.IconsNever,
 			Theme:             presentation.ThemeDefault,
+			DiagramView:       DiagramViewStructure,
+			DiagramDirection:  DiagramDirectionTopDown,
 		},
 		Provenance: map[string]Origin{
 			"depth":             builtIn,
@@ -270,6 +273,9 @@ func defaultResolution(root string) Resolution {
 			"color":             builtIn,
 			"icons":             builtIn,
 			"theme":             builtIn,
+			"diagram.view":      builtIn,
+			"diagram.direction": builtIn,
+			"diagram.maxNodes":  builtIn,
 		},
 	}
 }
@@ -352,8 +358,11 @@ func applyPartial(resolution *Resolution, values partial, origin Origin) error {
 	applyOptional(&resolution.Effective.Color, "color", values.Color, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.Icons, "icons", values.Icons, origin, resolution.Provenance)
 	applyTheme(resolution, values.Theme, origin)
+	applyOptional(&resolution.Effective.DiagramView, "diagram.view", values.DiagramView, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.DiagramDirection, "diagram.direction", values.DiagramDirection, origin, resolution.Provenance)
+	applyDiagramMaxNodes(resolution, values.DiagramMaxNodes, origin)
 	appendIgnores(resolution, values.IgnorePatterns, origin)
-	return validateEffective(*resolution)
+	return validateEffective(resolution)
 }
 
 func applyOverrides(resolution *Resolution, overrides Overrides) error {
@@ -368,8 +377,11 @@ func applyOverrides(resolution *Resolution, overrides Overrides) error {
 	applyOptional(&resolution.Effective.Color, "color", overrides.Color, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.Icons, "icons", overrides.Icons, origin, resolution.Provenance)
 	applyTheme(resolution, overrides.Theme, origin)
+	applyOptional(&resolution.Effective.DiagramView, "diagram.view", overrides.DiagramView, origin, resolution.Provenance)
+	applyOptional(&resolution.Effective.DiagramDirection, "diagram.direction", overrides.DiagramDirection, origin, resolution.Provenance)
+	applyDiagramMaxNodes(resolution, overrides.DiagramMaxNodes, origin)
 	appendIgnores(resolution, overrides.IgnorePatterns, origin)
-	return validateEffective(*resolution)
+	return validateEffective(resolution)
 }
 
 func applyTheme(resolution *Resolution, selection ThemeSelection, origin Origin) {
@@ -398,6 +410,19 @@ func applyDepth(resolution *Resolution, value DepthOverride, origin Origin) {
 	resolution.Provenance["depth"] = origin
 }
 
+func applyDiagramMaxNodes(resolution *Resolution, value LimitOverride, origin Origin) {
+	if !value.Set {
+		return
+	}
+	if value.Unlimited {
+		resolution.Effective.DiagramMaxNodes = nil
+	} else {
+		limit := value.Value
+		resolution.Effective.DiagramMaxNodes = &limit
+	}
+	resolution.Provenance["diagram.maxNodes"] = origin
+}
+
 func applyOptional[T any](target *T, field string, value Optional[T], origin Origin, provenance map[string]Origin) {
 	if !value.Set {
 		return
@@ -421,14 +446,25 @@ func appendIgnores(resolution *Resolution, patterns []string, origin Origin) {
 	}
 }
 
-func validateEffective(resolution Resolution) error {
+func validateEffective(resolution *Resolution) error {
 	if resolution.Effective.MaxDepth != nil && *resolution.Effective.MaxDepth < 0 {
 		return invalidf("depth must be a non-negative integer or unlimited")
 	}
-	switch resolution.Effective.Format {
-	case FormatText, FormatMarkdown, FormatMarkdownTree, FormatJSON:
+	canonicalFormat, ok := outputformat.Canonical(resolution.Effective.Format)
+	if !ok {
+		return invalidf("%v", outputformat.Validate(resolution.Effective.Format))
+	}
+	resolution.Effective.Format = canonicalFormat
+	if resolution.Effective.DiagramView != DiagramViewStructure {
+		return invalidf("unsupported diagram view %q (expected structure)", resolution.Effective.DiagramView)
+	}
+	switch resolution.Effective.DiagramDirection {
+	case DiagramDirectionTopDown, DiagramDirectionLeftRight:
 	default:
-		return invalidf("unsupported format %q (expected text, markdown, markdown-tree, or json)", resolution.Effective.Format)
+		return invalidf("unsupported diagram direction %q (expected top-down or left-right)", resolution.Effective.DiagramDirection)
+	}
+	if resolution.Effective.DiagramMaxNodes != nil && *resolution.Effective.DiagramMaxNodes <= 0 {
+		return invalidf("diagram max nodes must be positive or unlimited")
 	}
 	switch resolution.Effective.Style {
 	case StyleUnicode, StyleASCII:

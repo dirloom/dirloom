@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/outputformat"
 	"github.com/dirloom/dirloom/internal/presentation"
 	"go.yaml.in/yaml/v3"
 )
@@ -20,6 +21,7 @@ type fileDocument struct {
 	Filters       fileFilters      `yaml:"filters"`
 	Ignore        yaml.Node        `yaml:"ignore"`
 	Presentation  filePresentation `yaml:"presentation"`
+	Diagram       fileDiagram      `yaml:"diagram"`
 }
 
 type filePresentation struct {
@@ -41,6 +43,12 @@ type fileFilters struct {
 	UseGitIgnore      *bool `yaml:"useGitignore"`
 }
 
+type fileDiagram struct {
+	View      yaml.Node `yaml:"view"`
+	Direction yaml.Node `yaml:"direction"`
+	MaxNodes  yaml.Node `yaml:"maxNodes"`
+}
+
 type partial struct {
 	Preset            PresetSelection
 	Depth             DepthOverride
@@ -54,6 +62,9 @@ type partial struct {
 	Color             Optional[string]
 	Icons             Optional[string]
 	Theme             ThemeSelection
+	DiagramView       Optional[string]
+	DiagramDirection  Optional[string]
+	DiagramMaxNodes   LimitOverride
 }
 
 func parseDocument(data []byte, path string) (partial, error) {
@@ -89,9 +100,12 @@ func parseDocument(data []byte, path string) (partial, error) {
 		return partial{}, invalidf("invalid config %q: unsupported schemaVersion %d (expected %d)", path, *document.SchemaVersion, SchemaVersion)
 	}
 
-	format, err := parseEnumNode(document.Defaults.Format, path, "defaults.format", []string{FormatText, FormatMarkdown, FormatMarkdownTree, FormatJSON})
+	format, err := parseEnumNode(document.Defaults.Format, path, "defaults.format", outputformat.AcceptedNames())
 	if err != nil {
 		return partial{}, err
+	}
+	if format.Set {
+		format.Value, _ = outputformat.Canonical(format.Value)
 	}
 	style, err := parseEnumNode(document.Defaults.Style, path, "defaults.style", []string{StyleUnicode, StyleASCII})
 	if err != nil {
@@ -113,6 +127,18 @@ func parseDocument(data []byte, path string) (partial, error) {
 	if err != nil {
 		return partial{}, err
 	}
+	diagramView, err := parseEnumNode(document.Diagram.View, path, "diagram.view", []string{DiagramViewStructure})
+	if err != nil {
+		return partial{}, err
+	}
+	diagramDirection, err := parseEnumNode(document.Diagram.Direction, path, "diagram.direction", []string{DiagramDirectionTopDown, DiagramDirectionLeftRight})
+	if err != nil {
+		return partial{}, err
+	}
+	diagramMaxNodes, err := parsePositiveLimitNode(document.Diagram.MaxNodes, path, "diagram.maxNodes")
+	if err != nil {
+		return partial{}, err
+	}
 	result := partial{
 		Preset:            PresetSelection{},
 		DirectoriesOnly:   optionalBool(document.Defaults.DirectoriesOnly),
@@ -125,6 +151,9 @@ func parseDocument(data []byte, path string) (partial, error) {
 		Color:             color,
 		Icons:             icons,
 		Theme:             theme,
+		DiagramView:       diagramView,
+		DiagramDirection:  diagramDirection,
+		DiagramMaxNodes:   diagramMaxNodes,
 	}
 	preset, err := parsePresetNode(document.Preset, path)
 	if err != nil {
@@ -213,6 +242,26 @@ func parseDepthNode(node yaml.Node, path string) (DepthOverride, error) {
 		return DepthOverride{}, invalidf("invalid config %q: line %d, column %d: defaults.depth must be a non-negative integer or null", path, node.Line, node.Column)
 	}
 	return DepthOverride{Set: true, Value: value}, nil
+}
+
+func parsePositiveLimitNode(node yaml.Node, path, field string) (LimitOverride, error) {
+	if node.Kind == 0 {
+		return LimitOverride{}, nil
+	}
+	if node.Kind != yaml.ScalarNode {
+		return LimitOverride{}, invalidf("invalid config %q: line %d, column %d: %s must be a positive integer or null", path, node.Line, node.Column, field)
+	}
+	if node.ShortTag() == "!!null" {
+		return LimitOverride{Set: true, Unlimited: true}, nil
+	}
+	if node.ShortTag() != "!!int" {
+		return LimitOverride{}, invalidf("invalid config %q: line %d, column %d: %s must be a positive integer or null", path, node.Line, node.Column, field)
+	}
+	var value int
+	if err := node.Decode(&value); err != nil || value <= 0 {
+		return LimitOverride{}, invalidf("invalid config %q: line %d, column %d: %s must be a positive integer or null", path, node.Line, node.Column, field)
+	}
+	return LimitOverride{Set: true, Value: value}, nil
 }
 
 func parseEnumNode(node yaml.Node, path, field string, allowed []string) (Optional[string], error) {
