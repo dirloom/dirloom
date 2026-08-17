@@ -82,7 +82,7 @@ The four built-ins use the same semantic catalog. Switching themes changes only 
 | `default` | Universal | `default` | `ansi:blue` | `default` | `ansi:magenta` | `ansi:cyan` |
 | `midnight` | Dark (`#1A1B26`) | `#9AA5CE` | `#7AA2F7` | `#C0CAF5` | `#BB9AF7` | `#7DCFFF` |
 | `daylight` | Light (`#FFFFFF`) | `#4B5563` | `#1D4ED8` | `#111827` | `#6B21A8` | `#0369A1` |
-| `vivid` | Dark (`#10131A`) | `#96A0B5` | `#7EB6FF` | `#E5E9F0` | `#C6A0FF` | `#6ED6FF` |
+| `vivid` | Dark (`#10131A`) | `#7A869E` | `#44D7FF` | `#F1F5F9` | `#F38BFF` | `#8B7CFF` |
 
 `default` delegates to the terminal ANSI palette. Dirloom does not detect the terminal background; select `midnight`, `daylight`, or `vivid` explicitly.
 
@@ -94,20 +94,42 @@ dirloom theme explain daylight --as json
 
 ### Vivid palette
 
-`vivid` is the expressive dark showcase. It does not set a terminal background.
+`vivid` is an independent two-tone neon theme for dark terminals. Structural roles control text while technical kinds control icon color. This separation makes a Go test, generated source, and ordinary Go source immediately distinguishable without changing their technical glyph.
+
+Base presentation:
 
 | Binding | Color | Binding | Color |
 | --- | --- | --- | --- |
-| `security` | `#FF7C91` | `generated` | `#9AA4B6` |
-| `vendor` | `#8F99AB` | `test` | `#A8E063` |
-| `contract` | `#FFD166` | `lock` | `#E8A66A` |
-| `infra` | `#FF927E` | `config` | `#F2C879` |
-| `executable` | `#77DDB0` | `archive` | `#DDB07A` |
-| `media` | `#FF8FC1` | `data` | `#70D0F6` |
-| `source` | `#65D6BA` | `document` | `#B8ACFF` |
-| `tooling` | `#B2BDCF` | `generic` | `#C8D0DD` |
+| `edge` | `#7A869E` | `file` | `#F1F5F9` |
+| `directory` | `#44D7FF` | `symlink` | `#F38BFF` |
+| `accent` | `#8B7CFF` | Reference background | `#10131A` |
 
-Text colors meet WCAG 2.1 AA contrast of at least 4.5:1 against `#10131A`; decorative icon colors meet at least 3:1. These ratios are tested from the sRGB values.
+Role-driven text colors:
+
+| Role | Color | Role | Color |
+| --- | --- | --- | --- |
+| `security` | `#FF5C7C` | `generated` | `#A1AAC0` |
+| `vendor` | `#8793AA` | `test` | `#B6F36B` |
+| `contract` | `#FFE066` | `lock` | `#FFB86B` |
+| `infra` | `#FF7A5C` | `config` | `#FFD166` |
+| `executable` | `#5CFFA9` | `archive` | `#F4B860` |
+| `media` | `#FF75D8` | `data` | `#45E0FF` |
+| `source` | `#66F0C0` | `document` | `#C9A7FF` |
+| `tooling` | `#AAB8D0` | `generic` | `#DEE6F2` |
+
+Kind-driven icon colors:
+
+| Kind family | Color | Kind family | Color |
+| --- | --- | --- | --- |
+| `directory` | `#00D7FF` | `symlink` | `#FF6BEE` |
+| `source` | `#00FFD1` | `manifest` | `#FFB000` |
+| `data` | `#00D4FF` | `document` | `#A78BFA` |
+| `media` | `#FF4FB8` | `archive` | `#FF9F43` |
+| `binary` | `#2EF2A1` |  |  |
+
+`security` and `contract` are bold and underlined. `test`, `infra`, and `executable` are bold; `generated` and `vendor` are dimmed. Other roles keep their base text style. Icon spans remain free of text styles.
+
+Every built-in `vivid` color reaches at least 4.5:1 contrast against `#10131A`, including decorative icon colors. Ratios are tested from the sRGB values. The theme does not set a background and still requires explicit `--icons unicode`, `--icons nerd`, or `--icons auto` to display glyphs.
 
 ## Use a custom theme
 
@@ -129,11 +151,11 @@ description: Team terminal theme
 appearance: dark
 
 palette:
-  edge: "#96A0B5"
-  file: "#E5E9F0"
-  source: "#65D6BA"
-  generated: "#9AA4B6"
-  image: "#FF8FC1"
+  edge: "#7A869E"
+  file: "#F1F5F9"
+  source: "#66F0C0"
+  generated: "#A1AAC0"
+  image: "#FF75D8"
 
 tokens:
   tree.edge:

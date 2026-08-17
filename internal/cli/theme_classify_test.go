@@ -31,7 +31,7 @@ func TestThemeClassifyRealFilesystemEntriesTextAndJSON(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("text=(%q,%q,%d)", stdout, stderr, code)
 	}
-	for _, want := range []string{"Path: src/main.go", "Type: file", "Kind: source.go", "Roles: source", "Matched by: extension (.go)", "Theme: vivid (built-in)", "Text: color=#65D6BA", "Icon: unicode=\"•\" nerd=\"󰟓\" color=#65D6BA"} {
+	for _, want := range []string{"Path: src/main.go", "Type: file", "Kind: source.go", "Roles: source", "Matched by: extension (.go)", "Theme: vivid (built-in)", "Text: color=#66F0C0", "Icon: unicode=\"•\" nerd=\"󰟓\" color=#00FFD1"} {
 		if !strings.Contains(stdout, want) {
 			t.Errorf("text missing %q\n%s", want, stdout)
 		}

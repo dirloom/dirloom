@@ -324,7 +324,7 @@ dirloom --theme vivid --icons nerd
 
 Le catalogue décrit le projet sur deux axes : un kind technique pour le glyphe et des rôles structurels ordonnés pour la couleur et les styles. Le contrat v1 contient exactement 256 matchers, 96 kinds hiérarchiques et 16 rôles. `_test.go` conserve ainsi une icône Go avec le rôle `test`, tandis que `.pb.go` conserve Go avec `generated`.
 
-Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` consomment ce catalogue unique. La classification intégrée suit symlink, dossier exact, nom exact, suffixe composé le plus long, extension puis fallback. Elle ne lit ni contenu, shebang, MIME, état Git ou métadonnée étendue.
+Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` consomment ce catalogue unique. `vivid` l'interprète avec une identité two-tone indépendante : texte par rôle, couleur de glyphe par kind. La classification intégrée suit symlink, dossier exact, nom exact, suffixe composé le plus long, extension puis fallback. Elle ne lit ni contenu, shebang, MIME, état Git ou métadonnée étendue.
 
 ### Canonical Mode vs Presentation Mode
 
@@ -383,8 +383,8 @@ name: team
 appearance: dark
 
 palette:
-  source: "#65D6BA"
-  generated: "#9AA4B6"
+  source: "#66F0C0"
+  generated: "#A1AAC0"
 
 kinds:
   source:

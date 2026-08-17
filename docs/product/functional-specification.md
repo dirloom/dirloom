@@ -222,7 +222,7 @@ classification catalogue
 
 Une règle conserve la priorité chemin exact, nom exact, glob, extension, type ; à priorité égale, la première déclaration gagne. Un `kind:` ou `role:` inconnu dans une règle est une erreur. Une clé inconnue dans les blocs `kinds` ou `roles` est ignorée avec un warning stable pour permettre l'inspection d'un thème destiné à un catalogue futur.
 
-Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` DOIVENT utiliser le même catalogue. Le thème `vivid` constitue la vitrine sombre expressive ; le thème seul NE DOIT jamais activer les icônes. Les spans ANSI d'icône et de texte DOIVENT être séparés et réinitialisés indépendamment ; les styles de texte NE DOIVENT pas s'appliquer au glyphe.
+Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` DOIVENT utiliser le même catalogue. Le thème `vivid` constitue une vitrine sombre two-tone indépendante : les rôles pilotent le texte et les kinds la couleur des glyphes ; le thème seul NE DOIT jamais activer les icônes. Les spans ANSI d'icône et de texte DOIVENT être séparés et réinitialisés indépendamment ; les styles de texte NE DOIVENT pas s'appliquer au glyphe.
 
 `dirloom theme classify <path>` DOIT charger le thème avant l'accès cible, confiner la cible à `--root`, utiliser `Lstat`, ne pas suivre le symlink final, ne lire aucun contenu et ne parcourir aucun descendant. Son JSON possède son propre `schemaVersion: 1` et NE DOIT exposer aucun chemin absolu cible ou thème.
 

@@ -131,7 +131,7 @@ Explicit options override individual preset values. Use `--preset none` to neutr
 
 ## Terminal presentation
 
-Interactive text uses automatic color and keeps icons disabled until requested. The `vivid` theme showcases semantic project roles while the catalog keeps technical glyphs distinct:
+Interactive text uses automatic color and keeps icons disabled until requested. The independent `vivid` theme uses a two-tone neon system: structural roles color text while technical kinds color glyphs:
 
 ```bash
 dirloom --theme vivid

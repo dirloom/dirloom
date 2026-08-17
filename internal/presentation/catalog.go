@@ -83,17 +83,35 @@ func daylightPalette() map[string]string {
 
 func vividPalette() map[string]string {
 	return map[string]string{
-		"edge": "#96A0B5", "file": "#E5E9F0", "directory": "#7EB6FF", "symlink": "#C6A0FF", "accent": "#6ED6FF",
-		"security": "#FF7C91", "generated": "#9AA4B6", "vendor": "#8F99AB", "test": "#A8E063",
-		"contract": "#FFD166", "lock": "#E8A66A", "infra": "#FF927E", "config": "#F2C879",
-		"executable": "#77DDB0", "archive": "#DDB07A", "media": "#FF8FC1", "data": "#70D0F6",
-		"source": "#65D6BA", "document": "#B8ACFF", "tooling": "#B2BDCF", "generic": "#C8D0DD",
+		"edge": "#7A869E", "file": "#F1F5F9", "directory": "#44D7FF", "symlink": "#F38BFF", "accent": "#8B7CFF",
+		"security": "#FF5C7C", "generated": "#A1AAC0", "vendor": "#8793AA", "test": "#B6F36B",
+		"contract": "#FFE066", "lock": "#FFB86B", "infra": "#FF7A5C", "config": "#FFD166",
+		"executable": "#5CFFA9", "archive": "#F4B860", "media": "#FF75D8", "data": "#45E0FF",
+		"source": "#66F0C0", "document": "#C9A7FF", "tooling": "#AAB8D0", "generic": "#DEE6F2",
+		"icon-directory": "#00D7FF", "icon-symlink": "#FF6BEE", "icon-source": "#00FFD1", "icon-manifest": "#FFB000",
+		"icon-data": "#00D4FF", "icon-document": "#A78BFA", "icon-media": "#FF4FB8", "icon-archive": "#FF9F43", "icon-binary": "#2EF2A1",
 	}
+}
+
+func vividTheme() Theme {
+	theme := builtIn(ThemeVivid, "Use a two-tone neon palette designed for high-signal dark terminal output (reference background #10131A).", AppearanceDark, vividPalette())
+	theme.Kinds = map[string]Binding{
+		"source": kindBinding("icon-source"), "manifest": kindBinding("icon-manifest"),
+		"data": kindBinding("icon-data"), "document": kindBinding("icon-document"),
+		"media": kindBinding("icon-media"), "archive": kindBinding("icon-archive"),
+		"binary": kindBinding("icon-binary"), "directory": kindBinding("icon-directory"),
+		"symlink": kindBinding("icon-symlink"),
+	}
+	theme.Roles[string(catalog.RoleSecurity)] = binding("security", "bold", "underline")
+	theme.Roles[string(catalog.RoleTest)] = binding("test", "bold")
+	theme.Roles[string(catalog.RoleInfra)] = binding("infra", "bold")
+	theme.Roles[string(catalog.RoleExecutable)] = binding("executable", "bold")
+	return theme
 }
 
 var builtInCatalog = map[string]Theme{
 	ThemeDefault:  builtIn(ThemeDefault, "Use the terminal's ANSI palette for universal light and dark background compatibility.", AppearanceUniversal, defaultPalette()),
 	ThemeMidnight: builtIn(ThemeMidnight, "Use a truecolor palette designed for dark terminal backgrounds (reference background #1A1B26).", AppearanceDark, midnightPalette()),
 	ThemeDaylight: builtIn(ThemeDaylight, "Use a truecolor palette designed for light terminal backgrounds (reference background #FFFFFF).", AppearanceLight, daylightPalette()),
-	ThemeVivid:    builtIn(ThemeVivid, "Use an expressive high-contrast palette for dark terminals and Nerd Font showcases (reference background #10131A).", AppearanceDark, vividPalette()),
+	ThemeVivid:    vividTheme(),
 }

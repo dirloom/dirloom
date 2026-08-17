@@ -36,6 +36,26 @@ func TestDecoratorColorIconAndFallback(t *testing.T) {
 	}
 }
 
+func TestVividDecoratorUsesIndependentKindAndRoleSegments(t *testing.T) {
+	theme, _ := Lookup(ThemeVivid)
+	compiled, err := Compile(theme)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decorator := NewDecorator(compiled, true, IconsNerd, ProfileTrueColor)
+
+	got := decorator.Node(render.NodeContext{Path: "main.go", Name: "main.go", Display: "main.go", Type: tree.NodeFile})
+	want := "\x1b[38;2;0;255;209m󰟓\x1b[0m \x1b[38;2;102;240;192mmain.go\x1b[0m"
+	if got != want {
+		t.Fatalf("vivid source = %q, want %q", got, want)
+	}
+
+	got = decorator.Node(render.NodeContext{Path: "main_test.go", Name: "main_test.go", Display: "main_test.go", Type: tree.NodeFile})
+	want = "\x1b[38;2;0;255;209m󰟓\x1b[0m \x1b[38;2;182;243;107;1mmain_test.go\x1b[0m"
+	if got != want {
+		t.Fatalf("vivid test = %q, want %q", got, want)
+	}
+}
 func TestDecoratorEscapesTerminalControlsOnlyInPresentation(t *testing.T) {
 	theme, _ := Lookup("default")
 	compiled, err := Compile(theme)

@@ -164,9 +164,11 @@ Roles: source
 Visual role: source
 Matched by: extension (.go)
 Theme: vivid (built-in)
-Text: color=#65D6BA styles=none
-Icon: unicode="•" nerd="󰟓" color=#65D6BA
+Text: color=#66F0C0 styles=none
+Icon: unicode="•" nerd="󰟓" color=#00FFD1
 ```
+
+With `vivid`, this two-tone result is intentional: the `source` role selects the text color while the `source.go` kind inherits the `source` icon color.
 
 The JSON diagnostic owns an independent `schemaVersion: 1`. It contains no absolute target path or custom-theme path, uses stable role ordering, and emits empty arrays rather than `null`.
 
@@ -182,9 +184,9 @@ name: catalog-bindings
 appearance: dark
 
 palette:
-  source: "#65D6BA"
-  test: "#A8E063"
-  generated: "#9AA4B6"
+  source: "#66F0C0"
+  test: "#B6F36B"
+  generated: "#A1AAC0"
 
 kinds:
   source:

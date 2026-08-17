@@ -43,7 +43,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Primitive centrale | Artefact structurel déterministe et versionné |
 | Scaffolding | Plateforme de génération complète : templates, plans, migrations et Architecture Packs |
 | Premier Architecture Pack | Architecture FSD-like de référence, sous identifiant provisoire `reference-fsd` jusqu'à son baptême |
-| Couleurs et icônes | Socle v0.2 livré : couleur TTY auto, icônes opt-in, catalogue v1, thème `vivid`, thèmes personnalisés, `theme classify` et artefacts canoniques intacts ; états architecturaux avancés futurs |
+| Couleurs et icônes | Socle v0.2 livré : couleur TTY auto, icônes opt-in, catalogue v1, thème `vivid` two-tone indépendant, thèmes personnalisés, `theme classify` et artefacts canoniques intacts ; états architecturaux avancés futurs |
 | Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
 | TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |

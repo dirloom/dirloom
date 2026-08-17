@@ -29,6 +29,7 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Replace the pre-release theme prototype with the definitive public theme schema v1; `catalogVersion: 1` is now required and no legacy loader is retained.
 - Change the built-in icon mode from `auto` to `never`; Unicode and Nerd glyphs are now explicitly activated while automatic color remains unchanged.
 - Resolve icon color separately from text color and emit independent ANSI spans and resets.
+- Redesign `vivid` as an independent two-tone neon theme with role-driven text, kind-driven icon colors, stronger semantic emphasis, and WCAG AA contrast for every built-in color.
 
 ## [0.1.1] - 2026-08-11
 

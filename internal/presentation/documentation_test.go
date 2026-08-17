@@ -55,7 +55,7 @@ func TestPublicThemeDocumentationUsesRealContracts(t *testing.T) {
 		"| `default` | Universal | `default` | `ansi:blue` | `default` | `ansi:magenta` | `ansi:cyan` |",
 		"| `midnight` | Dark (`#1A1B26`) | `#9AA5CE` | `#7AA2F7` | `#C0CAF5` | `#BB9AF7` | `#7DCFFF` |",
 		"| `daylight` | Light (`#FFFFFF`) | `#4B5563` | `#1D4ED8` | `#111827` | `#6B21A8` | `#0369A1` |",
-		"| `vivid` | Dark (`#10131A`) | `#96A0B5` | `#7EB6FF` | `#E5E9F0` | `#C6A0FF` | `#6ED6FF` |",
+		"| `vivid` | Dark (`#10131A`) | `#7A869E` | `#44D7FF` | `#F1F5F9` | `#F38BFF` | `#8B7CFF` |",
 	} {
 		if !strings.Contains(text, row) {
 			t.Errorf("missing catalog row %q", row)

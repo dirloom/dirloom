@@ -356,11 +356,11 @@ description: Team terminal theme
 appearance: dark
 
 palette:
-  edge: "#96A0B5"
-  file: "#E5E9F0"
-  source: "#65D6BA"
-  generated: "#9AA4B6"
-  image: "#FF8FC1"
+  edge: "#7A869E"
+  file: "#F1F5F9"
+  source: "#66F0C0"
+  generated: "#A1AAC0"
+  image: "#FF75D8"
 
 tokens:
   tree.edge:
@@ -531,46 +531,61 @@ Conséquences :
 - `--icons nerd` ne prétend toujours pas détecter la police installée ;
 - presets, thèmes et configuration d’inspection ne modifient jamais implicitement le mode d’icônes.
 
-### 9.2 Palette exacte de `vivid`
+### 9.2 Identité two-tone exacte de `vivid`
 
-`vivid` utilise le fond sombre de référence `#10131A`, sans l’émettre ni modifier le terminal. Sa palette publique v0.2 est :
+`vivid` utilise le fond sombre de référence `#10131A`, sans l'émettre ni modifier le terminal. Il constitue un thème autonome et non une variante implicite de `default` ou `midnight`.
 
-| Token/rôle | Couleur |
+Son principe visuel est two-tone :
+
+- le rôle structurel pilote la couleur et les styles du texte ;
+- le kind technique pilote la couleur de l'icône ;
+- un même glyphe Go reste donc reconnaissable, tandis qu'un source, un test ou un fichier généré garde une intention textuelle distincte.
+
+Palette de base :
+
+| Token | Couleur |
 | --- | --- |
-| `edge` | `#96A0B5` |
-| `file` | `#E5E9F0` |
-| `directory` | `#7EB6FF` |
-| `symlink` | `#C6A0FF` |
-| `accent` | `#6ED6FF` |
-| `security` | `#FF7C91` |
-| `generated` | `#9AA4B6` |
-| `vendor` | `#8F99AB` |
-| `test` | `#A8E063` |
-| `contract` | `#FFD166` |
-| `lock` | `#E8A66A` |
-| `infra` | `#FF927E` |
-| `config` | `#F2C879` |
-| `executable` | `#77DDB0` |
-| `archive` | `#DDB07A` |
-| `media` | `#FF8FC1` |
-| `data` | `#70D0F6` |
-| `source` | `#65D6BA` |
-| `document` | `#B8ACFF` |
-| `tooling` | `#B2BDCF` |
-| `generic` | `#C8D0DD` |
+| `edge` | `#7A869E` |
+| `file` | `#F1F5F9` |
+| `directory` | `#44D7FF` |
+| `symlink` | `#F38BFF` |
+| `accent` | `#8B7CFF` |
 
-Tous les coloris utilisés pour le texte doivent atteindre WCAG 2.1 AA `≥ 4.5:1` contre le fond de référence. Une `iconColor` décorative doit atteindre `≥ 3:1`. Les tests calculent le contraste à partir des valeurs sRGB, sans accepter une validation visuelle subjective comme seule preuve.
+Couleurs de texte par rôle :
+
+| Rôle | Couleur | Rôle | Couleur |
+| --- | --- | --- | --- |
+| `security` | `#FF5C7C` | `generated` | `#A1AAC0` |
+| `vendor` | `#8793AA` | `test` | `#B6F36B` |
+| `contract` | `#FFE066` | `lock` | `#FFB86B` |
+| `infra` | `#FF7A5C` | `config` | `#FFD166` |
+| `executable` | `#5CFFA9` | `archive` | `#F4B860` |
+| `media` | `#FF75D8` | `data` | `#45E0FF` |
+| `source` | `#66F0C0` | `document` | `#C9A7FF` |
+| `tooling` | `#AAB8D0` | `generic` | `#DEE6F2` |
+
+Couleurs d'icône par famille de kind :
+
+| Kind | Couleur | Kind | Couleur |
+| --- | --- | --- | --- |
+| `directory` | `#00D7FF` | `symlink` | `#FF6BEE` |
+| `source` | `#00FFD1` | `manifest` | `#FFB000` |
+| `data` | `#00D4FF` | `document` | `#A78BFA` |
+| `media` | `#FF4FB8` | `archive` | `#FF9F43` |
+| `binary` | `#2EF2A1` |  |  |
+
+Tous les coloris intégrés, y compris ceux des icônes et des connecteurs, doivent atteindre WCAG 2.1 AA `≥ 4.5:1` contre le fond de référence. Les tests calculent le contraste depuis les valeurs sRGB et vérifient que chaque couleur principale de `vivid` diffère de la couleur correspondante de `midnight`.
 
 Bindings `vivid` :
 
-- `contract` : bold + underline ;
-- `test` : couleur test, sans style additionnel ;
+- `security` et `contract` : bold + underline ;
+- `test`, `infra` et `executable` : bold ;
 - `generated` et `vendor` : dim ;
-- `security` : bold ;
-- `source`, `infra`, `config`, `lock`, `data`, `document`, `media`, `archive`, `executable`, `tooling` et `generic` : couleur dédiée ;
-- kinds de médias, langages et manifests : `iconColor` de famille ou accent spécifique, sans modifier la couleur du texte donnée par le rôle.
+- les autres rôles conservent le style du token de base ;
+- les familles `source`, `manifest`, `data`, `document`, `media`, `archive`, `binary`, `directory` et `symlink` utilisent leur `iconColor` dédiée ;
+- les styles de texte ne s'appliquent jamais au span de l'icône.
 
-La palette est originale et ne reprend pas la combinaison violette/jaune/rose d’eza. Aucune police n’est embarquée.
+La palette est originale, fortement différenciée de `midnight` et n'imite pas la combinaison d'eza. Aucune police n'est embarquée et `--theme vivid` seul ne réactive pas les icônes.
 
 ## 10. Inspection d’une classification réelle
 
@@ -614,8 +629,8 @@ Kind: source.go
 Roles: source
 Matched by: extension (.go)
 Theme: vivid (built-in)
-Text: color=#65D6BA styles=none
-Icon: unicode="•" nerd="󰟓" color=#65D6BA
+Text: color=#66F0C0 styles=none
+Icon: unicode="•" nerd="󰟓" color=#00FFD1
 ```
 
 La sortie reste non décorée pour pouvoir être copiée dans un rapport ou une issue.
@@ -638,8 +653,8 @@ La sortie reste non décorée pour pouvoir être copiée dans un rapport ou une 
     "source": { "kind": "built-in" }
   },
   "style": {
-    "textColor": "#65D6BA",
-    "iconColor": "#65D6BA",
+    "textColor": "#66F0C0",
+    "iconColor": "#00FFD1",
     "styles": [],
     "icons": {
       "unicode": "•",
