@@ -17,6 +17,26 @@ Unlike a raw `tree` listing, the output is designed to be a reproducible artifac
 
 ## Installation
 
+Published status is independent of each package manager. GitHub Releases is always the artifact source. See [Distribution and trusted releases](docs/distribution.md).
+
+<!-- dirloom-distribution-status -->
+```text
+RELEASE STATUS
+Released at GitHub tag v0.1.1; v0.2.0 composing
+
+DISTRIBUTION STATUS
+GitHub     ✅ v0.1.1
+Scoop      ✅ v0.1.1
+Homebrew   ⏳
+Winget     ⏳
+```
+
+### Windows with Winget
+
+```powershell
+winget install Dirloom.Dirloom
+```
+
 ### Windows with Scoop
 
 ```powershell
@@ -26,9 +46,15 @@ scoop install dirloom
 
 The official bucket selects the x64 or ARM64 release, verifies its SHA-256 checksum and adds `dirloom` to `PATH`. Upgrade later with `scoop update dirloom`.
 
+### macOS and Linux with Homebrew
+
+```bash
+brew install --cask dirloom/tap/dirloom
+```
+
 ### Release archives
 
-Download the archive for Windows, Linux or macOS from [GitHub Releases](https://github.com/dirloom/dirloom/releases), extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`.
+Download the archive for Windows, Linux or macOS from [GitHub Releases](https://github.com/dirloom/dirloom/releases), extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`. Verify `checksums.txt`, SBOMs and attestations as described in [Distribution](docs/distribution.md).
 
 ### Install with Go
 
@@ -57,8 +83,8 @@ dirloom
 # Inspect another directory, at most three levels deep
 dirloom ./src --depth 3
 
-# Produce copy-ready Markdown
-dirloom --format markdown
+# Copy Markdown ready to paste into GitHub
+dirloom --format markdown --copy
 
 # Start from a documented built-in preset
 dirloom --preset compact
@@ -71,16 +97,19 @@ dirloom --format mermaid --output docs/structure.mmd
 
 # Write safely to a file (stdout remains empty)
 dirloom --format markdown --output structure.md
+
+# Generate a shell completion script
+dirloom completion bash
 ```
 
-PowerShell composition works naturally:
+PowerShell composition still works, but `--copy` is the native clipboard path:
 
 ```powershell
-dirloom --format markdown | Set-Clipboard
+dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md) and [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
 
 ## Persistent configuration
 
@@ -179,6 +208,7 @@ dirloom [directory] [flags]
 | `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `never`. |
 | `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, `vivid`, or a local YAML theme. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
+| `--copy` | Copy the rendered tree to the clipboard instead of stdout. Mutually exclusive with `--output`. |
 | `-h, --help` | Show integrated help. |
 | `-v, --version` | Show the version. |
 
@@ -187,6 +217,8 @@ dirloom [directory] [flags]
 `dirloom config explain [directory]` reports source status, the active preset, effective values and provenance. Add `--as json` for the versioned machine-readable diagnostic.
 
 `dirloom theme classify <path>` performs one bounded `Lstat` and explains the real entry type, semantic kind, roles, winning matcher, and resolved theme style without reading file content or scanning recursively.
+
+`dirloom completion bash|zsh|fish|powershell` writes a deterministic completion script to stdout and does not modify your shell profile. See [Clipboard and shell completions](docs/clipboard-and-completions.md).
 
 ## Filtering
 
@@ -240,7 +272,7 @@ Dirloom also follows Git's safety behavior by not following a symlink used as a 
 
 ## Output contracts
 
-All formats are UTF-8 without BOM, contain LF line endings on every platform, and end with exactly one LF.
+All formats are UTF-8 without BOM, contain LF line endings on every platform, and end with exactly one LF. Stdout, `--output` and `--copy` share that invariant.
 
 ### Text
 
@@ -316,6 +348,7 @@ Directories always have `children`, including empty directories. Files never do.
 - Symlinks, Windows symbolic links and junctions are terminal nodes and are not traversed.
 - An explicitly selected symlink root may be resolved once when it targets a directory.
 - `--output` renders to a temporary file in the same directory, syncs it, then uses the platform's atomic replacement primitive.
+- `--copy` is an exclusive destination: it never writes a file and never prints the tree on stdout.
 - Existing output remains intact if safe replacement fails. Missing parent directories are never created.
 - A symlink output destination is refused.
 
@@ -355,7 +388,7 @@ go test -race ./...
 go build ./cmd/dirloom
 ```
 
-CI repeats formatting, vet, tests and builds on Windows, Linux and macOS. It also runs the race detector, `golangci-lint`, `govulncheck` and official Mermaid/Graphviz/D2 parser checks on Linux.
+CI repeats formatting, `go mod tidy` with a clean diff, `go mod verify`, vet, tests and builds on Windows, Linux and macOS. It also runs the race detector, `golangci-lint`, `govulncheck`, official Mermaid/Graphviz/D2 parser checks, completion-script syntax, GoReleaser `check`, and a snapshot that verifies the 13-artifact inventory.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
@@ -365,7 +398,9 @@ Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` tracks the last published tag until the release candidate merges.
 See [Release workflow](docs/release-workflow.md).
 
-Tags matching `v*` invoke GoReleaser. A `v0.1.0` tag builds:
+Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after publication.
+
+The six official archives remain:
 
 ```text
 dirloom_Windows_x86_64.zip
@@ -376,27 +411,21 @@ dirloom_Darwin_x86_64.tar.gz
 dirloom_Darwin_arm64.tar.gz
 ```
 
-Releases are created as drafts so maintainers can verify artifacts and checksums before publication.
-
-The official [Scoop bucket](https://github.com/dirloom/scoop-bucket) checks published stable releases every six hours and updates its x64 and ARM64 manifest automatically.
+See [Distribution](docs/distribution.md) and [Release workflow](docs/release-workflow.md).
 
 ## Roadmap
 
-The voted product sequence builds from the deterministic v0.1 foundation toward structural intelligence:
+The voted product sequence builds from the deterministic v0.1 foundation:
 
-- v0.2: product UX, configuration and visual identity;
-- v0.3: interactive `dirloom browse` explorer;
-- v0.4: fingerprints, snapshots, verification and structural diff;
-- v0.5: scaffold, templates and Architecture Packs;
-- v0.6: architecture contracts, Shape Signatures and persistent knowledge;
-- v0.7: query, metrics and structural intelligence;
-- v0.8: drift, dependency analysis, impact and simulation foundations;
-- v0.9: local agent-context infrastructure, MCP and official skills;
-- v1.0: stable public structural-intelligence platform.
+```text
+v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.4 INTELLIGENCE → v0.5 CHANGE
+```
 
-See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
+- v0.2: install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
+- v0.3: visual richness — catalog, themes, semantic files, colors and styles, closing the gap with eza;
+- later: fingerprints, snapshots, structural diff, then scaffold and Architecture Packs.
 
-TUI, Desktop, MCP, code analysis, watch mode and file-content summaries remain intentionally outside v0.1. Future networked capabilities must remain explicit; the core stays local-first.
+`dirloom browse` is scheduled after the v0.3 presentation increment. See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
 
 ## License
 

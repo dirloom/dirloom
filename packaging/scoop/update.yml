@@ -1,0 +1,87 @@
+name: Update manifest
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-dirloom-manifest
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Open version PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out bucket
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Build an idempotent version branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          payload="$(gh api repos/dirloom/dirloom/releases/latest)"
+          draft="$(printf '%s' "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["draft"])')"
+          prerelease="$(printf '%s' "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["prerelease"])')"
+          if [[ "$draft" != "False" || "$prerelease" != "False" ]]; then
+            echo "Latest GitHub Release is not a published stable release."
+            exit 1
+          fi
+          TAG="$(printf '%s' "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')"
+          VERSION="${TAG#v}"
+          work="$(mktemp -d)"
+          gh release download "$TAG" --repo dirloom/dirloom --pattern checksums.txt --dir "$work"
+          gh release download "$TAG" --repo dirloom/dirloom --pattern dirloom_Windows_x86_64.zip --dir "$work"
+          gh release download "$TAG" --repo dirloom/dirloom --pattern dirloom_Windows_arm64.zip --dir "$work"
+          checksum_hash() { awk -v name="$1" '$2==name{print $1}' "$work/checksums.txt"; }
+          win_x64="$(checksum_hash dirloom_Windows_x86_64.zip)"
+          win_arm="$(checksum_hash dirloom_Windows_arm64.zip)"
+          test -n "$win_x64" && test -n "$win_arm"
+          actual_x64="$(sha256sum "$work/dirloom_Windows_x86_64.zip" | awk '{print $1}')"
+          actual_arm="$(sha256sum "$work/dirloom_Windows_arm64.zip" | awk '{print $1}')"
+          test "$actual_x64" = "$win_x64"
+          test "$actual_arm" = "$win_arm"
+          unzip -l "$work/dirloom_Windows_x86_64.zip" | grep -q 'dirloom.exe'
+          unzip -l "$work/dirloom_Windows_arm64.zip" | grep -q 'dirloom.exe'
+          branch="dirloom-${VERSION}"
+          count="$(gh pr list --head "$branch" --state open --json number --jq 'length')"
+          if [[ "${count:-0}" -ge 1 ]]; then
+            echo "Scoop PR already open for ${VERSION}"
+            exit 0
+          fi
+          git checkout -B "$branch"
+          current="$(python3 -c 'import json; print(json.load(open("dirloom.json")).get("version",""))')"
+          if [[ "$current" == "$VERSION" ]]; then
+            echo "Scoop manifest already at ${VERSION}"
+            exit 0
+          fi
+          latest="$(printf '%s\n%s\n' "$current" "$VERSION" | sort -V | tail -n1)"
+          if [[ "$latest" != "$VERSION" ]]; then
+            echo "Refusing to regress Scoop from ${current} to ${VERSION}"
+            exit 1
+          fi
+          python3 - <<PY
+          from pathlib import Path
+          import json
+          manifest = json.loads(Path("dirloom.json").read_text(encoding="utf-8"))
+          manifest["version"] = "${VERSION}"
+          manifest["architecture"]["64bit"]["url"] = "https://github.com/dirloom/dirloom/releases/download/${TAG}/dirloom_Windows_x86_64.zip"
+          manifest["architecture"]["64bit"]["hash"] = "${win_x64}"
+          manifest["architecture"]["arm64"]["url"] = "https://github.com/dirloom/dirloom/releases/download/${TAG}/dirloom_Windows_arm64.zip"
+          manifest["architecture"]["arm64"]["hash"] = "${win_arm}"
+          Path("dirloom.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+          PY
+          git add dirloom.json
+          if git diff --cached --quiet; then
+            echo "Scoop manifest already at ${VERSION}"
+            exit 0
+          fi
+          git -c user.name="dirloom-package-bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "chore: update Dirloom to ${VERSION}"
+          git push -u origin "$branch"
+          gh pr create --head "$branch" --title "dirloom ${VERSION}" --body "Update Scoop to GitHub Release ${TAG}. Hashes were recalculated independently from checksums.txt. Do not merge without the Validate manifests check."

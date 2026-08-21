@@ -143,7 +143,7 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `diagram.direction` | `top-down` or `left-right` | `top-down` | Select diagram flow. Inactive for non-diagram formats. |
 | `diagram.maxNodes` | positive integer or `null` | `null` (unlimited) | Fail when an explicit node budget is exceeded. Inactive for non-diagram formats. |
 
-`directory` and `output` are intentionally not configurable. A repository configuration cannot redirect an inspection or cause Dirloom to write a file.
+`directory`, `output` and `copy` are intentionally not configurable. A repository configuration cannot redirect an inspection, cause Dirloom to write a file, or copy to the clipboard. `--copy` and `--output` are CLI-only and mutually exclusive. See [Clipboard and shell completions](clipboard-and-completions.md).
 
 `markdown` keeps the historical fenced text drawing. `markdown-tree` produces a native nested list and ignores inherited drawing style; see the [semantic Markdown guide](markdown-tree.md). `mermaid`, `graphviz` and `d2` emit canonical structure graphs; see [Graphical exports](graph-exports.md). Explicit `--diagram-view`, `--diagram-direction` and `--diagram-max-nodes` are rejected with non-diagram formats.
 
@@ -330,6 +330,7 @@ A configuration file can change which names appear in output, including hidden e
 - interpolate environment variables;
 - select a different inspection root;
 - choose an output destination;
+- copy to the clipboard;
 - modify the project or the configuration file.
 
 Preset definitions are compiled into Dirloom and have the same boundaries. They do not load additional files, perform network access, or select an output destination.

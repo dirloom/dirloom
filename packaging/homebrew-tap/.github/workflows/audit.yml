@@ -1,0 +1,29 @@
+name: Audit cask
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: brew audit
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Audit and style the Dirloom cask
+        run: |
+          set -euo pipefail
+          brew tap-new --no-git dirloom/tap
+          mkdir -p "$(brew --repo dirloom/tap)/Casks"
+          cp Casks/dirloom.rb "$(brew --repo dirloom/tap)/Casks/dirloom.rb"
+          brew style --cask dirloom/tap/dirloom
+          brew audit --cask --online --strict dirloom/tap/dirloom
+          brew fetch --cask dirloom/tap/dirloom
+          brew install --cask dirloom/tap/dirloom
+          dirloom --version
+          dirloom completion bash >/dev/null
+          brew uninstall --cask dirloom/tap/dirloom

@@ -1,0 +1,21 @@
+PackageIdentifier: Dirloom.Dirloom
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: Dirloom
+PublisherUrl: https://github.com/dirloom
+PublisherSupportUrl: https://github.com/dirloom/dirloom/issues
+PackageName: Dirloom
+PackageUrl: https://github.com/dirloom/dirloom
+License: MIT
+LicenseUrl: https://github.com/dirloom/dirloom/blob/v0.1.1/LICENSE
+Copyright: Copyright (c) Dirloom contributors
+ShortDescription: Clean project trees for humans and AI
+Description: Dirloom turns a real directory into a clean, deterministic, filterable and shareable project structure. It is a local-only, cross-platform CLI.
+Moniker: dirloom
+Tags:
+  - cli
+  - tree
+  - documentation
+  - markdown
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

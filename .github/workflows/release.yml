@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -23,6 +25,9 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Install Syft
+        run: sudo bash .github/scripts/install-syft.sh /usr/local/bin
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
         with:
@@ -31,3 +36,66 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attach SBOMs and final checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          go run ./cmd/release-artifacts prepare --dist dist --syft syft
+          go run ./cmd/release-artifacts verify --dist dist
+          gh release upload "${GITHUB_REF_NAME}" \
+            dist/checksums.txt \
+            dist/dirloom_Windows_x86_64.zip.spdx.json \
+            dist/dirloom_Windows_arm64.zip.spdx.json \
+            dist/dirloom_Linux_x86_64.tar.gz.spdx.json \
+            dist/dirloom_Linux_arm64.tar.gz.spdx.json \
+            dist/dirloom_Darwin_x86_64.tar.gz.spdx.json \
+            dist/dirloom_Darwin_arm64.tar.gz.spdx.json \
+            --clobber
+
+      - name: Attest release artefacts
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: |
+            dist/dirloom_Windows_x86_64.zip
+            dist/dirloom_Windows_arm64.zip
+            dist/dirloom_Linux_x86_64.tar.gz
+            dist/dirloom_Linux_arm64.tar.gz
+            dist/dirloom_Darwin_x86_64.tar.gz
+            dist/dirloom_Darwin_arm64.tar.gz
+            dist/dirloom_Windows_x86_64.zip.spdx.json
+            dist/dirloom_Windows_arm64.zip.spdx.json
+            dist/dirloom_Linux_x86_64.tar.gz.spdx.json
+            dist/dirloom_Linux_arm64.tar.gz.spdx.json
+            dist/dirloom_Darwin_x86_64.tar.gz.spdx.json
+            dist/dirloom_Darwin_arm64.tar.gz.spdx.json
+            dist/checksums.txt
+
+      - name: Verify attestations
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          subjects=(
+            dist/dirloom_Windows_x86_64.zip
+            dist/dirloom_Windows_arm64.zip
+            dist/dirloom_Linux_x86_64.tar.gz
+            dist/dirloom_Linux_arm64.tar.gz
+            dist/dirloom_Darwin_x86_64.tar.gz
+            dist/dirloom_Darwin_arm64.tar.gz
+            dist/dirloom_Windows_x86_64.zip.spdx.json
+            dist/dirloom_Windows_arm64.zip.spdx.json
+            dist/dirloom_Linux_x86_64.tar.gz.spdx.json
+            dist/dirloom_Linux_arm64.tar.gz.spdx.json
+            dist/dirloom_Darwin_x86_64.tar.gz.spdx.json
+            dist/dirloom_Darwin_arm64.tar.gz.spdx.json
+            dist/checksums.txt
+          )
+          test "${#subjects[@]}" -eq 13
+          for subject in "${subjects[@]}"; do
+            gh attestation verify "$subject" --repo "${GITHUB_REPOSITORY}"
+          done
+
+      - name: Leave draft for human GO
+        run: echo "Draft remains unpublished. Human GO is required before GitHub Release publication."

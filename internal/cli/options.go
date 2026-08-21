@@ -93,6 +93,7 @@ type options struct {
 	format           string
 	style            string
 	output           string
+	copy             bool
 	color            string
 	icons            string
 	theme            string

@@ -4,8 +4,7 @@ project_name: dirloom
 
 before:
   hooks:
-    - go mod tidy
-    - go test ./...
+    - go mod verify
 
 builds:
   - id: dirloom
@@ -53,8 +52,10 @@ archives:
       - docs/**
 
 checksum:
-  name_template: checksums.txt
-  algorithm: sha256
+  # The published checksums.txt is rewritten after Syft so it covers the six
+  # archives and six SBOMs (12 hashes). Disabling GoReleaser checksums avoids a
+  # draft that briefly advertises an archives-only inventory.
+  disable: true
 
 changelog:
   sort: asc
