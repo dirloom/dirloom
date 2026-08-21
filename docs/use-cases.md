@@ -2,12 +2,12 @@
 
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
-> **Dernière vérification :** 16 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [exports graphiques](graph-exports.md), [thèmes](themes.md), [catalogue sémantique](catalog.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Dernière vérification :** 20 août 2026<br>
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [exports graphiques](graph-exports.md), [thèmes](themes.md), [catalogue sémantique](catalog.md), [presse-papiers et complétions](clipboard-and-completions.md), [distribution](distribution.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
-Dirloom inspecte des **noms et des relations structurelles**. Il ne lit pas le contenu des fichiers et ne modifie pas le projet, sauf lorsqu’une destination est explicitement fournie avec `--output`.
+Dirloom inspecte des **noms et des relations structurelles**. Il ne lit pas le contenu des fichiers et ne modifie pas le projet, sauf lorsqu’une destination est explicitement fournie avec `--output`. `--copy` place le même rendu dans le presse-papiers sans écrire de fichier.
 
 ## 1. Comment lire les exemples
 
@@ -46,12 +46,14 @@ dirloom --help
 | Désactiver la lecture des `.gitignore` | `dirloom --no-gitignore` |
 | Produire un arbre ASCII | `dirloom --style ascii` |
 | Produire du Markdown prêt à insérer | `dirloom --format markdown` |
+| Copier du Markdown dans le presse-papiers | `dirloom --format markdown --copy` |
 | Produire une liste Markdown sémantique | `dirloom --format markdown-tree` |
 | Produire un document machine versionné | `dirloom --format json` |
 | Produire un graphe Mermaid | `dirloom --format mermaid` |
 | Produire une source Graphviz | `dirloom --format graphviz` |
 | Produire une source D2 | `dirloom --format d2` |
 | Écrire sûrement dans un fichier | `dirloom --output structure.txt` |
+| Installer les complétions du shell | `dirloom completion bash` |
 | Générer une documentation d’architecture | `dirloom --format markdown --output structure.md` |
 | Générer un artefact pour la CI | `dirloom --format json --output structure.json` |
 | Auditer ce que masque `.gitignore` | `dirloom --no-gitignore` |
@@ -574,31 +576,29 @@ La redirection dépend du shell et ne bénéficie pas de l’écriture transacti
 
 ### 6.3 Copier dans le presse-papiers
 
-PowerShell :
+`--copy` est l’option native. Le succès est silencieux : stdout et stderr restent vides.
+
+```bash
+dirloom --format markdown --copy
+dirloom --format json --copy
+dirloom --copy
+```
+
+Le presse-papiers reçoit le rendu textuel tel quel. `--color auto` n’émet pas d’ANSI ; `--icons auto` conserve les glyphes Unicode du rendu texte interactif. `--copy` et `--output` sont mutuellement exclusifs.
+
+Les compositions externes restent possibles, mais ne sont plus nécessaires :
 
 ```powershell
 dirloom --format markdown | Set-Clipboard
 ```
 
-macOS, avec `pbcopy` :
-
 ```bash
 dirloom --format markdown | pbcopy
-```
-
-Linux Wayland, avec `wl-copy` installé :
-
-```bash
 dirloom --format markdown | wl-copy
-```
-
-Linux X11, avec `xclip` installé :
-
-```bash
 dirloom --format markdown | xclip -selection clipboard
 ```
 
-Ces outils de presse-papiers sont externes. Dirloom v0.1 ne possède pas encore d’option native `--copy`.
+Détails des backends, de l’installation des complétions et du dépannage : [presse-papiers et complétions](clipboard-and-completions.md).
 
 ### 6.4 Ajouter un arbre à un README
 
@@ -1119,8 +1119,7 @@ La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes n
 
 | Capacité future | Alternative actuelle |
 | --- | --- |
-| `--copy` natif | Pipe vers `Set-Clipboard`, `pbcopy`, `wl-copy` ou `xclip` |
-| `browse` ou TUI | Générer une sortie texte, Markdown ou JSON |
+| `browse` ou TUI | Générer une sortie texte, Markdown ou JSON ; `--copy` pour coller |
 | Fingerprint, snapshot, verify et diff natifs | Versionner le JSON et utiliser Git ou un outil de diff |
 | `watch` et flux d’événements | Relancer Dirloom depuis un outil externe |
 | Scaffold, templates et Architecture Packs | Utiliser un générateur externe, puis réinspecter la structure |
@@ -1161,7 +1160,10 @@ dirloom --no-user-config
 dirloom --preset compact --depth 4
 
 # Markdown partageable
-dirloom --preset docs
+dirloom --preset docs --copy
+
+# Complétions
+dirloom completion powershell
 
 # Compatibilité ASCII
 dirloom --depth 4 --style ascii

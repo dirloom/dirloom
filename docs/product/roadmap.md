@@ -1,9 +1,9 @@
 # Dirloom — Roadmap produit stratégique
 
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
-> **Date :** 11 août 2026<br>
+> **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.1.1` publiée<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.1.1` publiée ; incrément v0.2 d'accessibilité (`--copy`, complétions, distribution GitOps) en composition<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -427,14 +427,31 @@ Le socle `markdown-tree` est livré séparément : il couvre la documentation Ma
 
 ## 6.6 Clipboard, completions et distribution
 
-**Niveau : Adoption**
+**Niveau : Adoption / Accessibilité**
+
+**Statut : livré dans v0.2 à Release Done**, indépendamment de la fusion Winget.
 
 ```bash
 dirloom --copy
 dirloom --format markdown --copy
+dirloom completion bash
 ```
 
-Complétions PowerShell/bash/zsh/fish et distribution via GitHub Releases, winget, Scoop, Homebrew, puis d’autres gestionnaires de paquets soutenables.
+Complétions PowerShell/bash/zsh/fish et distribution via GitHub Releases (artefacts immuables, SBOM, attestations), Scoop, Homebrew (`brew install --cask dirloom/tap/dirloom`) et Winget (`Dirloom.Dirloom`).
+
+Trajectoire officielle après v0.1 :
+
+```text
+v0.1 CORE
+v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
+v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
+v0.4 INTELLIGENCE    ← presets avancés / architecture
+v0.5 CHANGE          ← snapshots, diffs
+```
+
+Release Done clôt v0.2 lorsque GitHub est publié et que les PR Scoop/Homebrew/Winget sont ouvertes. Distribution Verified est un statut opérationnel par canal (`✅` ou `⏳`). Winget peut rester ⏳ sans rouvrir le jalon.
+
+v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. Snapshots, diffs et Architecture Packs restent v0.4 / v0.5 de cette trajectoire.
 
 ---
 
@@ -443,6 +460,8 @@ Complétions PowerShell/bash/zsh/fish et distribution via GitHub Releases, winge
 ## 7.1 `dirloom browse` — TUI structure-first
 
 **Niveau : Killer UX**
+
+**Statut : reporté après l'incrément de richesse visuelle v0.3.** v0.3 ne doit pas être redéfinie comme TUI-first.
 
 ```bash
 dirloom browse
@@ -1967,11 +1986,11 @@ Critères de sortie :
 - chaîne de publication ;
 - CLI réellement agréable.
 
-## v0.2 — Product UX, Configuration & Visual Identity
+## v0.2 — Accessibility: install, copy, completion, trusted releases
 
-**Objectif :** faire de Dirloom un outil agréable à utiliser quotidiennement.
+**Objectif :** rendre le premier résultat de `dirloom` immédiatement partageable et l'installation naturelle.
 
-**État au 17 août 2026 :** configuration persistante, presets inspectables, socle Visual Theme Engine et exports graphiques Mermaid/Graphviz/D2 réalisés par incréments dans le périmètre v0.2. `--copy` et les complétions restent à réaliser avant de considérer l'ensemble du périmètre ci-dessous terminé.
+**État au 20 août 2026 :** configuration persistante, presets, Visual Theme Engine et exports graphiques déjà livrés dans le périmètre v0.2. `--copy`, `completion`, inventaire de release 13 artefacts et GitOps Scoop/Homebrew/Winget ferment le pilier **ACCESSIBILITY**. Le jalon est **Release Done** à la publication GitHub, pas à la fusion Winget.
 
 Fonctions :
 
@@ -1986,15 +2005,32 @@ Fonctions :
 - icônes ;
 - thèmes ;
 - exports Mermaid/Graphviz/D2 ;
-- gestionnaires de paquets.
+- gestionnaires de paquets (GitHub + PR Scoop/Homebrew/Winget).
 
 **Signature produit :**
 
 > Le premier rendu `dirloom` que les utilisateurs ont envie de capturer et de partager.
 
-## v0.3 — Interactive Explorer
+## v0.3 — Presentation: richesse visuelle
 
-**Objectif :** transformer l’artefact en interface navigable.
+**Objectif :** refermer l'écart visuel avec eza en étendant le catalogue (extensions, fichiers bien connus, dossiers spéciaux, couleurs sémantiques, styles, fallbacks, thèmes).
+
+Fonctions :
+
+- catalogue sémantique étendu ;
+- thèmes et styles visuels ;
+- fichiers et dossiers sémantiques ;
+- fallbacks d'icônes et de couleur.
+
+**Hors périmètre v0.3 :** TUI, snapshots, diffs, Architecture Packs, nouveau chantier d'infrastructure. `dirloom browse` est reporté après cet incrément.
+
+**Signature produit :**
+
+> Un `dirloom` sans option est visuellement à la hauteur d'un outil de listing moderne, sans casser les artefacts canoniques.
+
+## Après v0.3 — Interactive Explorer
+
+**Objectif :** transformer l’artefact en interface navigable, une fois la richesse visuelle en place.
 
 Fonctions :
 

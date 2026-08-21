@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/dirloom/dirloom/internal/app"
+	"github.com/dirloom/dirloom/internal/clipboard"
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/diagram"
 	"github.com/dirloom/dirloom/internal/output"
@@ -26,18 +27,40 @@ type usageError struct {
 func (e *usageError) Error() string { return e.err.Error() }
 func (e *usageError) Unwrap() error { return e.err }
 
+type commandDependencies struct {
+	loader    *configuration.Loader
+	evaluator *presentation.Evaluator
+	clipboard clipboard.Writer
+}
+
 // Execute runs the CLI with explicit streams and returns a stable process exit
 // code: 0 success, 1 runtime error, 2 invalid arguments.
 func Execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string) int {
-	return executeWithLoader(ctx, args, stdout, stderr, version, configuration.NewLoader())
+	return execute(ctx, args, stdout, stderr, version, commandDependencies{
+		loader:    configuration.NewLoader(),
+		evaluator: presentation.NewEvaluator(),
+		clipboard: clipboard.New(),
+	})
 }
 
 func executeWithLoader(ctx context.Context, args []string, stdout, stderr io.Writer, version string, loader *configuration.Loader) int {
-	return executeWithDependencies(ctx, args, stdout, stderr, version, loader, presentation.NewEvaluator())
+	return execute(ctx, args, stdout, stderr, version, commandDependencies{
+		loader:    loader,
+		evaluator: presentation.NewEvaluator(),
+		clipboard: &clipboard.Buffer{},
+	})
 }
 
 func executeWithDependencies(ctx context.Context, args []string, stdout, stderr io.Writer, version string, loader *configuration.Loader, evaluator *presentation.Evaluator) int {
-	command := newRootCommandWithEvaluator(stdout, stderr, version, loader, evaluator)
+	return execute(ctx, args, stdout, stderr, version, commandDependencies{
+		loader:    loader,
+		evaluator: evaluator,
+		clipboard: &clipboard.Buffer{},
+	})
+}
+
+func execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string, deps commandDependencies) int {
+	command := newRootCommandWithRuntime(stdout, stderr, version, deps)
 	command.SetArgs(args)
 	if err := command.ExecuteContext(ctx); err != nil {
 		_, _ = fmt.Fprintf(stderr, "Error: %s\n", err)
@@ -56,10 +79,14 @@ func NewRootCommand(stdout, stderr io.Writer, version string) *cobra.Command {
 }
 
 func newRootCommand(stdout, stderr io.Writer, version string, loader *configuration.Loader) *cobra.Command {
-	return newRootCommandWithEvaluator(stdout, stderr, version, loader, presentation.NewEvaluator())
+	return newRootCommandWithRuntime(stdout, stderr, version, commandDependencies{
+		loader:    loader,
+		evaluator: presentation.NewEvaluator(),
+		clipboard: &clipboard.Buffer{},
+	})
 }
 
-func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loader *configuration.Loader, evaluator *presentation.Evaluator) *cobra.Command {
+func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps commandDependencies) *cobra.Command {
 	var opts options
 	var sources sourceOptions
 	command := &cobra.Command{
@@ -76,12 +103,14 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
   dirloom --style ascii
   dirloom --theme midnight --icons unicode
   dirloom --format markdown
+  dirloom --format markdown --copy
   dirloom --format markdown-tree
   dirloom --format mermaid --diagram-direction left-right
   dirloom --format graphviz --output structure.dot
   dirloom --format d2 --output structure.d2
   dirloom --ignore node_modules --ignore dist
-  dirloom --output structure.md --format markdown`,
+  dirloom --output structure.md --format markdown
+  dirloom completion bash`,
 		Version:       version,
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -91,12 +120,16 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 			}
 			return nil
 		},
+		ValidArgsFunction: completeInspectRoot,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if opts.copy && cmd.Flags().Changed("output") {
+				return &usageError{err: fmt.Errorf("--copy and --output are mutually exclusive")}
+			}
 			root := "."
 			if len(args) == 1 {
 				root = args[0]
 			}
-			resolved, overrides, err := resolveOptions(cmd, loader, root, sources, &opts)
+			resolved, overrides, err := resolveOptions(cmd, deps.loader, root, sources, &opts)
 			if err != nil {
 				return err
 			}
@@ -108,9 +141,9 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 				return classifyPresentationError(err)
 			}
 			resolved.SetThemeInfo(theme)
-			capabilities, err := evaluator.Evaluate(presentation.CapabilityRequest{
+			capabilities, err := deps.evaluator.Evaluate(presentation.CapabilityRequest{
 				Format: resolved.Effective.Format, ColorMode: resolved.Effective.Color, IconMode: resolved.Effective.Icons,
-				ColorExplicitCLI: overrides.Color.Set, OutputPath: opts.output, Writer: stdout,
+				ColorExplicitCLI: overrides.Color.Set, OutputPath: opts.output, Clipboard: opts.copy, Writer: stdout,
 			})
 			if err != nil {
 				return classifyPresentationError(err)
@@ -141,7 +174,7 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 				decorator = presentation.NewDecorator(compiled, capabilities.ColorEnabled, capabilities.IconMode, capabilities.Profile)
 			}
 			nodeCount := diagram.CountNodes(model)
-			if outputformat.IsDiagram(resolved.Effective.Format) && resolved.Effective.DiagramMaxNodes == nil &&
+			if !opts.copy && outputformat.IsDiagram(resolved.Effective.Format) && resolved.Effective.DiagramMaxNodes == nil &&
 				nodeCount >= diagram.LargeGraphWarningThreshold {
 				_, _ = fmt.Fprintf(stderr, "Warning: diagram contains %d nodes; consider --depth, --dirs-only, --ignore, or an explicit --diagram-max-nodes limit\n", nodeCount)
 			}
@@ -160,13 +193,11 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 			if err := renderer.Render(&rendered, model); err != nil {
 				return fmt.Errorf("render tree: %w", err)
 			}
-
-			if opts.output != "" {
-				if err := output.WriteFile(opts.output, rendered.Bytes()); err != nil {
-					return err
-				}
-			} else if err := writeAll(stdout, rendered.Bytes()); err != nil {
-				return fmt.Errorf("write output: %w", err)
+			if err := output.ValidateText(rendered.Bytes()); err != nil {
+				return err
+			}
+			if err := writeRendered(opts, deps.clipboard, stdout, rendered.Bytes()); err != nil {
+				return err
 			}
 			if err := capabilities.Close(); err != nil {
 				return err
@@ -188,11 +219,30 @@ func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loade
 	command.PersistentFlags().BoolVar(&sources.noConfig, "no-config", false, "do not load user or project configuration files")
 	bindInspectFlags(command, &opts)
 	command.Flags().StringVarP(&opts.output, "output", "o", "", "write transactionally to a file instead of stdout")
-	command.AddCommand(newConfigCommand(stdout, loader, &sources))
+	command.Flags().BoolVar(&opts.copy, "copy", false, "copy the rendered tree to the clipboard instead of stdout")
+	registerInspectCompletions(command)
+	command.AddCommand(newConfigCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newPresetCommand(stdout, &sources))
 	command.AddCommand(newThemeCommand(stdout, &sources))
-
+	command.AddCommand(newCompletionCommand(stdout))
 	return command
+}
+
+func writeRendered(opts options, clip clipboard.Writer, stdout io.Writer, data []byte) error {
+	switch {
+	case opts.copy:
+		if err := clip.Write(data); err != nil {
+			return fmt.Errorf("copy to clipboard: %w", err)
+		}
+		return nil
+	case opts.output != "":
+		return output.WriteFile(opts.output, data)
+	default:
+		if err := writeAll(stdout, data); err != nil {
+			return fmt.Errorf("write output: %w", err)
+		}
+		return nil
+	}
 }
 
 func bindInspectFlags(command *cobra.Command, opts *options) {
@@ -373,7 +423,10 @@ func newConfigCommand(stdout io.Writer, loader *configuration.Loader, sources *s
 		},
 	}
 	bindInspectFlags(explain, &opts)
+	registerInspectCompletions(explain)
 	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
+	registerAsCompletions(explain)
+	explain.ValidArgsFunction = completeInspectRoot
 	command.AddCommand(explain)
 	return command
 }
@@ -431,6 +484,13 @@ func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
 		},
 	}
 	explain.Flags().StringVar(&outputFormat, "as", "text", "explanation format: text or json")
+	registerAsCompletions(explain)
+	explain.ValidArgsFunction = func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if len(args) > 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		return configuration.PresetNames(), cobra.ShellCompDirectiveNoFileComp
+	}
 	command.AddCommand(explain)
 	return command
 }

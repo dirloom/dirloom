@@ -60,6 +60,11 @@ func newThemeClassifyCommand(stdout io.Writer, sources *sourceOptions) *cobra.Co
 	command.Flags().StringVar(&root, "root", ".", "filesystem boundary for the inspected path")
 	command.Flags().StringVar(&themeReference, "theme", presentation.ThemeDefault, "built-in theme or local YAML path")
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
+	registerAsCompletions(command)
+	_ = command.RegisterFlagCompletionFunc("theme", completeTheme)
+	_ = command.RegisterFlagCompletionFunc("root", func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveFilterDirs
+	})
 	return command
 }
 

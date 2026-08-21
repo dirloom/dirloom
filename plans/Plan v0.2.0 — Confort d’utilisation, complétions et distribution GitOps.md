@@ -1,0 +1,764 @@
+# Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps
+
+Révision : plan figé pour exécution PR par PR. Derniers ajustements — identité textuelle du presse-papiers (byte-identical uniquement à l’interface interne), inventaire de 13 artefacts, pinning générique des outils CI/release, et `output` non persistable.
+
+---
+
+## 1. Résultat attendu
+
+La v0.2.0 doit rendre le premier résultat de `dirloom` immédiatement partageable et l’installation naturelle sur les plateformes principales.
+
+Le TUI, les snapshots/diffs, le scaffolding, les Architecture Packs, le presse-papiers riche/HTML et les nouveaux formats de paquets restent hors périmètre.
+
+### 1.1 Promesse produit de `--copy`
+
+Invariant :
+
+> Tout contenu généré avec `--copy` doit pouvoir être collé tel quel dans sa destination naturelle.
+
+Exemples :
+
+```bash
+dirloom --format markdown --copy
+```
+
+→ GitHub / GitLab / Markdown.
+
+```bash
+dirloom --format json --copy
+```
+
+→ éditeur / API / LLM.
+
+```bash
+dirloom --copy
+```
+
+→ terminal / chat / ticket.
+
+Aucun post-traitement, aucun message parasite, aucun `trim`, aucun fallback qui recrache le rendu sur stdout.
+
+### 1.2 Deux statuts distincts
+
+La disponibilité d’une release ne dépend d’aucun dépôt tiers. Winget, en particulier, implique une PR Microsoft dont la fusion n’est pas entièrement sous contrôle de Dirloom.
+
+**Release Done** — le jalon v0.2.0 est terminé lorsque :
+
+- `dirloom --format markdown --copy` place un rendu Markdown prêt à coller dans le presse-papiers, sans bruit sur stdout ;
+- `--copy` fonctionne sur Windows, macOS, Linux Wayland et Linux X11, avec des erreurs actionnables ;
+- `dirloom completion` génère des complétions valides pour PowerShell, Bash, Zsh et Fish ;
+- les six archives officielles Windows/Linux/macOS × amd64/arm64 sont publiées avec checksums, SBOM et attestations ;
+- v0.2.0 est publiée sur GitHub, artefacts vérifiés, attestations valides ;
+- les PR Scoop, Homebrew et Winget sont ouvertes ;
+- toutes les modifications passent par des PR relues, conformément au [hub GitOps Outline](https://knowledge.floxio.ai/doc/guide-release-workflow-git-ops-hub-6ERj1DbE2s) et au workflow du dépôt ;
+- le code, les tests et la documentation sont livrés ensemble.
+
+**Distribution Verified** — statut opérationnel indépendant, suivi par gestionnaire :
+
+```text
+RELEASE STATUS
+Released
+
+DISTRIBUTION STATUS
+GitHub     ✅
+Scoop      ✅ | ⏳
+Homebrew   ✅ | ⏳
+Winget     ✅ | ⏳
+```
+
+Une release GitHub parfaite avec Scoop et Homebrew fusionnés mais une PR Winget en attente reste une v0.2.0 **Released**. Elle n’est pas incomplète.
+
+### 1.3 Périmètre conscient
+
+Cet incrément combine volontairement plusieurs chantiers :
+
+| Couche | Contenu |
+|---|---|
+| Produit | `--copy`, `completion` |
+| Engineering | abstraction presse-papiers, backends OS, complétions sémantiques |
+| Release engineering | GoReleaser, Syft, SBOM, attestations, checksums, inventaire, durcissement CI |
+| Distribution | Scoop, Homebrew, Winget |
+| Gouvernance GitOps | repos séparés, branches protégées, PR automatiques, approvals, bot, rollback |
+
+L’utilisateur verra surtout `--copy` et `completion`. La majorité du travail est de l’infrastructure. C’est accepté : v0.2 pose la fondation d’accessibilité (obtenir et utiliser Dirloom). La richesse visuelle face à eza n’est **pas** l’objectif de cet incrément ; elle est réservée à v0.3.
+
+Scoop, Homebrew et Winget restent dans v0.2. GitHub Releases reste l’unique source d’artefacts.
+
+### 1.4 Trajectoire après v0.2.0
+
+Histoire produit à conserver :
+
+```text
+v0.1
+CORE
+│
+├── scan
+├── ignore
+├── render
+└── formats
+        │
+        ▼
+v0.2
+ACCESSIBILITY
+│
+├── install
+├── copy
+├── completion
+└── trusted releases
+        │
+        ▼
+v0.3
+PRESENTATION
+│
+├── icons
+├── colors
+├── semantic files
+└── themes
+        │
+        ▼
+v0.4
+INTELLIGENCE
+│
+├── presets
+└── architecture
+        │
+        ▼
+v0.5
+CHANGE
+│
+├── snapshots
+└── diffs
+```
+
+Le moteur visuel v1 (catalogue, thèmes, `vivid`) est déjà livré dans l’incrément v0.2. Après publication, l’installation, la supply chain, les complétions et le presse-papiers seront matures, alors que `dirloom` sans option restera visuellement moins riche qu’eza.
+
+**v0.3 est sanctuarisée dès maintenant comme release de richesse visuelle.** Elle doit étendre le catalogue (extensions, fichiers bien connus, dossiers spéciaux, couleurs sémantiques, styles, fallbacks, thèmes) jusqu’à un écart visible refermé avec eza, sans absorber de nouveau chantier d’infrastructure ou le TUI.
+
+Conséquences :
+
+- `dirloom browse` n’est plus le jalon v0.3 ; il est reporté après cet incrément de présentation ;
+- snapshots, diffs et Architecture Packs restent plus loin, conformément à v0.4 / v0.5 ci-dessus ;
+- `docs/product/roadmap.md` est mis à jour dans cet incrément pour enregistrer cette réservation ; un incrément post-v0.2.0 ne peut pas être « encore de la distribution » ni TUI-first.
+
+---
+
+## 2. Contrats CLI publics
+
+### `--copy`
+
+Ajouter un flag racine :
+
+```text
+dirloom [directory] --copy
+dirloom [directory] --format markdown --copy
+dirloom [directory] --preset docs --copy
+```
+
+Contrat :
+
+- le presse-papiers reçoit exactement le contenu textuel du rendu : mêmes caractères, mêmes séparateurs de lignes et même saut de ligne final, sans `trim` ni ajout de contenu ;
+- l’identité publique est textuelle, pas binaire : Windows stocke `CF_UNICODETEXT` en UTF-16, pas les octets UTF-8 du renderer ;
+- succès silencieux : stdout et stderr restent vides ;
+- `--copy` et `--output` sont mutuellement exclusifs ;
+- `output` et `--copy` sont des propriétés d’exécution : ni l’un ni l’autre n’est persistable. Le schéma v1 actuel interdit déjà `directory` et `output` en configuration ; `--copy` n’y est pas ajouté ;
+- le conflit `--copy`/`--output` est donc entièrement CLI : il est détecté avant le chargement de configuration et le scan, et retourne le code d’usage `2` ;
+- une erreur de presse-papiers retourne `1`, sans recopier le rendu sur stdout ;
+- aucune confirmation du type « Copied » n’est imprimée.
+
+UTF-8 :
+
+- tous les formats textuels produits par Dirloom sont garantis UTF-8 valides ;
+- cette propriété appartient à la couche de rendu / sortie, pas au presse-papiers ;
+- stdout, `--output` et `--copy` partagent le même invariant ; `--copy` n’introduit pas une politique plus stricte.
+
+Présentation — le presse-papiers n’est **pas** équivalent à une destination non-TTY :
+
+| Canal | `--color auto` | `--icons auto` |
+|---|---|---|
+| TTY texte | ANSI | Unicode |
+| `--output`, pipe, CI | pas d’ANSI | `never` (contrat non-TTY existant) |
+| `--copy` | pas d’ANSI | Unicode, comme un rendu texte interactif |
+
+Décision volontaire :
+
+- les séquences ANSI copiées sont indésirables : `--color auto` est désactivé ;
+- les icônes Unicode / Nerd Font sont souvent collables telles quelles dans GitHub, ChatGPT ou un ticket ;
+- les icônes suivent le renderer, le format et le preset, pas une règle « clipboard = no icons » ;
+- les forçages explicites `--color always|never` et `--icons never|unicode|nerd` restent respectés pour les formats texte ;
+- Markdown, JSON et diagrammes conservent leur comportement canonique (sans ANSI ni glyphes de présentation).
+
+Ainsi `dirloom --icons unicode` et `dirloom --icons unicode --copy` produisent le même arbre, hors ANSI. Avec les défauts actuels (`icons: never`), `dirloom` et `dirloom --copy` restent alignés.
+
+La « copie directe du Markdown » est le chemin explicite `--format markdown --copy`, complété par les presets documentaires existants.
+
+### `completion`
+
+Ajouter une commande publique explicite :
+
+```text
+dirloom completion bash [--no-descriptions]
+dirloom completion zsh [--no-descriptions]
+dirloom completion fish [--no-descriptions]
+dirloom completion powershell [--no-descriptions]
+```
+
+Contrat :
+
+- scripts générés à la demande, déterministes et terminés par un saut de ligne ;
+- aucune modification automatique du profil shell ;
+- aucune lecture de projet ou analyse d’arborescence pour générer le script ;
+- shell ou arité invalide : code `2` ;
+- erreur d’écriture : code `1` ;
+- les scripts générés ne sont pas versionnés comme artefacts dérivés dans le dépôt.
+
+Les complétions sémantiques couvrent au minimum :
+
+- formats de sortie (`markdown`, `json`, …) ;
+- presets, styles et thèmes intégrés ;
+- modes couleur et icônes (`auto`, `always`, …) ;
+- vues et directions des diagrammes ;
+- valeurs spéciales telles que `unlimited` ;
+- arguments énumérés des sous-commandes ;
+- chemins de fichiers ou dossiers lorsque le contexte l’autorise.
+
+`__complete` reste le protocole interne Cobra, acceptable et nécessaire aux tests.
+
+---
+
+## 3. Implémentation
+
+### 3.1 Architecture du presse-papiers
+
+Introduire une abstraction interne injectée dans la CLI afin que les tests ne touchent jamais le presse-papiers réel. Aucun fallback ne doit recracher accidentellement le contenu sur stdout.
+
+Flux :
+
+```text
+validation des options CLI, y compris --copy/--output
+→ scan et rendu en mémoire
+→ destination exclusive : fichier, presse-papiers ou stdout
+```
+
+Le renderer garantit un UTF-8 valide pour tout format textuel **avant** la destination. Le presse-papiers ne revalide pas ce que stdout ou `--output` accepteraient.
+
+Pipeline interne :
+
+```text
+renderer
+→ []byte UTF-8 canonique
+→ Clipboard.Write([]byte)
+→ backend natif
+```
+
+`Clipboard.Write` reçoit byte-pour-byte le rendu UTF-8. Cette identité binaire s’arrête à l’abstraction injectable ; elle n’est pas un contrat du stockage OS.
+
+Windows seulement :
+
+```text
+UTF-8 canonique
+→ UTF-16
+→ CF_UNICODETEXT
+```
+
+Implémentations par plateforme :
+
+- Windows :
+  - API native `CF_UNICODETEXT` via `x/sys/windows` ;
+  - conversion UTF-8 → UTF-16 après `Clipboard.Write` ;
+  - gestion sûre de l’allocation, du verrouillage et du nettoyage mémoire ;
+  - tentatives bornées en cas de contention temporaire du presse-papiers.
+
+- macOS :
+  - `/usr/bin/pbcopy` avec le rendu transmis sur stdin ;
+  - aucun shell intermédiaire ;
+  - propagation claire du code d’échec.
+
+- Linux :
+  - préférence à `wl-copy` lorsqu’une session Wayland est disponible ;
+  - repli sur `xclip -selection clipboard -in`, puis `xsel --clipboard --input` ;
+  - repli WSL sur `clip.exe` uniquement lorsque l’interopérabilité WSL est détectée ;
+  - exécution directe des programmes, sans shell ni interpolation ;
+  - délai borné, de l’ordre de cinq secondes ;
+  - message d’erreur indiquant les outils compatibles à installer si aucun backend n’est disponible.
+
+Aucune dépendance Go de presse-papiers supplémentaire n’est introduite. Les outils Linux restent des dépendances système optionnelles documentées. L’exécution sans shell est obligatoire : Dirloom scanne des chemins potentiellement contrôlés par l’utilisateur.
+
+### 3.2 Intégration CLI
+
+- Étendre les options racine avec `Copy bool`.
+- Conserver le modèle existant de streams injectables et de codes de sortie.
+- Ajouter un copier injectable aux dépendances de commande.
+- Centraliser la sélection de destination pour empêcher les doubles écritures.
+- Valider `--copy`/`--output` avant le chargement de configuration et le scan : `output` n’est pas configurable, donc le conflit précoce ne peut pas être masqué par un YAML.
+- Ne pas appliquer `--copy` à `--help`, `--version` ou aux sous-commandes qui ne produisent pas de rendu d’arborescence.
+- Préserver le comportement transactionnel de `--output`.
+- Ne pas rendre `output` persistable ; le schéma v1 reste inchangé sur ce point.
+- Pour `--copy`, résoudre la couleur comme une destination non ANSI en mode `auto`, et les icônes comme un rendu texte interactif.
+
+### 3.3 Complétions
+
+- Réactiver une commande `completion` contrôlée par Dirloom plutôt que d’exposer passivement la commande Cobra par défaut.
+- Utiliser les générateurs Cobra comme moteur, avec une couche Dirloom pour les erreurs, streams et codes de sortie.
+- Enregistrer des fonctions de complétion sur les flags et arguments réellement énumérés.
+- Éviter tout chargement de configuration ou accès coûteux pour les valeurs statiques.
+- Autoriser les fichiers pour les thèmes personnalisés et les dossiers pour l’argument racine.
+- Conserver `__complete` comme protocole interne Cobra afin de permettre les tests et l’intégration shell.
+- Homebrew générera les quatre familles de complétions depuis le binaire lors de l’installation.
+- Scoop, Winget et les archives directes documenteront les commandes permettant d’installer manuellement les complétions.
+
+---
+
+## 4. Chaîne de release et sécurité de la supply chain
+
+v0.2 investit dans un pipeline mature. Les releases suivantes doivent le **réutiliser**, pas le cérémonialiser davantage, sauf nouvel invariant à prouver. Une release publiée est un tuple immuable : tag, commit, artefact, SHA-256, SBOM, attestation.
+
+Principe de pinning :
+
+> Tout outil téléchargé ou installé dynamiquement dans les workflows de release et de validation est épinglé à une version déterministe ; toute GitHub Action tierce est épinglée par SHA complet.
+
+Ce principe couvre GoReleaser, Syft, WingetCreate, `actions/attest`, et aussi lint, `govulncheck`, `gh` et tout ajout futur. Le document n’a pas à énumérer chaque binaire.
+
+### 4.1 GoReleaser et artefacts
+
+Conserver GoReleaser `2.17.1` et les six cibles existantes :
+
+- Windows amd64/arm64 en ZIP ;
+- Linux amd64/arm64 en tar.gz ;
+- macOS amd64/arm64 en tar.gz.
+
+Ajouter :
+
+- un SBOM SPDX JSON par archive, produit par Syft `1.50.0` ;
+- `checksums.txt` ;
+- les licences et documents attendus dans chaque archive ;
+- une vérification de l’inventaire exact ;
+- une preuve que chaque binaire annonce `v0.2.0`.
+
+Inventaire de release :
+
+```text
+checksums.txt couvre :
+- les 6 archives ;
+- les 6 SBOM ;
+- et exclut checksums.txt lui-même.
+
+6 archives
+6 SBOM
+1 checksums.txt
+──────────────
+13 artefacts de release
+```
+
+Le gate d’inventaire est `expected artifacts = 13`. `checksums.txt` contient exactement 12 lignes de hash.
+
+Le hook GoReleaser ne doit pas modifier le dépôt. `go mod tidy` devient un contrôle CI suivi d’un diff, tandis que la release utilise des contrôles non mutatifs comme `go mod verify`.
+
+### 4.2 Attestations GitHub
+
+- Utiliser `actions/attest` `v4.2.1`, épinglé par SHA complet.
+- Attester 13 sujets :
+
+```text
+attest:
+6 archives
+6 SBOM
+checksums.txt
+= 13 sujets
+```
+- Limiter les permissions du job à :
+  - `contents: write` pour le brouillon de Release ;
+  - `id-token: write` ;
+  - `attestations: write`.
+- Vérifier les attestations avec `gh attestation verify` avant publication.
+- Ne jamais reconstruire ou remplacer silencieusement les artefacts après publication.
+
+### 4.3 CI
+
+Étendre les déclencheurs CI à `release/**`, en plus de `main`.
+
+Gates obligatoires :
+
+- `gofmt -l` vide ;
+- `go mod tidy`, puis diff vide ;
+- `go mod verify` ;
+- `go vet ./...` ;
+- `go test ./...` sur Windows, Linux et macOS ;
+- tests race sur la plateforme supportée ;
+- lint et `govulncheck` ;
+- validation des scripts de complétion ;
+- `goreleaser check` ;
+- snapshot GoReleaser avec Syft ;
+- vérification des archives, checksums, licences et SBOM.
+
+Les changements de workflow de release ou d’automatisation de paquets exigent deux approbations indépendantes.
+
+### 4.4 GO humain
+
+Workflow v0.2 :
+
+```text
+snapshot
+→ smoke
+→ GO
+→ merge
+→ tag
+→ draft
+→ verification
+→ GO humain
+→ publish
+```
+
+Le second GO humain est **transitoire**. Il reste obligatoire pour v0.2. La cible ultérieure, lorsque tous les invariants sont prouvés par le pipeline, est :
+
+```text
+merge release
+→ tag
+→ build
+→ attest
+→ verify
+→ publish
+```
+
+Sans cette évolution, la sécurité dépendrait paradoxalement d’une intervention humaine supplémentaire permanente. La signature/notarisation native et la publication entièrement automatique restent hors de v0.2.
+
+---
+
+## 5. Distribution GitOps
+
+GitHub Releases reste l’unique source d’artefacts. Scoop, Homebrew et Winget ne reconstruisent jamais Dirloom : ils référencent les mêmes URL immuables et les mêmes sommes SHA-256.
+
+```text
+                     GitHub Release
+                          │
+             ┌────────────┼────────────┐
+             │            │            │
+          Scoop        Homebrew      Winget
+             │            │            │
+             └────── mêmes binaires ───┘
+```
+
+Commandes publiques visées :
+
+```text
+Windows
+  winget install Dirloom.Dirloom
+  scoop install dirloom
+
+macOS
+  brew install --cask dirloom/tap/dirloom
+
+Linux
+  brew install --cask dirloom/tap/dirloom
+  archive GitHub
+```
+
+Le bootstrap Homebrew et Winget avec **v0.1.1 avant v0.2.0** reste obligatoire. Il dissocie « le pipeline de distribution fonctionne » de « v0.2.0 est correcte », et évite de découvrir manifest, audit, ARM, URL ou conventions Winget au moment du tag produit.
+
+### 5.1 Scoop
+
+Faire évoluer `dirloom/scoop-bucket` :
+
+- remplacer le commit direct automatique sur `main` par une branche de version et une PR idempotente ;
+- ignorer les releases draft ou prerelease ;
+- imposer une progression SemVer monotone ;
+- récupérer `checksums.txt` et recalculer indépendamment les hashes ;
+- vérifier la présence des archives Windows amd64 et arm64 ;
+- valider le JSON et la présence de `dirloom.exe` ;
+- tester installation, version, complétion, mise à niveau et désinstallation sur Windows amd64 ;
+- conserver une validation statique arm64, complétée par une preuve native lorsqu’un runner est disponible ;
+- protéger `main` et rendre le workflow de validation obligatoire.
+
+Les PR de version mécaniques exigent une approbation mainteneur. Les changements du workflow en exigent deux.
+
+### 5.2 Homebrew
+
+Créer `dirloom/homebrew-tap` avant la publication de v0.2.0 :
+
+- licence MIT, README, CODEOWNERS et branche `main` protégée ;
+- cask `Casks/dirloom.rb` ;
+- support macOS et Linux, amd64 et arm64 ;
+- `binary "dirloom"` ;
+- génération d’installation des complétions Bash, Zsh, Fish et PowerShell depuis le binaire ;
+- URL de chaque archive rattachée au tag GitHub exact ;
+- SHA-256 repris et vérifié par rapport aux artefacts officiels.
+
+Commande publique :
+
+```text
+brew install --cask dirloom/tap/dirloom
+```
+
+Automatisation :
+
+- surveillance planifiée et déclenchement manuel ;
+- sélection de la dernière release stable publiée ;
+- ouverture d’une PR de version, jamais de push direct ;
+- `brew style`, `brew audit --cask --strict`, contrôle des hashes ;
+- installation/désinstallation propre et tests `dirloom --version` et `dirloom completion` sur Linux et macOS.
+
+Le tap est initialisé avec v0.1.1 afin de tester le pipeline avant le passage à v0.2.0.
+
+### 5.3 Winget
+
+Créer l’identité de paquet :
+
+```text
+Dirloom.Dirloom
+```
+
+Manifest multi-fichiers :
+
+- installateurs Windows amd64 et arm64 ;
+- `InstallerType: zip` ;
+- `NestedInstallerType: portable` ;
+- `NestedInstallerFiles` ciblant `dirloom.exe` ;
+- alias portable `dirloom` ;
+- URL officielles GitHub et hashes exacts ;
+- licence MIT et métadonnées de locale par défaut.
+
+Processus :
+
+- initialiser le paquet avec v0.1.1 ;
+- générer et valider les mises à jour avec WingetCreate `1.12.13.0` épinglé ;
+- soumettre une PR à `microsoft/winget-pkgs` uniquement après publication GitHub stable ;
+- détecter les PR ou versions déjà existantes pour rendre le job idempotent ;
+- valider le schéma et une installation locale avant soumission ;
+- après fusion amont, tester installation exacte, version, mise à niveau et désinstallation.
+
+La fusion amont n’est **pas** un critère de Release Done. Tant qu’elle n’a pas eu lieu, Distribution Status pour Winget reste ⏳.
+
+Le jeton de soumission appartient à un bot dédié, est stocké dans un environnement GitHub protégé `package-publishing`, limité en portée et renouvelable. Il n’est jamais exposé aux workflows de PR.
+
+### 5.4 Autres gestionnaires
+
+Aucun gestionnaire supplémentaire n’entre dans v0.2.0. Un candidat ultérieur doit satisfaire tous les critères suivants :
+
+- demande utilisateur démontrable ;
+- recette officielle, communautaire reconnue ou dépôt maintenu par Dirloom ;
+- consommation des artefacts GitHub immuables ;
+- vérification SHA-256 ;
+- mise à jour automatisée par PR ;
+- test d’installation et de mise à niveau ;
+- propriétaire de maintenance nommé ;
+- coût opérationnel et stratégie de retrait documentés.
+
+---
+
+## 6. Documentation
+
+Mettre à jour ou créer :
+
+- un guide presse-papiers et complétions :
+  - exemples Markdown, JSON et texte prêts à coller ;
+  - distinction couleur (pas d’ANSI) / icônes (suivent le renderer) ;
+  - installation par shell ;
+  - dépendances Wayland/X11 ;
+  - dépannage ;
+  - implications de confidentialité du presse-papiers ;
+
+- un guide de distribution :
+  - matrice OS/architecture/gestionnaire ;
+  - identifiants Scoop, Homebrew et Winget ;
+  - vérification de `checksums.txt`, des SBOM et attestations ;
+  - dualité Release Done / Distribution Verified ;
+  - délai possible entre GitHub Release et fusion dans Winget, sans bloquer le jalon ;
+  - procédure mainteneur et critères d’admission d’un gestionnaire ;
+
+- README :
+  - quick start utilisant `--copy` ;
+  - commandes d’installation actualisées ;
+  - statut Release et statut de chaque canal de distribution ;
+
+- cas d’usage :
+  - retirer `--copy` de la liste future ;
+  - documenter la copie directe du Markdown ;
+
+- spécification fonctionnelle :
+  - destination exclusive ;
+  - codes de sortie ;
+  - invariant UTF-8 des rendus textuels ;
+  - comportement presse-papiers distinct du non-TTY pour les icônes ;
+  - contrat des complétions ;
+
+- workflow de release et contribution :
+  - gates GitOps ;
+  - outils épinglés ;
+  - preuves attendues ;
+  - GO humain transitoire ;
+  - procédure de rollback ;
+
+- roadmap et changelog :
+  - marquer le pilier v0.2 comme livré à Release Done, pas à la fusion Winget ;
+  - publier la matrice de distribution avec des états ⏳ indépendants ;
+  - publier la trajectoire CORE → ACCESSIBILITY → PRESENTATION → INTELLIGENCE → CHANGE comme élément officiel de la documentation produit ;
+  - sanctuariser v0.3 comme richesse visuelle / catalogue ;
+  - reporter explicitement `browse` après v0.3 ;
+  - conserver snapshots/diffs et packs comme v0.4 / v0.5 de cette trajectoire.
+
+La documentation utilisateur reste en anglais conformément au dépôt ; les documents produit existants conservent leur langue actuelle.
+
+---
+
+## 7. Plan de tests
+
+Les tests couvrent les propriétés du système, pas seulement « ça fonctionne ».
+
+### Tests de la couche de rendu / sortie
+
+- tout format textuel émis est UTF-8 valide ;
+- stdout, `--output` et `--copy` reçoivent le même invariant ;
+- conservation du saut de ligne final ;
+- aucun `trim`.
+
+### Tests unitaires presse-papiers
+
+- `Clipboard.Write` reçoit byte-pour-byte le rendu UTF-8 canonique ;
+- conservation du saut de ligne final ;
+- aucun test E2E n’exige que le stockage natif Windows contienne des octets UTF-8 ;
+- sélection Wayland/X11/WSL correcte ;
+- arguments et stdin exacts pour `pbcopy`, `wl-copy`, `xclip`, `xsel` et `clip.exe` ;
+- absence de shell ;
+- timeout, contention Windows et nettoyage des ressources ;
+- backend absent et messages actionnables ;
+- propagation des erreurs sans fuite du contenu ;
+- pas de revalidation UTF-8 spécifique qui divergerait de stdout.
+
+### Tests CLI
+
+- `--copy` produit stdout/stderr vides en succès ;
+- `--copy --output` retourne `2` avant chargement de configuration, scan ou écriture ;
+- échec de copie retourne `1` ;
+- `--color auto --copy` n’émet pas d’ANSI ;
+- `--icons auto --copy` conserve Unicode pour le format texte ;
+- `--icons unicode` et `--icons unicode --copy` produisent le même arbre, hors ANSI ;
+- `--icons never --copy` ne copie aucun glyphe de présentation ;
+- forçages explicites de couleur préservés ;
+- formats Markdown, JSON et diagrammes inchangés (canoniques) ;
+- aide, version et sous-commandes non affectées.
+
+### Tests de complétion
+
+- génération répétée byte-identique ;
+- saut de ligne final ;
+- shell et arité invalides ;
+- writer défaillant ;
+- candidats et directives `__complete` ;
+- syntaxe :
+  - `bash -n` ;
+  - `zsh -n` ;
+  - `fish -n` ;
+  - `[scriptblock]::Create(...)` sous PowerShell.
+
+### Tests release et distribution
+
+- snapshot contenant exactement 13 artefacts : 6 archives, 6 SBOM, 1 `checksums.txt` ;
+- `checksums.txt` contient 12 hashes et s’exclut lui-même ;
+- hashes recalculés indépendamment ;
+- licences et documentation présentes ;
+- `dirloom --version` correct pour chaque archive ;
+- 13 sujets d’attestation validés ;
+- installation propre, mise à niveau et désinstallation par gestionnaire **lorsque le canal est Verified** ;
+- preuve native arm64 lorsque disponible, sinon validation statique suivie d’un smoke manuel avant Distribution Verified du canal, pas avant Release Done.
+
+### Smokes manuels obligatoires
+
+- Windows natif ;
+- macOS ;
+- Linux Wayland avec `wl-copy` ;
+- Linux X11 avec `xclip` et `xsel` ;
+- WSL si supporté ;
+- collage du Markdown dans GitHub, un éditeur et une messagerie ;
+- collage d’un arbre texte avec icônes Unicode explicites dans GitHub et un chat, pour vérifier que les glyphes restent acceptables.
+
+---
+
+## 8. Séquencement GitOps
+
+### PR 1 — Presse-papiers
+
+Branche créée depuis le dernier `origin/release/v0.2.0`.
+
+Contenu indissociable :
+
+- implémentation `--copy` ;
+- abstraction et backends ;
+- invariant UTF-8 déplacé à la couche de rendu si ce n’est pas déjà le cas ;
+- résolution couleur / icônes du presse-papiers ;
+- tests unitaires et CLI ;
+- documentation utilisateur et spécification.
+
+### PR 2 — Complétions
+
+Après intégration de la PR 1 :
+
+- commande `completion` ;
+- complétions sémantiques ;
+- validation des quatre shells ;
+- conservation de `__complete` ;
+- guides d’installation.
+
+### PR 3A — Artefacts de release, SBOM et attestations
+
+Une PR CI/release unique serait trop large et trop sensible à relire. 3A porte le contrat d’artefacts :
+
+- GoReleaser, Syft et SBOM SPDX ;
+- inventaire de 13 artefacts et `checksums.txt` à 12 hashes ;
+- 13 attestations GitHub et `gh attestation verify` ;
+- immutabilité des artefacts ;
+- documentation de vérification des artefacts.
+
+Deux approbations indépendantes obligatoires.
+
+### PR 3B — Durcissement CI / release
+
+Après 3A :
+
+- déclencheurs `release/**` ;
+- gates CI (fmt, modules, vet, tests, race, lint, `govulncheck`, complétions, `goreleaser check`, snapshot) ;
+- pinning déterministe de tout outil ou action tierce des workflows ;
+- politique à deux approbations pour les workflows ;
+- documentation GitOps, contribution, rollback et GO humain transitoire ;
+- mise à jour roadmap : statuts Release / Distribution et sanctuarisation v0.3.
+
+Deux approbations indépendantes obligatoires.
+
+### PR externes
+
+- Scoop : conversion du bot en mise à jour par PR ;
+- Homebrew : création du tap et bootstrap v0.1.1 ;
+- Winget : soumission initiale v0.1.1 ;
+- après publication v0.2.0 : une PR de mise à jour par gestionnaire.
+
+Chaque PR externe contient ses validations, sa documentation de maintenance et son rollback.
+
+### Release v0.2.0
+
+1. Feature freeze sur `release/v0.2.0`.
+2. Snapshot GoReleaser et smoke des candidats.
+3. GO documenté.
+4. PR `release/v0.2.0 → main` avec merge commit.
+5. Contrôles frais sur l’état fusionné.
+6. Tag annoté et protégé `v0.2.0` sur `main`.
+7. Construction du brouillon GitHub Release.
+8. Vérification des archives, checksums, SBOM et attestations.
+9. GO humain puis publication du brouillon.
+10. Ouverture des PR Scoop, Homebrew et Winget.
+11. **Release Done** : clôture du jalon v0.2.0 et suppression de la branche de release. Les preuves minimales de publication sont collectées ici.
+12. Smoke d’installation après fusion de chaque recette → passage du canal correspondant à Distribution Verified. Winget peut rester ⏳ plusieurs jours sans rouvrir le jalon.
+
+---
+
+## 9. Rollback et hypothèses
+
+- Avant publication : revert des PR concernées sur `release/v0.2.0`.
+- Après publication : aucun remplacement d’artefact sous le même tag.
+- Un gestionnaire défaillant reste sur v0.1.1 pendant la correction ; cela n’annule pas Release Done.
+- Une erreur binaire impose une version corrective, par exemple v0.2.1.
+- Une recette incorrecte est retirée ou corrigée par PR dans son dépôt propre.
+- Les preuves minimales conservées sont : SHA du commit, tag, checksums, SBOM, attestations, résultats CI, approbations, smokes d’ouverture des PR de distribution, puis smokes d’installation par canal lorsqu’ils existent.
+- Rétention cible des preuves CI : au moins 90 jours.
+- Les modifications locales non suivies, notamment `.cursor/`, sont préservées.
+- Le travail part du dernier `origin/release/v0.2.0`, et non des branches locales potentiellement en retard.
+- La signature/notarisation native, MSI/DMG/deb/rpm, télémétrie et publication automatique sans GO humain restent hors de cet incrément.
+- v0.3 ne peut pas être redéfinie comme TUI, snapshots ou packs sans décision produit explicite remplaçant la section 1.4.
+- Ce plan est figé. Les raffinements supplémentaires relèvent de l’implémentation PR par PR, pas d’une nouvelle revue structurelle.

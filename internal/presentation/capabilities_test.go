@@ -27,6 +27,9 @@ func TestCapabilityResolution(t *testing.T) {
 		{"CLI overrides no color", map[string]string{"NO_COLOR": "1", "COLORTERM": "truecolor"}, true, CapabilityRequest{Format: "text", ColorMode: "always", IconMode: "unicode", ColorExplicitCLI: true}, true, "unicode", ProfileTrueColor},
 		{"256", map[string]string{"TERM": "xterm-256color"}, true, CapabilityRequest{Format: "text", ColorMode: "auto", IconMode: "auto"}, true, "unicode", ProfileANSI256},
 		{"machine", nil, true, CapabilityRequest{Format: "json", ColorMode: "always", IconMode: "nerd"}, false, "never", ProfileTrueColor},
+		{"clipboard auto", nil, true, CapabilityRequest{Format: "text", ColorMode: "auto", IconMode: "auto", Clipboard: true}, false, "unicode", ProfileTrueColor},
+		{"clipboard forced color", nil, false, CapabilityRequest{Format: "text", ColorMode: "always", IconMode: "nerd", Clipboard: true}, true, "nerd", ProfileTrueColor},
+		{"clipboard never icons", nil, true, CapabilityRequest{Format: "text", ColorMode: "auto", IconMode: "never", Clipboard: true}, false, "never", ProfileTrueColor},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

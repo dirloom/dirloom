@@ -19,6 +19,7 @@ cmd/dirloom
        │    └─ internal/tree   # project_structure adapter only
        ├─ internal/presentation
        │    └─ internal/presentation/catalog
+       ├─ internal/clipboard
        └─ internal/output
 ```
 
@@ -35,7 +36,9 @@ cmd/dirloom
 - `internal/presentation`: immutable built-in themes, strict public theme-schema v1 loading, kind/role/rule compilation, terminal capability resolution, ANSI generation, icon fallback and versioned diagnostics.
 - `internal/presentation/catalog`: pure immutable classification with 256 indexed matchers, 96 hierarchical technical kinds, 16 ordered structural roles and no filesystem, YAML, ANSI or Cobra dependency.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
+- `internal/clipboard`: injectable UTF-8 clipboard writer with native Windows, macOS, Linux and WSL backends. Tests never touch the real clipboard.
 - `internal/buildinfo`: version metadata injected once at link time.
+- `internal/releaseartifacts` and `cmd/release-artifacts`: 13-artifact inventory (6 archives, 6 SBOMs, `checksums.txt`), independent checksums, and archive payload checks for the release pipeline.
 
 ## Invariants
 
@@ -57,4 +60,6 @@ Filter priority is encoded in `filter.Policy`; nested `.gitignore` state is load
 
 The tree stores normalized relative paths only as private tie-break metadata. Public JSON deliberately projects to a separate type, preventing accidental leakage of absolute paths or future internal fields. The semantic Markdown renderer walks the same sorted model, creates only nested list items and escapes unsafe label characters without mutating node data.
 
-Rendering finishes in memory before stdout or the transactional file writer receives bytes. Theme, mode and terminal-preparation errors therefore leave stdout and existing output files untouched. A forced interactive Windows color session restores the previous console mode after writing.
+Rendering finishes in memory before stdout, the clipboard, or the transactional file writer receives bytes. Theme, mode and terminal-preparation errors therefore leave stdout, the clipboard and existing output files untouched. A forced interactive Windows color session restores the previous console mode after writing.
+
+The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--output` are rejected before configuration and scanning. Automatic color is disabled for the clipboard; automatic icons stay Unicode, like interactive text. The renderer validates UTF-8 once; the clipboard does not apply a stricter encoding policy.

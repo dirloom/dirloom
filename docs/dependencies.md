@@ -16,7 +16,7 @@ Dirloom creates the matcher with an empty root and feeds only `.gitignore` files
 
 ## x/sys v0.47.0
 
-`golang.org/x/sys/windows` provides the typed bindings needed for safe output replacement and temporary `ENABLE_VIRTUAL_TERMINAL_PROCESSING` setup on Windows. The standard library cannot guarantee replacement through `os.Rename` there and does not expose the required console-mode operations. Using the official Go extended-system package avoids maintaining unsafe local syscall wrappers. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause.
+`golang.org/x/sys/windows` provides the typed bindings needed for safe output replacement, temporary `ENABLE_VIRTUAL_TERMINAL_PROCESSING` setup, and native clipboard access (`CF_UNICODETEXT`) on Windows. The standard library cannot guarantee replacement through `os.Rename` there and does not expose the required console-mode or clipboard operations. Using the official Go extended-system package avoids maintaining unsafe local syscall wrappers. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause. Dirloom does not add a third-party clipboard library.
 
 ## x/term v0.45.0
 

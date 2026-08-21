@@ -79,6 +79,11 @@ func TestPublicThemeDocumentationRelativeLinksExist(t *testing.T) {
 		filepath.Join("..", "..", "docs", "configuration.md"),
 		filepath.Join("..", "..", "docs", "presets.md"),
 		filepath.Join("..", "..", "docs", "graph-exports.md"),
+		filepath.Join("..", "..", "docs", "clipboard-and-completions.md"),
+		filepath.Join("..", "..", "docs", "distribution.md"),
+		filepath.Join("..", "..", "docs", "use-cases.md"),
+		filepath.Join("..", "..", "docs", "architecture.md"),
+		filepath.Join("..", "..", "docs", "release-workflow.md"),
 	}
 	pattern := regexp.MustCompile(`\[[^\]]+\]\(([^):]+\.md)(?:#[^)]+)?\)`)
 	for _, documentPath := range paths {
