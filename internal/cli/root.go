@@ -86,14 +86,6 @@ func newRootCommand(stdout, stderr io.Writer, version string, loader *configurat
 	})
 }
 
-func newRootCommandWithEvaluator(stdout, stderr io.Writer, version string, loader *configuration.Loader, evaluator *presentation.Evaluator) *cobra.Command {
-	return newRootCommandWithRuntime(stdout, stderr, version, commandDependencies{
-		loader:    loader,
-		evaluator: evaluator,
-		clipboard: &clipboard.Buffer{},
-	})
-}
-
 func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps commandDependencies) *cobra.Command {
 	var opts options
 	var sources sourceOptions

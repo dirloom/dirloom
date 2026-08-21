@@ -48,7 +48,7 @@ func runCommand(ctx context.Context, name string, args []string, stdin []byte) e
 	if name == "" {
 		return fmt.Errorf("clipboard command is empty")
 	}
-	command := exec.CommandContext(ctx, name, args...)
+	command := exec.CommandContext(ctx, name, args...) //nolint:gosec // Clipboard backends invoke fixed OS utilities by absolute path.
 	command.Stdin = bytes.NewReader(stdin)
 	command.Stdout = nil
 	command.Stderr = nil

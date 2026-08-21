@@ -46,27 +46,27 @@ func VerifyArchivePayloads(distDir string) error {
 
 func listArchive(path string) ([]string, error) {
 	if strings.HasSuffix(path, ".zip") {
-		reader, err := zip.OpenReader(path)
+		reader, err := zip.OpenReader(path) //nolint:gosec // Release verification reads GoReleaser archives from dist/.
 		if err != nil {
 			return nil, err
 		}
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 		names := make([]string, 0, len(reader.File))
 		for _, file := range reader.File {
 			names = append(names, filepath.ToSlash(file.Name))
 		}
 		return names, nil
 	}
-	file, err := os.Open(path)
+	file, err := os.Open(path) //nolint:gosec // Release verification reads GoReleaser archives from dist/.
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		return nil, err
 	}
-	defer gzipReader.Close()
+	defer func() { _ = gzipReader.Close() }()
 	tarReader := tar.NewReader(gzipReader)
 	var names []string
 	for {
@@ -78,7 +78,6 @@ func listArchive(path string) ([]string, error) {
 			return nil, err
 		}
 		names = append(names, filepath.ToSlash(header.Name))
-		_, _ = io.Copy(io.Discard, tarReader)
 	}
 }
 

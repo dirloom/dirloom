@@ -48,7 +48,7 @@ func Prepare(distDir, syftPath string) error {
 			return fmt.Errorf("archive %s: %w", archive, err)
 		}
 		document := SBOMName(archive)
-		command := exec.Command(syftPath, archive, "-o", "spdx-json="+document)
+		command := exec.Command(syftPath, archive, "-o", "spdx-json="+document) //nolint:gosec // Syft path is pinned in CI and release workflows.
 		command.Dir = distDir
 		if output, err := command.CombinedOutput(); err != nil {
 			return fmt.Errorf("syft %s: %w\n%s", archive, err, output)
@@ -68,7 +68,7 @@ func WriteChecksums(distDir string) error {
 		_, _ = fmt.Fprintf(&builder, "%s  %s\n", entry.hash, entry.name)
 	}
 	path := filepath.Join(distDir, ChecksumsName)
-	return os.WriteFile(path, []byte(builder.String()), 0o644)
+	return os.WriteFile(path, []byte(builder.String()), 0o644) //nolint:gosec // Published checksums are intentionally world-readable.
 }
 
 // Verify asserts the 13-artifact inventory and independent checksums.
@@ -85,11 +85,11 @@ func Verify(distDir string) error {
 	if err := mustFile(checksumsPath); err != nil {
 		return err
 	}
-	file, err := os.Open(checksumsPath)
+	file, err := os.Open(checksumsPath) //nolint:gosec // Release verification reads files from the GoReleaser dist directory.
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	scanner := bufio.NewScanner(file)
 	seen := map[string]string{}
 	for scanner.Scan() {
@@ -155,11 +155,11 @@ func hashedEntries(distDir string) ([]hashed, error) {
 }
 
 func fileSHA256(path string) (string, error) {
-	file, err := os.Open(path)
+	file, err := os.Open(path) //nolint:gosec // Release verification reads files from the GoReleaser dist directory.
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, file); err != nil {
 		return "", err
