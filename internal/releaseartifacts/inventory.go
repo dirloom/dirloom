@@ -47,8 +47,8 @@ func Prepare(distDir, syftPath string) error {
 		if _, err := os.Stat(archivePath); err != nil {
 			return fmt.Errorf("archive %s: %w", archive, err)
 		}
-		document := filepath.Join(distDir, SBOMName(archive))
-		command := exec.Command(syftPath, archivePath, "-o", "spdx-json="+document)
+		document := SBOMName(archive)
+		command := exec.Command(syftPath, archive, "-o", "spdx-json="+document)
 		command.Dir = distDir
 		if output, err := command.CombinedOutput(); err != nil {
 			return fmt.Errorf("syft %s: %w\n%s", archive, err, output)

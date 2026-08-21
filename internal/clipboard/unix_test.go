@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os/exec"
 	"testing"
+	"time"
 )
 
 func TestUnixDarwinUsesPbcopy(t *testing.T) {
