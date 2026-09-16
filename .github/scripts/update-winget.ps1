@@ -5,13 +5,22 @@ Set-StrictMode -Version Latest
 $WingetCreateVersion = '1.12.13.0'
 $WingetCreateSha256 = '24042BD37915805615E6CF969AC57C6439124C3FE85823327F5F3FB24BD9FFEA'
 
+# Open an idempotent version PR against microsoft/winget-pkgs from the org fork
+# dirloom/winget-pkgs. Requires GH_TOKEN (dirloom-package-mgr) with contents:write
+# on that fork. WingetCreate only generates manifests; it does not --submit, so
+# the PR head stays on the org fork rather than a personal machine-user fork.
+
 $Tag = $env:TAG
 if ([string]::IsNullOrWhiteSpace($Tag)) {
     throw 'TAG is required'
 }
 $Version = $Tag.TrimStart('v')
 $RootRepo = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { 'dirloom/dirloom' }
+$ForkRepo = if ($env:WINGET_FORK_REPO) { $env:WINGET_FORK_REPO } else { 'dirloom/winget-pkgs' }
+$UpstreamRepo = 'microsoft/winget-pkgs'
 $PackageId = 'Dirloom.Dirloom'
+$CommitName = 'dirloom-package-mgr'
+$CommitEmail = '330109029+dirloom-package-mgr@users.noreply.github.com'
 $Work = Join-Path ([System.IO.Path]::GetTempPath()) ("dirloom-winget-" + [guid]::NewGuid().ToString('n'))
 New-Item -ItemType Directory -Path $Work | Out-Null
 
@@ -23,15 +32,47 @@ function Invoke-Gh {
     }
 }
 
+function Invoke-Git {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$GitArgs)
+    & git @GitArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "git $($GitArgs -join ' ') failed with exit $LASTEXITCODE"
+    }
+}
+
+function Set-LicenseUrl([string]$Root) {
+    $wanted = "LicenseUrl: https://github.com/dirloom/dirloom/blob/$Tag/LICENSE"
+    Get-ChildItem -LiteralPath $Root -Filter '*.yaml' -Recurse -File | ForEach-Object {
+        $text = [System.IO.File]::ReadAllText($_.FullName)
+        $updated = [regex]::Replace($text, '(?m)^LicenseUrl:\s*\S+\s*$', $wanted)
+        if ($updated -ne $text) {
+            [System.IO.File]::WriteAllText($_.FullName, $updated)
+        }
+    }
+}
+
 try {
-    $existingPr = & gh pr list --repo microsoft/winget-pkgs --search "$PackageId $Version" --state open --json number --jq 'length'
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+        if (-not [string]::IsNullOrWhiteSpace($env:PACKAGE_BOT_TOKEN)) {
+            $env:GH_TOKEN = $env:PACKAGE_BOT_TOKEN
+        } elseif (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            $env:GH_TOKEN = $env:GITHUB_TOKEN
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+        throw 'GH_TOKEN is required'
+    }
+
+    Invoke-Gh auth setup-git
+
+    $existingPr = & gh pr list --repo $UpstreamRepo --search "$PackageId $Version" --state open --json number --jq 'length'
     if ($LASTEXITCODE -eq 0 -and $existingPr -ne '0' -and $existingPr -ne '') {
         Write-Host "Winget PR already open for $Version"
         return
     }
 
     $manifestPath = "manifests/d/Dirloom/Dirloom/$Version"
-    & gh api "repos/microsoft/winget-pkgs/contents/$manifestPath" 2>$null | Out-Null
+    & gh api "repos/$UpstreamRepo/contents/$manifestPath" 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
         Write-Host "Winget already contains $PackageId $Version"
         return
@@ -88,34 +129,66 @@ try {
 
     $x64Url = "https://github.com/dirloom/dirloom/releases/download/$Tag/$x64Name"
     $armUrl = "https://github.com/dirloom/dirloom/releases/download/$Tag/$armName"
-    $token = $env:PACKAGE_BOT_TOKEN
-    if ([string]::IsNullOrWhiteSpace($token)) {
-        $token = $env:GITHUB_TOKEN
-    }
-    if ([string]::IsNullOrWhiteSpace($token)) {
-        throw 'PACKAGE_BOT_TOKEN or GITHUB_TOKEN is required'
-    }
-
-    & $exe update $PackageId --version $Version --urls $x64Url $armUrl --submit --token $token
-    if ($LASTEXITCODE -eq 0) {
-        return
-    }
-
-    $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-    $templateDir = Join-Path $repoRoot 'packaging\winget'
     $manifestDir = Join-Path $Work 'manifest'
     New-Item -ItemType Directory -Path $manifestDir | Out-Null
-    Get-ChildItem -LiteralPath $templateDir -Filter 'Dirloom.Dirloom*.yaml' | ForEach-Object {
-        $text = [System.IO.File]::ReadAllText($_.FullName)
-        $text = $text.Replace('0.1.1', $Version)
-        $text = $text.Replace('3BBD704956C9ADF2B41EFB7ABF88F86DDF476635BB366983762555526796A256', $x64Listed)
-        $text = $text.Replace('2995A9DAF6ABA00724FAFC17C4DE9419A127AC5EC47F5D4C791F256BD803E6F8', $armListed)
-        [System.IO.File]::WriteAllText((Join-Path $manifestDir $_.Name), $text)
+
+    & $exe update $PackageId --version $Version --urls $x64Url $armUrl --out $manifestDir --token $env:GH_TOKEN
+    $yamlCount = @(Get-ChildItem -LiteralPath $manifestDir -Filter '*.yaml' -Recurse -File).Count
+    if ($LASTEXITCODE -ne 0 -or $yamlCount -lt 3) {
+        Write-Host "WingetCreate update failed; falling back to in-repo templates"
+        Get-ChildItem -LiteralPath $manifestDir -Recurse -File -ErrorAction SilentlyContinue | Remove-Item -Force
+        $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+        $templateDir = Join-Path $repoRoot 'packaging\winget'
+        Get-ChildItem -LiteralPath $templateDir -Filter 'Dirloom.Dirloom*.yaml' | ForEach-Object {
+            $text = [System.IO.File]::ReadAllText($_.FullName)
+            $text = $text.Replace('0.1.1', $Version)
+            $text = $text.Replace('3BBD704956C9ADF2B41EFB7ABF88F86DDF476635BB366983762555526796A256', $x64Listed)
+            $text = $text.Replace('2995A9DAF6ABA00724FAFC17C4DE9419A127AC5EC47F5D4C791F256BD803E6F8', $armListed)
+            [System.IO.File]::WriteAllText((Join-Path $manifestDir $_.Name), $text)
+        }
     }
-    & $exe submit $manifestDir --token $token
-    if ($LASTEXITCODE -ne 0) {
-        throw "WingetCreate failed to update or submit $PackageId $Version"
+
+    Set-LicenseUrl $manifestDir
+    $generated = @(Get-ChildItem -LiteralPath $manifestDir -Filter '*.yaml' -Recurse -File)
+    if ($generated.Count -lt 3) {
+        throw "Expected at least 3 Winget YAML manifests, found $($generated.Count)"
     }
+
+    $forkDir = Join-Path $Work 'fork'
+    Invoke-Gh repo clone $ForkRepo $forkDir -- --filter=blob:none --sparse --depth 1
+    Push-Location $forkDir
+    try {
+        Invoke-Git sparse-checkout set manifests/d/Dirloom
+        Invoke-Git fetch https://github.com/$UpstreamRepo.git master --depth 1
+        $branch = "Dirloom.Dirloom-$Version"
+        Invoke-Git checkout -B $branch FETCH_HEAD
+        $dest = Join-Path $forkDir $manifestPath
+        New-Item -ItemType Directory -Path $dest -Force | Out-Null
+        foreach ($file in $generated) {
+            Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $dest $file.Name) -Force
+        }
+        Invoke-Git add -- $manifestPath
+        git diff --cached --quiet
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Winget manifests already at $Version"
+            return
+        }
+        & git -c "user.name=$CommitName" -c "user.email=$CommitEmail" commit -m "New version: $PackageId version $Version"
+        if ($LASTEXITCODE -ne 0) {
+            throw 'git commit failed'
+        }
+        & git push -u origin $branch
+        if ($LASTEXITCODE -ne 0) {
+            & gh api -X DELETE "repos/$ForkRepo/git/refs/heads/$branch" 2>$null | Out-Null
+            Invoke-Git push -u origin $branch
+        }
+    }
+    finally {
+        Pop-Location
+    }
+
+    $forkOwner = ($ForkRepo -split '/')[0]
+    Invoke-Gh pr create --repo $UpstreamRepo --head "${forkOwner}:${branch}" --base master --title "New version: $PackageId version $Version" --body "Update Dirloom.Dirloom to GitHub Release $Tag from the $ForkRepo fork. Installers are the official Windows zip archives; hashes were verified against checksums.txt. LicenseUrl points at $Tag."
 }
 finally {
     Remove-Item -LiteralPath $Work -Recurse -Force -ErrorAction SilentlyContinue
