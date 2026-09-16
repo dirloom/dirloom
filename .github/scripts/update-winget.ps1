@@ -65,6 +65,11 @@ try {
 
     Invoke-Gh auth setup-git
 
+    # Keep the organization fork aligned with microsoft/winget-pkgs before
+    # creating a publication branch. This avoids pushing upstream workflow
+    # changes through the package-manager PAT.
+    Invoke-Gh api -X POST "repos/$ForkRepo/merge-upstream" -f branch=master
+
     # Ignore open PRs from retired machine users (we cannot close those heads).
     # Only treat a version as already in flight when *our* org fork or current
     # publisher account already has an open PR.
@@ -167,9 +172,8 @@ try {
     Push-Location $forkDir
     try {
         Invoke-Git sparse-checkout set manifests/d/Dirloom
-        Invoke-Git fetch https://github.com/$UpstreamRepo.git master --depth 1
         $branch = "Dirloom.Dirloom-$Version"
-        Invoke-Git checkout -B $branch FETCH_HEAD
+        Invoke-Git checkout -B $branch origin/master
         $dest = Join-Path $forkDir $manifestPath
         New-Item -ItemType Directory -Path $dest -Force | Out-Null
         foreach ($file in $generated) {
