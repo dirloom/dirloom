@@ -210,4 +210,3 @@ jobs:
           tar -xzf dist/dirloom_Linux_x86_64.tar.gz -C "$work"
           "$work/dirloom" --version
           "$work/dirloom" completion bash >/dev/null
-

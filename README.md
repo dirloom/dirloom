@@ -418,12 +418,14 @@ See [Distribution](docs/distribution.md) and [Release workflow](docs/release-wor
 The voted product sequence builds from the deterministic v0.1 foundation:
 
 ```text
-v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.4 INTELLIGENCE → v0.5 CHANGE
+v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
 ```
 
 - v0.2: install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
 - v0.3: visual richness — catalog, themes, semantic files, colors and styles, closing the gap with eza;
-- later: fingerprints, snapshots, structural diff, then scaffold and Architecture Packs.
+- after v0.3: interactive explorer (`dirloom browse`);
+- v0.4: fingerprints, snapshots, verification and structural diff;
+- v0.5: scaffold, templates and Architecture Packs.
 
 `dirloom browse` is scheduled after the v0.3 presentation increment. See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
 

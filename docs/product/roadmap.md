@@ -429,7 +429,7 @@ Le socle `markdown-tree` est livré séparément : il couvre la documentation Ma
 
 **Niveau : Adoption / Accessibilité**
 
-**Statut : livré dans v0.2 à Release Done**, indépendamment de la fusion Winget.
+**Statut : implémenté sur la branche de composition v0.2 ; Release Done en attente de fusion, tag et publication GitHub.** La fusion Winget reste indépendante de la clôture de la release.
 
 ```bash
 dirloom --copy
@@ -445,13 +445,14 @@ Trajectoire officielle après v0.1 :
 v0.1 CORE
 v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
 v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
-v0.4 INTELLIGENCE    ← presets avancés / architecture
-v0.5 CHANGE          ← snapshots, diffs
+POST-v0.3 EXPLORER   ← browse, navigation, recherche, premières métriques
+v0.4 CHANGE          ← fingerprint, snapshots, verify, diffs
+v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
 ```
 
 Release Done clôt v0.2 lorsque GitHub est publié et que les PR Scoop/Homebrew/Winget sont ouvertes. Distribution Verified est un statut opérationnel par canal (`✅` ou `⏳`). Winget peut rester ⏳ sans rouvrir le jalon.
 
-v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. Snapshots, diffs et Architecture Packs restent v0.4 / v0.5 de cette trajectoire.
+v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. Snapshots et diffs relèvent de v0.4 ; scaffold et Architecture Packs relèvent de v0.5.
 
 ---
 
@@ -1990,7 +1991,7 @@ Critères de sortie :
 
 **Objectif :** rendre le premier résultat de `dirloom` immédiatement partageable et l'installation naturelle.
 
-**État au 20 août 2026 :** configuration persistante, presets, Visual Theme Engine et exports graphiques déjà livrés dans le périmètre v0.2. `--copy`, `completion`, inventaire de release 13 artefacts et GitOps Scoop/Homebrew/Winget ferment le pilier **ACCESSIBILITY**. Le jalon est **Release Done** à la publication GitHub, pas à la fusion Winget.
+**État au 16 septembre 2026 :** configuration persistante, presets, Visual Theme Engine et exports graphiques sont intégrés à `release/v0.2.0`. `--copy`, `completion`, l’inventaire de release de 13 artefacts et GitOps Scoop/Homebrew/Winget sont implémentés sur la branche de composition et doivent encore être intégrés à la release. Le jalon sera **Release Done** à la publication GitHub, pas à la fusion Winget.
 
 Fonctions :
 

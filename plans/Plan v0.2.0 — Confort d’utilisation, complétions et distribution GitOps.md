@@ -117,17 +117,20 @@ PRESENTATION
         │
         ▼
 v0.4
-INTELLIGENCE
+CHANGE
 │
-├── presets
-└── architecture
+├── fingerprint
+├── snapshots
+├── verify
+└── diffs
         │
         ▼
 v0.5
-CHANGE
+MATERIALIZE
 │
-├── snapshots
-└── diffs
+├── scaffold
+├── templates
+└── Architecture Packs
 ```
 
 Le moteur visuel v1 (catalogue, thèmes, `vivid`) est déjà livré dans l’incrément v0.2. Après publication, l’installation, la supply chain, les complétions et le presse-papiers seront matures, alors que `dirloom` sans option restera visuellement moins riche qu’eza.
@@ -137,7 +140,7 @@ Le moteur visuel v1 (catalogue, thèmes, `vivid`) est déjà livré dans l’inc
 Conséquences :
 
 - `dirloom browse` n’est plus le jalon v0.3 ; il est reporté après cet incrément de présentation ;
-- snapshots, diffs et Architecture Packs restent plus loin, conformément à v0.4 / v0.5 ci-dessus ;
+- snapshots et diffs restent en v0.4 ; scaffold et Architecture Packs restent en v0.5 ;
 - `docs/product/roadmap.md` est mis à jour dans cet incrément pour enregistrer cette réservation ; un incrément post-v0.2.0 ne peut pas être « encore de la distribution » ni TUI-first.
 
 ---
