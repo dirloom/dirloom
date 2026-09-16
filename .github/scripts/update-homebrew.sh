@@ -119,6 +119,6 @@ if git diff --cached --quiet; then
   echo "Homebrew cask already at ${VERSION}"
   exit 0
 fi
-git -c user.name="dirloom-package-bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "chore(cask): update dirloom to ${VERSION}"
+git -c user.name="dirloom-package-mgr" -c user.email="330109029+dirloom-package-mgr@users.noreply.github.com" commit -m "chore(cask): update dirloom to ${VERSION}"
 git push -u origin "$branch"
 gh pr create --repo "$TAP_REPO" --head "$branch" --title "dirloom ${VERSION}" --body "Update the Dirloom cask to GitHub Release ${TAG}. Binaries are the official archives; Dirloom is not rebuilt. Hashes were recalculated independently from checksums.txt."
