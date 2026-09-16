@@ -1,7 +1,7 @@
 # Documentation produit de Dirloom
 
 > **Statut :** corpus aligné sur la roadmap stratégique votée<br>
-> **Dernière consolidation :** 16 août 2026<br>
+> **Dernière consolidation :** 20 août 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
 Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.1.1` livre déjà le socle : une représentation locale, déterministe, filtrable, portable et exploitable par des machines. Les documents de ce dossier décrivent le produit que ce socle permet de construire.
@@ -20,6 +20,8 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Arbres Markdown sémantiques](../markdown-tree.md) | Comment produire une liste Markdown native, sûre et déterministe ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Exports graphiques](../graph-exports.md) | Comment produire des sources Mermaid, Graphviz et D2 déterministes ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
+| [Presse-papiers et complétions](../clipboard-and-completions.md) | Comment copier un rendu et installer les complétions shell ? | Utilisateurs, intégrateurs |
+| [Distribution](../distribution.md) | Comment installer Dirloom et vérifier une release de confiance ? | Utilisateurs, mainteneurs |
 | [Catalogue sémantique](../catalog.md) | Comment Dirloom classe-t-il kinds, rôles et matchers, et comment diagnostiquer une entrée réelle ? | Utilisateurs, concepteurs de thèmes, contributeurs |
 
 Pour implémenter ou vérifier le comportement de la ligne `v0.1`, la source normative reste [SPEC-v0.1.md](../../SPEC-v0.1.md). Les documents présents n'en modifient pas rétroactivement les contrats.
@@ -46,7 +48,8 @@ En cas d'écart, appliquer l'ordre suivant :
 | Premier Architecture Pack | Architecture FSD-like de référence, sous identifiant provisoire `reference-fsd` jusqu'à son baptême |
 | Couleurs et icônes | Socle v0.2 livré : couleur TTY auto, icônes opt-in, catalogue v1, thème `vivid` two-tone indépendant, thèmes personnalisés, `theme classify` et artefacts canoniques intacts ; états architecturaux avancés futurs |
 | Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
-| TUI | Jalon `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
+| TUI | Après l'incrément de richesse visuelle `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
+| Accessibilité `v0.2` | `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |

@@ -19,13 +19,10 @@ func TestHelpAndVersion(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "markdown-tree", "mermaid", "graphviz", "d2", "--diagram-view", "--diagram-direction", "--diagram-max-nodes", "config", "preset", "theme"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "--copy", "markdown-tree", "mermaid", "graphviz", "d2", "--diagram-view", "--diagram-direction", "--diagram-max-nodes", "config", "preset", "theme", "completion"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}
-	}
-	if strings.Contains(stdout, "completion  Generate") {
-		t.Fatalf("help exposes the out-of-scope completion command\n%s", stdout)
 	}
 
 	stdout, stderr, code = executeForTest(t, "--version")

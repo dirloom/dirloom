@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/dirloom/dirloom/internal/tree"
 )
@@ -101,6 +102,9 @@ func TestRendererValidation(t *testing.T) {
 
 func assertPortableLineEndings(t *testing.T, data []byte) {
 	t.Helper()
+	if !utf8.Valid(data) {
+		t.Fatal("output is not valid UTF-8")
+	}
 	if bytes.HasPrefix(data, []byte{0xef, 0xbb, 0xbf}) {
 		t.Fatal("output contains a UTF-8 BOM")
 	}

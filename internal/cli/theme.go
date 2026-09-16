@@ -122,6 +122,7 @@ func newThemeListCommand(stdout io.Writer, sources *sourceOptions) *cobra.Comman
 		},
 	}
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
+	registerAsCompletions(command)
 	return command
 }
 
@@ -150,6 +151,8 @@ func newThemeExplainCommand(stdout io.Writer, sources *sourceOptions) *cobra.Com
 		},
 	}
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
+	registerAsCompletions(command)
+	command.ValidArgsFunction = completeTheme
 	return command
 }
 
@@ -182,6 +185,13 @@ func newThemeValidateCommand(stdout io.Writer, sources *sourceOptions) *cobra.Co
 		},
 	}
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
+	registerAsCompletions(command)
+	command.ValidArgsFunction = func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if len(args) > 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
+	}
 	return command
 }
 

@@ -111,6 +111,20 @@ Chaque capacité DOIT déclarer son niveau de coût :
 
 La classe active et la portée DEVRAIENT être visibles avant une opération coûteuse ou sensible.
 
+### 4.6 Destinations de sortie
+
+Une exécution d'inspection DOIT écrire le rendu vers exactement une destination : stdout, `--output`, ou `--copy`. `--copy` et `--output` SONT mutuellement exclusifs. Le conflit DOIT être détecté avant le chargement de configuration et le scan, et DOIT retourner le code d'usage `2`.
+
+`output` et `copy` SONT des propriétés d'exécution. Le schéma de configuration v1 NE DOIT PAS les accepter.
+
+Tout format textuel émis DOIT être de l'UTF-8 valide. Cet invariant appartient au rendu / à la sortie, pas au presse-papiers. stdout, `--output` et `--copy` partagent le même invariant.
+
+`--copy` DOIT placer dans le presse-papiers exactement le contenu textuel du rendu, sans `trim`, sans message de confirmation, et avec stdout/stderr vides en cas de succès. Une erreur de presse-papiers DOIT retourner `1` sans recopier le rendu sur stdout. L'identité publique est textuelle : Windows PEUT stocker `CF_UNICODETEXT` en UTF-16.
+
+### 4.7 Complétions shell
+
+`dirloom completion bash|zsh|fish|powershell` DOIT écrire un script déterministe sur stdout, terminé par un saut de ligne, sans modifier le profil du shell. Un shell ou une arité invalide DOIT retourner `2`. Une erreur d'écriture DOIT retourner `1`. Les complétions DOIVENT couvrir les valeurs énumérées publiques (formats, presets, styles, thèmes, couleur, icônes, diagrammes, `unlimited`) et les dossiers pour la racine d'inspection.
+
 ## 5. Expérience visuelle : couleurs, icônes et thèmes
 
 ### 5.1 Objectif
@@ -130,6 +144,8 @@ dirloom --theme midnight
 ```
 
 Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe `color: auto`, `icons: never` et `theme: default` comme défauts intégrés. Un TTY interactif utilisable reçoit donc la couleur mais aucune icône sans activation explicite. `--icons auto` active Unicode seulement sur un TTY éligible ; un pipe, une redirection, `--output`, CI ou `TERM=dumb` reste neutre. Les presets NE DOIVENT PAS modifier ces valeurs.
+
+`--copy` N'EST PAS une destination non-TTY. En mode `auto`, la couleur ANSI DOIT être absente et les icônes Unicode DOIVENT être conservées comme pour un rendu texte interactif. `--color always|never` et `--icons never|unicode|nerd` restent respectés pour le format texte. Markdown, JSON et diagrammes restent canoniques.
 
 - `never` n'émet aucune séquence ANSI ni icône décorative ;
 - `auto` active la décoration seulement sur une surface compatible ;
@@ -803,6 +819,8 @@ Le Context Firewall DOIT permettre d'exclure ou de restreindre ces catégories e
 
 Le TUI DOIT explorer l'artefact Dirloom : filtres, profondeur, diff, métriques, contrats, annotations, contexte et exports. Il NE DOIT PAS devenir un clone de Yazi, ranger ou broot et NE DOIT PAS exposer de suppression/déplacement généraliste.
 
+`browse` N'EST PAS le jalon v0.3. v0.3 est réservé à la richesse visuelle (catalogue, thèmes, fichiers sémantiques, couleurs). Le TUI est reporté après cet incrément de présentation.
+
 ### 11.2 Dirloom Desktop
 
 Desktop est une surface future officielle pour :
@@ -934,7 +952,7 @@ CLI explicite
 
 La configuration utilisateur DOIT suivre le répertoire de configuration natif de l'OS. Dans Git, Dirloom DOIT charger le `.dirloom.yaml` le plus proche sans fusionner plusieurs fichiers projet ; hors Git, il DOIT examiner seulement la racine inspectée. Les exclusions explicites DOIVENT s'accumuler dans l'ordre utilisateur, projet puis CLI, avec déduplication stable. Les autres valeurs DOIVENT suivre la priorité générale et distinguer absence, `false`, `0` et profondeur illimitée explicite.
 
-`dirloom config explain` DOIT rendre visibles sources, statuts, valeurs effectives, provenance et exclusions. Aucun fichier de configuration NE DOIT pouvoir sélectionner la racine, imposer une destination d'écriture, exécuter une commande, interpoler l'environnement ou inclure un autre document.
+`dirloom config explain` DOIT rendre visibles sources, statuts, valeurs effectives, provenance et exclusions. Aucun fichier de configuration NE DOIT pouvoir sélectionner la racine, imposer une destination d'écriture, copier vers le presse-papiers, exécuter une commande, interpoler l'environnement ou inclure un autre document.
 
 Un preset est une composition nommée et inspectable, activée explicitement par la CLI ou la configuration. Il NE DOIT PAS créer un niveau de priorité caché. Une seule sélection est active selon la priorité CLI, projet, utilisateur ; `preset: null` et `--preset none` neutralisent une sélection héritée sans retirer les autres valeurs. Le preset gagnant est développé dans sa couche avant les valeurs explicites de cette couche. `dirloom preset explain <name>` DOIT rendre sa définition intrinsèque visible en texte et en JSON versionné, tandis que `dirloom config explain` DOIT exposer la sélection effective et la provenance de chaque effet.
 

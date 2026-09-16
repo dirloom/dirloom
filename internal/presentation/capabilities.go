@@ -18,6 +18,7 @@ type CapabilityRequest struct {
 	IconMode         string
 	ColorExplicitCLI bool
 	OutputPath       string
+	Clipboard        bool
 	Writer           io.Writer
 }
 
@@ -96,7 +97,7 @@ func (evaluator *Evaluator) Evaluate(request CapabilityRequest) (Capabilities, e
 	if !outputformat.UsesPresentation(request.Format) {
 		return Capabilities{IconMode: IconsNever, Profile: ProfileTrueColor}, nil
 	}
-	tty := request.OutputPath == "" && evaluator.isTTY(request.Writer)
+	tty := !request.Clipboard && request.OutputPath == "" && evaluator.isTTY(request.Writer)
 	autoEligible := tty && request.OutputPath == "" && evaluator.env("CI") == "" && evaluator.env("TERM") != "dumb"
 	colorEnabled := false
 	switch request.ColorMode {
@@ -119,7 +120,7 @@ func (evaluator *Evaluator) Evaluate(request CapabilityRequest) (Capabilities, e
 	case IconsNerd:
 		iconMode = IconsNerd
 	case IconsAuto:
-		if autoEligible {
+		if autoEligible || request.Clipboard {
 			iconMode = IconsUnicode
 		}
 	default:

@@ -6,6 +6,11 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ### Added
 
+- Add `--copy` to place the rendered tree on the native clipboard with silent success, exclusive destination, and OS backends for Windows, macOS, Linux and WSL.
+- Add `dirloom completion` for Bash, Zsh, Fish and PowerShell with semantic flag values and no profile mutation.
+- Publish clipboard, completion and distribution guides, including Release Done versus Distribution Verified.
+- Add SPDX SBOMs, a 13-artifact GitHub Release inventory, checksums covering archives and SBOMs, and GitHub Artifact Attestations.
+- Add GitOps package templates and published-release automation for Scoop, Homebrew (`dirloom/tap/dirloom`) and Winget (`Dirloom.Dirloom`).
 - Add official Scoop distribution for Windows x64 and ARM64 with automatic updates from published stable releases.
 - Add strict layered configuration through `.dirloom.yaml`, the native user configuration directory and explicit CLI overrides.
 - Add Git-bounded project discovery, additive ignore rules and `dirloom config explain` diagnostics with value provenance.
@@ -31,6 +36,8 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Change the built-in icon mode from `auto` to `never`; Unicode and Nerd glyphs are now explicitly activated while automatic color remains unchanged.
 - Resolve icon color separately from text color and emit independent ANSI spans and resets.
 - Redesign `vivid` as an independent two-tone neon theme with role-driven text, kind-driven icon colors, stronger semantic emphasis, and WCAG AA contrast for every built-in color.
+- Change the GitHub Release checksum file so it covers the six archives and six SBOMs and never hashes itself.
+- Convert Scoop updates from direct commits on `main` to idempotent version pull requests.
 
 ## [0.1.1] - 2026-08-11
 
