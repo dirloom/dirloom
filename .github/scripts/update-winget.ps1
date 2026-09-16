@@ -65,9 +65,12 @@ try {
 
     Invoke-Gh auth setup-git
 
-    $existingPr = & gh pr list --repo $UpstreamRepo --search "$PackageId $Version" --state open --json number --jq 'length'
-    if ($LASTEXITCODE -eq 0 -and $existingPr -ne '0' -and $existingPr -ne '') {
-        Write-Host "Winget PR already open for $Version"
+    # Ignore open PRs from retired machine users (we cannot close those heads).
+    # Only treat a version as already in flight when *our* org fork or current
+    # publisher account already has an open PR.
+    $oursOpen = & gh pr list --repo $UpstreamRepo --search "$PackageId $Version" --state open --json number,author,headRepositoryOwner --jq '[.[] | select(.author.login == "dirloom-package-mgr" or .headRepositoryOwner.login == "dirloom")] | length'
+    if ($LASTEXITCODE -eq 0 -and $oursOpen -ne '0' -and $oursOpen -ne '') {
+        Write-Host "Winget PR already open for $Version from dirloom/dirloom-package-mgr"
         return
     }
 
@@ -188,7 +191,11 @@ try {
     }
 
     $forkOwner = ($ForkRepo -split '/')[0]
-    Invoke-Gh pr create --repo $UpstreamRepo --head "${forkOwner}:${branch}" --base master --title "New version: $PackageId version $Version" --body "Update Dirloom.Dirloom to GitHub Release $Tag from the $ForkRepo fork. Installers are the official Windows zip archives; hashes were verified against checksums.txt. LicenseUrl points at $Tag."
+    Invoke-Gh pr create --repo $UpstreamRepo --head "${forkOwner}:${branch}" --base master --title "New version: $PackageId version $Version" --body @"
+Update Dirloom.Dirloom to GitHub Release $Tag from the $ForkRepo fork. Installers are the official Windows zip archives; hashes were verified against checksums.txt. LicenseUrl points at $Tag.
+
+Supersedes https://github.com/microsoft/winget-pkgs/pull/435891 : that PR was opened by the retired ``dirloom-package-bot`` account, which we can no longer access to close the PR or complete the CLA. Please close #435891 in favor of this one.
+"@
 }
 finally {
     Remove-Item -LiteralPath $Work -Recurse -Force -ErrorAction SilentlyContinue
