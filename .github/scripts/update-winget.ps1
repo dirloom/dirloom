@@ -158,7 +158,12 @@ try {
     }
 
     $forkDir = Join-Path $Work 'fork'
-    Invoke-Gh repo clone $ForkRepo $forkDir -- --filter=blob:none --sparse --depth 1
+    # Call git directly: PowerShell functions swallow `--`, which gh needs to
+    # forward clone filters.
+    & git clone --filter=blob:none --sparse --depth 1 "https://github.com/$ForkRepo.git" $forkDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "git clone $ForkRepo failed with exit $LASTEXITCODE"
+    }
     Push-Location $forkDir
     try {
         Invoke-Git sparse-checkout set manifests/d/Dirloom
