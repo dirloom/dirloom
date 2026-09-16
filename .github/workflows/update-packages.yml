@@ -1,0 +1,52 @@
+name: Update package managers
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: GitHub release tag to distribute
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  scoop:
+    name: Scoop PR
+    runs-on: ubuntu-latest
+    environment: package-publishing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Open Scoop version PR
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGE_BOT_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        run: bash .github/scripts/update-scoop.sh
+
+  homebrew:
+    name: Homebrew PR
+    runs-on: ubuntu-latest
+    environment: package-publishing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Open Homebrew version PR
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGE_BOT_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        run: bash .github/scripts/update-homebrew.sh
+
+  winget:
+    name: Winget PR
+    runs-on: windows-latest
+    environment: package-publishing
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Submit Winget PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.PACKAGE_BOT_TOKEN }}
+          PACKAGE_BOT_TOKEN: ${{ secrets.PACKAGE_BOT_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        shell: pwsh
+        run: .github/scripts/update-winget.ps1
