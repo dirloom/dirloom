@@ -9,6 +9,13 @@ VERSION="${TAG#v}"
 BUCKET_REPO="${SCOOP_BUCKET_REPO:-dirloom/scoop-bucket}"
 ROOT_REPO="${GITHUB_REPOSITORY:-dirloom/dirloom}"
 
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "GH_TOKEN is required" >&2
+  exit 1
+fi
+
+gh auth setup-git
+
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 

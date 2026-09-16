@@ -6,6 +6,13 @@ VERSION="${TAG#v}"
 TAP_REPO="${HOMEBREW_TAP_REPO:-dirloom/homebrew-tap}"
 ROOT_REPO="${GITHUB_REPOSITORY:-dirloom/dirloom}"
 
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "GH_TOKEN is required" >&2
+  exit 1
+fi
+
+gh auth setup-git
+
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 gh release download "$TAG" --repo "$ROOT_REPO" --pattern checksums.txt --dir "$work"
@@ -92,7 +99,7 @@ cask "dirloom" do
       (zsh_dir/"_dirloom").write system_command(executable, args: ["completion", "zsh"]).stdout
       (fish_dir/"dirloom.fish").write system_command(executable, args: ["completion", "fish"]).stdout
       (pwsh_dir/"dirloom.ps1").write system_command(executable, args: ["completion", "powershell"]).stdout
-    rescue StandardError
+    rescue StandardError => e
       puts "Could not install generated shell completions (#{e.message}); run dirloom completion <shell> manually."
     end
   end
