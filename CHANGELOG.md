@@ -4,6 +4,22 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Contextual CLI help through `dirloom help <topic>`.
+- `dirloom help topics`, `examples`, and `concepts`.
+- Shell completion for command and contextual help targets.
+- Actionable guidance and suggestions for invalid CLI usage.
+
+### Changed
+
+- `--icons` without an explicit value now behaves as `--icons=auto`.
+- `--color` without an explicit value now behaves as `--color=auto`.
+
+### Fixed
+
+- `--help` and `--version` are no longer consumed as the value of `--icons` or `--color`.
+
 ## [0.3.0] - 2026-09-17
 
 Presentation richness: additive semantic catalog (506 matchers, 119 kinds) and

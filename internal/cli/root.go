@@ -21,10 +21,42 @@ import (
 )
 
 type usageError struct {
-	err error
+	err         error
+	values      []string
+	suggestions []string
+	helpTopic   string
+	hint        string
 }
 
-func (e *usageError) Error() string { return e.err.Error() }
+func (e *usageError) Error() string {
+	var builder strings.Builder
+	builder.WriteString(e.err.Error())
+	if len(e.values) > 0 {
+		builder.WriteString("\n\nValid values:")
+		for _, value := range e.values {
+			builder.WriteString("\n  ")
+			builder.WriteString(value)
+		}
+	}
+	if len(e.suggestions) > 0 {
+		builder.WriteString("\n\nDid you mean:")
+		for _, suggestion := range e.suggestions {
+			builder.WriteString("\n  ")
+			builder.WriteString(suggestion)
+		}
+	}
+	if e.helpTopic != "" {
+		builder.WriteString("\n\nRun 'dirloom help ")
+		builder.WriteString(e.helpTopic)
+		builder.WriteString("' for details.")
+	}
+	if e.hint != "" {
+		builder.WriteString("\n\n")
+		builder.WriteString(e.hint)
+	}
+	return builder.String()
+}
+
 func (e *usageError) Unwrap() error { return e.err }
 
 type commandDependencies struct {
@@ -61,7 +93,7 @@ func executeWithDependencies(ctx context.Context, args []string, stdout, stderr 
 
 func execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string, deps commandDependencies) int {
 	command := newRootCommandWithRuntime(stdout, stderr, version, deps)
-	command.SetArgs(args)
+	command.SetArgs(normalizeOptionalAutoFlags(args))
 	if err := command.ExecuteContext(ctx); err != nil {
 		_, _ = fmt.Fprintf(stderr, "Error: %s\n", err)
 		var invalid *usageError
@@ -94,13 +126,16 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 		Short: "Create clean, deterministic project trees",
 		Long: "Dirloom turns a directory into a clean, deterministic and shareable\n" +
 			"tree for terminals, documentation, CI pipelines, humans and tools.\n\n" +
-			"Arguments:\n  directory   Directory to inspect (default: current directory)",
+			"Arguments:\n  directory   Directory to inspect (default: current directory)\n\n" +
+			"Run \"dirloom help topics\" for conceptual help such as icons, colors, formats,\n" +
+			"filters, and configuration.",
 		Example: `  dirloom
   dirloom ./src
   dirloom --depth 3
   dirloom --preset docs
   dirloom --dirs-only
   dirloom --style ascii
+  dirloom --icons
   dirloom --theme midnight --icons unicode
   dirloom --format markdown
   dirloom --format markdown --copy
@@ -110,6 +145,8 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
   dirloom --format d2 --output structure.d2
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown
+  dirloom help icons
+  dirloom help topics
   dirloom completion bash`,
 		Version:       version,
 		SilenceErrors: true,
@@ -225,6 +262,7 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 	command.AddCommand(newPresetCommand(stdout, &sources))
 	command.AddCommand(newThemeCommand(stdout, &sources))
 	command.AddCommand(newCompletionCommand(stdout))
+	command.SetHelpCommand(newHelpCommand())
 	return command
 }
 
@@ -255,8 +293,8 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
 	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, json, mermaid, graphviz (dot), or d2")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
-	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto")
-	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto")
+	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto; omit the value for auto")
+	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto; omit the value for auto")
 	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, vivid, or a YAML path")
 	command.Flags().StringVar(&opts.diagramView, "diagram-view", "", "diagram view: structure")
 	command.Flags().StringVar(&opts.diagramDirection, "diagram-direction", "", "diagram direction: top-down or left-right")
@@ -295,8 +333,11 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 		}
 		if opts.preset == configuration.PresetNone {
 			result.Preset = configuration.PresetSelection{Set: true, Disabled: true}
-		} else {
+		} else if _, ok := configuration.LookupPreset(opts.preset); ok {
 			result.Preset = configuration.PresetSelection{Set: true, Name: opts.preset}
+		} else {
+			allowed := append(append([]string{}, configuration.PresetNames()...), configuration.PresetNone)
+			return configuration.Overrides{}, invalidEnumeratedFlag("preset", opts.preset, allowed, "presets")
 		}
 	}
 	if command.Flags().Changed("depth") {
@@ -309,13 +350,19 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 		result.IncludeHidden = configuration.Optional[bool]{Set: true, Value: opts.includeHidden}
 	}
 	if command.Flags().Changed("format") {
+		if opts.format == "" {
+			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--format requires a non-empty value")}
+		}
 		canonical, ok := outputformat.Canonical(opts.format)
 		if !ok {
-			return configuration.Overrides{}, &usageError{err: outputformat.Validate(opts.format)}
+			return configuration.Overrides{}, invalidEnumeratedFlag("format", opts.format, outputformat.Names(), "formats")
 		}
 		result.Format = configuration.Optional[string]{Set: true, Value: canonical}
 	}
 	if command.Flags().Changed("style") {
+		if err := requireEnumeratedFlag("style", opts.style, []string{configuration.StyleUnicode, configuration.StyleASCII}, "formats"); err != nil {
+			return configuration.Overrides{}, err
+		}
 		result.Style = configuration.Optional[string]{Set: true, Value: opts.style}
 	}
 	if command.Flags().Changed("no-default-ignore") {
@@ -328,14 +375,14 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 		result.IgnorePatterns = append([]string(nil), opts.ignorePatterns...)
 	}
 	if command.Flags().Changed("color") {
-		if opts.color == "" {
-			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--color requires a non-empty value")}
+		if err := requireEnumeratedFlag("color", opts.color, presentation.ColorModes(), "colors"); err != nil {
+			return configuration.Overrides{}, err
 		}
 		result.Color = configuration.Optional[string]{Set: true, Value: opts.color}
 	}
 	if command.Flags().Changed("icons") {
-		if opts.icons == "" {
-			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--icons requires a non-empty value")}
+		if err := requireEnumeratedFlag("icons", opts.icons, presentation.IconModes(), "icons"); err != nil {
+			return configuration.Overrides{}, err
 		}
 		result.Icons = configuration.Optional[string]{Set: true, Value: opts.icons}
 	}
@@ -346,14 +393,14 @@ func explicitOverrides(command *cobra.Command, opts *options) (configuration.Ove
 		result.Theme = configuration.ThemeSelection{Set: true, Value: opts.theme}
 	}
 	if command.Flags().Changed("diagram-view") {
-		if opts.diagramView == "" {
-			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--diagram-view requires a non-empty value")}
+		if err := requireEnumeratedFlag("diagram-view", opts.diagramView, []string{string(diagram.ViewStructure)}, "diagrams"); err != nil {
+			return configuration.Overrides{}, err
 		}
 		result.DiagramView = configuration.Optional[string]{Set: true, Value: opts.diagramView}
 	}
 	if command.Flags().Changed("diagram-direction") {
-		if opts.diagramDirection == "" {
-			return configuration.Overrides{}, &usageError{err: fmt.Errorf("--diagram-direction requires a non-empty value")}
+		if err := requireEnumeratedFlag("diagram-direction", opts.diagramDirection, []string{string(diagram.DirectionTopDown), string(diagram.DirectionLeftRight)}, "diagrams"); err != nil {
+			return configuration.Overrides{}, err
 		}
 		result.DiagramDirection = configuration.Optional[string]{Set: true, Value: opts.diagramDirection}
 	}

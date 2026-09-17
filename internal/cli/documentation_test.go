@@ -95,3 +95,106 @@ func TestREADMEAndUseCasesExposeCopyAndCompletions(t *testing.T) {
 		t.Fatal("use cases missing native Markdown copy")
 	}
 }
+
+func TestPublicHelpDocumentationMatchesCLIContracts(t *testing.T) {
+	readme, err := os.ReadFile(filepath.Join("..", "..", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	guide, err := os.ReadFile(filepath.Join("..", "..", "docs", "contextual-help.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	themes, err := os.ReadFile(filepath.Join("..", "..", "docs", "themes.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	completions, err := os.ReadFile(filepath.Join("..", "..", "docs", "clipboard-and-completions.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	readmeText := string(readme)
+	guideText := string(guide)
+	themeText := string(themes)
+	completionText := string(completions)
+	for _, want := range []string{
+		"dirloom help icons",
+		"dirloom help topics",
+		"docs/contextual-help.md",
+		"dirloom --icons",
+	} {
+		if !strings.Contains(readmeText, want) {
+			t.Errorf("README missing %q", want)
+		}
+	}
+	for _, want := range []string{
+		"dirloom --help",
+		"dirloom help <topic>",
+		"--icons",
+		"--color",
+		"never",
+		"unicode",
+		"nerd",
+		"auto",
+		"always",
+		"help vs explain",
+	} {
+		if !strings.Contains(guideText, want) {
+			t.Errorf("contextual help guide missing %q", want)
+		}
+	}
+	for _, mode := range []string{"never", "unicode", "nerd", "auto"} {
+		if !strings.Contains(themeText, mode) {
+			t.Errorf("themes guide missing icon mode %q", mode)
+		}
+	}
+	for _, mode := range []string{"never", "always", "auto"} {
+		if !strings.Contains(themeText, mode) {
+			t.Errorf("themes guide missing color mode %q", mode)
+		}
+	}
+	if !strings.Contains(themeText, "dirloom help icons") || !strings.Contains(themeText, "without a value is equivalent") {
+		t.Fatal("themes guide missing implicit --icons documentation")
+	}
+	if !strings.Contains(completionText, "dirloom help") || !strings.Contains(completionText, "help topics") {
+		t.Fatal("completion guide missing contextual help completions")
+	}
+	for _, name := range helpTopicNames() {
+		if !strings.Contains(guideText, name) {
+			t.Errorf("contextual help guide missing topic %q", name)
+		}
+	}
+}
+
+func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "docs", "release-workflow.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, want := range []string{
+		"Pre-1.0 versioning policy",
+		"0.Y.0",
+		"0.Y.Z",
+		"v0.3.0",
+		"v0.3.1",
+		"v0.4.0",
+		"PRESENTATION",
+		"CHANGE",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("release workflow missing %q", want)
+		}
+	}
+	roadmap, err := os.ReadFile(filepath.Join("..", "..", "docs", "product", "roadmap.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	roadmapText := string(roadmap)
+	if !strings.Contains(roadmapText, "v0.3.1") || !strings.Contains(roadmapText, "CLI GUIDANCE") {
+		t.Fatal("roadmap missing v0.3.1 CLI guidance refinement")
+	}
+	if strings.Contains(roadmapText, "v0.4.0-beta") || strings.Contains(roadmapText, "v0.4.0-b") {
+		t.Fatal("roadmap must not present contextual help as a v0.4.0 beta")
+	}
+}

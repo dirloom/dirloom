@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 17 septembre 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.2.0` livre le socle déterministe plus l'accessibilité (`--copy`, complétions, releases de confiance). Les documents de ce dossier décrivent le produit que ce socle permet de construire. v0.3 est l'incrément de richesse visuelle, Code Complete, freeze sur `release/v0.3.0`.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.3.0` est publiée (socle déterministe, accessibilité, richesse visuelle). Les documents de ce dossier décrivent le produit que ce socle permet de construire. La cible de développement actuelle est `v0.3.1` sur `main` ; `release/v0.3.1` n'est pas encore ouverte.
 
 ## Parcours de lecture
 
@@ -21,6 +21,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Exports graphiques](../graph-exports.md) | Comment produire des sources Mermaid, Graphviz et D2 déterministes ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
 | [Presse-papiers et complétions](../clipboard-and-completions.md) | Comment copier un rendu et installer les complétions shell ? | Utilisateurs, intégrateurs |
+| [Aide contextuelle](../contextual-help.md) | Comment découvrir commandes, topics et valeurs CLI ? | Utilisateurs, intégrateurs |
 | [Distribution](../distribution.md) | Comment installer Dirloom et vérifier une release de confiance ? | Utilisateurs, mainteneurs |
 | [Catalogue sémantique](../catalog.md) | Comment Dirloom classe-t-il kinds, rôles et matchers, et comment diagnostiquer une entrée réelle ? | Utilisateurs, concepteurs de thèmes, contributeurs |
 
@@ -50,7 +51,8 @@ En cas d'écart, appliquer l'ordre suivant :
 | Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
 | TUI | Après l'incrément de richesse visuelle `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Accessibilité `v0.2` | Livré : `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
-| Richesse visuelle `v0.3` | Code Complete, freeze sur `release/v0.3.0` : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
+| Richesse visuelle `v0.3` | Publiée en `v0.3.0` : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
+| Aide contextuelle `v0.3.1` | En développement sur `main` : `dirloom help <topic>`, `--icons`/`--color` implicites `auto`, diagnostics actionnables ; `release/v0.3.1` n'est pas ouverte ; `v0.4.0` reste CHANGE |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |

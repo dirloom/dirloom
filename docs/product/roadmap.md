@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.2.0` publiée ; v0.3.0 Code Complete, freeze sur `release/v0.3.0`<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.3.0` publiée ; cible de développement `v0.3.1` sur `main` (`release/v0.3.1` pas encore ouverte)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -445,6 +445,7 @@ Trajectoire officielle après v0.1 :
 v0.1 CORE
 v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
 v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
+v0.3.1 CLI GUIDANCE  ← contextual help, implicit --icons/--color auto
 POST-v0.3 EXPLORER   ← browse, navigation, recherche, premières métriques
 v0.4 CHANGE          ← fingerprint, snapshots, verify, diffs
 v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
@@ -452,7 +453,7 @@ v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
 
 Release Done clôt v0.2 lorsque GitHub est publié et que les PR Scoop/Homebrew/Winget sont ouvertes. Distribution Verified est un statut opérationnel par canal (`✅` ou `⏳`). Winget peut rester ⏳ sans rouvrir le jalon.
 
-v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. Snapshots et diffs relèvent de v0.4 ; scaffold et Architecture Packs relèvent de v0.5.
+v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. L'ergonomie CLI (`v0.3.1`) raffine l'aide et les flags `--icons`/`--color` sans changer la présentation. Snapshots et diffs relèvent de v0.4 ; scaffold et Architecture Packs relèvent de v0.5.
 
 ---
 
@@ -1972,6 +1973,8 @@ Cette matrice est une estimation stratégique et doit évoluer avec les preuves 
 
 Les numéros ci-dessous donnent un ordre de construction, pas un engagement de calendrier. Les dépendances sont plus importantes que les versions.
 
+Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
+
 ## v0.1 — Deterministic Foundation
 
 **Objectif :** excellent générateur d’arborescence local.
@@ -2016,7 +2019,7 @@ Fonctions :
 
 **Objectif :** refermer l'écart visuel avec eza en étendant le catalogue (extensions, fichiers bien connus, dossiers spéciaux, couleurs sémantiques, styles, fallbacks, thèmes).
 
-**Statut : Code Complete.** Freeze sur `release/v0.3.0`. Catalogue v1 étendu de façon additive à 506 matchers et 119 kinds, thèmes intégrés inchangés en schéma, corpus de showcase project-centric, défaut `icons: never` conservé. Les 256 identités de matchers v0.2 (64 filenames, 40 directories, 32 suffixes, 120 extensions) restent stables ; les promotions de chemins telles que `requirements.txt` et `Chart.yaml` sont des matchers plus spécifiques, pas une réécriture de cette table.
+**Statut : Released.** GitHub tag `v0.3.0` publié. Catalogue v1 étendu de façon additive à 506 matchers et 119 kinds, thèmes intégrés inchangés en schéma, corpus de showcase project-centric, défaut `icons: never` conservé. Les 256 identités de matchers v0.2 (64 filenames, 40 directories, 32 suffixes, 120 extensions) restent stables ; les promotions de chemins telles que `requirements.txt` et `Chart.yaml` sont des matchers plus spécifiques, pas une réécriture de cette table.
 
 Fonctions :
 
@@ -2030,6 +2033,22 @@ Fonctions :
 **Signature produit :**
 
 > Un `dirloom` sans option est visuellement à la hauteur d'un outil de listing moderne, sans casser les artefacts canoniques.
+
+## v0.3.1 — CLI guidance / contextual help
+
+**Niveau : raffinement post-v0.3, avant v0.4.**
+
+**Statut : en développement sur `main`.** Ce n'est pas un nouveau jalon stratégique. `release/v0.3.1` n'est pas encore ouverte.
+
+Fonctions :
+
+- `--icons` et `--color` sans valeur signifient `auto` ;
+- `dirloom help <topic>` pour les concepts (icons, colors, formats, filters, …) ;
+- `dirloom help topics` comme catalogue déterministe ;
+- diagnostics actionnables pour les enums CLI, sans changer les codes de sortie ;
+- completions des topics d'aide.
+
+Frontière : aucune notion structurelle de v0.4 (fingerprint, snapshot, verify, diff, history, watch).
 
 ## Après v0.3 — Interactive Explorer
 
