@@ -111,6 +111,28 @@ dirloom --style ascii > structure.txt
 
 See [Clipboard and shell completions](docs/clipboard-and-completions.md) and [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
 
+## Getting help
+
+```bash
+# General help
+dirloom --help
+
+# Command help
+dirloom theme --help
+
+# Concept help
+dirloom help icons
+dirloom help formats
+dirloom help filters
+
+# List help topics
+dirloom help topics
+```
+
+`--icons` without a value is a shortcut for `--icons=auto`. `--color` without a value is a shortcut for `--color=auto`. Other string flags still require an explicit value.
+
+See [Contextual help](docs/contextual-help.md) for the three help levels, optional-value flags, and usage diagnostics.
+
 ## Persistent configuration
 
 Dirloom can load shared project settings from `.dirloom.yaml` and personal defaults from your operating system's configuration directory.
@@ -167,6 +189,7 @@ Interactive text uses automatic color and keeps icons disabled until requested. 
 
 ```bash
 dirloom --theme vivid
+dirloom --theme vivid --icons
 dirloom --theme vivid --icons nerd
 dirloom --icons unicode --theme midnight testdata/showcase/infra-terraform-k8s
 dirloom theme classify README.md --theme vivid
@@ -206,8 +229,8 @@ dirloom [directory] [flags]
 | `--no-user-config` | Skip personal configuration while retaining project configuration. |
 | `--no-config` | Disable user and project configuration files. |
 | `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
-| `--color never\|always\|auto` | Control ANSI color for text output. Default: `auto`. |
-| `--icons never\|unicode\|nerd\|auto` | Control presentation icons for text output. Default: `never`. |
+| `--color[=MODE]` | Control ANSI color for text output: `never`, `always`, or `auto`. Default: `auto`. `--color` alone means `--color=auto`. |
+| `--icons[=MODE]` | Control presentation icons for text output: `never`, `unicode`, `nerd`, or `auto`. Default when omitted: `never`. `--icons` alone means `--icons=auto`. |
 | `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, `vivid`, or a local YAML theme. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `--copy` | Copy the rendered tree to the clipboard instead of stdout. Mutually exclusive with `--output`. |
@@ -221,6 +244,8 @@ dirloom [directory] [flags]
 `dirloom theme classify <path>` performs one bounded `Lstat` and explains the real entry type, semantic kind, roles, winning matcher, and resolved theme style without reading file content or scanning recursively.
 
 `dirloom completion bash|zsh|fish|powershell` writes a deterministic completion script to stdout and does not modify your shell profile. See [Clipboard and shell completions](docs/clipboard-and-completions.md).
+
+`dirloom help [command | topic]` resolves commands first, then compiled topics. `dirloom help topics` lists conceptual topics. See [Contextual help](docs/contextual-help.md).
 
 ## Filtering
 
@@ -420,11 +445,12 @@ See [Distribution](docs/distribution.md) and [Release workflow](docs/release-wor
 The voted product sequence builds from the deterministic v0.1 foundation:
 
 ```text
-v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
+v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
 ```
 
 - v0.2: released — install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
 - v0.3: Code Complete, freeze on `release/v0.3.0` — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
+- v0.3.1: CLI guidance — contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

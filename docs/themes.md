@@ -73,6 +73,17 @@ dirloom --icons nerd --theme vivid
 
 For each semantic kind, Nerd mode falls back to its Unicode glyph, then to no glyph. Dirloom does not assume a fixed display width. The semantic catalog and glyph provenance are documented in [Semantic catalog](catalog.md).
 
+`--icons` without a value is equivalent to `--icons=auto`. `--color` without a value is equivalent to `--color=auto`. A theme does not enable icons by itself:
+
+```bash
+dirloom --icons
+dirloom --theme vivid --icons
+dirloom help icons
+dirloom help colors
+```
+
+`dirloom help themes` teaches the theme system. `dirloom theme explain vivid` inspects one concrete definition. See [Contextual help](contextual-help.md).
+
 ## Built-in themes
 
 The four built-ins use the same semantic catalog. Switching themes changes only presentation bindings.

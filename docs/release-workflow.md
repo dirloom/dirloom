@@ -3,6 +3,26 @@
 Dirloom follows the Ginov **release branch** model documented in the
 [Release workflow & Git-Ops hub](https://knowledge.floxio.ai/doc/guide-release-workflow-git-ops-hub-6ERj1DbE2s).
 
+## Pre-1.0 versioning policy
+
+While Dirloom remains in 0.x:
+
+- `0.Y.0` marks a product milestone or capability boundary.
+- `0.Y.Z` is a backward-compatible maintenance release within that milestone.
+
+Patch releases may include bug fixes, UX refinements, CLI ergonomics,
+documentation/discoverability improvements, and small additive capabilities
+that do not redefine the milestone.
+
+Examples:
+
+- `v0.3.0` — PRESENTATION
+- `v0.3.1` — PRESENTATION refinement / Contextual Help & CLI Guidance
+- `v0.4.0` — CHANGE / Fingerprint, Snapshot, Verify, Diff
+
+`v0.4.0` stays reserved for the CHANGE milestone. Contextual help belongs to
+the PRESENTATION/CLI refinement line and must not be requalified as v0.4.
+
 ## Active release
 
 | Field | Value |

@@ -445,6 +445,7 @@ Trajectoire officielle après v0.1 :
 v0.1 CORE
 v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
 v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
+v0.3.1 CLI GUIDANCE  ← contextual help, implicit --icons/--color auto
 POST-v0.3 EXPLORER   ← browse, navigation, recherche, premières métriques
 v0.4 CHANGE          ← fingerprint, snapshots, verify, diffs
 v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
@@ -452,7 +453,7 @@ v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
 
 Release Done clôt v0.2 lorsque GitHub est publié et que les PR Scoop/Homebrew/Winget sont ouvertes. Distribution Verified est un statut opérationnel par canal (`✅` ou `⏳`). Winget peut rester ⏳ sans rouvrir le jalon.
 
-v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. Snapshots et diffs relèvent de v0.4 ; scaffold et Architecture Packs relèvent de v0.5.
+v0.3 est **sanctuarisée** comme release de richesse visuelle. Elle étend le catalogue jusqu'à un écart visible refermé avec eza. Elle n'absorbe ni nouveau chantier d'infrastructure ni le TUI. `dirloom browse` est reporté après v0.3. L'ergonomie CLI (`v0.3.1`) raffine l'aide et les flags `--icons`/`--color` sans changer la présentation. Snapshots et diffs relèvent de v0.4 ; scaffold et Architecture Packs relèvent de v0.5.
 
 ---
 
@@ -1972,6 +1973,8 @@ Cette matrice est une estimation stratégique et doit évoluer avec les preuves 
 
 Les numéros ci-dessous donnent un ordre de construction, pas un engagement de calendrier. Les dépendances sont plus importantes que les versions.
 
+Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
+
 ## v0.1 — Deterministic Foundation
 
 **Objectif :** excellent générateur d’arborescence local.
@@ -2030,6 +2033,22 @@ Fonctions :
 **Signature produit :**
 
 > Un `dirloom` sans option est visuellement à la hauteur d'un outil de listing moderne, sans casser les artefacts canoniques.
+
+## v0.3.1 — CLI guidance / contextual help
+
+**Niveau : raffinement post-v0.3, avant v0.4.**
+
+**Statut : chantier d'ergonomie CLI.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas le freeze `v0.3.0`.
+
+Fonctions :
+
+- `--icons` et `--color` sans valeur signifient `auto` ;
+- `dirloom help <topic>` pour les concepts (icons, colors, formats, filters, …) ;
+- `dirloom help topics` comme catalogue déterministe ;
+- diagnostics actionnables pour les enums CLI, sans changer les codes de sortie ;
+- completions des topics d'aide.
+
+Frontière : aucune notion structurelle de v0.4 (fingerprint, snapshot, verify, diff, history, watch).
 
 ## Après v0.3 — Interactive Explorer
 

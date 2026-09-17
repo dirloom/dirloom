@@ -126,4 +126,4 @@ Prefer a dedicated file under your PowerShell profile directory if you do not wa
 
 ### Semantic values
 
-Completions cover public enumerated flags, including formats, presets, styles, themes, color and icon modes, diagram view and direction, and special values such as `unlimited`. The inspect root completes as directories. Custom theme paths still complete as files. `__complete` remains Cobra's internal protocol for tests and shell integration; it is not a user command.
+Completions cover public enumerated flags, including formats, presets, styles, themes, color and icon modes, diagram view and direction, and special values such as `unlimited`. `dirloom help <TAB>` also completes public commands and compiled help topics (`icons`, `formats`, `help topics`, and the rest of the catalog). The inspect root completes as directories. Custom theme paths still complete as files. `__complete` remains Cobra's internal protocol for tests and shell integration; it is not a user command.

@@ -21,6 +21,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Exports graphiques](../graph-exports.md) | Comment produire des sources Mermaid, Graphviz et D2 déterministes ? | Utilisateurs, rédacteurs techniques, intégrateurs |
 | [Couleurs, icônes et thèmes](../themes.md) | Comment personnaliser le terminal sans modifier les artefacts canoniques ? | Utilisateurs, contributeurs, intégrateurs |
 | [Presse-papiers et complétions](../clipboard-and-completions.md) | Comment copier un rendu et installer les complétions shell ? | Utilisateurs, intégrateurs |
+| [Aide contextuelle](../contextual-help.md) | Comment découvrir commandes, topics et valeurs CLI ? | Utilisateurs, intégrateurs |
 | [Distribution](../distribution.md) | Comment installer Dirloom et vérifier une release de confiance ? | Utilisateurs, mainteneurs |
 | [Catalogue sémantique](../catalog.md) | Comment Dirloom classe-t-il kinds, rôles et matchers, et comment diagnostiquer une entrée réelle ? | Utilisateurs, concepteurs de thèmes, contributeurs |
 
@@ -51,6 +52,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | TUI | Après l'incrément de richesse visuelle `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Accessibilité `v0.2` | Livré : `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
 | Richesse visuelle `v0.3` | Code Complete, freeze sur `release/v0.3.0` : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
+| Aide contextuelle `v0.3.1` | Raffinement PRESENTATION/CLI : `dirloom help <topic>`, `--icons`/`--color` implicites `auto`, diagnostics actionnables ; `v0.4.0` reste CHANGE |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |
