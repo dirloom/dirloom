@@ -11,8 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-While `release/v0.2.0` is open, base feature and fix branches on
-`release/v0.2.0` and open pull requests against that branch. See
+Base feature and fix branches on latest `main`. Create `release/v0.3.0` only when the v0.3 scope is frozen. See
 [Release workflow](docs/release-workflow.md).
 
 1. Create a focused branch.
@@ -39,6 +38,8 @@ goreleaser release --snapshot --clean --skip=publish
 go run ./cmd/release-artifacts prepare --dist dist --syft syft
 go run ./cmd/release-artifacts verify --dist dist
 ```
+
+Catalog expansions must keep `internal/presentation/catalog/testdata/classification-v0.2.yaml` frozen. That fixture is never regenerated automatically; `DIRLOOM_WRITE_CATALOG_FIXTURE=1` rewrites only `classification-v1.yaml`. After matcher changes, regenerate the exhaustive v1 fixture with that variable and materialize `testdata/showcase` with `DIRLOOM_WRITE_SHOWCASE=1`. Do not introduce prefix matchers, `catalogVersion: 2`, new roles, or a default icon mode other than `never`. Path promotions such as `requirements.txt` or `Chart.yaml` must be changelogued as intentional classification changes, distinct from the 256 frozen v0.2 matcher identities.
 
 ## Compatibility expectations
 

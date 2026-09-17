@@ -22,10 +22,10 @@ Published status is independent of each package manager. GitHub Releases is alwa
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Released at GitHub tag v0.1.1; v0.2.0 composing
+Released at GitHub tag v0.2.0; v0.3.0 in progress
 
 DISTRIBUTION STATUS
-GitHub     ✅ v0.1.1
+GitHub     ✅ v0.2.0
 Scoop      ✅ v0.1.1
 Homebrew   ⏳
 Winget     ⏳
@@ -168,7 +168,9 @@ Interactive text uses automatic color and keeps icons disabled until requested. 
 ```bash
 dirloom --theme vivid
 dirloom --theme vivid --icons nerd
+dirloom --icons unicode --theme midnight testdata/showcase/infra-terraform-k8s
 dirloom theme classify README.md --theme vivid
+dirloom theme classify Chart.yaml
 ```
 
 Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Reproduce canonical historical text explicitly with:
@@ -177,7 +179,7 @@ Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Mark
 dirloom --color never --icons never
 ```
 
-Dirloom respects `NO_COLOR`; only explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for the public theme schema and [Semantic catalog](docs/catalog.md) for the 256 matchers, 96 kinds, 16 roles, and classification diagnostics.
+Dirloom respects `NO_COLOR`; only explicit CLI `--color always` overrides it. See [Terminal colors, icons, and themes](docs/themes.md) for the public theme schema and [Semantic catalog](docs/catalog.md) for the 506 matchers, 119 kinds, 16 roles, `catalogVersion: 1`, and classification diagnostics. v0.3 keeps the 256 v0.2 matcher identities and documents intentional path promotions such as `requirements.txt` and `Chart.yaml`.
 
 ## CLI reference
 
@@ -421,8 +423,8 @@ The voted product sequence builds from the deterministic v0.1 foundation:
 v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
 ```
 
-- v0.2: install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
-- v0.3: visual richness — catalog, themes, semantic files, colors and styles, closing the gap with eza;
+- v0.2: released — install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
+- v0.3: in progress — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

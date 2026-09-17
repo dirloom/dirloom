@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.1.1` publiée ; incrément v0.2 d'accessibilité (`--copy`, complétions, distribution GitOps) en composition<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.2.0` publiée ; incrément v0.3 de richesse visuelle en cours<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -322,7 +322,7 @@ Showcase :
 dirloom --theme vivid --icons nerd
 ```
 
-Le catalogue décrit le projet sur deux axes : un kind technique pour le glyphe et des rôles structurels ordonnés pour la couleur et les styles. Le contrat v1 contient exactement 256 matchers, 96 kinds hiérarchiques et 16 rôles. `_test.go` conserve ainsi une icône Go avec le rôle `test`, tandis que `.pb.go` conserve Go avec `generated`.
+Le catalogue décrit le projet sur deux axes : un kind technique pour le glyphe et des rôles structurels ordonnés pour la couleur et les styles. Le contrat v1 reste additif : `catalogVersion: 1`, 16 rôles dans le même ordre, précédence inchangée. v0.2 a livré 256 matchers et 96 kinds ; v0.3 étend le catalogue compilé à 506 matchers et 119 kinds sans nouvelle version de contrat. `_test.go` conserve ainsi une icône Go avec le rôle `test`, tandis que `.pb.go` conserve Go avec `generated`.
 
 Les quatre thèmes `default`, `midnight`, `daylight` et `vivid` consomment ce catalogue unique. `vivid` l'interprète avec une identité two-tone indépendante : texte par rôle, couleur de glyphe par kind. La classification intégrée suit symlink, dossier exact, nom exact, suffixe composé le plus long, extension puis fallback. Elle ne lit ni contenu, shebang, MIME, état Git ou métadonnée étendue.
 
@@ -429,7 +429,7 @@ Le socle `markdown-tree` est livré séparément : il couvre la documentation Ma
 
 **Niveau : Adoption / Accessibilité**
 
-**Statut : implémenté sur la branche de composition v0.2 ; Release Done en attente de fusion, tag et publication GitHub.** La fusion Winget reste indépendante de la clôture de la release.
+**Statut : livré.** v0.2.0 est publiée sur GitHub. La fusion Winget reste indépendante de la clôture de la release.
 
 ```bash
 dirloom --copy
@@ -1991,7 +1991,7 @@ Critères de sortie :
 
 **Objectif :** rendre le premier résultat de `dirloom` immédiatement partageable et l'installation naturelle.
 
-**État au 16 septembre 2026 :** configuration persistante, presets, Visual Theme Engine et exports graphiques sont intégrés à `release/v0.2.0`. `--copy`, `completion`, l’inventaire de release de 13 artefacts et GitOps Scoop/Homebrew/Winget sont implémentés sur la branche de composition et doivent encore être intégrés à la release. Le jalon sera **Release Done** à la publication GitHub, pas à la fusion Winget.
+**Statut : Released.** GitHub tag `v0.2.0` publié le 16 septembre 2026. Scoop/Homebrew/Winget restent des canaux de distribution indépendants ; Winget peut rester ⏳ sans rouvrir le jalon.
 
 Fonctions :
 
@@ -2015,6 +2015,8 @@ Fonctions :
 ## v0.3 — Presentation: richesse visuelle
 
 **Objectif :** refermer l'écart visuel avec eza en étendant le catalogue (extensions, fichiers bien connus, dossiers spéciaux, couleurs sémantiques, styles, fallbacks, thèmes).
+
+**Statut : In progress.** Catalogue v1 étendu de façon additive à 506 matchers et 119 kinds, thèmes intégrés inchangés en schéma, corpus de showcase project-centric, défaut `icons: never` conservé. Les 256 identités de matchers v0.2 (64 filenames, 40 directories, 32 suffixes, 120 extensions) restent stables ; les promotions de chemins telles que `requirements.txt` et `Chart.yaml` sont des matchers plus spécifiques, pas une réécriture de cette table.
 
 Fonctions :
 

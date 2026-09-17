@@ -1,6 +1,7 @@
 package presentation
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -107,13 +108,30 @@ func TestPublicCatalogDocumentationUsesRealContracts(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	for _, want := range []string{"| **Matchers** | **256** |", "| Technical kinds | 96 |", "| Structural roles | 16 |", "dirloom theme classify src/main.go --theme vivid"} {
+	for _, want := range []string{
+		fmt.Sprintf("| Exact filenames | %d | %d |", semanticcatalog.FrozenV02FilenameEntryCount, semanticcatalog.FilenameEntryCount),
+		fmt.Sprintf("| Exact directory names | %d | %d |", semanticcatalog.FrozenV02DirectoryEntryCount, semanticcatalog.DirectoryEntryCount),
+		fmt.Sprintf("| Compound suffixes | %d | %d |", semanticcatalog.FrozenV02SuffixEntryCount, semanticcatalog.SuffixEntryCount),
+		fmt.Sprintf("| Extensions | %d | %d |", semanticcatalog.FrozenV02ExtensionEntryCount, semanticcatalog.ExtensionEntryCount),
+		fmt.Sprintf("| **Matchers** | **%d** | **%d** |", semanticcatalog.FrozenV02EntryCount, semanticcatalog.EntryCount),
+		fmt.Sprintf("| Technical kinds | %d | %d |", semanticcatalog.FrozenV02KindCount, semanticcatalog.KindCount),
+		"| Structural roles | 16 | 16 |",
+		"dirloom theme classify src/main.go --theme vivid",
+		"catalogVersion: 1",
+		"`manifest.terraform`",
+		"`manifest.nix`",
+		"`main.tf`",
+		"`flake.nix`",
+		"`document.text` via `.txt`",
+		"`data.yaml` via `.yaml`",
+		"256 v0.2 **matcher identities**",
+	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("catalog documentation missing %q", want)
 		}
 	}
-	if semanticcatalog.EntryCount != 256 || semanticcatalog.KindCount != 96 || semanticcatalog.RoleCount != 16 {
-		t.Fatal("compiled catalog counters changed without documentation review")
+	if semanticcatalog.RoleCount != 16 {
+		t.Fatal("role contract changed without documentation review")
 	}
 	pattern := regexp.MustCompile(`(?s)<!-- dirloom-catalog-theme-example:bindings -->\r?\n` + "```yaml" + `\r?\n(.*?)\r?\n` + "```")
 	match := pattern.FindSubmatch(data)
@@ -129,5 +147,27 @@ func TestPublicCatalogDocumentationUsesRealContracts(t *testing.T) {
 	}
 	if _, err := Compile(theme); err != nil {
 		t.Fatalf("catalog binding example does not compile: %v", err)
+	}
+}
+
+func TestPublicDocumentsKeepLiveCatalogCounts(t *testing.T) {
+	matchers := fmt.Sprintf("%d", semanticcatalog.EntryCount)
+	kinds := fmt.Sprintf("%d", semanticcatalog.KindCount)
+	paths := []string{
+		filepath.Join("..", "..", "README.md"),
+		filepath.Join("..", "..", "CHANGELOG.md"),
+		filepath.Join("..", "..", "docs", "architecture.md"),
+		filepath.Join("..", "..", "docs", "use-cases.md"),
+		filepath.Join("..", "..", "docs", "themes.md"),
+	}
+	for _, path := range paths {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		text := string(data)
+		if !strings.Contains(text, matchers) || !strings.Contains(text, kinds) {
+			t.Errorf("%s does not document live catalog counts %s matchers / %s kinds", path, matchers, kinds)
+		}
 	}
 }

@@ -34,7 +34,7 @@ cmd/dirloom
 - `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
 - `internal/presentation`: immutable built-in themes, strict public theme-schema v1 loading, kind/role/rule compilation, terminal capability resolution, ANSI generation, icon fallback and versioned diagnostics.
-- `internal/presentation/catalog`: pure immutable classification with 256 indexed matchers, 96 hierarchical technical kinds, 16 ordered structural roles and no filesystem, YAML, ANSI or Cobra dependency.
+- `internal/presentation/catalog`: pure immutable classification with 506 indexed matchers, 119 hierarchical technical kinds, 16 ordered structural roles and no filesystem, YAML, ANSI or Cobra dependency.
 - `internal/output`: transactional same-directory temporary files and safe atomic replacement.
 - `internal/clipboard`: injectable UTF-8 clipboard writer with native Windows, macOS, Linux and WSL backends. Tests never touch the real clipboard.
 - `internal/buildinfo`: version metadata injected once at link time.

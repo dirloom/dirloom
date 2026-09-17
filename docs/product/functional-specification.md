@@ -162,7 +162,7 @@ Le socle v0.2 DOIT classifier chaque entrée sur deux axes avant toute décorati
 - un `Kind` technique hiérarchique détermine l'identité et le glyphe, par exemple `source.go`, `data.json`, `document.markdown`, `directory` ou `symlink` ;
 - une liste ordonnée de rôles structurels détermine la fonction visuelle, par exemple `test`, `generated`, `contract`, `source` ou `document`.
 
-Le catalogue public v1 contient exactement 256 matchers, 96 kinds et 16 rôles. Les rôles suivent cet ordre contractuel :
+Le catalogue public v1 reste additif : `catalogVersion: 1`, 16 rôles dans cet ordre contractuel, précédence inchangée. v0.2 a livré 256 matchers et 96 kinds ; v0.3 étend le registre compilé à 506 matchers et 119 kinds sans nouvelle version de contrat. Les rôles suivent cet ordre contractuel :
 
 ```text
 security > generated > vendor > test > contract > lock > infra > config

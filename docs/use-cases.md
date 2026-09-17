@@ -430,7 +430,7 @@ dirloom theme classify README.md --theme vivid
 dirloom theme classify internal/api/user_test.go --theme vivid --as json
 ```
 
-Cette commande effectue un seul `Lstat`, ne suit pas le symlink final et ne lit pas le contenu. Le [catalogue sémantique](catalog.md) détaille les 256 matchers, 96 kinds et 16 rôles.
+Cette commande effectue un seul `Lstat`, ne suit pas le symlink final et ne lit pas le contenu. Le [catalogue sémantique](catalog.md) détaille les 506 matchers, 119 kinds et 16 rôles.
 
 Pour une sortie texte reproductible :
 

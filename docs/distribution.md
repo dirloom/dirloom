@@ -25,13 +25,13 @@ Linux
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Released at GitHub tag v0.1.1; v0.2.0 composing
+Released at GitHub tag v0.2.0; v0.3.0 in progress
 
 DISTRIBUTION STATUS
-GitHub     ✅ v0.1.1
-Scoop      ✅ v0.1.1 (PR-based updates from this increment)
-Homebrew   ⏳ tap bootstrap with v0.1.1
-Winget     ⏳ package bootstrap with v0.1.1
+GitHub     ✅ v0.2.0
+Scoop      ✅ v0.1.1
+Homebrew   ⏳
+Winget     ⏳
 ```
 
 ## Identifiers
