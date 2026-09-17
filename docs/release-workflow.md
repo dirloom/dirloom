@@ -27,27 +27,51 @@ the PRESENTATION/CLI refinement line and must not be requalified as v0.4.
 
 | Field | Value |
 | --- | --- |
+| Version | `v0.3.1` |
 | Latest published release | `v0.3.0` |
-| Current development target | `v0.3.1` |
+| Release branch | `release/v0.3.1` |
 | Integration branch | `main` |
-| v0.3.1 release branch | not opened yet |
 | Profile | CLI / package — build on tag after RC validation |
 
-`v0.3.0` is published on GitHub. `v0.3.1` work lands on `main`. Do not create
-`release/v0.3.1` until the Release Owner opens that freeze.
+`v0.3.0` remains the latest published GitHub tag. `release/v0.3.1` is the
+scope freeze: changelog, product status, snapshot and smoke only. No new
+features. Do not tag, draft or publish until this freeze merges to `main`
+and the release ceremony completes.
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch main
-git pull --ff-only origin main
-git switch -c feat/short-description
-# … commit, push, open PR → main
+git switch release/v0.3.1
+git pull --ff-only origin release/v0.3.1
+git switch -c chore/v0.3.1-freeze-follow-up
+# … freeze-only commit, push, open PR → release/v0.3.1
 ```
 
-Base feature work on latest `main`. Open a `release/vX.Y.Z` branch only when
-the Release Owner starts that version's freeze.
+Use `main` as the base for work outside this freeze, with explicit Release
+Owner approval. Do not add v0.3.1 product scope after the freeze.
+
+## v0.3.1 freeze checklist
+
+```text
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → merge release → main → tag v0.3.1 → draft → verification → human GO → publish
+```
+
+1. Keep the freeze changelog (`[0.3.1] - 2026-09-18`, empty `[Unreleased]`) on
+   `release/v0.3.1`. Do not tag or publish from this step.
+2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
+   completion syntax, GoReleaser check, snapshot, 13-artifact verify).
+3. Record GO/NO-GO with commit SHA and artifact checksums.
+4. Merge `release/v0.3.1` → `main` with a merge commit.
+5. Tag annotated `v0.3.1` on `main` only after smoke tests on candidate archives.
+   The binary reports `dirloom 0.3.1` (no leading `v`).
+6. The tag workflow leaves a **draft**. Verify 13 artifacts, 12 checksum lines,
+   SBOMs, licences inside archives, and `gh attestation verify` on all 13
+   subjects. Do not publish from CI.
+7. Human GO publishes the draft. Then delete `release/v0.3.1` after closure.
+8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
+   wait for the Winget merge.
 
 ## Pins and approvals
 
