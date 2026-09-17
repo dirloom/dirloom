@@ -111,6 +111,9 @@ func TestVividThemeHasIndependentTwoToneIdentity(t *testing.T) {
 		{path: "main_test.go", name: "main_test.go", nodeType: tree.NodeFile, text: "#B6F36B", icon: "#00FFD1", styles: []string{"bold"}},
 		{path: "README.md", name: "README.md", nodeType: tree.NodeFile, text: "#FFE066", icon: "#A78BFA", styles: []string{"bold", "underline"}},
 		{path: "src", name: "src", nodeType: tree.NodeDirectory, text: "#66F0C0", icon: "#00D7FF", styles: []string{"bold"}},
+		{path: "secret.pem", name: "secret.pem", nodeType: tree.NodeFile, text: "#FF5C7C", icon: "#FF8FA8", styles: []string{"bold", "underline"}},
+		{path: "main.tf", name: "main.tf", nodeType: tree.NodeFile, text: "#FF7A5C", icon: "#FF9A78", styles: []string{"bold"}},
+		{path: "Chart.yaml", name: "Chart.yaml", nodeType: tree.NodeFile, text: "#FFE066", icon: "#FF9A78", styles: []string{"bold", "underline"}},
 	} {
 		inspection := compiled.Inspect(test.path, test.name, test.nodeType)
 		if inspection.TextColor != test.text || inspection.IconColor != test.icon || !reflect.DeepEqual(inspection.Styles, test.styles) {
@@ -168,11 +171,54 @@ func TestIconCatalogContainsDocumentedFallbacks(t *testing.T) {
 		{"data.json", "data.json", "◇", "󰘦"},
 		{"config.yaml", "config.yaml", "◇", "󰈙"},
 		{"Dockerfile", "Dockerfile", "▣", "󰡨"},
+		{"Main.hs", "Main.hs", "•", "\U000F0C92"},
+		{"site.tf", "site.tf", "◇", "\U000F1062"},
+		{"flake.nix", "flake.nix", "◇", "\U000F1105"},
+		{"ca.pem", "ca.pem", "◇", "\U000F0124"},
 	}
 	for _, test := range tests {
 		style := compiled.resolve(test.path, test.name, "file")
 		if style.icons.Unicode != test.unicode || style.icons.Nerd != test.nerd {
 			t.Errorf("%s icons = %#v", test.name, style.icons)
+		}
+	}
+}
+
+func TestEveryBuiltInThemeResolvesExpandedCatalogKinds(t *testing.T) {
+	samples := []struct {
+		path, name string
+		nodeType   tree.NodeType
+	}{
+		{"main.go", "main.go", tree.NodeFile},
+		{"main_test.go", "main_test.go", tree.NodeFile},
+		{"user.pb.go", "user.pb.go", tree.NodeFile},
+		{"package.json", "package.json", tree.NodeFile},
+		{"ca.pem", "ca.pem", tree.NodeFile},
+		{"main.tf", "main.tf", tree.NodeFile},
+		{"src", "src", tree.NodeDirectory},
+		{"archive.zip", "archive.zip", tree.NodeFile},
+		{"logo.webp", "logo.webp", tree.NodeFile},
+		{"link", "link", tree.NodeSymlink},
+		{"unknown.bin", "unknown.bin", tree.NodeFile},
+		{"Chart.yaml", "Chart.yaml", tree.NodeFile},
+		{"flake.nix", "flake.nix", tree.NodeFile},
+	}
+	for _, name := range ThemeNames() {
+		theme, _ := Lookup(name)
+		compiled, err := Compile(theme)
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		if name == ThemeVivid {
+			if theme.Kinds["data.certificate"].IconColor != "icon-security" || theme.Kinds["manifest.helm"].IconColor != "icon-infra" || theme.Kinds["manifest.terraform"].IconColor != "icon-infra" || theme.Kinds["manifest.nix"].IconColor != "icon-manifest" {
+				t.Fatalf("vivid lost specific kind icon colors: %#v", theme.Kinds)
+			}
+		}
+		for _, sample := range samples {
+			inspection := compiled.Inspect(sample.path, sample.name, sample.nodeType)
+			if inspection.Classification.Kind == "" || len(inspection.Classification.Roles) == 0 || inspection.Icons.Unicode == "" || inspection.Icons.Nerd == "" {
+				t.Errorf("%s %s = %#v", name, sample.path, inspection)
+			}
 		}
 	}
 }

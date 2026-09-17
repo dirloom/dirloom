@@ -4,6 +4,21 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Extend semantic catalog v1 additively to 506 matchers and 119 technical kinds while keeping `catalogVersion: 1` and the 16 structural roles.
+- Recognize additional languages, manifests, lockfiles, CI/CD names, generated suffixes, project directories, media/archive formats, and certificate/key extensions.
+- Classify Terraform/OpenTofu sources as `manifest.terraform` and well-known Nix files as `manifest.nix`, while generic `.hcl` and `.nix` stay source kinds.
+- Add exact filenames for Playwright, Cypress, Next.js, and Nuxt config variants instead of prefix matchers.
+- Add more specific Nerd glyphs for language, manifest, data, and media kinds, with the existing Unicode fallbacks unchanged.
+- Materialize a synthetic `testdata/showcase` corpus covering Go, TypeScript, Node, Flutter, Python, Rust, .NET, JVM, Terraform/Kubernetes, and mixed-platform trees.
+
+### Changed
+
+- Promote selected real-world paths that previously lost to a generic v0.2 extension or fallback. The 256 v0.2 matcher identities are unchanged; `requirements.txt` becomes `manifest.python`, `Chart.yaml` becomes `manifest.helm`, `go.work` becomes `manifest.go`, Terraform `.tf` becomes `manifest.terraform`, and `build.gradle.kts` becomes `manifest.java`.
+- Built-in themes inherit the expanded catalog. `vivid` adds `icon-security` and `icon-infra` so certificate/key and Helm/Terraform identities stay two-tone without changing the public theme schema.
+- Public catalog, theme, README, and roadmap docs now describe the additive v0.3 coverage, the 64/40/32/120 v0.2 matcher groups, and the distinction between frozen matcher identities and intentional path promotions.
+
 ## [0.2.0] - 2026-09-16
 
 ### Added

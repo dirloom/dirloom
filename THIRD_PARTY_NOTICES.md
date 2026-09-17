@@ -14,7 +14,7 @@ Transitive module metadata is pinned in `go.sum`. Full corresponding license tex
 
 Dirloom's optional Nerd Font strings use code points assigned to [Material Design Icons](https://github.com/Templarian/MaterialDesign) through the [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) mapping. Material Design Icons are distributed under Apache License 2.0; Nerd Fonts records that provenance in its glyph catalog and license audit. The Apache 2.0 text is included as `LICENSES/Apache-2.0.txt`.
 
-Catalog v1 embeds only these glyph strings and their semantic mapping:
+Catalog v1 embeds only glyph strings and their semantic mapping. v0.3 keeps the v0.2 Unicode identities and adds more specific Nerd mappings, including:
 
 | Use | Glyph | Code point |
 | --- | --- | --- |
@@ -41,5 +41,10 @@ Catalog v1 embeds only these glyph strings and their semantic mapping:
 | PNG | `󰸭` | `U+F0E2D` |
 | package archive | `󰏗` | `U+F03D7` |
 | Dockerfile / Containerfile | `󰡨` | `U+F0868` |
+| Haskell | `󰲒` | `U+F0C92` |
+| Nix | `󱄅` | `U+F1105` |
+| Terraform | `󱁢` | `U+F1062` |
+| certificate | `󰄤` | `U+F0124` |
+| key | `󰌆` | `U+F0306` |
 
 No font, font binary, SVG, image, or network-delivered asset is bundled. Users must install a compatible font independently before choosing `--icons nerd`; Dirloom otherwise supports Unicode fallback or no icon.

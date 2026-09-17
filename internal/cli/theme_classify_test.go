@@ -165,6 +165,56 @@ rules:
 	}
 }
 
+func TestThemeClassifyExpandedCatalogEntriesTextAndJSON(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		"requirements.txt":      "",
+		"main.tf":               "",
+		"flake.nix":             "",
+		"playwright.config.mts": "",
+		"Chart.yaml":            "",
+		"go.work":               "",
+		"app.blade.php":         "",
+		"site.hs":               "",
+		"ca.pem":                "",
+	}
+	if err := os.Mkdir(filepath.Join(root, ".next"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, body := range files {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cases := []struct {
+		target string
+		kind   string
+		match  string
+	}{
+		{"requirements.txt", "manifest.python", "filename (requirements.txt)"},
+		{"main.tf", "manifest.terraform", "extension (.tf)"},
+		{"flake.nix", "manifest.nix", "filename (flake.nix)"},
+		{"playwright.config.mts", "source.typescript", "filename (playwright.config.mts)"},
+		{"Chart.yaml", "manifest.helm", "filename (chart.yaml)"},
+		{"go.work", "manifest.go", "filename (go.work)"},
+		{"app.blade.php", "source.php", "suffix (.blade.php)"},
+		{"site.hs", "source.haskell", "extension (.hs)"},
+		{"ca.pem", "data.certificate", "extension (.pem)"},
+		{".next", "directory", "directory (.next)"},
+	}
+	for _, test := range cases {
+		stdout, stderr, code := executeForTest(t, "theme", "classify", test.target, "--root", root)
+		if code != 0 || stderr != "" || !strings.Contains(stdout, "Kind: "+test.kind) || !strings.Contains(stdout, "Matched by: "+test.match) {
+			t.Errorf("text %s=(%q,%q,%d)", test.target, stdout, stderr, code)
+		}
+		stdout, stderr, code = executeForTest(t, "theme", "classify", test.target, "--root", root, "--as", "json")
+		if code != 0 || stderr != "" || !strings.Contains(stdout, `"kind": "`+test.kind+`"`) {
+			t.Errorf("json %s=(%q,%q,%d)", test.target, stdout, stderr, code)
+		}
+	}
+}
+
 func reflectRoles(got, want []catalog.Role) bool {
 	if len(got) != len(want) {
 		return false

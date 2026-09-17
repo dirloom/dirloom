@@ -37,7 +37,12 @@ func Validate() error {
 		seen[identity] = struct{}{}
 		counts[entry.Matcher.Source]++
 	}
-	expected := map[MatchSource]int{SourceFilename: 64, SourceDirectory: 40, SourceSuffix: 32, SourceExtension: 120}
+	expected := map[MatchSource]int{
+		SourceFilename:  FilenameEntryCount,
+		SourceDirectory: DirectoryEntryCount,
+		SourceSuffix:    SuffixEntryCount,
+		SourceExtension: ExtensionEntryCount,
+	}
 	for source, count := range expected {
 		if counts[source] != count {
 			return fmt.Errorf("catalog has %d %s matchers; expected %d", counts[source], source, count)

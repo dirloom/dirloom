@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 20 août 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.1.1` livre déjà le socle : une représentation locale, déterministe, filtrable, portable et exploitable par des machines. Les documents de ce dossier décrivent le produit que ce socle permet de construire.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.2.0` livre le socle déterministe plus l'accessibilité (`--copy`, complétions, releases de confiance). Les documents de ce dossier décrivent le produit que ce socle permet de construire. v0.3 est l'incrément de richesse visuelle en cours.
 
 ## Parcours de lecture
 
@@ -49,7 +49,8 @@ En cas d'écart, appliquer l'ordre suivant :
 | Couleurs et icônes | Socle v0.2 livré : couleur TTY auto, icônes opt-in, catalogue v1, thème `vivid` two-tone indépendant, thèmes personnalisés, `theme classify` et artefacts canoniques intacts ; états architecturaux avancés futurs |
 | Configuration | Socle livré : `.dirloom.yaml`, configuration utilisateur, presets intégrés et résolution inspectable |
 | TUI | Après l'incrément de richesse visuelle `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
-| Accessibilité `v0.2` | `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
+| Accessibilité `v0.2` | Livré : `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
+| Richesse visuelle `v0.3` | En cours : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |

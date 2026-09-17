@@ -55,6 +55,24 @@ func TestVividDecoratorUsesIndependentKindAndRoleSegments(t *testing.T) {
 	if got != want {
 		t.Fatalf("vivid test = %q, want %q", got, want)
 	}
+
+	samples := []render.NodeContext{
+		{Path: "user.pb.go", Name: "user.pb.go", Display: "user.pb.go", Type: tree.NodeFile},
+		{Path: "package.json", Name: "package.json", Display: "package.json", Type: tree.NodeFile},
+		{Path: "ca.pem", Name: "ca.pem", Display: "ca.pem", Type: tree.NodeFile},
+		{Path: "main.tf", Name: "main.tf", Display: "main.tf", Type: tree.NodeFile},
+		{Path: ".github", Name: ".github", Display: ".github", Type: tree.NodeDirectory},
+		{Path: "app.zip", Name: "app.zip", Display: "app.zip", Type: tree.NodeFile},
+		{Path: "logo.webp", Name: "logo.webp", Display: "logo.webp", Type: tree.NodeFile},
+		{Path: "link", Name: "link", Display: "link", Type: tree.NodeSymlink},
+		{Path: "unknown.bin", Name: "unknown.bin", Display: "unknown.bin", Type: tree.NodeFile},
+	}
+	for _, context := range samples {
+		got = decorator.Node(context)
+		if !strings.Contains(got, "\x1b[0m") || !strings.Contains(got, context.Display) {
+			t.Errorf("vivid %s = %q", context.Path, got)
+		}
+	}
 }
 func TestDecoratorEscapesTerminalControlsOnlyInPresentation(t *testing.T) {
 	theme, _ := Lookup("default")

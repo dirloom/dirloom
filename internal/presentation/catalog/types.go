@@ -8,12 +8,27 @@ import (
 )
 
 const (
-	// Version is the semantic catalog contract shipped with Dirloom v0.2.
+	// Version is the semantic catalog contract. v0.3 extends the compiled
+	// matchers additively without introducing catalogVersion 2.
 	Version = 1
 
-	EntryCount = 256
-	KindCount  = 96
+	FilenameEntryCount  = 179
+	DirectoryEntryCount = 74
+	SuffixEntryCount    = 58
+	ExtensionEntryCount = 195
+
+	EntryCount = FilenameEntryCount + DirectoryEntryCount + SuffixEntryCount + ExtensionEntryCount
+	KindCount  = 119
 	RoleCount  = 16
+
+	// Frozen v0.2 matcher groups. Compatibility tests must compare against
+	// these literals, never against the live v0.3 counts.
+	FrozenV02FilenameEntryCount  = 64
+	FrozenV02DirectoryEntryCount = 40
+	FrozenV02SuffixEntryCount    = 32
+	FrozenV02ExtensionEntryCount = 120
+	FrozenV02EntryCount          = FrozenV02FilenameEntryCount + FrozenV02DirectoryEntryCount + FrozenV02SuffixEntryCount + FrozenV02ExtensionEntryCount
+	FrozenV02KindCount           = 96
 )
 
 // Kind identifies the technical nature of an entry.

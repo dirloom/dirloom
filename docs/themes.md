@@ -94,7 +94,7 @@ dirloom theme explain daylight --as json
 
 ### Vivid palette
 
-`vivid` is an independent two-tone neon theme for dark terminals. Structural roles control text while technical kinds control icon color. This separation makes a Go test, generated source, and ordinary Go source immediately distinguishable without changing their technical glyph.
+`vivid` is an independent two-tone neon theme for dark terminals. Structural roles control text while technical kinds control icon color. This separation makes a Go test, generated source, and ordinary Go source immediately distinguishable without changing their technical glyph. Certificate and Helm/Terraform files keep that two-tone split through `icon-security` and `icon-infra`. v0.3 does not change the theme schema; it only adds catalog identities for the existing four built-ins to interpret. The compiled catalog grows from 256 matchers and 96 kinds to 506 matchers and 119 kinds while keeping `catalogVersion: 1` and 16 roles, within the theme quota of 256 kind bindings.
 
 Base presentation:
 
@@ -125,7 +125,7 @@ Kind-driven icon colors:
 | `source` | `#00FFD1` | `manifest` | `#FFB000` |
 | `data` | `#00D4FF` | `document` | `#A78BFA` |
 | `media` | `#FF4FB8` | `archive` | `#FF9F43` |
-| `binary` | `#2EF2A1` |  |  |
+| `binary` | `#2EF2A1` | `security` / `infra` kinds | `#FF8FA8` / `#FF9A78` |
 
 `security` and `contract` are bold and underlined. `test`, `infra`, and `executable` are bold; `generated` and `vendor` are dimmed. Other roles keep their base text style. Icon spans remain free of text styles.
 
@@ -350,7 +350,7 @@ dirloom theme validate ./.dirloom/themes/team.yaml
 dirloom theme validate ./.dirloom/themes/team.yaml --as json
 ```
 
-`theme list`, `theme explain`, and `theme validate` have independent JSON schema v1 contracts. Theme explanation identifies `themeSchemaVersion: 1` and reports catalog version and counts without dumping all 256 matchers. Validation returns stable warnings such as `unknown-token`, `unknown-kind-binding`, and `unknown-role-binding`.
+`theme list`, `theme explain`, and `theme validate` have independent JSON schema v1 contracts. Theme explanation identifies `themeSchemaVersion: 1` and reports catalog version and counts without dumping all matchers. v0.3 enriches the compiled catalog; the theme file format remains schema v1. Validation returns stable warnings such as `unknown-token`, `unknown-kind-binding`, and `unknown-role-binding`.
 
 Configuration-source flags are rejected because these commands intentionally ignore configuration.
 
