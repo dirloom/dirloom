@@ -107,7 +107,9 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
   dirloom --format markdown-tree
   dirloom --format mermaid --diagram-direction left-right
   dirloom --format graphviz --output structure.dot
-  dirloom --format d2 --output structure.d2
+	dirloom --format d2 --output structure.d2
+  dirloom fingerprint
+  dirloom fingerprint --format json
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown
   dirloom completion bash`,
@@ -224,6 +226,7 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 	command.AddCommand(newConfigCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newPresetCommand(stdout, &sources))
 	command.AddCommand(newThemeCommand(stdout, &sources))
+	command.AddCommand(newFingerprintCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newCompletionCommand(stdout))
 	return command
 }

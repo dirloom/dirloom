@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add `dirloom fingerprint` to identify the observed structural view as `dlm:v1:sha256:<digest>` without hashing file contents.
+- Add Canonical Structural Artifact v1, Identity Projection v1 and Canonical Identity Encoding v1, reused by a single existing scanner traversal.
+- Publish fingerprint text and JSON (`schemaVersion` 1) contracts, plus architecture, encoding and command reference docs.
+
 ## [0.3.0] - 2026-09-17
 
 Presentation richness: additive semantic catalog (506 matchers, 119 kinds) and

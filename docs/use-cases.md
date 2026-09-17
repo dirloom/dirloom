@@ -72,6 +72,7 @@ dirloom --help
 | Utiliser une Nerd Font | `dirloom --icons nerd` |
 | Garantir un texte canonique sans décoration | `dirloom --color never --icons never` |
 | Inspecter ou valider un thème | `dirloom theme explain midnight` ou `dirloom theme validate theme.yaml` |
+| Identifier la vue structurelle observée | `dirloom fingerprint` |
 
 ## 3. Prendre en main l’inspection
 

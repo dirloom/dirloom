@@ -63,6 +63,7 @@ func TestCompleteProtocolOffersSemanticValues(t *testing.T) {
 		{[]string{"__complete", "--diagram-direction", ""}, []string{"top-down", "left-right"}},
 		{[]string{"__complete", "--preset", ""}, []string{"docs", "ai", "none"}},
 		{[]string{"__complete", "completion", ""}, []string{"bash", "zsh", "fish", "powershell"}},
+		{[]string{"__complete", "fingerprint", "--format", ""}, []string{"text", "json"}},
 	}
 	for _, test := range cases {
 		stdout, _, code := executeForTest(t, test.args...)

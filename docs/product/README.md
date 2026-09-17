@@ -23,6 +23,7 @@ Dirloom transforme la structure logicielle en un artefact que l'on peut capturer
 | [Presse-papiers et complétions](../clipboard-and-completions.md) | Comment copier un rendu et installer les complétions shell ? | Utilisateurs, intégrateurs |
 | [Distribution](../distribution.md) | Comment installer Dirloom et vérifier une release de confiance ? | Utilisateurs, mainteneurs |
 | [Catalogue sémantique](../catalog.md) | Comment Dirloom classe-t-il kinds, rôles et matchers, et comment diagnostiquer une entrée réelle ? | Utilisateurs, concepteurs de thèmes, contributeurs |
+| [Fingerprint](../reference/fingerprint.md) | Comment identifier la vue structurelle observée sans hasher le contenu des fichiers ? | Utilisateurs, intégrateurs, contributeurs |
 
 Pour implémenter ou vérifier le comportement de la ligne `v0.1`, la source normative reste [SPEC-v0.1.md](../../SPEC-v0.1.md). Les documents présents n'en modifient pas rétroactivement les contrats.
 
