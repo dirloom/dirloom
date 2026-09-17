@@ -101,6 +101,9 @@ dirloom --format markdown --output structure.md
 
 # Generate a shell completion script
 dirloom completion bash
+
+# Fingerprint the observed structural view (not file contents)
+dirloom fingerprint
 ```
 
 PowerShell composition still works, but `--copy` is the native clipboard path:
@@ -110,7 +113,7 @@ dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Clipboard and shell completions](docs/clipboard-and-completions.md) and [Practical use cases and examples](docs/use-cases.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, ecosystem-specific commands and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md) and [`dirloom fingerprint`](docs/reference/fingerprint.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, ecosystem-specific commands and current product limitations.
 
 ## Getting help
 
@@ -251,6 +254,8 @@ dirloom [directory] [flags]
 `dirloom completion bash|zsh|fish|powershell` writes a deterministic completion script to stdout and does not modify your shell profile. See [Clipboard and shell completions](docs/clipboard-and-completions.md).
 
 `dirloom help [command | topic]` resolves commands first, then compiled topics. `dirloom help topics` lists conceptual topics. See [Contextual help](docs/contextual-help.md).
+
+`dirloom fingerprint [directory]` prints `dlm:v1:sha256:<digest>` for the structural view Dirloom observes after filters. It does not hash file contents. Presentation flags are ignored. See [fingerprint](docs/reference/fingerprint.md).
 
 ## Filtering
 
@@ -408,7 +413,7 @@ CLI arguments
 
 The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse`, snapshot and diff interfaces able to reuse the same core.
 
-See [docs/architecture.md](docs/architecture.md) for package boundaries and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
+See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md) for structural identity, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
 ## Development
 

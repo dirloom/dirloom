@@ -30,6 +30,10 @@ Version `v0.45.0` targets Go 1.25 and uses the already pinned `x/sys v0.47.0`. T
 
 The dependency is isolated behind `internal/config` and `internal/presentation` loaders. Dirloom does not enable YAML-based execution, includes, templates or environment interpolation. Configuration and theme schema versions remain independent. The module is dual-licensed under MIT and Apache-2.0.
 
+## x/text
+
+`golang.org/x/text/unicode/norm` provides Unicode NFC normalization for Canonical Structural Artifact paths and symlink targets. Dirloom does not implement a custom normalizer. Two distinct raw names that NFC to the same canonical path are a hard collision, never a silent merge. The module is maintained by the Go project and licensed under BSD-3-Clause.
+
 ## Review policy
 
 Dependency upgrades require:

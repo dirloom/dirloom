@@ -63,11 +63,12 @@ func TestCompleteProtocolOffersSemanticValues(t *testing.T) {
 		{[]string{"__complete", "--diagram-direction", ""}, []string{"top-down", "left-right"}},
 		{[]string{"__complete", "--preset", ""}, []string{"docs", "ai", "none"}},
 		{[]string{"__complete", "completion", ""}, []string{"bash", "zsh", "fish", "powershell"}},
-		{[]string{"__complete", "help", ""}, []string{"icons", "colors", "themes", "formats", "filters", "configuration", "presets", "diagrams", "output", "topics", "examples", "concepts", "theme", "config"}},
+		{[]string{"__complete", "help", ""}, []string{"icons", "colors", "themes", "formats", "filters", "configuration", "presets", "diagrams", "output", "topics", "examples", "concepts", "theme", "config", "fingerprint"}},
 		{[]string{"__complete", "--icons", "un"}, []string{"auto", "ascii", "unicode", "nerd", "never"}},
 		{[]string{"__complete", "--color", "al"}, []string{"auto", "always", "never"}},
 		{[]string{"__complete", "--icons", "--format", ""}, []string{"json", "markdown"}},
 		{[]string{"__complete", "help", "theme", ""}, []string{"list", "explain", "validate", "classify"}},
+		{[]string{"__complete", "fingerprint", "--format", ""}, []string{"text", "json"}},
 	}
 	for _, test := range cases {
 		stdout, _, code := executeForTest(t, test.args...)
