@@ -65,10 +65,11 @@ try {
 
     Invoke-Gh auth setup-git
 
-    # Keep the organization fork aligned with microsoft/winget-pkgs before
-    # creating a publication branch. This avoids pushing upstream workflow
-    # changes through the package-manager PAT.
-    Invoke-Gh api -X POST "repos/$ForkRepo/merge-upstream" -f branch=master
+    # Deliberately do not sync the fork with upstream here.
+    # Updating upstream workflow files would require the PAT `workflow` scope.
+    # The publication branch is based on the fork's own master and contains
+    # only the Dirloom manifests; GitHub computes the PR diff from the common
+    # ancestor with microsoft/winget-pkgs.
 
     # Ignore open PRs from retired machine users (we cannot close those heads).
     # Only treat a version as already in flight when *our* org fork or current
