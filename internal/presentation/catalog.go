@@ -14,6 +14,26 @@ func kindBinding(iconColor string) Binding {
 	return Binding{IconColor: iconColor, iconColorSet: true}
 }
 
+func catalogKindBindings(iconFor func(family string) string) map[string]Binding {
+	return map[string]Binding{
+		"source":             kindBinding(iconFor("source")),
+		"manifest":           kindBinding(iconFor("manifest")),
+		"data":               kindBinding(iconFor("data")),
+		"document":           kindBinding(iconFor("document")),
+		"media":              kindBinding(iconFor("media")),
+		"archive":            kindBinding(iconFor("archive")),
+		"binary":             kindBinding(iconFor("binary")),
+		"directory":          kindBinding(iconFor("directory")),
+		"symlink":            kindBinding(iconFor("symlink")),
+		"data.certificate":   kindBinding(iconFor("security")),
+		"data.key":           kindBinding(iconFor("security")),
+		"manifest.terraform": kindBinding(iconFor("infra")),
+		"manifest.helm":      kindBinding(iconFor("infra")),
+		"manifest.nix":       kindBinding(iconFor("config")),
+		"manifest.container": kindBinding(iconFor("infra")),
+	}
+}
+
 func builtIn(name, description, appearance string, palette map[string]string) Theme {
 	roles := make(map[string]Binding, catalog.RoleCount)
 	for _, role := range catalog.Roles() {
@@ -38,13 +58,16 @@ func builtIn(name, description, appearance string, palette map[string]string) Th
 			"node.file":      token("file", []string{}),
 			"node.symlink":   token("symlink", []string{}),
 		},
-		Kinds: map[string]Binding{
-			"source": kindBinding("source"), "manifest": kindBinding("config"),
-			"data": kindBinding("data"), "document": kindBinding("document"),
-			"media": kindBinding("media"), "archive": kindBinding("archive"),
-			"binary": kindBinding("executable"), "directory": kindBinding("directory"),
-			"symlink": kindBinding("symlink"),
-		},
+		Kinds: catalogKindBindings(func(family string) string {
+			switch family {
+			case "manifest":
+				return "config"
+			case "binary":
+				return "executable"
+			default:
+				return family
+			}
+		}),
 		Roles: roles, Rules: []Rule{}, Icons: IconSettings{Spacing: 1},
 		Source: Source{Kind: "built-in"}, Warnings: []Warning{},
 		Catalog: semanticCatalogSummary(),
@@ -90,18 +113,26 @@ func vividPalette() map[string]string {
 		"source": "#66F0C0", "document": "#C9A7FF", "tooling": "#AAB8D0", "generic": "#DEE6F2",
 		"icon-directory": "#00D7FF", "icon-symlink": "#FF6BEE", "icon-source": "#00FFD1", "icon-manifest": "#FFB000",
 		"icon-data": "#00D4FF", "icon-document": "#A78BFA", "icon-media": "#FF4FB8", "icon-archive": "#FF9F43", "icon-binary": "#2EF2A1",
+		"icon-security": "#FF8FA8", "icon-infra": "#FF9A78",
 	}
 }
 
 func vividTheme() Theme {
 	theme := builtIn(ThemeVivid, "Use a two-tone neon palette designed for high-signal dark terminal output (reference background #10131A).", AppearanceDark, vividPalette())
-	theme.Kinds = map[string]Binding{
-		"source": kindBinding("icon-source"), "manifest": kindBinding("icon-manifest"),
-		"data": kindBinding("icon-data"), "document": kindBinding("icon-document"),
-		"media": kindBinding("icon-media"), "archive": kindBinding("icon-archive"),
-		"binary": kindBinding("icon-binary"), "directory": kindBinding("icon-directory"),
-		"symlink": kindBinding("icon-symlink"),
-	}
+	theme.Kinds = catalogKindBindings(func(family string) string {
+		switch family {
+		case "manifest", "config":
+			return "icon-manifest"
+		case "binary":
+			return "icon-binary"
+		case "security":
+			return "icon-security"
+		case "infra":
+			return "icon-infra"
+		default:
+			return "icon-" + family
+		}
+	})
 	theme.Roles[string(catalog.RoleSecurity)] = binding("security", "bold", "underline")
 	theme.Roles[string(catalog.RoleTest)] = binding("test", "bold")
 	theme.Roles[string(catalog.RoleInfra)] = binding("infra", "bold")

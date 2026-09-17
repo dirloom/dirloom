@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/dirloom/dirloom/internal/presentation/catalog"
 )
 
 func TestThemeDiagnosticsAreStableAndNonNull(t *testing.T) {
@@ -49,7 +51,7 @@ func TestThemeDiagnosticsAreStableAndNonNull(t *testing.T) {
 	if err := json.Unmarshal(jsonOutput.Bytes(), &decoded); err != nil {
 		t.Fatal(err)
 	}
-	if decoded.SchemaVersion != 1 || decoded.ThemeSchemaVersion != 1 || decoded.Catalog.EntryCount != 256 || decoded.Theme.Name != "midnight" || decoded.Theme.Rules == nil || decoded.Theme.Warnings == nil {
+	if decoded.SchemaVersion != 1 || decoded.ThemeSchemaVersion != 1 || decoded.Catalog.EntryCount != catalog.EntryCount || decoded.Theme.Name != "midnight" || decoded.Theme.Rules == nil || decoded.Theme.Warnings == nil {
 		t.Fatalf("theme JSON = %#v", decoded)
 	}
 }
