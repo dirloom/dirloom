@@ -7,28 +7,29 @@ Dirloom follows the Ginov **release branch** model documented in the
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.2.0` |
-| Release branch | `release/v0.2.0` |
-| Integration branch | `main` (last published tag: `v0.1.1`) |
+| Version | `v0.3.0` |
+| Release branch | `release/v0.3.0` |
+| Integration branch | `main` (last published tag: `v0.2.0`) |
 | Profile | CLI / package — build on tag after RC validation |
 
-During `v0.2.0` composition, feature and fix pull requests MUST target
-`release/v0.2.0`, not `main`. `main` receives the release only after the
-release candidate passes GO/NO-GO and a `release/v0.2.0` → `main` pull request
-is merged.
+v0.3 implementation already merged to `main` (PR #25). `release/v0.3.0` is the
+scope freeze: changelog, product status, snapshot and smoke only. No new
+matchers, kinds, themes or features. `main` receives the freeze only after the
+release candidate passes GO/NO-GO and a `release/v0.3.0` → `main` pull request
+is merged. Do not tag, draft or publish until that ceremony.
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch release/v0.2.0
-git pull --ff-only origin release/v0.2.0
-git switch -c feat/my-change
-# … commit, push, open PR → release/v0.2.0
+git switch release/v0.3.0
+git pull --ff-only origin release/v0.3.0
+git switch -c chore/v0.3-freeze-follow-up
+# … freeze-only commit, push, open PR → release/v0.3.0
 ```
 
-Use `main` as the base only for documentation or tooling that must land
-outside the current release scope, with explicit Release Owner approval.
+Use `main` as the base for work outside this freeze, with explicit Release
+Owner approval. Do not add v0.3 product scope after the freeze.
 
 ## Pins and approvals
 
@@ -55,37 +56,31 @@ It is not available to pull-request workflows.
 
 ## Release owner checklist
 
-v0.2 uses a transitional human GO after the draft is attested. Later releases
-should drop that extra gate once the pipeline has proven the inventory,
-checksums, SBOMs and attestations on its own.
+v0.3 keeps the transitional human GO after the draft is attested.
 
 ```text
-snapshot → smoke → GO → merge → tag → draft → verification → human GO → publish
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → merge release → main → tag v0.3.0 → draft → verification → human GO → publish
 ```
 
-Target once the invariants are machine-proven:
-
-```text
-merge release → tag → build → attest → verify → publish
-```
-
-1. Keep the RC note and `[Unreleased]` changelog entries on `release/v0.2.0`.
+1. Keep the freeze changelog (`[0.3.0] - 2026-09-17`, empty `[Unreleased]`) on
+   `release/v0.3.0`. Do not tag or publish from this step.
 2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
    completion syntax, GoReleaser check, snapshot, 13-artifact verify).
 3. Record GO/NO-GO with commit SHA and artifact checksums.
-4. Merge `release/v0.2.0` → `main` with a merge commit.
-5. Tag annotated `v0.2.0` on `main` only after smoke tests on candidate archives.
-   The binary reports `dirloom 0.2.0` (no leading `v`).
+4. Merge `release/v0.3.0` → `main` with a merge commit.
+5. Tag annotated `v0.3.0` on `main` only after smoke tests on candidate archives.
+   The binary reports `dirloom 0.3.0` (no leading `v`).
 6. The tag workflow leaves a **draft**. Verify 13 artifacts, 12 checksum lines,
    SBOMs, licences inside archives, and `gh attestation verify` on all 13
    subjects. Do not publish from CI.
-7. Human GO publishes the draft. Then delete `release/v0.2.0` after closure.
+7. Human GO publishes the draft. Then delete `release/v0.3.0` after closure.
 8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
    wait for the Winget merge. Flip each channel to Distribution Verified after
    install/upgrade/uninstall smoke.
 
-Bootstrap Homebrew and Winget against **v0.1.1** before tagging v0.2.0. See
-[Distribution](distribution.md).
+See [Distribution](distribution.md). GitHub remains the published tag `v0.2.0`
+until Human GO.
 
 ## Inventory
 
@@ -97,8 +92,8 @@ checksums.txt has 12 hashes and excludes itself
 ```
 
 After publication, never replace artifacts under the same tag. A binary defect
-requires v0.2.1. A broken package recipe is fixed in its own repository and
-does not undo Release Done.
+requires a new version such as v0.3.1. A broken package recipe is fixed in its
+own repository and does not undo Release Done.
 
 Retain CI evidence for at least 90 days: commit SHA, tag, checksums, SBOMs,
 attestations, CI results, approvals, distribution PR smokes, then per-channel
@@ -106,9 +101,10 @@ install smokes.
 
 ## Rollback
 
-- Before publication: revert the relevant PRs on `release/v0.2.0`.
+- Before publication: revert the relevant freeze commits on `release/v0.3.0`.
 - After publication: no artifact replacement; ship a corrective version.
-- A failing manager can remain on v0.1.1 while it is repaired.
+- A failing manager can remain on the last Distribution Verified version while
+  it is repaired.
 
 ## Process correction (2026-08-17)
 
