@@ -22,7 +22,7 @@ Published status is independent of each package manager. GitHub Releases is alwa
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Released at GitHub tag v0.2.0; v0.3.0 in progress
+Released at GitHub tag v0.2.0; v0.3.0 freeze on release/v0.3.0
 
 DISTRIBUTION STATUS
 GitHub     ✅ v0.2.0
@@ -424,7 +424,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → EXPLORER → v0.4 CHA
 ```
 
 - v0.2: released — install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
-- v0.3: in progress — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
+- v0.3: Code Complete, freeze on `release/v0.3.0` — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

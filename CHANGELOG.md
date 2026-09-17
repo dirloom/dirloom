@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-17
+
+Presentation richness: additive semantic catalog (506 matchers, 119 kinds) and
+richer built-in theme identity, without changing canonical formats, the theme
+schema, or the default `icons: never`.
+
 ### Added
 
 - Extend semantic catalog v1 additively to 506 matchers and 119 technical kinds while keeping `catalogVersion: 1` and the 16 structural roles.
@@ -75,7 +81,8 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/dirloom/dirloom/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dirloom/dirloom/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/dirloom/dirloom/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dirloom/dirloom/releases/tag/v0.1.0

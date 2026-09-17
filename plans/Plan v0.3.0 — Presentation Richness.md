@@ -2,7 +2,11 @@
 
 > **Projet :** Dirloom  
 > **Version cible :** `v0.3.0`  
-> **Statut :** Implementation complete on `feat/v0.3.0-presentation-richness` (PR #25). Code Complete pending merge to `main`. Release Ready pending `release/v0.3.0` freeze and release ceremony.  
+> **Statut :** Code Complete on `main` at `248fa9a57ffe57bd33fdca720e424bf180fe087b`.  
+> Freeze on `release/v0.3.0`.  
+> Release Ready pending freeze review, CI, snapshot/smoke and release-notes review.  
+> The release ceremony starts only after Release Ready:  
+> merge → tag → draft → verification → Human GO → publish.  
 > **Baseline auditée :** `dirloom/dirloom@33e63b62eb52d266e960ef842f9ab52bf1fe09db` (`main`, 17 septembre 2026)  
 > **Source stratégique :** roadmap Dirloom — v0.3 sanctuarisée comme release de richesse visuelle  
 > **Principe directeur :** enrichir fortement la présentation sans modifier l’artefact canonique, sans réécrire le moteur v0.2 et sans absorber les chantiers TUI / Structural Version Control / Architecture Packs.
@@ -12,7 +16,9 @@
 Implementation PR: [#25](https://github.com/dirloom/dirloom/pull/25)  
 Implementation branch: `feat/v0.3.0-presentation-richness`  
 Baseline: `33e63b62eb52d266e960ef842f9ab52bf1fe09db`  
-Implementation HEAD at this record: `706d458e04d3ce54f6c20f7521bf209ea82a69b5`
+Implementation HEAD at this record: `706d458e04d3ce54f6c20f7521bf209ea82a69b5`  
+Code Complete merge: `248fa9a57ffe57bd33fdca720e424bf180fe087b` (`main`, merge commit of PR #25)  
+Freeze branch: `release/v0.3.0` created from that SHA
 
 Execution deviation:
 
@@ -46,9 +52,12 @@ Validation (GitHub Actions run `35213175666` on `706d458e`):
 
 Status:
 
-- Implementation complete on branch.
-- Code Complete pending merge to main.
-- Release Ready pending `release/v0.3.0` freeze and release ceremony.
+- Implementation complete and merged to `main` (`248fa9a`, PR #25 merge commit).
+- Main CI after merge: GitHub Actions run `35223462788` ✅
+- Freeze branch `release/v0.3.0` created from that SHA.
+- Release Ready pending freeze review, CI on the freeze branch,
+  snapshot + 13-artifact smoke and release-notes review.
+- After Release Ready: merge → tag → draft → verification → Human GO → publish.
 
 README distribution status was rechecked and left unchanged: GitHub ✅ v0.2.0, Scoop ✅ v0.1.1, Homebrew ⏳, Winget ⏳. That table records Distribution Verified after real smoke, not package-PR merge, and is a merge-time check rather than a v0.3 catalog change.
 
@@ -1833,7 +1842,7 @@ Aucune feature nouvelle dans cette PR.
 
 # 13. Branching / GitOps
 
-See the [Execution record](#execution-record): the implementation shipped as one PR with seven logical commits instead of six stacked PRs. Do not recreate PR0–PR5 after the fact. Do not create `release/v0.3.0` until this implementation is merged and the scope is frozen.
+See the [Execution record](#execution-record): the implementation shipped as one PR with seven logical commits instead of six stacked PRs. Do not recreate PR0–PR5 after the fact. `release/v0.3.0` was created from Code Complete `main` at `248fa9a`. That freeze accepts only changelog, product-status, snapshot, and smoke work — no new matchers, kinds, themes, or features.
 
 Chaque PR :
 
@@ -2057,9 +2066,9 @@ Aucune sémantique de thème injectée.
 - [ ] `docs/catalog.md` à jour ;
 - [ ] `docs/themes.md` à jour ;
 - [ ] README à jour ;
-- [ ] CHANGELOG `[Unreleased]` à jour ;
+- [x] CHANGELOG `[0.3.0] - 2026-09-17` figé ; `[Unreleased]` vide jusqu'au prochain incrément ;
 - [ ] CONTRIBUTING ne parle plus d’une release v0.2 ouverte ;
-- [ ] roadmap indique v0.3 in progress / done selon étape ;
+- [x] roadmap / docs produit indiquent Code Complete et freeze `release/v0.3.0`, pas « v0.3 in progress » ;
 - [ ] exemples marqués restent exécutables ;
 - [ ] liens docs valides.
 
@@ -2128,7 +2137,12 @@ Toute dérive doit être remontée comme proposition séparée.
 
 # 20. Definition of Done v0.3.0
 
-At the Execution record above: implementation is complete on the branch; **Code Complete** still requires merge to `main`; **Release Ready** still requires `release/v0.3.0` freeze and the release ceremony. The original criteria follow.
+At the Execution record above: **Code Complete** is `main` at `248fa9a`.
+**Release Ready** requires the frozen release branch, green CI,
+snapshot/inventory, smoke tests, reviewed release notes and D1 closure.
+The merge/tag/draft/Human-GO sequence is the subsequent release ceremony.
+
+The original criteria follow.
 
 La v0.3.0 est **code complete** lorsque :
 

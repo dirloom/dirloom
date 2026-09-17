@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.2.0` publiée ; incrément v0.3 de richesse visuelle en cours<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.2.0` publiée ; v0.3.0 Code Complete, freeze sur `release/v0.3.0`<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2016,7 +2016,7 @@ Fonctions :
 
 **Objectif :** refermer l'écart visuel avec eza en étendant le catalogue (extensions, fichiers bien connus, dossiers spéciaux, couleurs sémantiques, styles, fallbacks, thèmes).
 
-**Statut : In progress.** Catalogue v1 étendu de façon additive à 506 matchers et 119 kinds, thèmes intégrés inchangés en schéma, corpus de showcase project-centric, défaut `icons: never` conservé. Les 256 identités de matchers v0.2 (64 filenames, 40 directories, 32 suffixes, 120 extensions) restent stables ; les promotions de chemins telles que `requirements.txt` et `Chart.yaml` sont des matchers plus spécifiques, pas une réécriture de cette table.
+**Statut : Code Complete.** Freeze sur `release/v0.3.0`. Catalogue v1 étendu de façon additive à 506 matchers et 119 kinds, thèmes intégrés inchangés en schéma, corpus de showcase project-centric, défaut `icons: never` conservé. Les 256 identités de matchers v0.2 (64 filenames, 40 directories, 32 suffixes, 120 extensions) restent stables ; les promotions de chemins telles que `requirements.txt` et `Chart.yaml` sont des matchers plus spécifiques, pas une réécriture de cette table.
 
 Fonctions :
 

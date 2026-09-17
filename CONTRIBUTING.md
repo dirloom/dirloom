@@ -11,7 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-Base feature and fix branches on latest `main`. Create `release/v0.3.0` only when the v0.3 scope is frozen. See
+Base feature and fix branches on latest `main`. The v0.3 freeze lives on `release/v0.3.0`; that branch accepts only freeze and release-candidate work. See
 [Release workflow](docs/release-workflow.md).
 
 1. Create a focused branch.

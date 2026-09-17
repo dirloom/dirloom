@@ -25,7 +25,7 @@ Linux
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Released at GitHub tag v0.2.0; v0.3.0 in progress
+Released at GitHub tag v0.2.0; v0.3.0 freeze on release/v0.3.0
 
 DISTRIBUTION STATUS
 GitHub     ✅ v0.2.0
