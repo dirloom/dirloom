@@ -36,12 +36,12 @@ func runHelp(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
 		return root.Help()
 	}
-	if len(args) == 1 && args[0] == helpTopicsMetaName {
-		return writeHelpTopicList(out)
-	}
 	target, _, err := root.Find(args)
 	if err == nil && target != nil && target != root {
 		return target.Help()
+	}
+	if len(args) == 1 && args[0] == helpTopicsMetaName {
+		return writeHelpTopicList(out)
 	}
 	if len(args) != 1 {
 		return unknownHelpTarget(root, strings.Join(args, " "))

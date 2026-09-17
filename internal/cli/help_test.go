@@ -13,6 +13,7 @@ import (
 
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/presentation"
+	"github.com/spf13/cobra"
 )
 
 func TestNormalizeOptionalAutoFlags(t *testing.T) {
@@ -65,6 +66,9 @@ func TestHelpTopicRegistryIsValid(t *testing.T) {
 		}
 		if _, ok := lookupHelpTopic(command.Name()); ok {
 			t.Errorf("command %q collides with a help topic; commands must keep precedence", command.Name())
+		}
+		if command.Name() == helpTopicsMetaName {
+			t.Errorf("command %q collides with the reserved help meta-target; command lookup would hide the topic catalog", command.Name())
 		}
 		for _, alias := range command.Aliases {
 			if _, ok := lookupHelpTopic(alias); ok {
@@ -262,6 +266,38 @@ func TestHelpResolvesCommandsBeforeTopics(t *testing.T) {
 		if topic, ok := lookupHelpTopic(command.Name()); ok {
 			t.Fatalf("command %q is shadowed by topic %q", command.Name(), topic.Name)
 		}
+		if command.Name() == helpTopicsMetaName {
+			t.Fatalf("command %q would hide the reserved %s catalog", command.Name(), helpTopicsMetaName)
+		}
+	}
+}
+
+func TestHelpTopicsMetaDoesNotBypassCommandPrecedence(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	root := NewRootCommand(&stdout, &stderr, "v0.1.0-test")
+	root.AddCommand(&cobra.Command{
+		Use:   helpTopicsMetaName,
+		Short: "synthetic topics command",
+		Run:   func(*cobra.Command, []string) {},
+	})
+	root.SetArgs([]string{"help", helpTopicsMetaName})
+	if err := root.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	out := stdout.String()
+	if stderr.Len() != 0 {
+		t.Fatalf("stderr=%q", stderr.String())
+	}
+	if !strings.Contains(out, "synthetic topics command") {
+		t.Fatalf("command named %q must win command-first lookup:\n%s", helpTopicsMetaName, out)
+	}
+	if strings.Contains(out, "Help topics:") {
+		t.Fatalf("topics meta-target must not run before command lookup:\n%s", out)
+	}
+
+	catalog, catalogErr, code := executeForTest(t, "help", "topics")
+	if code != 0 || catalogErr != "" || !strings.Contains(catalog, "Help topics:") {
+		t.Fatalf("public help topics catalog=(%q,%q,%d)", catalog, catalogErr, code)
 	}
 }
 
