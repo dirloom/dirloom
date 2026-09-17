@@ -16,7 +16,7 @@ dirloom help <topic>
 | Command help | `dirloom theme --help` or `dirloom help theme` | How to use that command |
 | Concept help | `dirloom help icons` | How a capability works |
 
-`dirloom help <name>` resolves a public command first, then a compiled topic. Command names keep precedence over topic names.
+`dirloom help <name>` resolves a public command first, then the `topics` catalog if that name is reserved and no such command exists, then a compiled topic. Command names keep precedence over topic names and over the `topics` meta-target.
 
 ## Available topics
 

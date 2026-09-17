@@ -27,29 +27,27 @@ the PRESENTATION/CLI refinement line and must not be requalified as v0.4.
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.3.0` |
-| Release branch | `release/v0.3.0` |
-| Integration branch | `main` (last published tag: `v0.2.0`) |
+| Latest published release | `v0.3.0` |
+| Current development target | `v0.3.1` |
+| Integration branch | `main` |
+| v0.3.1 release branch | not opened yet |
 | Profile | CLI / package — build on tag after RC validation |
 
-v0.3 implementation already merged to `main` (PR #25). `release/v0.3.0` is the
-scope freeze: changelog, product status, snapshot and smoke only. No new
-matchers, kinds, themes or features. `main` receives the freeze only after the
-release candidate passes GO/NO-GO and a `release/v0.3.0` → `main` pull request
-is merged. Do not tag, draft or publish until that ceremony.
+`v0.3.0` is published on GitHub. `v0.3.1` work lands on `main`. Do not create
+`release/v0.3.1` until the Release Owner opens that freeze.
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch release/v0.3.0
-git pull --ff-only origin release/v0.3.0
-git switch -c chore/v0.3-freeze-follow-up
-# … freeze-only commit, push, open PR → release/v0.3.0
+git switch main
+git pull --ff-only origin main
+git switch -c feat/short-description
+# … commit, push, open PR → main
 ```
 
-Use `main` as the base for work outside this freeze, with explicit Release
-Owner approval. Do not add v0.3 product scope after the freeze.
+Base feature work on latest `main`. Open a `release/vX.Y.Z` branch only when
+the Release Owner starts that version's freeze.
 
 ## Pins and approvals
 
@@ -74,9 +72,12 @@ approval.
 The Winget submission token lives in the GitHub Environment `package-publishing`.
 It is not available to pull-request workflows.
 
-## Release owner checklist
+## v0.3.0 release record
 
-v0.3 keeps the transitional human GO after the draft is attested.
+v0.3.0 is published. The checklist below is the completed ceremony, kept for
+audit. It is not the current active release state.
+
+v0.3 kept the transitional human GO after the draft is attested.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
@@ -99,8 +100,7 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
    wait for the Winget merge. Flip each channel to Distribution Verified after
    install/upgrade/uninstall smoke.
 
-See [Distribution](distribution.md). GitHub remains the published tag `v0.2.0`
-until Human GO.
+See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.0`.
 
 ## Inventory
 
@@ -121,7 +121,8 @@ install smokes.
 
 ## Rollback
 
-- Before publication: revert the relevant freeze commits on `release/v0.3.0`.
+- Before publication: revert the relevant freeze commits on that version's
+  release branch.
 - After publication: no artifact replacement; ship a corrective version.
 - A failing manager can remain on the last Distribution Verified version while
   it is repaired.
