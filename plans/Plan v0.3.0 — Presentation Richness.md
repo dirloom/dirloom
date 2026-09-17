@@ -2,7 +2,11 @@
 
 > **Projet :** Dirloom  
 > **Version cible :** `v0.3.0`  
-> **Statut :** Code Complete on `main` at `248fa9a57ffe57bd33fdca720e424bf180fe087b`. Freeze on `release/v0.3.0`. Release Ready pending freeze review, CI, snapshot/smoke, then merge → tag → Human GO.  
+> **Statut :** Code Complete on `main` at `248fa9a57ffe57bd33fdca720e424bf180fe087b`.  
+> Freeze on `release/v0.3.0`.  
+> Release Ready pending freeze review, CI, snapshot/smoke and release-notes review.  
+> The release ceremony starts only after Release Ready:  
+> merge → tag → draft → verification → Human GO → publish.  
 > **Baseline auditée :** `dirloom/dirloom@33e63b62eb52d266e960ef842f9ab52bf1fe09db` (`main`, 17 septembre 2026)  
 > **Source stratégique :** roadmap Dirloom — v0.3 sanctuarisée comme release de richesse visuelle  
 > **Principe directeur :** enrichir fortement la présentation sans modifier l’artefact canonique, sans réécrire le moteur v0.2 et sans absorber les chantiers TUI / Structural Version Control / Architecture Packs.
@@ -51,7 +55,9 @@ Status:
 - Implementation complete and merged to `main` (`248fa9a`, PR #25 merge commit).
 - Main CI after merge: GitHub Actions run `35223462788` ✅
 - Freeze branch `release/v0.3.0` created from that SHA.
-- Release Ready pending freeze review, CI on the freeze branch, snapshot + 13-artifact smoke, then merge → tag → Human GO. No GitHub tag, draft, or publication yet.
+- Release Ready pending freeze review, CI on the freeze branch,
+  snapshot + 13-artifact smoke and release-notes review.
+- After Release Ready: merge → tag → draft → verification → Human GO → publish.
 
 README distribution status was rechecked and left unchanged: GitHub ✅ v0.2.0, Scoop ✅ v0.1.1, Homebrew ⏳, Winget ⏳. That table records Distribution Verified after real smoke, not package-PR merge, and is a merge-time check rather than a v0.3 catalog change.
 
@@ -2131,7 +2137,12 @@ Toute dérive doit être remontée comme proposition séparée.
 
 # 20. Definition of Done v0.3.0
 
-At the Execution record above: **Code Complete** is `main` at `248fa9a`. **Release Ready** still requires freeze review, CI, snapshot/smoke, then merge `release/v0.3.0` → `main` → tag `v0.3.0` → draft GitHub Release → Human GO. The original criteria follow.
+At the Execution record above: **Code Complete** is `main` at `248fa9a`.
+**Release Ready** requires the frozen release branch, green CI,
+snapshot/inventory, smoke tests, reviewed release notes and D1 closure.
+The merge/tag/draft/Human-GO sequence is the subsequent release ceremony.
+
+The original criteria follow.
 
 La v0.3.0 est **code complete** lorsque :
 
