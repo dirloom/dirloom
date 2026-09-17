@@ -2,10 +2,55 @@
 
 > **Projet :** Dirloom  
 > **Version cible :** `v0.3.0`  
-> **Statut :** Implementation plan — prêt pour exécution par agent de code  
+> **Statut :** Implementation complete on `feat/v0.3.0-presentation-richness` (PR #25). Code Complete pending merge to `main`. Release Ready pending `release/v0.3.0` freeze and release ceremony.  
 > **Baseline auditée :** `dirloom/dirloom@33e63b62eb52d266e960ef842f9ab52bf1fe09db` (`main`, 17 septembre 2026)  
 > **Source stratégique :** roadmap Dirloom — v0.3 sanctuarisée comme release de richesse visuelle  
 > **Principe directeur :** enrichir fortement la présentation sans modifier l’artefact canonique, sans réécrire le moteur v0.2 et sans absorber les chantiers TUI / Structural Version Control / Architecture Packs.
+
+## Execution record
+
+Implementation PR: [#25](https://github.com/dirloom/dirloom/pull/25)  
+Implementation branch: `feat/v0.3.0-presentation-richness`  
+Baseline: `33e63b62eb52d266e960ef842f9ab52bf1fe09db`  
+Implementation HEAD at this record: `706d458e04d3ce54f6c20f7521bf209ea82a69b5`
+
+Execution deviation:
+
+PR0 → PR5 were intentionally consolidated into one reviewable PR with
+seven logical commits. The functional boundaries, compatibility gates,
+test obligations and documentation requirements were preserved. The
+original PR0–PR5 sequence below remains the planned decomposition; it
+is not to be reconstructed after the fact.
+
+Final implementation:
+
+- 506 matchers
+- 119 technical kinds
+- 16 structural roles
+- catalogVersion: 1
+- icons default: never
+- D1–D4 closed
+
+Validation (GitHub Actions run `35213175666` on `706d458e`):
+
+- Verify Ubuntu ✅
+- Verify Windows ✅
+- Verify macOS ✅
+- Race detector ✅
+- Lint ✅
+- govulncheck ✅
+- Diagram syntax ✅
+- Pin check ✅
+- Release snapshot ✅
+- 13-artifact inventory ✅
+
+Status:
+
+- Implementation complete on branch.
+- Code Complete pending merge to main.
+- Release Ready pending `release/v0.3.0` freeze and release ceremony.
+
+README distribution status was rechecked and left unchanged: GitHub ✅ v0.2.0, Scoop ✅ v0.1.1, Homebrew ⏳, Winget ⏳. That table records Distribution Verified after real smoke, not package-PR merge, and is a merge-time check rather than a v0.3 catalog change.
 
 ---
 
@@ -1788,7 +1833,7 @@ Aucune feature nouvelle dans cette PR.
 
 # 13. Branching / GitOps
 
-Ne pas créer `release/v0.3.0` au début du chantier.
+See the [Execution record](#execution-record): the implementation shipped as one PR with seven logical commits instead of six stacked PRs. Do not recreate PR0–PR5 after the fact. Do not create `release/v0.3.0` until this implementation is merged and the scope is frozen.
 
 Chaque PR :
 
@@ -2082,6 +2127,8 @@ Toute dérive doit être remontée comme proposition séparée.
 ---
 
 # 20. Definition of Done v0.3.0
+
+At the Execution record above: implementation is complete on the branch; **Code Complete** still requires merge to `main`; **Release Ready** still requires `release/v0.3.0` freeze and the release ceremony. The original criteria follow.
 
 La v0.3.0 est **code complete** lorsque :
 
