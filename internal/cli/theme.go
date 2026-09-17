@@ -35,24 +35,24 @@ func validateFormatOptions(resolution configuration.Resolution, overrides config
 	if !outputformat.IsDiagram(resolution.Effective.Format) {
 		switch {
 		case overrides.DiagramView.Set:
-			return &usageError{err: fmt.Errorf("--diagram-view cannot be used with --format %s", resolution.Effective.Format)}
+			return &usageError{err: fmt.Errorf("--diagram-view cannot be used with --format %s", resolution.Effective.Format), helpTopic: "diagrams"}
 		case overrides.DiagramDirection.Set:
-			return &usageError{err: fmt.Errorf("--diagram-direction cannot be used with --format %s", resolution.Effective.Format)}
+			return &usageError{err: fmt.Errorf("--diagram-direction cannot be used with --format %s", resolution.Effective.Format), helpTopic: "diagrams"}
 		case overrides.DiagramMaxNodes.Set:
-			return &usageError{err: fmt.Errorf("--diagram-max-nodes cannot be used with --format %s", resolution.Effective.Format)}
+			return &usageError{err: fmt.Errorf("--diagram-max-nodes cannot be used with --format %s", resolution.Effective.Format), helpTopic: "diagrams"}
 		}
 	}
 	if outputformat.UsesPresentation(resolution.Effective.Format) {
 		return nil
 	}
 	if overrides.Color.Set && overrides.Color.Value != presentation.ColorNever {
-		return &usageError{err: fmt.Errorf("--color %s cannot be used with --format %s; use --color never for a canonical artifact", overrides.Color.Value, resolution.Effective.Format)}
+		return &usageError{err: fmt.Errorf("--color %s cannot be used with --format %s; use --color never for a canonical artifact", overrides.Color.Value, resolution.Effective.Format), helpTopic: "colors"}
 	}
 	if overrides.Icons.Set && overrides.Icons.Value != presentation.IconsNever {
-		return &usageError{err: fmt.Errorf("--icons %s cannot be used with --format %s; use --icons never for a canonical artifact", overrides.Icons.Value, resolution.Effective.Format)}
+		return &usageError{err: fmt.Errorf("--icons %s cannot be used with --format %s; use --icons never for a canonical artifact", overrides.Icons.Value, resolution.Effective.Format), helpTopic: "icons"}
 	}
 	if overrides.Theme.Set {
-		return &usageError{err: fmt.Errorf("--theme cannot be used with --format %s", resolution.Effective.Format)}
+		return &usageError{err: fmt.Errorf("--theme cannot be used with --format %s", resolution.Effective.Format), helpTopic: "themes"}
 	}
 	return nil
 }

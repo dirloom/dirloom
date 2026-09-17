@@ -468,7 +468,7 @@ func TestCLIInspectionErrorsPreserveOutputAndClassifyWriteFailure(t *testing.T) 
 		t.Fatal(err)
 	}
 	stdout, stderr, code := executeForTest(t, root, "--preset", "unknown", "--output", output)
-	if code != 2 || stdout != "" || !strings.Contains(stderr, "unsupported preset") {
+	if code != 2 || stdout != "" || !strings.Contains(stderr, `invalid value "unknown" for --preset`) || !strings.Contains(stderr, "dirloom help presets") {
 		t.Fatalf("invalid preset=(%q, %q, %d)", stdout, stderr, code)
 	}
 	data, err := os.ReadFile(output)
