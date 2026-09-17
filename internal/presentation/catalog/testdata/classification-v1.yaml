@@ -643,6 +643,1153 @@ cases:
       matchedBy: filename
       matcherKey: docker-bake.hcl
     - id: matcher-065
+      name: bun.lock
+      relativePath: fixture/bun.lock
+      type: file
+      kind: document.text
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: bun.lock
+    - id: matcher-066
+      name: deno.json
+      relativePath: fixture/deno.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: deno.json
+    - id: matcher-067
+      name: deno.jsonc
+      relativePath: fixture/deno.jsonc
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: deno.jsonc
+    - id: matcher-068
+      name: biome.json
+      relativePath: fixture/biome.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: biome.json
+    - id: matcher-069
+      name: biome.jsonc
+      relativePath: fixture/biome.jsonc
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: biome.jsonc
+    - id: matcher-070
+      name: turbo.json
+      relativePath: fixture/turbo.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: turbo.json
+    - id: matcher-071
+      name: nx.json
+      relativePath: fixture/nx.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: nx.json
+    - id: matcher-072
+      name: lerna.json
+      relativePath: fixture/lerna.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: lerna.json
+    - id: matcher-073
+      name: playwright.config.ts
+      relativePath: fixture/playwright.config.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.ts
+    - id: matcher-074
+      name: playwright.config.js
+      relativePath: fixture/playwright.config.js
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.js
+    - id: matcher-075
+      name: playwright.config.mts
+      relativePath: fixture/playwright.config.mts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.mts
+    - id: matcher-076
+      name: playwright.config.cts
+      relativePath: fixture/playwright.config.cts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.cts
+    - id: matcher-077
+      name: playwright.config.mjs
+      relativePath: fixture/playwright.config.mjs
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.mjs
+    - id: matcher-078
+      name: playwright.config.cjs
+      relativePath: fixture/playwright.config.cjs
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: playwright.config.cjs
+    - id: matcher-079
+      name: cypress.config.ts
+      relativePath: fixture/cypress.config.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: cypress.config.ts
+    - id: matcher-080
+      name: cypress.config.js
+      relativePath: fixture/cypress.config.js
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: cypress.config.js
+    - id: matcher-081
+      name: cypress.config.mts
+      relativePath: fixture/cypress.config.mts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: cypress.config.mts
+    - id: matcher-082
+      name: cypress.config.mjs
+      relativePath: fixture/cypress.config.mjs
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: cypress.config.mjs
+    - id: matcher-083
+      name: cypress.config.cjs
+      relativePath: fixture/cypress.config.cjs
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: cypress.config.cjs
+    - id: matcher-084
+      name: next.config.ts
+      relativePath: fixture/next.config.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: next.config.ts
+    - id: matcher-085
+      name: next.config.js
+      relativePath: fixture/next.config.js
+      type: file
+      kind: source.javascript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: next.config.js
+    - id: matcher-086
+      name: next.config.mjs
+      relativePath: fixture/next.config.mjs
+      type: file
+      kind: source.javascript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: next.config.mjs
+    - id: matcher-087
+      name: nuxt.config.ts
+      relativePath: fixture/nuxt.config.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: nuxt.config.ts
+    - id: matcher-088
+      name: nuxt.config.js
+      relativePath: fixture/nuxt.config.js
+      type: file
+      kind: source.javascript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: nuxt.config.js
+    - id: matcher-089
+      name: nuxt.config.mjs
+      relativePath: fixture/nuxt.config.mjs
+      type: file
+      kind: source.javascript
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: nuxt.config.mjs
+    - id: matcher-090
+      name: pnpm-workspace.yaml
+      relativePath: fixture/pnpm-workspace.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: pnpm-workspace.yaml
+    - id: matcher-091
+      name: .npmrc
+      relativePath: fixture/.npmrc
+      type: file
+      kind: data.ini
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .npmrc
+    - id: matcher-092
+      name: .yarnrc.yml
+      relativePath: fixture/.yarnrc.yml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .yarnrc.yml
+    - id: matcher-093
+      name: go.work
+      relativePath: fixture/go.work
+      type: file
+      kind: manifest.go
+      roles:
+        - contract
+        - config
+      matchedBy: filename
+      matcherKey: go.work
+    - id: matcher-094
+      name: go.work.sum
+      relativePath: fixture/go.work.sum
+      type: file
+      kind: document.text
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: go.work.sum
+    - id: matcher-095
+      name: .golangci.yml
+      relativePath: fixture/.golangci.yml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .golangci.yml
+    - id: matcher-096
+      name: .golangci.yaml
+      relativePath: fixture/.golangci.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .golangci.yaml
+    - id: matcher-097
+      name: .goreleaser.yml
+      relativePath: fixture/.goreleaser.yml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .goreleaser.yml
+    - id: matcher-098
+      name: .goreleaser.yaml
+      relativePath: fixture/.goreleaser.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .goreleaser.yaml
+    - id: matcher-099
+      name: pubspec.lock
+      relativePath: fixture/pubspec.lock
+      type: file
+      kind: data.yaml
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: pubspec.lock
+    - id: matcher-100
+      name: analysis_options.yaml
+      relativePath: fixture/analysis_options.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: analysis_options.yaml
+    - id: matcher-101
+      name: build.yaml
+      relativePath: fixture/build.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: build.yaml
+    - id: matcher-102
+      name: .flutter-plugins
+      relativePath: fixture/.flutter-plugins
+      type: file
+      kind: document.text
+      roles:
+        - generated
+        - config
+      matchedBy: filename
+      matcherKey: .flutter-plugins
+    - id: matcher-103
+      name: .flutter-plugins-dependencies
+      relativePath: fixture/.flutter-plugins-dependencies
+      type: file
+      kind: document.text
+      roles:
+        - generated
+        - config
+      matchedBy: filename
+      matcherKey: .flutter-plugins-dependencies
+    - id: matcher-104
+      name: requirements.txt
+      relativePath: fixture/requirements.txt
+      type: file
+      kind: manifest.python
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: requirements.txt
+    - id: matcher-105
+      name: requirements-dev.txt
+      relativePath: fixture/requirements-dev.txt
+      type: file
+      kind: manifest.python
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: requirements-dev.txt
+    - id: matcher-106
+      name: pipfile
+      relativePath: fixture/pipfile
+      type: file
+      kind: manifest.python
+      roles:
+        - contract
+        - config
+      matchedBy: filename
+      matcherKey: pipfile
+    - id: matcher-107
+      name: uv.lock
+      relativePath: fixture/uv.lock
+      type: file
+      kind: data.toml
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: uv.lock
+    - id: matcher-108
+      name: tox.ini
+      relativePath: fixture/tox.ini
+      type: file
+      kind: data.ini
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: tox.ini
+    - id: matcher-109
+      name: pytest.ini
+      relativePath: fixture/pytest.ini
+      type: file
+      kind: data.ini
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: pytest.ini
+    - id: matcher-110
+      name: ruff.toml
+      relativePath: fixture/ruff.toml
+      type: file
+      kind: data.toml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: ruff.toml
+    - id: matcher-111
+      name: mypy.ini
+      relativePath: fixture/mypy.ini
+      type: file
+      kind: data.ini
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: mypy.ini
+    - id: matcher-112
+      name: .python-version
+      relativePath: fixture/.python-version
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .python-version
+    - id: matcher-113
+      name: conftest.py
+      relativePath: fixture/conftest.py
+      type: file
+      kind: source.python
+      roles:
+        - test
+        - source
+      matchedBy: filename
+      matcherKey: conftest.py
+    - id: matcher-114
+      name: rust-toolchain
+      relativePath: fixture/rust-toolchain
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: rust-toolchain
+    - id: matcher-115
+      name: rust-toolchain.toml
+      relativePath: fixture/rust-toolchain.toml
+      type: file
+      kind: data.toml
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: rust-toolchain.toml
+    - id: matcher-116
+      name: build.gradle.kts
+      relativePath: fixture/build.gradle.kts
+      type: file
+      kind: manifest.java
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: build.gradle.kts
+    - id: matcher-117
+      name: settings.gradle
+      relativePath: fixture/settings.gradle
+      type: file
+      kind: manifest.java
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: settings.gradle
+    - id: matcher-118
+      name: settings.gradle.kts
+      relativePath: fixture/settings.gradle.kts
+      type: file
+      kind: manifest.java
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: settings.gradle.kts
+    - id: matcher-119
+      name: gradle.properties
+      relativePath: fixture/gradle.properties
+      type: file
+      kind: data.properties
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: gradle.properties
+    - id: matcher-120
+      name: gradlew
+      relativePath: fixture/gradlew
+      type: file
+      kind: source.shell
+      roles:
+        - executable
+        - tooling
+      matchedBy: filename
+      matcherKey: gradlew
+    - id: matcher-121
+      name: gradlew.bat
+      relativePath: fixture/gradlew.bat
+      type: file
+      kind: source.batch
+      roles:
+        - executable
+        - tooling
+      matchedBy: filename
+      matcherKey: gradlew.bat
+    - id: matcher-122
+      name: directory.build.props
+      relativePath: fixture/directory.build.props
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: directory.build.props
+    - id: matcher-123
+      name: directory.build.targets
+      relativePath: fixture/directory.build.targets
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: directory.build.targets
+    - id: matcher-124
+      name: global.json
+      relativePath: fixture/global.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: global.json
+    - id: matcher-125
+      name: nuget.config
+      relativePath: fixture/nuget.config
+      type: file
+      kind: data.xml
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: nuget.config
+    - id: matcher-126
+      name: packages.lock.json
+      relativePath: fixture/packages.lock.json
+      type: file
+      kind: data.json
+      roles:
+        - lock
+        - config
+        - data
+      matchedBy: filename
+      matcherKey: packages.lock.json
+    - id: matcher-127
+      name: composer.lock
+      relativePath: fixture/composer.lock
+      type: file
+      kind: data.json
+      roles:
+        - lock
+        - config
+        - data
+      matchedBy: filename
+      matcherKey: composer.lock
+    - id: matcher-128
+      name: phpunit.xml
+      relativePath: fixture/phpunit.xml
+      type: file
+      kind: data.xml
+      roles:
+        - test
+        - config
+      matchedBy: filename
+      matcherKey: phpunit.xml
+    - id: matcher-129
+      name: gemfile
+      relativePath: fixture/gemfile
+      type: file
+      kind: manifest.generic
+      roles:
+        - contract
+        - config
+      matchedBy: filename
+      matcherKey: gemfile
+    - id: matcher-130
+      name: gemfile.lock
+      relativePath: fixture/gemfile.lock
+      type: file
+      kind: document.text
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: gemfile.lock
+    - id: matcher-131
+      name: rakefile
+      relativePath: fixture/rakefile
+      type: file
+      kind: source.ruby
+      roles:
+        - executable
+        - tooling
+      matchedBy: filename
+      matcherKey: rakefile
+    - id: matcher-132
+      name: mix.exs
+      relativePath: fixture/mix.exs
+      type: file
+      kind: source.elixir
+      roles:
+        - contract
+        - config
+      matchedBy: filename
+      matcherKey: mix.exs
+    - id: matcher-133
+      name: mix.lock
+      relativePath: fixture/mix.lock
+      type: file
+      kind: document.text
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: mix.lock
+    - id: matcher-134
+      name: rebar.config
+      relativePath: fixture/rebar.config
+      type: file
+      kind: source.erlang
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: rebar.config
+    - id: matcher-135
+      name: terraform.tfstate
+      relativePath: fixture/terraform.tfstate
+      type: file
+      kind: data.json
+      roles:
+        - infra
+        - data
+      matchedBy: filename
+      matcherKey: terraform.tfstate
+    - id: matcher-136
+      name: terraform.tfstate.backup
+      relativePath: fixture/terraform.tfstate.backup
+      type: file
+      kind: data.json
+      roles:
+        - generated
+        - infra
+        - data
+      matchedBy: filename
+      matcherKey: terraform.tfstate.backup
+    - id: matcher-137
+      name: flake.nix
+      relativePath: fixture/flake.nix
+      type: file
+      kind: manifest.nix
+      roles:
+        - contract
+        - config
+      matchedBy: filename
+      matcherKey: flake.nix
+    - id: matcher-138
+      name: default.nix
+      relativePath: fixture/default.nix
+      type: file
+      kind: manifest.nix
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: default.nix
+    - id: matcher-139
+      name: shell.nix
+      relativePath: fixture/shell.nix
+      type: file
+      kind: manifest.nix
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: shell.nix
+    - id: matcher-140
+      name: flake.lock
+      relativePath: fixture/flake.lock
+      type: file
+      kind: data.json
+      roles:
+        - lock
+        - config
+      matchedBy: filename
+      matcherKey: flake.lock
+    - id: matcher-141
+      name: chart.yaml
+      relativePath: fixture/chart.yaml
+      type: file
+      kind: manifest.helm
+      roles:
+        - contract
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: chart.yaml
+    - id: matcher-142
+      name: chart.lock
+      relativePath: fixture/chart.lock
+      type: file
+      kind: manifest.helm
+      roles:
+        - lock
+        - infra
+      matchedBy: filename
+      matcherKey: chart.lock
+    - id: matcher-143
+      name: values.yaml
+      relativePath: fixture/values.yaml
+      type: file
+      kind: manifest.helm
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: values.yaml
+    - id: matcher-144
+      name: kustomization.yaml
+      relativePath: fixture/kustomization.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: kustomization.yaml
+    - id: matcher-145
+      name: helmfile.yaml
+      relativePath: fixture/helmfile.yaml
+      type: file
+      kind: manifest.helm
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: helmfile.yaml
+    - id: matcher-146
+      name: skaffold.yaml
+      relativePath: fixture/skaffold.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: skaffold.yaml
+    - id: matcher-147
+      name: .dockerignore
+      relativePath: fixture/.dockerignore
+      type: file
+      kind: document.text
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: .dockerignore
+    - id: matcher-148
+      name: compose.yml
+      relativePath: fixture/compose.yml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: compose.yml
+    - id: matcher-149
+      name: docker-compose.yaml
+      relativePath: fixture/docker-compose.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: docker-compose.yaml
+    - id: matcher-150
+      name: devcontainer.json
+      relativePath: fixture/devcontainer.json
+      type: file
+      kind: data.json
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: devcontainer.json
+    - id: matcher-151
+      name: action.yml
+      relativePath: fixture/action.yml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: action.yml
+    - id: matcher-152
+      name: action.yaml
+      relativePath: fixture/action.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: action.yaml
+    - id: matcher-153
+      name: cloudbuild.yaml
+      relativePath: fixture/cloudbuild.yaml
+      type: file
+      kind: data.yaml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: cloudbuild.yaml
+    - id: matcher-154
+      name: .tool-versions
+      relativePath: fixture/.tool-versions
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .tool-versions
+    - id: matcher-155
+      name: .nvmrc
+      relativePath: fixture/.nvmrc
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .nvmrc
+    - id: matcher-156
+      name: .node-version
+      relativePath: fixture/.node-version
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .node-version
+    - id: matcher-157
+      name: readme
+      relativePath: fixture/readme
+      type: file
+      kind: document.text
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: readme
+    - id: matcher-158
+      name: readme.txt
+      relativePath: fixture/readme.txt
+      type: file
+      kind: document.text
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: readme.txt
+    - id: matcher-159
+      name: readme.rst
+      relativePath: fixture/readme.rst
+      type: file
+      kind: document.rst
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: readme.rst
+    - id: matcher-160
+      name: license.md
+      relativePath: fixture/license.md
+      type: file
+      kind: document.license
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: license.md
+    - id: matcher-161
+      name: licence.md
+      relativePath: fixture/licence.md
+      type: file
+      kind: document.license
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: licence.md
+    - id: matcher-162
+      name: changelog
+      relativePath: fixture/changelog
+      type: file
+      kind: document.changelog
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: changelog
+    - id: matcher-163
+      name: changelog.txt
+      relativePath: fixture/changelog.txt
+      type: file
+      kind: document.changelog
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: changelog.txt
+    - id: matcher-164
+      name: contributors
+      relativePath: fixture/contributors
+      type: file
+      kind: document.text
+      roles:
+        - contract
+        - document
+      matchedBy: filename
+      matcherKey: contributors
+    - id: matcher-165
+      name: .env.local
+      relativePath: fixture/.env.local
+      type: file
+      kind: data.env
+      roles:
+        - security
+        - config
+      matchedBy: filename
+      matcherKey: .env.local
+    - id: matcher-166
+      name: .env.development
+      relativePath: fixture/.env.development
+      type: file
+      kind: data.env
+      roles:
+        - security
+        - config
+      matchedBy: filename
+      matcherKey: .env.development
+    - id: matcher-167
+      name: .env.production
+      relativePath: fixture/.env.production
+      type: file
+      kind: data.env
+      roles:
+        - security
+        - config
+      matchedBy: filename
+      matcherKey: .env.production
+    - id: matcher-168
+      name: .env.test
+      relativePath: fixture/.env.test
+      type: file
+      kind: data.env
+      roles:
+        - security
+        - config
+      matchedBy: filename
+      matcherKey: .env.test
+    - id: matcher-169
+      name: .env.example
+      relativePath: fixture/.env.example
+      type: file
+      kind: data.env
+      roles:
+        - config
+      matchedBy: filename
+      matcherKey: .env.example
+    - id: matcher-170
+      name: .gitignore
+      relativePath: fixture/.gitignore
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .gitignore
+    - id: matcher-171
+      name: .gitattributes
+      relativePath: fixture/.gitattributes
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .gitattributes
+    - id: matcher-172
+      name: .gitmodules
+      relativePath: fixture/.gitmodules
+      type: file
+      kind: document.text
+      roles:
+        - vendor
+        - config
+      matchedBy: filename
+      matcherKey: .gitmodules
+    - id: matcher-173
+      name: .eslintignore
+      relativePath: fixture/.eslintignore
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .eslintignore
+    - id: matcher-174
+      name: .prettierignore
+      relativePath: fixture/.prettierignore
+      type: file
+      kind: document.text
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: .prettierignore
+    - id: matcher-175
+      name: vercel.json
+      relativePath: fixture/vercel.json
+      type: file
+      kind: data.json
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: vercel.json
+    - id: matcher-176
+      name: netlify.toml
+      relativePath: fixture/netlify.toml
+      type: file
+      kind: data.toml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: netlify.toml
+    - id: matcher-177
+      name: fly.toml
+      relativePath: fixture/fly.toml
+      type: file
+      kind: data.toml
+      roles:
+        - infra
+        - config
+      matchedBy: filename
+      matcherKey: fly.toml
+    - id: matcher-178
+      name: procfile
+      relativePath: fixture/procfile
+      type: file
+      kind: document.text
+      roles:
+        - infra
+        - executable
+      matchedBy: filename
+      matcherKey: procfile
+    - id: matcher-179
+      name: brewfile
+      relativePath: fixture/brewfile
+      type: file
+      kind: source.ruby
+      roles:
+        - config
+        - tooling
+      matchedBy: filename
+      matcherKey: brewfile
+    - id: matcher-180
       name: src
       relativePath: fixture/src
       type: directory
@@ -651,7 +1798,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: src
-    - id: matcher-066
+    - id: matcher-181
       name: source
       relativePath: fixture/source
       type: directory
@@ -660,7 +1807,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: source
-    - id: matcher-067
+    - id: matcher-182
       name: lib
       relativePath: fixture/lib
       type: directory
@@ -669,7 +1816,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: lib
-    - id: matcher-068
+    - id: matcher-183
       name: internal
       relativePath: fixture/internal
       type: directory
@@ -678,7 +1825,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: internal
-    - id: matcher-069
+    - id: matcher-184
       name: pkg
       relativePath: fixture/pkg
       type: directory
@@ -687,7 +1834,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: pkg
-    - id: matcher-070
+    - id: matcher-185
       name: cmd
       relativePath: fixture/cmd
       type: directory
@@ -697,7 +1844,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: cmd
-    - id: matcher-071
+    - id: matcher-186
       name: app
       relativePath: fixture/app
       type: directory
@@ -706,7 +1853,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: app
-    - id: matcher-072
+    - id: matcher-187
       name: apps
       relativePath: fixture/apps
       type: directory
@@ -715,7 +1862,7 @@ cases:
         - source
       matchedBy: directory
       matcherKey: apps
-    - id: matcher-073
+    - id: matcher-188
       name: test
       relativePath: fixture/test
       type: directory
@@ -724,7 +1871,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: test
-    - id: matcher-074
+    - id: matcher-189
       name: tests
       relativePath: fixture/tests
       type: directory
@@ -733,7 +1880,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: tests
-    - id: matcher-075
+    - id: matcher-190
       name: __tests__
       relativePath: fixture/__tests__
       type: directory
@@ -742,7 +1889,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: __tests__
-    - id: matcher-076
+    - id: matcher-191
       name: spec
       relativePath: fixture/spec
       type: directory
@@ -751,7 +1898,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: spec
-    - id: matcher-077
+    - id: matcher-192
       name: specs
       relativePath: fixture/specs
       type: directory
@@ -760,7 +1907,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: specs
-    - id: matcher-078
+    - id: matcher-193
       name: fixtures
       relativePath: fixture/fixtures
       type: directory
@@ -770,7 +1917,7 @@ cases:
         - data
       matchedBy: directory
       matcherKey: fixtures
-    - id: matcher-079
+    - id: matcher-194
       name: mocks
       relativePath: fixture/mocks
       type: directory
@@ -779,7 +1926,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: mocks
-    - id: matcher-080
+    - id: matcher-195
       name: snapshots
       relativePath: fixture/snapshots
       type: directory
@@ -789,7 +1936,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: snapshots
-    - id: matcher-081
+    - id: matcher-196
       name: docs
       relativePath: fixture/docs
       type: directory
@@ -798,7 +1945,7 @@ cases:
         - document
       matchedBy: directory
       matcherKey: docs
-    - id: matcher-082
+    - id: matcher-197
       name: doc
       relativePath: fixture/doc
       type: directory
@@ -807,7 +1954,7 @@ cases:
         - document
       matchedBy: directory
       matcherKey: doc
-    - id: matcher-083
+    - id: matcher-198
       name: examples
       relativePath: fixture/examples
       type: directory
@@ -816,7 +1963,7 @@ cases:
         - document
       matchedBy: directory
       matcherKey: examples
-    - id: matcher-084
+    - id: matcher-199
       name: samples
       relativePath: fixture/samples
       type: directory
@@ -825,7 +1972,7 @@ cases:
         - document
       matchedBy: directory
       matcherKey: samples
-    - id: matcher-085
+    - id: matcher-200
       name: assets
       relativePath: fixture/assets
       type: directory
@@ -834,7 +1981,7 @@ cases:
         - media
       matchedBy: directory
       matcherKey: assets
-    - id: matcher-086
+    - id: matcher-201
       name: public
       relativePath: fixture/public
       type: directory
@@ -843,7 +1990,7 @@ cases:
         - media
       matchedBy: directory
       matcherKey: public
-    - id: matcher-087
+    - id: matcher-202
       name: static
       relativePath: fixture/static
       type: directory
@@ -852,7 +1999,7 @@ cases:
         - media
       matchedBy: directory
       matcherKey: static
-    - id: matcher-088
+    - id: matcher-203
       name: media
       relativePath: fixture/media
       type: directory
@@ -861,7 +2008,7 @@ cases:
         - media
       matchedBy: directory
       matcherKey: media
-    - id: matcher-089
+    - id: matcher-204
       name: node_modules
       relativePath: fixture/node_modules
       type: directory
@@ -870,7 +2017,7 @@ cases:
         - vendor
       matchedBy: directory
       matcherKey: node_modules
-    - id: matcher-090
+    - id: matcher-205
       name: vendor
       relativePath: fixture/vendor
       type: directory
@@ -879,7 +2026,7 @@ cases:
         - vendor
       matchedBy: directory
       matcherKey: vendor
-    - id: matcher-091
+    - id: matcher-206
       name: third_party
       relativePath: fixture/third_party
       type: directory
@@ -888,7 +2035,7 @@ cases:
         - vendor
       matchedBy: directory
       matcherKey: third_party
-    - id: matcher-092
+    - id: matcher-207
       name: dist
       relativePath: fixture/dist
       type: directory
@@ -897,7 +2044,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: dist
-    - id: matcher-093
+    - id: matcher-208
       name: build
       relativePath: fixture/build
       type: directory
@@ -906,7 +2053,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: build
-    - id: matcher-094
+    - id: matcher-209
       name: out
       relativePath: fixture/out
       type: directory
@@ -915,7 +2062,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: out
-    - id: matcher-095
+    - id: matcher-210
       name: target
       relativePath: fixture/target
       type: directory
@@ -924,7 +2071,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: target
-    - id: matcher-096
+    - id: matcher-211
       name: coverage
       relativePath: fixture/coverage
       type: directory
@@ -934,7 +2081,7 @@ cases:
         - test
       matchedBy: directory
       matcherKey: coverage
-    - id: matcher-097
+    - id: matcher-212
       name: .git
       relativePath: fixture/.git
       type: directory
@@ -944,7 +2091,7 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: .git
-    - id: matcher-098
+    - id: matcher-213
       name: .github
       relativePath: fixture/.github
       type: directory
@@ -954,7 +2101,7 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: .github
-    - id: matcher-099
+    - id: matcher-214
       name: .gitlab
       relativePath: fixture/.gitlab
       type: directory
@@ -964,7 +2111,7 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: .gitlab
-    - id: matcher-100
+    - id: matcher-215
       name: .vscode
       relativePath: fixture/.vscode
       type: directory
@@ -974,7 +2121,7 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: .vscode
-    - id: matcher-101
+    - id: matcher-216
       name: .idea
       relativePath: fixture/.idea
       type: directory
@@ -984,7 +2131,7 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: .idea
-    - id: matcher-102
+    - id: matcher-217
       name: .cache
       relativePath: fixture/.cache
       type: directory
@@ -993,7 +2140,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: .cache
-    - id: matcher-103
+    - id: matcher-218
       name: tmp
       relativePath: fixture/tmp
       type: directory
@@ -1002,7 +2149,7 @@ cases:
         - generated
       matchedBy: directory
       matcherKey: tmp
-    - id: matcher-104
+    - id: matcher-219
       name: migrations
       relativePath: fixture/migrations
       type: directory
@@ -1012,7 +2159,328 @@ cases:
         - tooling
       matchedBy: directory
       matcherKey: migrations
-    - id: matcher-105
+    - id: matcher-220
+      name: .storybook
+      relativePath: fixture/.storybook
+      type: directory
+      kind: directory
+      roles:
+        - document
+        - tooling
+      matchedBy: directory
+      matcherKey: .storybook
+    - id: matcher-221
+      name: .changeset
+      relativePath: fixture/.changeset
+      type: directory
+      kind: directory
+      roles:
+        - document
+        - tooling
+      matchedBy: directory
+      matcherKey: .changeset
+    - id: matcher-222
+      name: .husky
+      relativePath: fixture/.husky
+      type: directory
+      kind: directory
+      roles:
+        - tooling
+      matchedBy: directory
+      matcherKey: .husky
+    - id: matcher-223
+      name: .next
+      relativePath: fixture/.next
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .next
+    - id: matcher-224
+      name: .nuxt
+      relativePath: fixture/.nuxt
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .nuxt
+    - id: matcher-225
+      name: .svelte-kit
+      relativePath: fixture/.svelte-kit
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .svelte-kit
+    - id: matcher-226
+      name: .output
+      relativePath: fixture/.output
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .output
+    - id: matcher-227
+      name: .nx
+      relativePath: fixture/.nx
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - tooling
+      matchedBy: directory
+      matcherKey: .nx
+    - id: matcher-228
+      name: .turbo
+      relativePath: fixture/.turbo
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - tooling
+      matchedBy: directory
+      matcherKey: .turbo
+    - id: matcher-229
+      name: .dart_tool
+      relativePath: fixture/.dart_tool
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .dart_tool
+    - id: matcher-230
+      name: .venv
+      relativePath: fixture/.venv
+      type: directory
+      kind: directory
+      roles:
+        - vendor
+      matchedBy: directory
+      matcherKey: .venv
+    - id: matcher-231
+      name: venv
+      relativePath: fixture/venv
+      type: directory
+      kind: directory
+      roles:
+        - vendor
+      matchedBy: directory
+      matcherKey: venv
+    - id: matcher-232
+      name: __pycache__
+      relativePath: fixture/__pycache__
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: __pycache__
+    - id: matcher-233
+      name: .pytest_cache
+      relativePath: fixture/.pytest_cache
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - test
+      matchedBy: directory
+      matcherKey: .pytest_cache
+    - id: matcher-234
+      name: .mypy_cache
+      relativePath: fixture/.mypy_cache
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .mypy_cache
+    - id: matcher-235
+      name: .ruff_cache
+      relativePath: fixture/.ruff_cache
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: .ruff_cache
+    - id: matcher-236
+      name: .tox
+      relativePath: fixture/.tox
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - test
+      matchedBy: directory
+      matcherKey: .tox
+    - id: matcher-237
+      name: .cargo
+      relativePath: fixture/.cargo
+      type: directory
+      kind: directory
+      roles:
+        - config
+        - tooling
+      matchedBy: directory
+      matcherKey: .cargo
+    - id: matcher-238
+      name: .gradle
+      relativePath: fixture/.gradle
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - tooling
+      matchedBy: directory
+      matcherKey: .gradle
+    - id: matcher-239
+      name: obj
+      relativePath: fixture/obj
+      type: directory
+      kind: directory
+      roles:
+        - generated
+      matchedBy: directory
+      matcherKey: obj
+    - id: matcher-240
+      name: bin
+      relativePath: fixture/bin
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - executable
+      matchedBy: directory
+      matcherKey: bin
+    - id: matcher-241
+      name: charts
+      relativePath: fixture/charts
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: charts
+    - id: matcher-242
+      name: helm
+      relativePath: fixture/helm
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: helm
+    - id: matcher-243
+      name: k8s
+      relativePath: fixture/k8s
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: k8s
+    - id: matcher-244
+      name: kubernetes
+      relativePath: fixture/kubernetes
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: kubernetes
+    - id: matcher-245
+      name: manifests
+      relativePath: fixture/manifests
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: manifests
+    - id: matcher-246
+      name: deploy
+      relativePath: fixture/deploy
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: deploy
+    - id: matcher-247
+      name: deployments
+      relativePath: fixture/deployments
+      type: directory
+      kind: directory
+      roles:
+        - infra
+      matchedBy: directory
+      matcherKey: deployments
+    - id: matcher-248
+      name: .terraform
+      relativePath: fixture/.terraform
+      type: directory
+      kind: directory
+      roles:
+        - generated
+        - infra
+      matchedBy: directory
+      matcherKey: .terraform
+    - id: matcher-249
+      name: .devcontainer
+      relativePath: fixture/.devcontainer
+      type: directory
+      kind: directory
+      roles:
+        - config
+        - tooling
+      matchedBy: directory
+      matcherKey: .devcontainer
+    - id: matcher-250
+      name: .circleci
+      relativePath: fixture/.circleci
+      type: directory
+      kind: directory
+      roles:
+        - infra
+        - tooling
+      matchedBy: directory
+      matcherKey: .circleci
+    - id: matcher-251
+      name: testdata
+      relativePath: fixture/testdata
+      type: directory
+      kind: directory
+      roles:
+        - test
+        - data
+      matchedBy: directory
+      matcherKey: testdata
+    - id: matcher-252
+      name: scripts
+      relativePath: fixture/scripts
+      type: directory
+      kind: directory
+      roles:
+        - executable
+        - tooling
+      matchedBy: directory
+      matcherKey: scripts
+    - id: matcher-253
+      name: .direnv
+      relativePath: fixture/.direnv
+      type: directory
+      kind: directory
+      roles:
+        - config
+        - tooling
+      matchedBy: directory
+      matcherKey: .direnv
+    - id: matcher-254
       name: fixture_test.go
       relativePath: fixture/fixture_test.go
       type: file
@@ -1022,7 +2490,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: _test.go
-    - id: matcher-106
+    - id: matcher-255
       name: fixture.pb.go
       relativePath: fixture/fixture.pb.go
       type: file
@@ -1032,7 +2500,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .pb.go
-    - id: matcher-107
+    - id: matcher-256
       name: fixture.g.dart
       relativePath: fixture/fixture.g.dart
       type: file
@@ -1042,7 +2510,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .g.dart
-    - id: matcher-108
+    - id: matcher-257
       name: fixture.freezed.dart
       relativePath: fixture/fixture.freezed.dart
       type: file
@@ -1052,7 +2520,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .freezed.dart
-    - id: matcher-109
+    - id: matcher-258
       name: fixture.generated.go
       relativePath: fixture/fixture.generated.go
       type: file
@@ -1062,7 +2530,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .generated.go
-    - id: matcher-110
+    - id: matcher-259
       name: fixture.gen.go
       relativePath: fixture/fixture.gen.go
       type: file
@@ -1072,7 +2540,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .gen.go
-    - id: matcher-111
+    - id: matcher-260
       name: fixture.d.ts
       relativePath: fixture/fixture.d.ts
       type: file
@@ -1083,7 +2551,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .d.ts
-    - id: matcher-112
+    - id: matcher-261
       name: fixture.d.mts
       relativePath: fixture/fixture.d.mts
       type: file
@@ -1094,7 +2562,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .d.mts
-    - id: matcher-113
+    - id: matcher-262
       name: fixture.d.cts
       relativePath: fixture/fixture.d.cts
       type: file
@@ -1105,7 +2573,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .d.cts
-    - id: matcher-114
+    - id: matcher-263
       name: fixture.test.ts
       relativePath: fixture/fixture.test.ts
       type: file
@@ -1115,7 +2583,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .test.ts
-    - id: matcher-115
+    - id: matcher-264
       name: fixture.test.tsx
       relativePath: fixture/fixture.test.tsx
       type: file
@@ -1125,7 +2593,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .test.tsx
-    - id: matcher-116
+    - id: matcher-265
       name: fixture.test.js
       relativePath: fixture/fixture.test.js
       type: file
@@ -1135,7 +2603,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .test.js
-    - id: matcher-117
+    - id: matcher-266
       name: fixture.test.jsx
       relativePath: fixture/fixture.test.jsx
       type: file
@@ -1145,7 +2613,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .test.jsx
-    - id: matcher-118
+    - id: matcher-267
       name: fixture.spec.ts
       relativePath: fixture/fixture.spec.ts
       type: file
@@ -1155,7 +2623,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .spec.ts
-    - id: matcher-119
+    - id: matcher-268
       name: fixture.spec.tsx
       relativePath: fixture/fixture.spec.tsx
       type: file
@@ -1165,7 +2633,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .spec.tsx
-    - id: matcher-120
+    - id: matcher-269
       name: fixture.spec.js
       relativePath: fixture/fixture.spec.js
       type: file
@@ -1175,7 +2643,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .spec.js
-    - id: matcher-121
+    - id: matcher-270
       name: fixture.spec.jsx
       relativePath: fixture/fixture.spec.jsx
       type: file
@@ -1185,7 +2653,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .spec.jsx
-    - id: matcher-122
+    - id: matcher-271
       name: fixture.stories.ts
       relativePath: fixture/fixture.stories.ts
       type: file
@@ -1195,7 +2663,7 @@ cases:
         - document
       matchedBy: suffix
       matcherKey: .stories.ts
-    - id: matcher-123
+    - id: matcher-272
       name: fixture.stories.tsx
       relativePath: fixture/fixture.stories.tsx
       type: file
@@ -1205,7 +2673,7 @@ cases:
         - document
       matchedBy: suffix
       matcherKey: .stories.tsx
-    - id: matcher-124
+    - id: matcher-273
       name: fixture.stories.js
       relativePath: fixture/fixture.stories.js
       type: file
@@ -1215,7 +2683,7 @@ cases:
         - document
       matchedBy: suffix
       matcherKey: .stories.js
-    - id: matcher-125
+    - id: matcher-274
       name: fixture.stories.jsx
       relativePath: fixture/fixture.stories.jsx
       type: file
@@ -1225,7 +2693,7 @@ cases:
         - document
       matchedBy: suffix
       matcherKey: .stories.jsx
-    - id: matcher-126
+    - id: matcher-275
       name: fixture.snap
       relativePath: fixture/fixture.snap
       type: file
@@ -1235,7 +2703,7 @@ cases:
         - test
       matchedBy: suffix
       matcherKey: .snap
-    - id: matcher-127
+    - id: matcher-276
       name: fixture.min.js
       relativePath: fixture/fixture.min.js
       type: file
@@ -1245,7 +2713,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .min.js
-    - id: matcher-128
+    - id: matcher-277
       name: fixture.min.css
       relativePath: fixture/fixture.min.css
       type: file
@@ -1255,7 +2723,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .min.css
-    - id: matcher-129
+    - id: matcher-278
       name: fixture.generated.ts
       relativePath: fixture/fixture.generated.ts
       type: file
@@ -1265,7 +2733,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .generated.ts
-    - id: matcher-130
+    - id: matcher-279
       name: fixture.generated.js
       relativePath: fixture/fixture.generated.js
       type: file
@@ -1275,7 +2743,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .generated.js
-    - id: matcher-131
+    - id: matcher-280
       name: fixture.gen.ts
       relativePath: fixture/fixture.gen.ts
       type: file
@@ -1285,7 +2753,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .gen.ts
-    - id: matcher-132
+    - id: matcher-281
       name: fixture.gen.js
       relativePath: fixture/fixture.gen.js
       type: file
@@ -1295,7 +2763,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .gen.js
-    - id: matcher-133
+    - id: matcher-282
       name: fixture.mock.ts
       relativePath: fixture/fixture.mock.ts
       type: file
@@ -1305,7 +2773,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .mock.ts
-    - id: matcher-134
+    - id: matcher-283
       name: fixture.mock.js
       relativePath: fixture/fixture.mock.js
       type: file
@@ -1315,7 +2783,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .mock.js
-    - id: matcher-135
+    - id: matcher-284
       name: fixture.designer.cs
       relativePath: fixture/fixture.designer.cs
       type: file
@@ -1325,7 +2793,7 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .designer.cs
-    - id: matcher-136
+    - id: matcher-285
       name: fixture.generated.cs
       relativePath: fixture/fixture.generated.cs
       type: file
@@ -1335,7 +2803,267 @@ cases:
         - source
       matchedBy: suffix
       matcherKey: .generated.cs
-    - id: matcher-137
+    - id: matcher-286
+      name: fixture.blade.php
+      relativePath: fixture/fixture.blade.php
+      type: file
+      kind: source.php
+      roles:
+        - source
+      matchedBy: suffix
+      matcherKey: .blade.php
+    - id: matcher-287
+      name: fixture_test.py
+      relativePath: fixture/fixture_test.py
+      type: file
+      kind: source.python
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: _test.py
+    - id: matcher-288
+      name: fixture.test.py
+      relativePath: fixture/fixture.test.py
+      type: file
+      kind: source.python
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .test.py
+    - id: matcher-289
+      name: fixture_spec.py
+      relativePath: fixture/fixture_spec.py
+      type: file
+      kind: source.python
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: _spec.py
+    - id: matcher-290
+      name: fixture_spec.rb
+      relativePath: fixture/fixture_spec.rb
+      type: file
+      kind: source.ruby
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: _spec.rb
+    - id: matcher-291
+      name: fixture_test.rb
+      relativePath: fixture/fixture_test.rb
+      type: file
+      kind: source.ruby
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: _test.rb
+    - id: matcher-292
+      name: fixture.spec.rb
+      relativePath: fixture/fixture.spec.rb
+      type: file
+      kind: source.ruby
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .spec.rb
+    - id: matcher-293
+      name: fixture.cy.ts
+      relativePath: fixture/fixture.cy.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .cy.ts
+    - id: matcher-294
+      name: fixture.cy.tsx
+      relativePath: fixture/fixture.cy.tsx
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .cy.tsx
+    - id: matcher-295
+      name: fixture.cy.js
+      relativePath: fixture/fixture.cy.js
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .cy.js
+    - id: matcher-296
+      name: fixture.e2e.ts
+      relativePath: fixture/fixture.e2e.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .e2e.ts
+    - id: matcher-297
+      name: fixture.e2e.js
+      relativePath: fixture/fixture.e2e.js
+      type: file
+      kind: source.javascript
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .e2e.js
+    - id: matcher-298
+      name: fixture.mocks.dart
+      relativePath: fixture/fixture.mocks.dart
+      type: file
+      kind: source.dart
+      roles:
+        - generated
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .mocks.dart
+    - id: matcher-299
+      name: fixture.generated.dart
+      relativePath: fixture/fixture.generated.dart
+      type: file
+      kind: source.dart
+      roles:
+        - generated
+        - source
+      matchedBy: suffix
+      matcherKey: .generated.dart
+    - id: matcher-300
+      name: fixture.pb.dart
+      relativePath: fixture/fixture.pb.dart
+      type: file
+      kind: source.dart
+      roles:
+        - generated
+        - source
+      matchedBy: suffix
+      matcherKey: .pb.dart
+    - id: matcher-301
+      name: fixture.gen.dart
+      relativePath: fixture/fixture.gen.dart
+      type: file
+      kind: source.dart
+      roles:
+        - generated
+        - source
+      matchedBy: suffix
+      matcherKey: .gen.dart
+    - id: matcher-302
+      name: fixturetests.cs
+      relativePath: fixture/fixturetests.cs
+      type: file
+      kind: source.csharp
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: tests.cs
+    - id: matcher-303
+      name: fixturetest.java
+      relativePath: fixture/fixturetest.java
+      type: file
+      kind: source.java
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: test.java
+    - id: matcher-304
+      name: fixturetest.kt
+      relativePath: fixture/fixturetest.kt
+      type: file
+      kind: source.kotlin
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: test.kt
+    - id: matcher-305
+      name: fixture.test.kt
+      relativePath: fixture/fixture.test.kt
+      type: file
+      kind: source.kotlin
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .test.kt
+    - id: matcher-306
+      name: fixture.pb.ts
+      relativePath: fixture/fixture.pb.ts
+      type: file
+      kind: source.typescript
+      roles:
+        - generated
+        - source
+      matchedBy: suffix
+      matcherKey: .pb.ts
+    - id: matcher-307
+      name: fixture.grpc.pb.go
+      relativePath: fixture/fixture.grpc.pb.go
+      type: file
+      kind: source.go
+      roles:
+        - generated
+        - source
+      matchedBy: suffix
+      matcherKey: .grpc.pb.go
+    - id: matcher-308
+      name: fixture.mock.go
+      relativePath: fixture/fixture.mock.go
+      type: file
+      kind: source.go
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: .mock.go
+    - id: matcher-309
+      name: fixture_mock.go
+      relativePath: fixture/fixture_mock.go
+      type: file
+      kind: source.go
+      roles:
+        - test
+        - source
+      matchedBy: suffix
+      matcherKey: _mock.go
+    - id: matcher-310
+      name: fixture.stories.mdx
+      relativePath: fixture/fixture.stories.mdx
+      type: file
+      kind: document.markdown
+      roles:
+        - source
+        - document
+      matchedBy: suffix
+      matcherKey: .stories.mdx
+    - id: matcher-311
+      name: fixture.gradle.kts
+      relativePath: fixture/fixture.gradle.kts
+      type: file
+      kind: manifest.java
+      roles:
+        - config
+        - tooling
+      matchedBy: suffix
+      matcherKey: .gradle.kts
+    - id: matcher-312
       name: fixture.c
       relativePath: fixture/fixture.c
       type: file
@@ -1344,7 +3072,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .c
-    - id: matcher-138
+    - id: matcher-313
       name: fixture.h
       relativePath: fixture/fixture.h
       type: file
@@ -1354,7 +3082,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .h
-    - id: matcher-139
+    - id: matcher-314
       name: fixture.cc
       relativePath: fixture/fixture.cc
       type: file
@@ -1363,7 +3091,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cc
-    - id: matcher-140
+    - id: matcher-315
       name: fixture.cpp
       relativePath: fixture/fixture.cpp
       type: file
@@ -1372,7 +3100,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cpp
-    - id: matcher-141
+    - id: matcher-316
       name: fixture.cxx
       relativePath: fixture/fixture.cxx
       type: file
@@ -1381,7 +3109,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cxx
-    - id: matcher-142
+    - id: matcher-317
       name: fixture.hpp
       relativePath: fixture/fixture.hpp
       type: file
@@ -1391,7 +3119,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .hpp
-    - id: matcher-143
+    - id: matcher-318
       name: fixture.m
       relativePath: fixture/fixture.m
       type: file
@@ -1400,7 +3128,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .m
-    - id: matcher-144
+    - id: matcher-319
       name: fixture.mm
       relativePath: fixture/fixture.mm
       type: file
@@ -1409,7 +3137,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .mm
-    - id: matcher-145
+    - id: matcher-320
       name: fixture.swift
       relativePath: fixture/fixture.swift
       type: file
@@ -1418,7 +3146,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .swift
-    - id: matcher-146
+    - id: matcher-321
       name: fixture.go
       relativePath: fixture/fixture.go
       type: file
@@ -1427,7 +3155,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .go
-    - id: matcher-147
+    - id: matcher-322
       name: fixture.rs
       relativePath: fixture/fixture.rs
       type: file
@@ -1436,7 +3164,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .rs
-    - id: matcher-148
+    - id: matcher-323
       name: fixture.zig
       relativePath: fixture/fixture.zig
       type: file
@@ -1445,7 +3173,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .zig
-    - id: matcher-149
+    - id: matcher-324
       name: fixture.java
       relativePath: fixture/fixture.java
       type: file
@@ -1454,7 +3182,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .java
-    - id: matcher-150
+    - id: matcher-325
       name: fixture.kt
       relativePath: fixture/fixture.kt
       type: file
@@ -1463,7 +3191,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .kt
-    - id: matcher-151
+    - id: matcher-326
       name: fixture.kts
       relativePath: fixture/fixture.kts
       type: file
@@ -1472,7 +3200,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .kts
-    - id: matcher-152
+    - id: matcher-327
       name: fixture.scala
       relativePath: fixture/fixture.scala
       type: file
@@ -1481,7 +3209,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .scala
-    - id: matcher-153
+    - id: matcher-328
       name: fixture.cs
       relativePath: fixture/fixture.cs
       type: file
@@ -1490,7 +3218,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cs
-    - id: matcher-154
+    - id: matcher-329
       name: fixture.fs
       relativePath: fixture/fixture.fs
       type: file
@@ -1499,7 +3227,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .fs
-    - id: matcher-155
+    - id: matcher-330
       name: fixture.fsx
       relativePath: fixture/fixture.fsx
       type: file
@@ -1508,7 +3236,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .fsx
-    - id: matcher-156
+    - id: matcher-331
       name: fixture.dart
       relativePath: fixture/fixture.dart
       type: file
@@ -1517,7 +3245,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .dart
-    - id: matcher-157
+    - id: matcher-332
       name: fixture.sol
       relativePath: fixture/fixture.sol
       type: file
@@ -1526,7 +3254,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .sol
-    - id: matcher-158
+    - id: matcher-333
       name: fixture.vhd
       relativePath: fixture/fixture.vhd
       type: file
@@ -1535,7 +3263,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .vhd
-    - id: matcher-159
+    - id: matcher-334
       name: fixture.vhdl
       relativePath: fixture/fixture.vhdl
       type: file
@@ -1544,7 +3272,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .vhdl
-    - id: matcher-160
+    - id: matcher-335
       name: fixture.asm
       relativePath: fixture/fixture.asm
       type: file
@@ -1553,7 +3281,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .asm
-    - id: matcher-161
+    - id: matcher-336
       name: fixture.py
       relativePath: fixture/fixture.py
       type: file
@@ -1562,7 +3290,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .py
-    - id: matcher-162
+    - id: matcher-337
       name: fixture.pyi
       relativePath: fixture/fixture.pyi
       type: file
@@ -1572,7 +3300,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .pyi
-    - id: matcher-163
+    - id: matcher-338
       name: fixture.rb
       relativePath: fixture/fixture.rb
       type: file
@@ -1581,7 +3309,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .rb
-    - id: matcher-164
+    - id: matcher-339
       name: fixture.php
       relativePath: fixture/fixture.php
       type: file
@@ -1590,7 +3318,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .php
-    - id: matcher-165
+    - id: matcher-340
       name: fixture.lua
       relativePath: fixture/fixture.lua
       type: file
@@ -1599,7 +3327,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .lua
-    - id: matcher-166
+    - id: matcher-341
       name: fixture.pl
       relativePath: fixture/fixture.pl
       type: file
@@ -1608,7 +3336,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .pl
-    - id: matcher-167
+    - id: matcher-342
       name: fixture.pm
       relativePath: fixture/fixture.pm
       type: file
@@ -1617,7 +3345,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .pm
-    - id: matcher-168
+    - id: matcher-343
       name: fixture.r
       relativePath: fixture/fixture.r
       type: file
@@ -1626,7 +3354,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .r
-    - id: matcher-169
+    - id: matcher-344
       name: fixture.jl
       relativePath: fixture/fixture.jl
       type: file
@@ -1635,7 +3363,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .jl
-    - id: matcher-170
+    - id: matcher-345
       name: fixture.ex
       relativePath: fixture/fixture.ex
       type: file
@@ -1644,7 +3372,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .ex
-    - id: matcher-171
+    - id: matcher-346
       name: fixture.exs
       relativePath: fixture/fixture.exs
       type: file
@@ -1653,7 +3381,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .exs
-    - id: matcher-172
+    - id: matcher-347
       name: fixture.erl
       relativePath: fixture/fixture.erl
       type: file
@@ -1662,7 +3390,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .erl
-    - id: matcher-173
+    - id: matcher-348
       name: fixture.hrl
       relativePath: fixture/fixture.hrl
       type: file
@@ -1672,7 +3400,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .hrl
-    - id: matcher-174
+    - id: matcher-349
       name: fixture.clj
       relativePath: fixture/fixture.clj
       type: file
@@ -1681,7 +3409,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .clj
-    - id: matcher-175
+    - id: matcher-350
       name: fixture.cljs
       relativePath: fixture/fixture.cljs
       type: file
@@ -1690,7 +3418,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cljs
-    - id: matcher-176
+    - id: matcher-351
       name: fixture.groovy
       relativePath: fixture/fixture.groovy
       type: file
@@ -1699,7 +3427,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .groovy
-    - id: matcher-177
+    - id: matcher-352
       name: fixture.sh
       relativePath: fixture/fixture.sh
       type: file
@@ -1709,7 +3437,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .sh
-    - id: matcher-178
+    - id: matcher-353
       name: fixture.bash
       relativePath: fixture/fixture.bash
       type: file
@@ -1719,7 +3447,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .bash
-    - id: matcher-179
+    - id: matcher-354
       name: fixture.zsh
       relativePath: fixture/fixture.zsh
       type: file
@@ -1729,7 +3457,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .zsh
-    - id: matcher-180
+    - id: matcher-355
       name: fixture.fish
       relativePath: fixture/fixture.fish
       type: file
@@ -1739,7 +3467,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .fish
-    - id: matcher-181
+    - id: matcher-356
       name: fixture.ps1
       relativePath: fixture/fixture.ps1
       type: file
@@ -1749,7 +3477,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .ps1
-    - id: matcher-182
+    - id: matcher-357
       name: fixture.bat
       relativePath: fixture/fixture.bat
       type: file
@@ -1759,7 +3487,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .bat
-    - id: matcher-183
+    - id: matcher-358
       name: fixture.cmd
       relativePath: fixture/fixture.cmd
       type: file
@@ -1769,7 +3497,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cmd
-    - id: matcher-184
+    - id: matcher-359
       name: fixture.js
       relativePath: fixture/fixture.js
       type: file
@@ -1778,7 +3506,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .js
-    - id: matcher-185
+    - id: matcher-360
       name: fixture.mjs
       relativePath: fixture/fixture.mjs
       type: file
@@ -1787,7 +3515,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .mjs
-    - id: matcher-186
+    - id: matcher-361
       name: fixture.cjs
       relativePath: fixture/fixture.cjs
       type: file
@@ -1796,7 +3524,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cjs
-    - id: matcher-187
+    - id: matcher-362
       name: fixture.jsx
       relativePath: fixture/fixture.jsx
       type: file
@@ -1805,7 +3533,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .jsx
-    - id: matcher-188
+    - id: matcher-363
       name: fixture.ts
       relativePath: fixture/fixture.ts
       type: file
@@ -1814,7 +3542,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .ts
-    - id: matcher-189
+    - id: matcher-364
       name: fixture.mts
       relativePath: fixture/fixture.mts
       type: file
@@ -1823,7 +3551,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .mts
-    - id: matcher-190
+    - id: matcher-365
       name: fixture.cts
       relativePath: fixture/fixture.cts
       type: file
@@ -1832,7 +3560,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .cts
-    - id: matcher-191
+    - id: matcher-366
       name: fixture.tsx
       relativePath: fixture/fixture.tsx
       type: file
@@ -1841,7 +3569,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .tsx
-    - id: matcher-192
+    - id: matcher-367
       name: fixture.html
       relativePath: fixture/fixture.html
       type: file
@@ -1850,7 +3578,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .html
-    - id: matcher-193
+    - id: matcher-368
       name: fixture.css
       relativePath: fixture/fixture.css
       type: file
@@ -1859,7 +3587,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .css
-    - id: matcher-194
+    - id: matcher-369
       name: fixture.scss
       relativePath: fixture/fixture.scss
       type: file
@@ -1868,7 +3596,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .scss
-    - id: matcher-195
+    - id: matcher-370
       name: fixture.sass
       relativePath: fixture/fixture.sass
       type: file
@@ -1877,7 +3605,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .sass
-    - id: matcher-196
+    - id: matcher-371
       name: fixture.less
       relativePath: fixture/fixture.less
       type: file
@@ -1886,7 +3614,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .less
-    - id: matcher-197
+    - id: matcher-372
       name: fixture.vue
       relativePath: fixture/fixture.vue
       type: file
@@ -1895,7 +3623,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .vue
-    - id: matcher-198
+    - id: matcher-373
       name: fixture.svelte
       relativePath: fixture/fixture.svelte
       type: file
@@ -1904,7 +3632,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .svelte
-    - id: matcher-199
+    - id: matcher-374
       name: fixture.astro
       relativePath: fixture/fixture.astro
       type: file
@@ -1913,7 +3641,7 @@ cases:
         - source
       matchedBy: extension
       matcherKey: .astro
-    - id: matcher-200
+    - id: matcher-375
       name: fixture.wasm
       relativePath: fixture/fixture.wasm
       type: file
@@ -1922,7 +3650,7 @@ cases:
         - executable
       matchedBy: extension
       matcherKey: .wasm
-    - id: matcher-201
+    - id: matcher-376
       name: fixture.json
       relativePath: fixture/fixture.json
       type: file
@@ -1931,7 +3659,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .json
-    - id: matcher-202
+    - id: matcher-377
       name: fixture.jsonc
       relativePath: fixture/fixture.jsonc
       type: file
@@ -1941,7 +3669,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .jsonc
-    - id: matcher-203
+    - id: matcher-378
       name: fixture.yaml
       relativePath: fixture/fixture.yaml
       type: file
@@ -1951,7 +3679,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .yaml
-    - id: matcher-204
+    - id: matcher-379
       name: fixture.yml
       relativePath: fixture/fixture.yml
       type: file
@@ -1961,7 +3689,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .yml
-    - id: matcher-205
+    - id: matcher-380
       name: fixture.toml
       relativePath: fixture/fixture.toml
       type: file
@@ -1971,7 +3699,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .toml
-    - id: matcher-206
+    - id: matcher-381
       name: fixture.xml
       relativePath: fixture/fixture.xml
       type: file
@@ -1980,7 +3708,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .xml
-    - id: matcher-207
+    - id: matcher-382
       name: fixture.ini
       relativePath: fixture/fixture.ini
       type: file
@@ -1989,7 +3717,7 @@ cases:
         - config
       matchedBy: extension
       matcherKey: .ini
-    - id: matcher-208
+    - id: matcher-383
       name: fixture.env
       relativePath: fixture/fixture.env
       type: file
@@ -1999,7 +3727,7 @@ cases:
         - config
       matchedBy: extension
       matcherKey: .env
-    - id: matcher-209
+    - id: matcher-384
       name: fixture.cfg
       relativePath: fixture/fixture.cfg
       type: file
@@ -2008,7 +3736,7 @@ cases:
         - config
       matchedBy: extension
       matcherKey: .cfg
-    - id: matcher-210
+    - id: matcher-385
       name: fixture.conf
       relativePath: fixture/fixture.conf
       type: file
@@ -2017,7 +3745,7 @@ cases:
         - config
       matchedBy: extension
       matcherKey: .conf
-    - id: matcher-211
+    - id: matcher-386
       name: fixture.csv
       relativePath: fixture/fixture.csv
       type: file
@@ -2026,7 +3754,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .csv
-    - id: matcher-212
+    - id: matcher-387
       name: fixture.tsv
       relativePath: fixture/fixture.tsv
       type: file
@@ -2035,7 +3763,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .tsv
-    - id: matcher-213
+    - id: matcher-388
       name: fixture.sql
       relativePath: fixture/fixture.sql
       type: file
@@ -2044,7 +3772,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .sql
-    - id: matcher-214
+    - id: matcher-389
       name: fixture.graphql
       relativePath: fixture/fixture.graphql
       type: file
@@ -2054,7 +3782,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .graphql
-    - id: matcher-215
+    - id: matcher-390
       name: fixture.gql
       relativePath: fixture/fixture.gql
       type: file
@@ -2064,7 +3792,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .gql
-    - id: matcher-216
+    - id: matcher-391
       name: fixture.proto
       relativePath: fixture/fixture.proto
       type: file
@@ -2074,7 +3802,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .proto
-    - id: matcher-217
+    - id: matcher-392
       name: fixture.avsc
       relativePath: fixture/fixture.avsc
       type: file
@@ -2084,7 +3812,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .avsc
-    - id: matcher-218
+    - id: matcher-393
       name: fixture.parquet
       relativePath: fixture/fixture.parquet
       type: file
@@ -2093,7 +3821,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .parquet
-    - id: matcher-219
+    - id: matcher-394
       name: fixture.tex
       relativePath: fixture/fixture.tex
       type: file
@@ -2102,7 +3830,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .tex
-    - id: matcher-220
+    - id: matcher-395
       name: fixture.txt
       relativePath: fixture/fixture.txt
       type: file
@@ -2111,7 +3839,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .txt
-    - id: matcher-221
+    - id: matcher-396
       name: fixture.ipynb
       relativePath: fixture/fixture.ipynb
       type: file
@@ -2121,7 +3849,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .ipynb
-    - id: matcher-222
+    - id: matcher-397
       name: fixture.odt
       relativePath: fixture/fixture.odt
       type: file
@@ -2130,7 +3858,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .odt
-    - id: matcher-223
+    - id: matcher-398
       name: fixture.epub
       relativePath: fixture/fixture.epub
       type: file
@@ -2139,7 +3867,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .epub
-    - id: matcher-224
+    - id: matcher-399
       name: fixture.db
       relativePath: fixture/fixture.db
       type: file
@@ -2148,7 +3876,7 @@ cases:
         - data
       matchedBy: extension
       matcherKey: .db
-    - id: matcher-225
+    - id: matcher-400
       name: fixture.md
       relativePath: fixture/fixture.md
       type: file
@@ -2157,7 +3885,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .md
-    - id: matcher-226
+    - id: matcher-401
       name: fixture.mdx
       relativePath: fixture/fixture.mdx
       type: file
@@ -2166,7 +3894,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .mdx
-    - id: matcher-227
+    - id: matcher-402
       name: fixture.rst
       relativePath: fixture/fixture.rst
       type: file
@@ -2175,7 +3903,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .rst
-    - id: matcher-228
+    - id: matcher-403
       name: fixture.adoc
       relativePath: fixture/fixture.adoc
       type: file
@@ -2184,7 +3912,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .adoc
-    - id: matcher-229
+    - id: matcher-404
       name: fixture.pdf
       relativePath: fixture/fixture.pdf
       type: file
@@ -2193,7 +3921,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .pdf
-    - id: matcher-230
+    - id: matcher-405
       name: fixture.docx
       relativePath: fixture/fixture.docx
       type: file
@@ -2202,7 +3930,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .docx
-    - id: matcher-231
+    - id: matcher-406
       name: fixture.xlsx
       relativePath: fixture/fixture.xlsx
       type: file
@@ -2212,7 +3940,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .xlsx
-    - id: matcher-232
+    - id: matcher-407
       name: fixture.pptx
       relativePath: fixture/fixture.pptx
       type: file
@@ -2221,7 +3949,7 @@ cases:
         - document
       matchedBy: extension
       matcherKey: .pptx
-    - id: matcher-233
+    - id: matcher-408
       name: fixture.png
       relativePath: fixture/fixture.png
       type: file
@@ -2230,7 +3958,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .png
-    - id: matcher-234
+    - id: matcher-409
       name: fixture.jpg
       relativePath: fixture/fixture.jpg
       type: file
@@ -2239,7 +3967,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .jpg
-    - id: matcher-235
+    - id: matcher-410
       name: fixture.jpeg
       relativePath: fixture/fixture.jpeg
       type: file
@@ -2248,7 +3976,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .jpeg
-    - id: matcher-236
+    - id: matcher-411
       name: fixture.svg
       relativePath: fixture/fixture.svg
       type: file
@@ -2257,7 +3985,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .svg
-    - id: matcher-237
+    - id: matcher-412
       name: fixture.mp3
       relativePath: fixture/fixture.mp3
       type: file
@@ -2266,7 +3994,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .mp3
-    - id: matcher-238
+    - id: matcher-413
       name: fixture.wav
       relativePath: fixture/fixture.wav
       type: file
@@ -2275,7 +4003,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .wav
-    - id: matcher-239
+    - id: matcher-414
       name: fixture.mp4
       relativePath: fixture/fixture.mp4
       type: file
@@ -2284,7 +4012,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .mp4
-    - id: matcher-240
+    - id: matcher-415
       name: fixture.webm
       relativePath: fixture/fixture.webm
       type: file
@@ -2293,7 +4021,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .webm
-    - id: matcher-241
+    - id: matcher-416
       name: fixture.zip
       relativePath: fixture/fixture.zip
       type: file
@@ -2302,7 +4030,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .zip
-    - id: matcher-242
+    - id: matcher-417
       name: fixture.tar
       relativePath: fixture/fixture.tar
       type: file
@@ -2311,7 +4039,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .tar
-    - id: matcher-243
+    - id: matcher-418
       name: fixture.gz
       relativePath: fixture/fixture.gz
       type: file
@@ -2320,7 +4048,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .gz
-    - id: matcher-244
+    - id: matcher-419
       name: fixture.tgz
       relativePath: fixture/fixture.tgz
       type: file
@@ -2329,7 +4057,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .tgz
-    - id: matcher-245
+    - id: matcher-420
       name: fixture.jar
       relativePath: fixture/fixture.jar
       type: file
@@ -2338,7 +4066,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .jar
-    - id: matcher-246
+    - id: matcher-421
       name: fixture.war
       relativePath: fixture/fixture.war
       type: file
@@ -2347,7 +4075,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .war
-    - id: matcher-247
+    - id: matcher-422
       name: fixture.whl
       relativePath: fixture/fixture.whl
       type: file
@@ -2356,7 +4084,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .whl
-    - id: matcher-248
+    - id: matcher-423
       name: fixture.deb
       relativePath: fixture/fixture.deb
       type: file
@@ -2365,7 +4093,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .deb
-    - id: matcher-249
+    - id: matcher-424
       name: fixture.rpm
       relativePath: fixture/fixture.rpm
       type: file
@@ -2374,7 +4102,7 @@ cases:
         - archive
       matchedBy: extension
       matcherKey: .rpm
-    - id: matcher-250
+    - id: matcher-425
       name: fixture.exe
       relativePath: fixture/fixture.exe
       type: file
@@ -2383,7 +4111,7 @@ cases:
         - executable
       matchedBy: extension
       matcherKey: .exe
-    - id: matcher-251
+    - id: matcher-426
       name: fixture.dll
       relativePath: fixture/fixture.dll
       type: file
@@ -2392,7 +4120,7 @@ cases:
         - executable
       matchedBy: extension
       matcherKey: .dll
-    - id: matcher-252
+    - id: matcher-427
       name: fixture.so
       relativePath: fixture/fixture.so
       type: file
@@ -2401,7 +4129,7 @@ cases:
         - executable
       matchedBy: extension
       matcherKey: .so
-    - id: matcher-253
+    - id: matcher-428
       name: fixture.dylib
       relativePath: fixture/fixture.dylib
       type: file
@@ -2410,7 +4138,7 @@ cases:
         - executable
       matchedBy: extension
       matcherKey: .dylib
-    - id: matcher-254
+    - id: matcher-429
       name: fixture.ttf
       relativePath: fixture/fixture.ttf
       type: file
@@ -2419,7 +4147,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .ttf
-    - id: matcher-255
+    - id: matcher-430
       name: fixture.woff
       relativePath: fixture/fixture.woff
       type: file
@@ -2428,7 +4156,7 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .woff
-    - id: matcher-256
+    - id: matcher-431
       name: fixture.woff2
       relativePath: fixture/fixture.woff2
       type: file
@@ -2437,3 +4165,694 @@ cases:
         - media
       matchedBy: extension
       matcherKey: .woff2
+    - id: matcher-432
+      name: fixture.hs
+      relativePath: fixture/fixture.hs
+      type: file
+      kind: source.haskell
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .hs
+    - id: matcher-433
+      name: fixture.lhs
+      relativePath: fixture/fixture.lhs
+      type: file
+      kind: source.haskell
+      roles:
+        - source
+        - document
+      matchedBy: extension
+      matcherKey: .lhs
+    - id: matcher-434
+      name: fixture.ml
+      relativePath: fixture/fixture.ml
+      type: file
+      kind: source.ocaml
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .ml
+    - id: matcher-435
+      name: fixture.mli
+      relativePath: fixture/fixture.mli
+      type: file
+      kind: source.ocaml
+      roles:
+        - contract
+        - source
+      matchedBy: extension
+      matcherKey: .mli
+    - id: matcher-436
+      name: fixture.nim
+      relativePath: fixture/fixture.nim
+      type: file
+      kind: source.nim
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .nim
+    - id: matcher-437
+      name: fixture.nims
+      relativePath: fixture/fixture.nims
+      type: file
+      kind: source.nim
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .nims
+    - id: matcher-438
+      name: fixture.d
+      relativePath: fixture/fixture.d
+      type: file
+      kind: source.d
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .d
+    - id: matcher-439
+      name: fixture.f90
+      relativePath: fixture/fixture.f90
+      type: file
+      kind: source.fortran
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .f90
+    - id: matcher-440
+      name: fixture.f95
+      relativePath: fixture/fixture.f95
+      type: file
+      kind: source.fortran
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .f95
+    - id: matcher-441
+      name: fixture.f03
+      relativePath: fixture/fixture.f03
+      type: file
+      kind: source.fortran
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .f03
+    - id: matcher-442
+      name: fixture.for
+      relativePath: fixture/fixture.for
+      type: file
+      kind: source.fortran
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .for
+    - id: matcher-443
+      name: fixture.f
+      relativePath: fixture/fixture.f
+      type: file
+      kind: source.fortran
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .f
+    - id: matcher-444
+      name: fixture.gleam
+      relativePath: fixture/fixture.gleam
+      type: file
+      kind: source.gleam
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .gleam
+    - id: matcher-445
+      name: fixture.scm
+      relativePath: fixture/fixture.scm
+      type: file
+      kind: source.scheme
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .scm
+    - id: matcher-446
+      name: fixture.ss
+      relativePath: fixture/fixture.ss
+      type: file
+      kind: source.scheme
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .ss
+    - id: matcher-447
+      name: fixture.rkt
+      relativePath: fixture/fixture.rkt
+      type: file
+      kind: source.racket
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .rkt
+    - id: matcher-448
+      name: fixture.elm
+      relativePath: fixture/fixture.elm
+      type: file
+      kind: source.elm
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .elm
+    - id: matcher-449
+      name: fixture.v
+      relativePath: fixture/fixture.v
+      type: file
+      kind: source.v
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .v
+    - id: matcher-450
+      name: fixture.cr
+      relativePath: fixture/fixture.cr
+      type: file
+      kind: source.crystal
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .cr
+    - id: matcher-451
+      name: fixture.nix
+      relativePath: fixture/fixture.nix
+      type: file
+      kind: source.nix
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .nix
+    - id: matcher-452
+      name: fixture.hcl
+      relativePath: fixture/fixture.hcl
+      type: file
+      kind: source.hcl
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .hcl
+    - id: matcher-453
+      name: fixture.cue
+      relativePath: fixture/fixture.cue
+      type: file
+      kind: source.cue
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .cue
+    - id: matcher-454
+      name: fixture.jsonnet
+      relativePath: fixture/fixture.jsonnet
+      type: file
+      kind: source.jsonnet
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .jsonnet
+    - id: matcher-455
+      name: fixture.libsonnet
+      relativePath: fixture/fixture.libsonnet
+      type: file
+      kind: source.jsonnet
+      roles:
+        - source
+      matchedBy: extension
+      matcherKey: .libsonnet
+    - id: matcher-456
+      name: fixture.tf
+      relativePath: fixture/fixture.tf
+      type: file
+      kind: manifest.terraform
+      roles:
+        - infra
+        - source
+      matchedBy: extension
+      matcherKey: .tf
+    - id: matcher-457
+      name: fixture.tfvars
+      relativePath: fixture/fixture.tfvars
+      type: file
+      kind: manifest.terraform
+      roles:
+        - infra
+        - config
+      matchedBy: extension
+      matcherKey: .tfvars
+    - id: matcher-458
+      name: fixture.tofu
+      relativePath: fixture/fixture.tofu
+      type: file
+      kind: manifest.terraform
+      roles:
+        - infra
+        - source
+      matchedBy: extension
+      matcherKey: .tofu
+    - id: matcher-459
+      name: fixture.tfstate
+      relativePath: fixture/fixture.tfstate
+      type: file
+      kind: data.json
+      roles:
+        - infra
+        - data
+      matchedBy: extension
+      matcherKey: .tfstate
+    - id: matcher-460
+      name: fixture.sln
+      relativePath: fixture/fixture.sln
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+      matchedBy: extension
+      matcherKey: .sln
+    - id: matcher-461
+      name: fixture.csproj
+      relativePath: fixture/fixture.csproj
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .csproj
+    - id: matcher-462
+      name: fixture.fsproj
+      relativePath: fixture/fixture.fsproj
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+        - source
+      matchedBy: extension
+      matcherKey: .fsproj
+    - id: matcher-463
+      name: fixture.vbproj
+      relativePath: fixture/fixture.vbproj
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+      matchedBy: extension
+      matcherKey: .vbproj
+    - id: matcher-464
+      name: fixture.vcxproj
+      relativePath: fixture/fixture.vcxproj
+      type: file
+      kind: manifest.dotnet
+      roles:
+        - config
+      matchedBy: extension
+      matcherKey: .vcxproj
+    - id: matcher-465
+      name: fixture.gradle
+      relativePath: fixture/fixture.gradle
+      type: file
+      kind: manifest.java
+      roles:
+        - config
+        - tooling
+      matchedBy: extension
+      matcherKey: .gradle
+    - id: matcher-466
+      name: fixture.gif
+      relativePath: fixture/fixture.gif
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .gif
+    - id: matcher-467
+      name: fixture.webp
+      relativePath: fixture/fixture.webp
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .webp
+    - id: matcher-468
+      name: fixture.avif
+      relativePath: fixture/fixture.avif
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .avif
+    - id: matcher-469
+      name: fixture.ico
+      relativePath: fixture/fixture.ico
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .ico
+    - id: matcher-470
+      name: fixture.bmp
+      relativePath: fixture/fixture.bmp
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .bmp
+    - id: matcher-471
+      name: fixture.tif
+      relativePath: fixture/fixture.tif
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .tif
+    - id: matcher-472
+      name: fixture.tiff
+      relativePath: fixture/fixture.tiff
+      type: file
+      kind: media.image
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .tiff
+    - id: matcher-473
+      name: fixture.flac
+      relativePath: fixture/fixture.flac
+      type: file
+      kind: media.audio
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .flac
+    - id: matcher-474
+      name: fixture.ogg
+      relativePath: fixture/fixture.ogg
+      type: file
+      kind: media.audio
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .ogg
+    - id: matcher-475
+      name: fixture.m4a
+      relativePath: fixture/fixture.m4a
+      type: file
+      kind: media.audio
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .m4a
+    - id: matcher-476
+      name: fixture.mov
+      relativePath: fixture/fixture.mov
+      type: file
+      kind: media.video
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .mov
+    - id: matcher-477
+      name: fixture.mkv
+      relativePath: fixture/fixture.mkv
+      type: file
+      kind: media.video
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .mkv
+    - id: matcher-478
+      name: fixture.avi
+      relativePath: fixture/fixture.avi
+      type: file
+      kind: media.video
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .avi
+    - id: matcher-479
+      name: fixture.psd
+      relativePath: fixture/fixture.psd
+      type: file
+      kind: media.design
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .psd
+    - id: matcher-480
+      name: fixture.ai
+      relativePath: fixture/fixture.ai
+      type: file
+      kind: media.design
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .ai
+    - id: matcher-481
+      name: fixture.fig
+      relativePath: fixture/fixture.fig
+      type: file
+      kind: media.design
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .fig
+    - id: matcher-482
+      name: fixture.7z
+      relativePath: fixture/fixture.7z
+      type: file
+      kind: archive.compressed
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .7z
+    - id: matcher-483
+      name: fixture.bz2
+      relativePath: fixture/fixture.bz2
+      type: file
+      kind: archive.compressed
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .bz2
+    - id: matcher-484
+      name: fixture.xz
+      relativePath: fixture/fixture.xz
+      type: file
+      kind: archive.compressed
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .xz
+    - id: matcher-485
+      name: fixture.zst
+      relativePath: fixture/fixture.zst
+      type: file
+      kind: archive.compressed
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .zst
+    - id: matcher-486
+      name: fixture.rar
+      relativePath: fixture/fixture.rar
+      type: file
+      kind: archive.compressed
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .rar
+    - id: matcher-487
+      name: fixture.apk
+      relativePath: fixture/fixture.apk
+      type: file
+      kind: archive.package
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .apk
+    - id: matcher-488
+      name: fixture.aab
+      relativePath: fixture/fixture.aab
+      type: file
+      kind: archive.package
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .aab
+    - id: matcher-489
+      name: fixture.ipa
+      relativePath: fixture/fixture.ipa
+      type: file
+      kind: archive.package
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .ipa
+    - id: matcher-490
+      name: fixture.msi
+      relativePath: fixture/fixture.msi
+      type: file
+      kind: archive.package
+      roles:
+        - executable
+        - archive
+      matchedBy: extension
+      matcherKey: .msi
+    - id: matcher-491
+      name: fixture.nupkg
+      relativePath: fixture/fixture.nupkg
+      type: file
+      kind: archive.package
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .nupkg
+    - id: matcher-492
+      name: fixture.gem
+      relativePath: fixture/fixture.gem
+      type: file
+      kind: archive.package
+      roles:
+        - archive
+      matchedBy: extension
+      matcherKey: .gem
+    - id: matcher-493
+      name: fixture.pem
+      relativePath: fixture/fixture.pem
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .pem
+    - id: matcher-494
+      name: fixture.crt
+      relativePath: fixture/fixture.crt
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .crt
+    - id: matcher-495
+      name: fixture.cer
+      relativePath: fixture/fixture.cer
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .cer
+    - id: matcher-496
+      name: fixture.key
+      relativePath: fixture/fixture.key
+      type: file
+      kind: data.key
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .key
+    - id: matcher-497
+      name: fixture.pub
+      relativePath: fixture/fixture.pub
+      type: file
+      kind: data.key
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .pub
+    - id: matcher-498
+      name: fixture.p12
+      relativePath: fixture/fixture.p12
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .p12
+    - id: matcher-499
+      name: fixture.pfx
+      relativePath: fixture/fixture.pfx
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .pfx
+    - id: matcher-500
+      name: fixture.asc
+      relativePath: fixture/fixture.asc
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .asc
+    - id: matcher-501
+      name: fixture.sig
+      relativePath: fixture/fixture.sig
+      type: file
+      kind: data.certificate
+      roles:
+        - security
+      matchedBy: extension
+      matcherKey: .sig
+    - id: matcher-502
+      name: fixture.properties
+      relativePath: fixture/fixture.properties
+      type: file
+      kind: data.properties
+      roles:
+        - config
+        - data
+      matchedBy: extension
+      matcherKey: .properties
+    - id: matcher-503
+      name: fixture.plist
+      relativePath: fixture/fixture.plist
+      type: file
+      kind: data.plist
+      roles:
+        - config
+        - data
+      matchedBy: extension
+      matcherKey: .plist
+    - id: matcher-504
+      name: fixture.strings
+      relativePath: fixture/fixture.strings
+      type: file
+      kind: data.localization
+      roles:
+        - data
+      matchedBy: extension
+      matcherKey: .strings
+    - id: matcher-505
+      name: fixture.otf
+      relativePath: fixture/fixture.otf
+      type: file
+      kind: font
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .otf
+    - id: matcher-506
+      name: fixture.eot
+      relativePath: fixture/fixture.eot
+      type: file
+      kind: font.web
+      roles:
+        - media
+      matchedBy: extension
+      matcherKey: .eot
