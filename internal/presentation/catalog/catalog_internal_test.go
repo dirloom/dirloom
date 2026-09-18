@@ -104,17 +104,17 @@ func TestCatalogInternalFallbackAndValidationBranches(t *testing.T) {
 	if chain := KindChain("source.future"); chain != nil {
 		t.Fatalf("unknown chain = %#v", chain)
 	}
-	if unicodeGlyph, nerdGlyph := Glyphs("source.future"); unicodeGlyph != "" || nerdGlyph != "" {
-		t.Fatalf("unknown glyphs = %q/%q", unicodeGlyph, nerdGlyph)
+	if glyphs := Glyphs("source.future"); glyphs.ASCII != "" || glyphs.Unicode != "" || glyphs.Nerd != "" {
+		t.Fatalf("unknown glyphs = %#v", glyphs)
 	}
 	original := kindRegistry["source.go"]
 	withoutGlyph := original
-	withoutGlyph.Unicode, withoutGlyph.Nerd = "", ""
+	withoutGlyph.ASCII, withoutGlyph.Unicode, withoutGlyph.Nerd = "", "", ""
 	kindRegistry["source.go"] = withoutGlyph
-	unicodeGlyph, nerdGlyph := Glyphs("source.go")
+	glyphs := Glyphs("source.go")
 	kindRegistry["source.go"] = original
-	if unicodeGlyph != "•" || nerdGlyph == "" {
-		t.Fatalf("parent fallback = %q/%q", unicodeGlyph, nerdGlyph)
+	if glyphs.ASCII != "[SC]" || glyphs.Unicode != "•" || glyphs.Nerd == "" {
+		t.Fatalf("parent fallback = %#v", glyphs)
 	}
 
 	if got := normalizeRoles([]Role{RoleSource, "future", RoleSecurity, RoleSource}); len(got) != 2 || got[0] != RoleSecurity || got[1] != RoleSource {

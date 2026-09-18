@@ -22,6 +22,15 @@ type fileDocument struct {
 	Ignore        yaml.Node        `yaml:"ignore"`
 	Presentation  filePresentation `yaml:"presentation"`
 	Diagram       fileDiagram      `yaml:"diagram"`
+	Terminal      fileTerminal     `yaml:"terminal"`
+}
+
+type fileTerminal struct {
+	Capabilities fileCapabilities `yaml:"capabilities"`
+}
+
+type fileCapabilities struct {
+	NerdFont yaml.Node `yaml:"nerdFont"`
 }
 
 type filePresentation struct {
@@ -62,6 +71,7 @@ type partial struct {
 	Color             Optional[string]
 	Icons             Optional[string]
 	Theme             ThemeSelection
+	NerdFont          Optional[bool]
 	DiagramView       Optional[string]
 	DiagramDirection  Optional[string]
 	DiagramMaxNodes   LimitOverride
@@ -139,6 +149,10 @@ func parseDocument(data []byte, path string) (partial, error) {
 	if err != nil {
 		return partial{}, err
 	}
+	nerdFont, err := parseOptionalBoolNode(document.Terminal.Capabilities.NerdFont, path, "terminal.capabilities.nerdFont")
+	if err != nil {
+		return partial{}, err
+	}
 	result := partial{
 		Preset:            PresetSelection{},
 		DirectoriesOnly:   optionalBool(document.Defaults.DirectoriesOnly),
@@ -151,6 +165,7 @@ func parseDocument(data []byte, path string) (partial, error) {
 		Color:             color,
 		Icons:             icons,
 		Theme:             theme,
+		NerdFont:          nerdFont,
 		DiagramView:       diagramView,
 		DiagramDirection:  diagramDirection,
 		DiagramMaxNodes:   diagramMaxNodes,
@@ -262,6 +277,20 @@ func parsePositiveLimitNode(node yaml.Node, path, field string) (LimitOverride, 
 		return LimitOverride{}, invalidf("invalid config %q: line %d, column %d: %s must be a positive integer or null", path, node.Line, node.Column, field)
 	}
 	return LimitOverride{Set: true, Value: value}, nil
+}
+
+func parseOptionalBoolNode(node yaml.Node, path, field string) (Optional[bool], error) {
+	if node.Kind == 0 {
+		return Optional[bool]{}, nil
+	}
+	if node.Kind != yaml.ScalarNode || node.ShortTag() != "!!bool" {
+		return Optional[bool]{}, invalidf("invalid config %q: line %d, column %d: %s must be a boolean", path, node.Line, node.Column, field)
+	}
+	var value bool
+	if err := node.Decode(&value); err != nil {
+		return Optional[bool]{}, invalidf("invalid config %q: line %d, column %d: %s must be a boolean", path, node.Line, node.Column, field)
+	}
+	return Optional[bool]{Set: true, Value: value}, nil
 }
 
 func parseEnumNode(node yaml.Node, path, field string, allowed []string) (Optional[string], error) {

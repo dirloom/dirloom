@@ -357,11 +357,11 @@ Modes publics :
 
 ```text
 --color never|always|auto
---icons never|unicode|nerd|auto
+--icons never|ascii|unicode|nerd|auto
 --theme default|midnight|daylight|vivid|<path>
 ```
 
-`--icons auto` active Unicode seulement sur un TTY éligible ; Nerd reste explicite. Le thème seul n'active aucune icône. Pipes, redirections, `--output`, CI et `TERM=dumb` restent neutres en mode automatique. `NO_COLOR` désactive l'ANSI sauf surclassement CLI explicite par `--color always`. Markdown, Markdown sémantique, JSON, diagnostics, aides et erreurs restent canoniques.
+`--icons auto` sélectionne Unicode, ou Nerd seulement si une capability Nerd Font est déclarée. Auto ne détecte pas une police. Le thème seul n'active aucune icône. Pipes, redirections, `--output`, CI et `TERM=dumb` restent neutres pour `--color auto`. `NO_COLOR` désactive l'ANSI sauf surclassement CLI explicite par `--color always`. Markdown, Markdown sémantique, JSON, diagnostics, aides et erreurs restent canoniques.
 
 Commandes livrées :
 
@@ -446,6 +446,7 @@ v0.1 CORE
 v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
 v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
 v0.3.1 CLI GUIDANCE  ← contextual help, implicit --icons/--color auto
+v0.3.2 ICON CONTRACT ← ascii icons, declared Nerd capability, conservative auto
 POST-v0.3 EXPLORER   ← browse, navigation, recherche, premières métriques
 v0.4 CHANGE          ← fingerprint, snapshots, verify, diffs
 v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
@@ -1973,7 +1974,7 @@ Cette matrice est une estimation stratégique et doit évoluer avec les preuves 
 
 Les numéros ci-dessous donnent un ordre de construction, pas un engagement de calendrier. Les dépendances sont plus importantes que les versions.
 
-Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
+Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.3.2` raffine le contrat d’icônes ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
 
 ## v0.1 — Deterministic Foundation
 
@@ -2049,6 +2050,21 @@ Fonctions :
 - completions des topics d'aide.
 
 Frontière : aucune notion structurelle de v0.4 (fingerprint, snapshot, verify, diff, history, watch).
+
+## v0.3.2 — Icon capability contract & portable ASCII icons
+
+**Niveau : raffinement PRESENTATION, avant CHANGE.**
+
+**Statut : chantier d'implémentation.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas le freeze `v0.3.0`.
+
+Fonctions :
+
+- `--icons ascii` avec un catalogue strictement ASCII ;
+- `--icons auto` conservateur : Unicode, ou Nerd seulement si la capability est déclarée ;
+- `DIRLOOM_NERD_FONT` et user config `terminal.capabilities.nerdFont` ;
+- canal `icons.ascii` additif dans les thèmes v1.
+
+Frontière : aucune notion structurelle de v0.4. Le défaut reste `icons: never`.
 
 ## Après v0.3 — Interactive Explorer
 

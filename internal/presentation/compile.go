@@ -26,6 +26,8 @@ type compiledBinding struct {
 	iconColorReset bool
 	styles         []string
 	stylesSet      bool
+	asciiIcon      string
+	asciiIconSet   bool
 	unicodeIcon    string
 	unicodeIconSet bool
 	nerdIcon       string
@@ -148,6 +150,7 @@ func resolveColor(value string, palette map[string]string) (colorSpec, error) {
 func compileBinding(value Binding, palette map[string]string) (compiledBinding, error) {
 	result := compiledBinding{
 		styles: append([]string(nil), value.Styles...), stylesSet: value.stylesSet,
+		asciiIcon: value.Icons.ASCII, asciiIconSet: value.asciiIconSet,
 		unicodeIcon: value.Icons.Unicode, unicodeIconSet: value.unicodeIconSet,
 		nerdIcon: value.Icons.Nerd, nerdIconSet: value.nerdIconSet,
 	}
@@ -195,6 +198,12 @@ func compileRule(document ruleDocument, palette map[string]string) (compiledRule
 		value.Styles, value.stylesSet = append([]string(nil), (*document.Styles)...), true
 	}
 	if document.Icons != nil {
+		if document.Icons.ASCII.Present {
+			value.asciiIconSet = true
+			if !document.Icons.ASCII.Null {
+				value.Icons.ASCII = document.Icons.ASCII.Value
+			}
+		}
 		if document.Icons.Unicode.Present {
 			value.unicodeIconSet = true
 			if !document.Icons.Unicode.Null {
@@ -245,8 +254,11 @@ func ruleDocumentFromPublic(rule Rule) ruleDocument {
 		styles := append([]string(nil), rule.Styles...)
 		result.Styles = &styles
 	}
-	if rule.Icons.Unicode != "" || rule.Icons.Nerd != "" {
+	if rule.Icons.ASCII != "" || rule.Icons.Unicode != "" || rule.Icons.Nerd != "" {
 		icons := iconDocument{}
+		if rule.Icons.ASCII != "" {
+			icons.ASCII = nullableStringDocument{Present: true, Value: rule.Icons.ASCII}
+		}
 		if rule.Icons.Unicode != "" {
 			icons.Unicode = nullableStringDocument{Present: true, Value: rule.Icons.Unicode}
 		}
@@ -318,12 +330,15 @@ func (theme *CompiledTheme) resolve(pathValue, name string, nodeType tree.NodeTy
 	result.visualRole = visualRole
 	result.origins.Kind = kindOrigin
 	result.origins.Role = roleOrigin
-	unicodeGlyph, nerdGlyph := catalog.Glyphs(effectiveKind)
-	if unicodeGlyph != "" {
-		result.icons.Unicode = unicodeGlyph
+	glyphs := catalog.Glyphs(effectiveKind)
+	if glyphs.ASCII != "" {
+		result.icons.ASCII = glyphs.ASCII
 	}
-	if nerdGlyph != "" {
-		result.icons.Nerd = nerdGlyph
+	if glyphs.Unicode != "" {
+		result.icons.Unicode = glyphs.Unicode
+	}
+	if glyphs.Nerd != "" {
+		result.icons.Nerd = glyphs.Nerd
 	}
 	result.origins.Icons = "catalog-kind"
 
@@ -361,6 +376,10 @@ func applyCompiledBinding(result NodeStyle, binding compiledBinding, origin stri
 	}
 	if binding.stylesSet {
 		result.styles = append([]string(nil), binding.styles...)
+	}
+	if binding.asciiIconSet {
+		result.icons.ASCII = binding.asciiIcon
+		result.origins.Icons = origin
 	}
 	if binding.unicodeIconSet {
 		result.icons.Unicode = binding.unicodeIcon
@@ -479,6 +498,18 @@ func validateGlyph(value string) error {
 	}
 	if count > 4 {
 		return fmt.Errorf("exceeds the 4-rune limit")
+	}
+	return nil
+}
+
+func validateASCIIGlyph(value string) error {
+	if err := validateGlyph(value); err != nil {
+		return err
+	}
+	for _, char := range value {
+		if char < 0x20 || char > 0x7E {
+			return fmt.Errorf("must contain only printable ASCII (U+0020 to U+007E)")
+		}
 	}
 	return nil
 }

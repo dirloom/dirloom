@@ -114,14 +114,17 @@ func TestCatalogRegistryRolesAndDefensiveCopies(t *testing.T) {
 		if chain := KindChain(definition.Kind); len(chain) == 0 || len(chain) > 4 {
 			t.Errorf("kind %s chain = %#v", definition.Kind, chain)
 		}
-		unicodeGlyph, nerdGlyph := Glyphs(definition.Kind)
-		if unicodeGlyph == "" || nerdGlyph == "" {
+		glyphs := Glyphs(definition.Kind)
+		if glyphs.ASCII == "" || glyphs.Unicode == "" || glyphs.Nerd == "" {
 			t.Errorf("kind %s has no effective glyphs", definition.Kind)
 		}
-		if err := validateCatalogGlyph(unicodeGlyph); err != nil {
+		if err := validateASCIICatalogGlyph(glyphs.ASCII); err != nil {
+			t.Errorf("kind %s ascii: %v", definition.Kind, err)
+		}
+		if err := validateUnicodeCatalogGlyph(glyphs.Unicode); err != nil {
 			t.Errorf("kind %s unicode: %v", definition.Kind, err)
 		}
-		if err := validateCatalogGlyph(nerdGlyph); err != nil {
+		if err := validateCatalogGlyph(glyphs.Nerd); err != nil {
 			t.Errorf("kind %s nerd: %v", definition.Kind, err)
 		}
 	}
@@ -151,9 +154,8 @@ func TestCatalogRegistryRolesAndDefensiveCopies(t *testing.T) {
 		"media.design": "\U000F03D8", "media.image": "\U000F02E9", "archive.compressed": "\U000F05C4",
 	}
 	for kind, want := range wantNerd {
-		_, nerdGlyph := Glyphs(kind)
-		if nerdGlyph != want {
-			t.Errorf("kind %s nerd = %q, want %q", kind, nerdGlyph, want)
+		if got := Glyphs(kind).Nerd; got != want {
+			t.Errorf("kind %s nerd = %q, want %q", kind, got, want)
 		}
 	}
 

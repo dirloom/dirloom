@@ -125,6 +125,9 @@ func TestPublicCatalogDocumentationUsesRealContracts(t *testing.T) {
 		"`document.text` via `.txt`",
 		"`data.yaml` via `.yaml`",
 		"256 v0.2 **matcher identities**",
+		"file       [FI]",
+		"source     [SC]",
+		"ASCII   = maximum portability",
 	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("catalog documentation missing %q", want)

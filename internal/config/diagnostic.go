@@ -22,6 +22,15 @@ type diagnosticDocument struct {
 	Provenance    map[string]Origin      `json:"provenance"`
 	Inactive      []string               `json:"inactive"`
 	Presentation  diagnosticPresentation `json:"presentation"`
+	Terminal      diagnosticTerminal     `json:"terminal"`
+}
+
+type diagnosticTerminal struct {
+	Capabilities diagnosticCapabilities `json:"capabilities"`
+}
+
+type diagnosticCapabilities struct {
+	NerdFont *bool `json:"nerdFont"`
 }
 
 type diagnosticPresentation struct {
@@ -155,6 +164,16 @@ func (resolution Resolution) WriteText(writer io.Writer) error {
 	if _, err := fmt.Fprintln(writer); err != nil {
 		return err
 	}
+	if _, err := fmt.Fprintln(writer, "\nTerminal:"); err != nil {
+		return err
+	}
+	nerdFontValue := "unset"
+	if resolution.Effective.NerdFont.Set {
+		nerdFontValue = strconv.FormatBool(resolution.Effective.NerdFont.Value)
+	}
+	if _, err := fmt.Fprintf(writer, "  capabilities.nerdFont: %s (%s)\n", nerdFontValue, formatOrigin(resolution.Provenance["terminal.capabilities.nerdFont"])); err != nil {
+		return err
+	}
 	if len(resolution.Ignores) == 0 {
 		_, err := fmt.Fprintln(writer, "\nIgnore: none")
 		return err
@@ -216,7 +235,19 @@ func (resolution Resolution) diagnostic() diagnosticDocument {
 			Icons: resolution.Effective.Icons,
 			Theme: resolution.diagnosticTheme(),
 		},
+		Terminal: diagnosticTerminal{
+			Capabilities: diagnosticCapabilities{NerdFont: resolution.ConfiguredNerdFont()},
+		},
 	}
+}
+
+// ConfiguredNerdFont returns the user-configured Nerd Font capability, or nil if unset.
+func (resolution Resolution) ConfiguredNerdFont() *bool {
+	if !resolution.Effective.NerdFont.Set {
+		return nil
+	}
+	value := resolution.Effective.NerdFont.Value
+	return &value
 }
 
 func styleInactive(format string) bool {

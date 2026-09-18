@@ -12,22 +12,22 @@ var kindRegistry = buildKindRegistry()
 
 func buildKindRegistry() map[Kind]KindDefinition {
 	definitions := []KindDefinition{
-		{Kind: "file", Unicode: "·", Nerd: "󰈔"},
-		{Kind: "source", Parent: "file", Unicode: "•", Nerd: "󰅩"},
-		{Kind: "manifest", Parent: "file", Unicode: "◇", Nerd: "󰘦"},
-		{Kind: "data", Parent: "file", Unicode: "◇", Nerd: "󰆼"},
-		{Kind: "document", Parent: "file", Unicode: "¶", Nerd: "󰈙"},
-		{Kind: "media", Parent: "file", Unicode: "◆", Nerd: "󰉏"},
-		{Kind: "archive", Parent: "file", Unicode: "▣", Nerd: "󰀼"},
-		{Kind: "font", Parent: "file", Unicode: "A", Nerd: "󰛖"},
-		{Kind: "binary", Parent: "file", Unicode: "▪", Nerd: "󰆍"},
-		{Kind: "directory", Unicode: "▸", Nerd: "󰉋"},
-		{Kind: "symlink", Unicode: "↗", Nerd: "󰌷"},
+		{Kind: "file", ASCII: "[FI]", Unicode: "·", Nerd: "󰈔"},
+		{Kind: "source", Parent: "file", ASCII: "[SC]", Unicode: "•", Nerd: "󰅩"},
+		{Kind: "manifest", Parent: "file", ASCII: "[MF]", Unicode: "◇", Nerd: "󰘦"},
+		{Kind: "data", Parent: "file", ASCII: "[DT]", Unicode: "◇", Nerd: "󰆼"},
+		{Kind: "document", Parent: "file", ASCII: "[DC]", Unicode: "¶", Nerd: "󰈙"},
+		{Kind: "media", Parent: "file", ASCII: "[ME]", Unicode: "◆", Nerd: "󰉏"},
+		{Kind: "archive", Parent: "file", ASCII: "[AR]", Unicode: "▣", Nerd: "󰀼"},
+		{Kind: "font", Parent: "file", ASCII: "[FT]", Unicode: "A", Nerd: "󰛖"},
+		{Kind: "binary", Parent: "file", ASCII: "[BN]", Unicode: "▪", Nerd: "󰆍"},
+		{Kind: "directory", ASCII: "[DR]", Unicode: "▸", Nerd: "󰉋"},
+		{Kind: "symlink", ASCII: "[LN]", Unicode: "↗", Nerd: "󰌷"},
 	}
-	appendChildren := func(parent Kind, names []string, unicodeGlyph, nerdGlyph string) {
+	appendChildren := func(parent Kind, names []string, asciiGlyph, unicodeGlyph, nerdGlyph string) {
 		for _, name := range names {
 			definitions = append(definitions, KindDefinition{
-				Kind: Kind(string(parent) + "." + name), Parent: parent, Unicode: unicodeGlyph, Nerd: nerdGlyph,
+				Kind: Kind(string(parent) + "." + name), Parent: parent, ASCII: asciiGlyph, Unicode: unicodeGlyph, Nerd: nerdGlyph,
 			})
 		}
 	}
@@ -39,20 +39,20 @@ func buildKindRegistry() map[Kind]KindDefinition {
 		"html", "css", "vue", "svelte", "astro", "graphql", "protobuf", "webassembly",
 		"haskell", "ocaml", "nim", "d", "fortran", "gleam", "scheme", "racket",
 		"elm", "v", "crystal", "nix", "hcl", "cue", "jsonnet",
-	}, "•", "󰅩")
+	}, "[SC]", "•", "󰅩")
 	appendChildren("manifest", []string{
 		"node", "go", "rust", "python", "java", "dotnet", "dart", "container", "php", "generic",
 		"terraform", "helm", "nix",
-	}, "◇", "󰘦")
+	}, "[MF]", "◇", "󰘦")
 	appendChildren("data", []string{
 		"json", "yaml", "toml", "xml", "ini", "env", "tabular", "sql", "schema", "binary", "database", "notebook",
 		"properties", "plist", "certificate", "key", "localization",
-	}, "◇", "󰆼")
-	appendChildren("document", []string{"markdown", "rst", "asciidoc", "tex", "text", "pdf", "office", "ebook", "changelog", "license"}, "¶", "󰈙")
-	appendChildren("media", []string{"image", "image.png", "image.jpeg", "image.svg", "audio", "video", "design", "model"}, "◆", "󰉏")
-	appendChildren("archive", []string{"package", "compressed"}, "▣", "󰀼")
-	appendChildren("font", []string{"web"}, "A", "󰛖")
-	appendChildren("binary", []string{"executable", "library"}, "▪", "󰆍")
+	}, "[DT]", "◇", "󰆼")
+	appendChildren("document", []string{"markdown", "rst", "asciidoc", "tex", "text", "pdf", "office", "ebook", "changelog", "license"}, "[DC]", "¶", "󰈙")
+	appendChildren("media", []string{"image", "image.png", "image.jpeg", "image.svg", "audio", "video", "design", "model"}, "[ME]", "◆", "󰉏")
+	appendChildren("archive", []string{"package", "compressed"}, "[AR]", "▣", "󰀼")
+	appendChildren("font", []string{"web"}, "[FT]", "A", "󰛖")
+	appendChildren("binary", []string{"executable", "library"}, "[BN]", "▪", "󰆍")
 
 	// Unicode glyphs for existing kinds are compatibility-frozen. Nerd glyphs may
 	// become more specific; values listed here are the effective pair.
@@ -153,19 +153,29 @@ func KindChain(kind Kind) []Kind {
 	return result
 }
 
-// Glyphs returns the effective catalog glyph pair for a kind.
-func Glyphs(kind Kind) (string, string) {
+// Glyphs returns the effective three-channel catalog glyphs for a kind.
+func Glyphs(kind Kind) GlyphSet {
+	var result GlyphSet
 	for current := kind; current != ""; {
 		definition, ok := kindRegistry[current]
 		if !ok {
 			break
 		}
-		if definition.Unicode != "" || definition.Nerd != "" {
-			return definition.Unicode, definition.Nerd
+		if result.ASCII == "" {
+			result.ASCII = definition.ASCII
+		}
+		if result.Unicode == "" {
+			result.Unicode = definition.Unicode
+		}
+		if result.Nerd == "" {
+			result.Nerd = definition.Nerd
+		}
+		if result.ASCII != "" && result.Unicode != "" && result.Nerd != "" {
+			return result
 		}
 		current = definition.Parent
 	}
-	return "", ""
+	return result
 }
 
 func validateKinds() error {
@@ -185,7 +195,10 @@ func validateKinds() error {
 		if len(chain) == 0 || len(chain) > 4 {
 			return fmt.Errorf("kind %q has an invalid or too deep inheritance chain", kind)
 		}
-		if err := validateCatalogGlyph(definition.Unicode); err != nil {
+		if err := validateASCIICatalogGlyph(definition.ASCII); err != nil {
+			return fmt.Errorf("kind %q ascii glyph: %w", kind, err)
+		}
+		if err := validateUnicodeCatalogGlyph(definition.Unicode); err != nil {
 			return fmt.Errorf("kind %q unicode glyph: %w", kind, err)
 		}
 		if err := validateCatalogGlyph(definition.Nerd); err != nil {
@@ -193,6 +206,46 @@ func validateKinds() error {
 		}
 	}
 	return nil
+}
+
+func validateASCIICatalogGlyph(value string) error {
+	if err := validateCatalogGlyph(value); err != nil {
+		return err
+	}
+	for _, char := range value {
+		if char < 0x20 || char > 0x7E {
+			return fmt.Errorf("must contain only printable ASCII (U+0020 to U+007E)")
+		}
+	}
+	return nil
+}
+
+func validateUnicodeCatalogGlyph(value string) error {
+	if err := validateCatalogGlyph(value); err != nil {
+		return err
+	}
+	for _, char := range value {
+		if isPrivateUseArea(char) {
+			return fmt.Errorf("contains Private Use Area character U+%04X", char)
+		}
+		if char == '\u200D' {
+			return fmt.Errorf("contains a ZWJ sequence")
+		}
+		if isEmojiVariationSelector(char) {
+			return fmt.Errorf("contains an emoji variation selector U+%04X", char)
+		}
+	}
+	return nil
+}
+
+func isPrivateUseArea(char rune) bool {
+	return char >= 0xE000 && char <= 0xF8FF ||
+		char >= 0xF0000 && char <= 0xFFFFD ||
+		char >= 0x100000 && char <= 0x10FFFD
+}
+
+func isEmojiVariationSelector(char rune) bool {
+	return char == 0xFE0E || char == 0xFE0F || char >= 0xE0100 && char <= 0xE01EF
 }
 
 func validateCatalogGlyph(value string) error {

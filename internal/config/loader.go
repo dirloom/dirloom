@@ -242,6 +242,9 @@ func (loader *Loader) loadOptional(kind SourceKind, path string, required bool) 
 	if err != nil {
 		return Source{}, partial{}, err
 	}
+	if kind != SourceUser && values.NerdFont.Set {
+		return Source{}, partial{}, invalidf("terminal.capabilities.nerdFont is a user/host capability\nand cannot be declared by project configuration")
+	}
 	source.Status = StatusLoaded
 	return source, values, nil
 }
@@ -263,19 +266,20 @@ func defaultResolution(root string) Resolution {
 			DiagramDirection:  DiagramDirectionTopDown,
 		},
 		Provenance: map[string]Origin{
-			"depth":             builtIn,
-			"dirsOnly":          builtIn,
-			"hidden":            builtIn,
-			"format":            builtIn,
-			"style":             builtIn,
-			"useDefaultIgnores": builtIn,
-			"useGitignore":      builtIn,
-			"color":             builtIn,
-			"icons":             builtIn,
-			"theme":             builtIn,
-			"diagram.view":      builtIn,
-			"diagram.direction": builtIn,
-			"diagram.maxNodes":  builtIn,
+			"depth":                          builtIn,
+			"dirsOnly":                       builtIn,
+			"hidden":                         builtIn,
+			"format":                         builtIn,
+			"style":                          builtIn,
+			"useDefaultIgnores":              builtIn,
+			"useGitignore":                   builtIn,
+			"color":                          builtIn,
+			"icons":                          builtIn,
+			"theme":                          builtIn,
+			"terminal.capabilities.nerdFont": builtIn,
+			"diagram.view":                   builtIn,
+			"diagram.direction":              builtIn,
+			"diagram.maxNodes":               builtIn,
 		},
 	}
 }
@@ -357,6 +361,9 @@ func applyPartial(resolution *Resolution, values partial, origin Origin) error {
 	applyOptional(&resolution.Effective.UseGitIgnore, "useGitignore", values.UseGitIgnore, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.Color, "color", values.Color, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.Icons, "icons", values.Icons, origin, resolution.Provenance)
+	if err := applyNerdFont(resolution, values.NerdFont, origin); err != nil {
+		return err
+	}
 	applyTheme(resolution, values.Theme, origin)
 	applyOptional(&resolution.Effective.DiagramView, "diagram.view", values.DiagramView, origin, resolution.Provenance)
 	applyOptional(&resolution.Effective.DiagramDirection, "diagram.direction", values.DiagramDirection, origin, resolution.Provenance)
@@ -382,6 +389,18 @@ func applyOverrides(resolution *Resolution, overrides Overrides) error {
 	applyDiagramMaxNodes(resolution, overrides.DiagramMaxNodes, origin)
 	appendIgnores(resolution, overrides.IgnorePatterns, origin)
 	return validateEffective(resolution)
+}
+
+func applyNerdFont(resolution *Resolution, value Optional[bool], origin Origin) error {
+	if !value.Set {
+		return nil
+	}
+	if origin.Source != SourceUser {
+		return invalidf("terminal.capabilities.nerdFont is a user/host capability\nand cannot be declared by project configuration")
+	}
+	resolution.Effective.NerdFont = value
+	resolution.Provenance["terminal.capabilities.nerdFont"] = origin
+	return nil
 }
 
 func applyTheme(resolution *Resolution, selection ThemeSelection, origin Origin) {
@@ -477,9 +496,9 @@ func validateEffective(resolution *Resolution) error {
 		return invalidf("unsupported color mode %q (expected never, always, or auto)", resolution.Effective.Color)
 	}
 	switch resolution.Effective.Icons {
-	case presentation.IconsNever, presentation.IconsUnicode, presentation.IconsNerd, presentation.IconsAuto:
+	case presentation.IconsNever, presentation.IconsASCII, presentation.IconsUnicode, presentation.IconsNerd, presentation.IconsAuto:
 	default:
-		return invalidf("unsupported icon mode %q (expected never, unicode, nerd, or auto)", resolution.Effective.Icons)
+		return invalidf("unsupported icon mode %q (expected never, ascii, unicode, nerd, or auto)", resolution.Effective.Icons)
 	}
 	if resolution.Effective.Theme == "" {
 		return invalidf("theme must not be empty")

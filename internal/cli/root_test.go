@@ -280,13 +280,13 @@ presentation:
 	if code != 0 || stderr != "" {
 		t.Fatalf("text=(%q,%q,%d)", stdout, stderr, code)
 	}
-	for _, want := range []string{"color: auto (project:", "resolved at output time", "icons: nerd (project:", "theme: midnight (project:", "theme source: built-in"} {
+	for _, want := range []string{"color: auto (project:", "resolved at output time", "icons: nerd (project:", "theme: midnight (project:", "theme source: built-in", "capabilities.nerdFont: unset"} {
 		if !strings.Contains(stdout, want) {
 			t.Errorf("text missing %q\n%s", want, stdout)
 		}
 	}
 	stdout, stderr, code = executeForTest(t, "config", "explain", root, "--as", "json", "--format", "markdown")
-	if code != 0 || stderr != "" || !strings.Contains(stdout, `"presentation": {`) || !strings.Contains(stdout, `"appearance": "dark"`) || !strings.Contains(stdout, `"inactive": [`) || !strings.Contains(stdout, `"theme"`) {
+	if code != 0 || stderr != "" || !strings.Contains(stdout, `"presentation": {`) || !strings.Contains(stdout, `"appearance": "dark"`) || !strings.Contains(stdout, `"inactive": [`) || !strings.Contains(stdout, `"theme"`) || !strings.Contains(stdout, `"terminal"`) {
 		t.Fatalf("JSON=(%q,%q,%d)", stdout, stderr, code)
 	}
 }
