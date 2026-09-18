@@ -128,34 +128,9 @@ func TestCatalogRegistryRolesAndDefensiveCopies(t *testing.T) {
 			t.Errorf("kind %s nerd: %v", definition.Kind, err)
 		}
 	}
-	wantNerd := map[Kind]string{
-		"source.go": "󰟓", "source.rust": "󱘗", "source.python": "󰌠", "source.javascript": "󰌞",
-		"source.typescript": "󰛦", "source.html": "󰌝", "source.css": "󰌜", "data.json": "󰘦",
-		"data.yaml": "󰈙", "data.toml": "󰈙", "document.markdown": "󰍔", "document.pdf": "󰈦",
-		"media.image.png": "󰸭", "archive.package": "󰏗", "manifest.container": "󰡨",
-		"source.c": "\U000F0671", "source.cpp": "\U000F0672", "source.csharp": "\U000F031B",
-		"source.java": "\U000F0B37", "source.kotlin": "\U000F1219", "source.php": "\U000F031F",
-		"source.ruby": "\U000F0D2D", "source.swift": "\U000F06E5", "source.lua": "\U000F08B1",
-		"source.r": "\U000F07D4", "source.vue": "\U000F0844", "source.svelte": "\U000F059F",
-		"source.astro": "\U000F06E4", "source.graphql": "\U000F0877", "source.protobuf": "\U000F0FD8",
-		"source.haskell": "\U000F0C92", "source.ocaml": "\U000F0295", "source.nim": "\U000F02D8",
-		"source.d": "\U000F01A6", "source.fortran": "\U000F121A", "source.gleam": "\U000F04A0",
-		"source.scheme": "\U000F0627", "source.racket": "\U000F0172", "source.elm": "\U000F0405",
-		"source.v": "\U000F016C", "source.crystal": "\U000F01C8", "source.nix": "\U000F1105",
-		"source.hcl": "\U000F10D6", "source.cue": "\U000F0168", "source.jsonnet": "\U000F0626",
-		"source.powershell": "\U000F0A0A", "source.shell": "\U000F1183", "source.fsharp": "\U000F0627",
-		"source.dart": "\U000F08C6", "manifest.node": "\U000F0399", "manifest.go": "󰟓",
-		"manifest.rust": "󱘗", "manifest.python": "󰌠", "manifest.java": "\U000F0B37",
-		"manifest.dotnet": "\U000F0AAE", "manifest.php": "\U000F031F", "manifest.terraform": "\U000F1062",
-		"manifest.helm": "\U000F10FE", "manifest.nix": "\U000F1105", "data.database": "\U000F01BC",
-		"data.notebook": "\U000F082E", "data.properties": "\U000F0493", "data.plist": "\U000F05C0",
-		"data.certificate": "\U000F0124", "data.key": "\U000F0306", "data.localization": "\U000F05CA",
-		"data.xml": "\U000F05C0", "media.audio": "\U000F075A", "media.video": "\U000F0567",
-		"media.design": "\U000F03D8", "media.image": "\U000F02E9", "archive.compressed": "\U000F05C4",
-	}
-	for kind, want := range wantNerd {
-		if got := Glyphs(kind).Nerd; got != want {
-			t.Errorf("kind %s nerd = %q, want %q", kind, got, want)
+	for kind, definition := range nerdGlyphByKind {
+		if got := Glyphs(kind).Nerd; got != definition.Glyph {
+			t.Errorf("kind %s nerd = %q, want %q", kind, got, definition.Glyph)
 		}
 	}
 

@@ -3,6 +3,7 @@
 package clipboard
 
 import (
+	"errors"
 	"fmt"
 	"syscall"
 	"time"
@@ -95,12 +96,12 @@ func nativeWindowsAPI() windowsAPI {
 				}
 				return nil, err
 			}
-			return unsafe.Add(unsafe.Pointer(nil), r1), nil
+			return unsafe.Add(unsafe.Pointer(nil), r1), nil //nolint:gosec // G103: GlobalLock returns a raw clipboard memory address.
 		},
 		unlock: func(handle windows.Handle) error {
 			r1, _, err := procGlobalUnlock.Call(uintptr(handle))
 			if r1 == 0 {
-				if err == windows.ERROR_SUCCESS {
+				if errors.Is(err, windows.ERROR_SUCCESS) {
 					return nil
 				}
 				return err
@@ -167,7 +168,7 @@ func (writer *windowsWriter) writeLocked(encoded []byte) error {
 		_ = writer.api.free(handle)
 		return fmt.Errorf("lock clipboard memory: %w", err)
 	}
-	destination := unsafe.Slice((*byte)(pointer), len(encoded))
+	destination := unsafe.Slice((*byte)(pointer), len(encoded)) //nolint:gosec // G103: write UTF-16 payload into locked clipboard memory.
 	copy(destination, encoded)
 	if err := writer.api.unlock(handle); err != nil {
 		_ = writer.api.free(handle)

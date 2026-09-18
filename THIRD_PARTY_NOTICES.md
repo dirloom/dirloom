@@ -10,41 +10,41 @@ Dirloom includes the following direct runtime dependencies:
 
 Transitive module metadata is pinned in `go.sum`. Full corresponding license texts are distributed in `LICENSES` and every release archive. The Go project licenses for `x/sys` and `x/term` are recorded separately as `LICENSES/BSD-3-Clause-x-sys.txt` and `LICENSES/BSD-3-Clause-x-term.txt`.
 
-## Nerd Font and Material Design Icons glyph metadata
+## Nerd Font glyph metadata
 
-Dirloom's optional Nerd Font strings use code points assigned to [Material Design Icons](https://github.com/Templarian/MaterialDesign) through the [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) mapping. Material Design Icons are distributed under Apache License 2.0; Nerd Fonts records that provenance in its glyph catalog and license audit. The Apache 2.0 text is included as `LICENSES/Apache-2.0.txt`.
+Dirloom does not bundle a font, font binary, `.ttf`, `.otf`, SVG, image, or logo asset. Optional `--icons nerd` output embeds only Unicode characters/codepoints. Users must install a compatible [Nerd Font](https://github.com/ryanoasis/nerd-fonts) independently. The compiled catalog is the Nerd mapping; Dirloom never inspects the installed font.
 
-Catalog v1 embeds only glyph strings and their semantic mapping. v0.3 keeps the v0.2 Unicode identities and adds more specific Nerd mappings, including:
+Pinned Nerd Fonts registry:
 
-| Use | Glyph | Code point |
-| --- | --- | --- |
-| file | `󰈔` | `U+F0214` |
-| source family | `󰅩` | `U+F0169` |
-| manifest / JSON | `󰘦` | `U+F0626` |
-| data family | `󰆼` | `U+F01BC` |
-| document / YAML / TOML | `󰈙` | `U+F0219` |
-| media family | `󰉏` | `U+F024F` |
-| archive family | `󰀼` | `U+F003C` |
-| font family | `󰛖` | `U+F06D6` |
-| binary family | `󰆍` | `U+F018D` |
-| directory | `󰉋` | `U+F024B` |
-| symlink | `󰌷` | `U+F0337` |
-| Go | `󰟓` | `U+F07D3` |
-| Rust | `󱘗` | `U+F1617` |
-| Python | `󰌠` | `U+F0320` |
-| JavaScript | `󰌞` | `U+F031E` |
-| TypeScript | `󰛦` | `U+F06E6` |
-| HTML | `󰌝` | `U+F031D` |
-| CSS | `󰌜` | `U+F031C` |
-| Markdown | `󰍔` | `U+F0354` |
-| PDF | `󰈦` | `U+F0226` |
-| PNG | `󰸭` | `U+F0E2D` |
-| package archive | `󰏗` | `U+F03D7` |
-| Dockerfile / Containerfile | `󰡨` | `U+F0868` |
-| Haskell | `󰲒` | `U+F0C92` |
-| Nix | `󱄅` | `U+F1105` |
-| Terraform | `󱁢` | `U+F1062` |
-| certificate | `󰄤` | `U+F0124` |
-| key | `󰌆` | `U+F0306` |
+```text
+Nerd Fonts: v3.5.1
+repository: ryanoasis/nerd-fonts
+tag: v3.5.1
+glyphnames.json retrieved: 2026-09-18
+```
 
-No font, font binary, SVG, image, or network-delivered asset is bundled. Users must install a compatible font independently before choosing `--icons nerd`; Dirloom otherwise supports Unicode fallback or no icon.
+Nerd Fonts is the patched-font project that assigns those codepoints. The original icon drawings come from the upstream projects below. v0.3.3 is a governed multi-collection catalog; it does not claim that every glyph is Material Design Icons.
+
+| Collection | Nerd Fonts prefix | Original project | License in this repository |
+| --- | --- | --- | --- |
+| Material Design Icons | `nf-md-*` | [Templarian/MaterialDesign](https://github.com/Templarian/MaterialDesign) | Apache-2.0 (`LICENSES/Apache-2.0.txt`) |
+| Devicons | `nf-dev-*` | [devicons/devicon](https://github.com/devicons/devicon) | MIT (`LICENSES/MIT-devicons.txt`) |
+
+Generic file, source, document, and media identities use Material Design Icons. Technology-specific logos are used only when the pinned Nerd Fonts v3.5.1 registry contains an approved Devicons or MDI identity with a documented license. If that logo is missing or the license/provenance is unclear, Dirloom uses a conservative semantic fallback such as `nf-md-code-braces`.
+
+Catalog v1 embeds only glyph strings, official Nerd Fonts names, codepoints, collection, upstream, and license metadata. ASCII and Unicode channels stay frozen. Representative mappings:
+
+| Use | Glyph | Official name | Code point | Collection |
+| --- | --- | --- | --- | --- |
+| file | `󰈔` | `nf-md-file` | `U+F0214` | Material Design Icons |
+| source family | `󰅩` | `nf-md-code-braces` | `U+F0169` | Material Design Icons |
+| Go | `󰟓` | `nf-md-language-go` | `U+F07D3` | Material Design Icons |
+| JPEG | `󰈥` | `nf-md-file-jpg-box` | `U+F0225` | Material Design Icons |
+| SVG | `󰜡` | `nf-md-svg` | `U+F0721` | Material Design Icons |
+| LICENSE | `󰿃` | `nf-md-license` | `U+F0FC3` | Material Design Icons |
+| CHANGELOG | `󰋚` | `nf-md-history` | `U+F02DA` | Material Design Icons |
+| Svelte | `` | `nf-dev-svelte` | `U+E8B7` | Devicons |
+| Helm | `` | `nf-dev-helm` | `U+E7FB` | Devicons |
+| Dockerfile | `󰡨` | `nf-md-docker` | `U+F0868` | Material Design Icons |
+
+The complete compiled contract lives in `internal/presentation/catalog/testdata/nerd-fonts-v3.5.1-contract.json`. No font, SVG, image, or network-delivered asset is bundled. `--icons nerd` asserts compatibility; otherwise use Unicode, ASCII, or no icons.

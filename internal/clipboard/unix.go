@@ -3,13 +3,33 @@
 package clipboard
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
+
+const copyTimeout = 5 * time.Second
+
+type commandRunner func(ctx context.Context, name string, args []string, stdin []byte) error
+
+func runCommand(ctx context.Context, name string, args []string, stdin []byte) error {
+	if name == "" {
+		return fmt.Errorf("clipboard command is empty")
+	}
+	command := exec.CommandContext(ctx, name, args...) //nolint:gosec // Clipboard backends invoke fixed OS utilities by absolute path.
+	command.Stdin = bytes.NewReader(stdin)
+	command.Stdout = nil
+	command.Stderr = nil
+	if err := command.Run(); err != nil {
+		return fmt.Errorf("run %s: %w", name, err)
+	}
+	return nil
+}
 
 type unixHost struct {
 	goos      string

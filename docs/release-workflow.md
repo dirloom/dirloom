@@ -19,6 +19,7 @@ Examples:
 - `v0.3.0` — PRESENTATION
 - `v0.3.1` — PRESENTATION refinement / Contextual Help & CLI Guidance
 - `v0.3.2` — PRESENTATION refinement / Icon Capability Contract & Portable ASCII Icons
+- `v0.3.3` — PRESENTATION refinement / Nerd Catalog Fidelity, Provenance & Classification Refinement
 - `v0.4.0` — CHANGE / Fingerprint, Snapshot, Verify, Diff
 
 `v0.4.0` stays reserved for the CHANGE milestone. Contextual help and the icon
@@ -89,35 +90,45 @@ does not have.
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.3.2` |
-| Latest published release | `v0.3.1` |
-| Release branch | `release/v0.3.2` |
+| Version | `v0.3.3` |
+| Latest published release | `v0.3.2` |
+| Release branch | `release/v0.3.3` |
 | Integration branch | `main` |
 | Profile | CLI / package — build on tag after RC validation |
 
-`v0.3.1` is the latest published GitHub tag. `release/v0.3.2` is the
-scope freeze: changelog, product status, snapshot and smoke only. No new
-features. Freeze-only commits land directly on this branch. Do not tag,
-draft or publish until this freeze merges to `main` and the release
-ceremony completes.
+`v0.3.2` is the latest published GitHub tag. `release/v0.3.3` is the open
+implementation branch for Nerd catalog fidelity, provenance, and
+classification refinement. Feature work lands by pull request on
+`release/v0.3.3`. Do not open versioned pull requests against `main`.
+Do not tag, draft or publish from the implementation branch.
+
+```text
+feature → release/v0.3.3
+release/v0.3.3 → main
+main → annotated tag v0.3.3
+tag workflow → draft
+human GO → publish
+```
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch release/v0.3.2
-git pull --ff-only origin release/v0.3.2
-# freeze-only commits: changelog, product status, snapshot, smoke
-# land directly on release/v0.3.2 — no extra feature or chore branch
+git switch release/v0.3.3
+git pull --ff-only origin release/v0.3.3
+git switch -c feat/v0.3.3-<topic>
+# … commit, push, open PR → release/v0.3.3
 ```
 
-Do not add v0.3.2 product scope after the freeze. Do not open a pull request
-to `main` until the Release Owner starts the final `release/v0.3.2` → `main`
-merge. Do not create `chore/v0.3.2-freeze`.
+Do not open a pull request to `main` until the Release Owner starts the
+final `release/v0.3.3` → `main` merge.
 
-## v0.3.2 freeze checklist
+## v0.3.2 release record
 
-The freeze is open on `release/v0.3.2`.
+v0.3.2 is published. The checklist below is the completed ceremony, kept for
+audit. It is not the current active release state.
+
+The **scope freeze** lived on `release/v0.3.2`.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
@@ -138,6 +149,8 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
 7. Human GO publishes the draft. Then delete `release/v0.3.2` after closure.
 8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
    wait for the Winget merge.
+
+Do not create `chore/v0.3.2-freeze`. That freeze is closed.
 
 ## Pins and approvals
 
@@ -215,7 +228,7 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
    wait for the Winget merge. Flip each channel to Distribution Verified after
    install/upgrade/uninstall smoke.
 
-See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.1`.
+See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.2`.
 
 ## Inventory
 
