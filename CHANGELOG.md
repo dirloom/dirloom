@@ -4,6 +4,11 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-18
+
+PRESENTATION refinement: contextual CLI help and guided usage, without
+redefining the v0.3 visual contract or the default `icons: never`.
+
 ### Added
 
 - Contextual CLI help through `dirloom help <topic>`.
@@ -97,7 +102,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/dirloom/dirloom/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dirloom/dirloom/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dirloom/dirloom/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/dirloom/dirloom/compare/v0.1.0...v0.1.1

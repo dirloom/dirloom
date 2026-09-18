@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 17 septembre 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.3.0` est publiée (socle déterministe, accessibilité, richesse visuelle). Les documents de ce dossier décrivent le produit que ce socle permet de construire. La cible de développement actuelle est `v0.3.1` sur `main` ; `release/v0.3.1` n'est pas encore ouverte.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. La version `v0.3.0` est publiée (socle déterministe, accessibilité, richesse visuelle). Les documents de ce dossier décrivent le produit que ce socle permet de construire. `v0.3.1` est en freeze sur `release/v0.3.1`.
 
 ## Parcours de lecture
 
@@ -52,7 +52,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | TUI | Après l'incrément de richesse visuelle `v0.3` : surface d'exploration de l'artefact, pas gestionnaire de fichiers |
 | Accessibilité `v0.2` | Livré : `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
 | Richesse visuelle `v0.3` | Publiée en `v0.3.0` : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
-| Aide contextuelle `v0.3.1` | En développement sur `main` : `dirloom help <topic>`, `--icons`/`--color` implicites `auto`, diagnostics actionnables ; `release/v0.3.1` n'est pas ouverte ; `v0.4.0` reste CHANGE |
+| Aide contextuelle `v0.3.1` | Freeze sur `release/v0.3.1` : `dirloom help <topic>`, `--icons`/`--color` implicites `auto`, diagnostics actionnables ; `v0.4.0` reste CHANGE |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |
