@@ -4,6 +4,8 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-09-18
+
 PRESENTATION refinement: Nerd catalog fidelity, provenance, and classification
 refinement, without changing `catalogVersion`, matcher counts, ASCII, Unicode,
 the theme schema, or the default `icons: never`.
@@ -24,6 +26,25 @@ the theme schema, or the default `icons: never`.
 
 `catalogVersion` remains 1 with 506 matchers, 119 kinds, and 16 roles. ASCII
 and Unicode catalogs are unchanged.
+
+Manual terminal validation
+- Windows Terminal / Nerd Font: PASS
+- style=unicode × icons=nerd: PASS
+- style=ascii × icons=nerd: PASS
+- vivid × nerd: PASS
+
+Optional extended terminal matrix
+- WezTerm / Mono: NOT RUN — terminal unavailable
+- WezTerm / non-Mono: NOT RUN — terminal unavailable
+- Alacritty / Mono: NOT RUN — terminal unavailable
+- Alacritty / non-Mono: NOT RUN — terminal unavailable
+- Release blocker: NO
+
+WezTerm and Alacritty were not available. That absence does not block v0.3.3:
+Nerd glyph/codepoint validity is covered automatically, Nerd Fonts v3.5.1
+provenance is pinned, ASCII and Unicode channels are frozen by tests, spacing
+behavior is tested, Dirloom makes no terminal-width assumption, and the full
+CI matrix is green.
 
 ## [0.3.2] - 2026-09-18
 
@@ -141,7 +162,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/dirloom/dirloom/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dirloom/dirloom/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dirloom/dirloom/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dirloom/dirloom/compare/v0.2.0...v0.3.0

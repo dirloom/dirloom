@@ -23,7 +23,7 @@ Published status is independent of each package manager. GitHub Releases is alwa
 ```text
 RELEASE STATUS
 Latest published release: v0.3.2
-Current development/release: v0.3.3
+Current freeze: release/v0.3.3
 
 DISTRIBUTION STATUS
 GitHub     ✅ v0.3.2
@@ -428,7 +428,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published tag is `v0.3.2`.
-`release/v0.3.3` is the active development/release branch.
+`release/v0.3.3` is the active freeze for the next tag.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after publication.
@@ -458,7 +458,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3: published (`v0.3.0`) — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
 - v0.3.1: published — CLI guidance, contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
 - v0.3.2: published — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
-- v0.3.3: in development on `release/v0.3.3` — Nerd catalog fidelity, provenance, and classification refinement;
+- v0.3.3: freeze on `release/v0.3.3` — Nerd catalog fidelity, provenance, and classification refinement;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

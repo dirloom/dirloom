@@ -96,11 +96,11 @@ does not have.
 | Integration branch | `main` |
 | Profile | CLI / package — build on tag after RC validation |
 
-`v0.3.2` is the latest published GitHub tag. `release/v0.3.3` is the open
-implementation branch for Nerd catalog fidelity, provenance, and
-classification refinement. Feature work lands by pull request on
-`release/v0.3.3`. Do not open versioned pull requests against `main`.
-Do not tag, draft or publish from the implementation branch.
+`v0.3.2` is the latest published GitHub tag. `release/v0.3.3` is the
+scope freeze: changelog, product status, snapshot and smoke only. No new
+features. Freeze-only commits land directly on this branch. Do not tag,
+draft or publish until this freeze merges to `main` and the release
+ceremony completes.
 
 ```text
 feature → release/v0.3.3
@@ -116,12 +116,63 @@ human GO → publish
 git fetch --prune origin
 git switch release/v0.3.3
 git pull --ff-only origin release/v0.3.3
-git switch -c feat/v0.3.3-<topic>
-# … commit, push, open PR → release/v0.3.3
+# freeze-only commits: changelog, product status, snapshot, smoke
+# land directly on release/v0.3.3 — no extra feature or chore branch
 ```
 
-Do not open a pull request to `main` until the Release Owner starts the
-final `release/v0.3.3` → `main` merge.
+Do not add v0.3.3 product scope after the freeze. Do not open a pull request
+to `main` until the Release Owner starts the final `release/v0.3.3` → `main`
+merge. Do not create `chore/v0.3.3-freeze`.
+
+## v0.3.3 freeze checklist
+
+The freeze is open on `release/v0.3.3`.
+
+```text
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → merge release → main → tag v0.3.3 → draft → verification → human GO → publish
+```
+
+1. Keep the freeze changelog (`[0.3.3] - 2026-09-18`, empty `[Unreleased]`) on
+   `release/v0.3.3`. Do not tag or publish from this step.
+2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
+   completion syntax, GoReleaser check, snapshot, 13-artifact verify).
+3. Record GO/NO-GO with commit SHA and artifact checksums.
+4. Merge `release/v0.3.3` → `main` with a merge commit.
+5. Tag annotated `v0.3.3` on `main` only after smoke tests on candidate archives.
+   The binary reports `dirloom 0.3.3` (no leading `v`).
+6. The tag workflow leaves a **draft**. Verify 13 artifacts, 12 checksum lines,
+   SBOMs, licences inside archives, and `gh attestation verify` on all 13
+   subjects. Do not publish from CI.
+7. Human GO publishes the draft. Then delete `release/v0.3.3` after closure.
+8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
+   wait for the Winget merge.
+
+Required visual gate is Windows Terminal with a compatible Nerd Font. The
+extended WezTerm/Alacritty matrix is optional and is not a release blocker.
+
+```text
+Manual terminal validation
+- Windows Terminal / Nerd Font: PASS
+- style=unicode × icons=nerd: PASS
+- style=ascii × icons=nerd: PASS
+- vivid × nerd: PASS
+
+Optional extended terminal matrix
+- WezTerm / Mono: NOT RUN — terminal unavailable
+- WezTerm / non-Mono: NOT RUN — terminal unavailable
+- Alacritty / Mono: NOT RUN — terminal unavailable
+- Alacritty / non-Mono: NOT RUN — terminal unavailable
+- Release blocker: NO
+```
+
+WezTerm and Alacritty were not available. Absence does not block v0.3.3
+because Nerd glyph/codepoint validity is covered automatically, Nerd Fonts
+v3.5.1 provenance is pinned, ASCII and Unicode channels are frozen by tests,
+spacing behavior is tested, Dirloom makes no terminal-width assumption, and
+the full CI matrix is green.
+
+Do not create `chore/v0.3.3-freeze`.
 
 ## v0.3.2 release record
 
