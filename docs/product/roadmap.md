@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.3.1` publiée ; freeze `v0.3.2` sur `release/v0.3.2`<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.3.2` publiée ; développement `v0.3.3` sur `release/v0.3.3`<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -447,6 +447,7 @@ v0.2 ACCESSIBILITY   ← install, copy, completion, trusted releases
 v0.3 PRESENTATION    ← icons, colors, semantic files, themes (sanctuarisé)
 v0.3.1 CLI GUIDANCE  ← contextual help, implicit --icons/--color auto
 v0.3.2 ICON CONTRACT ← ascii icons, declared Nerd capability, conservative auto
+v0.3.3 NERD CATALOG  ← Nerd fidelity, provenance, classification refinement
 POST-v0.3 EXPLORER   ← browse, navigation, recherche, premières métriques
 v0.4 CHANGE          ← fingerprint, snapshots, verify, diffs
 v0.5 MATERIALIZE     ← scaffold, templates, Architecture Packs
@@ -1974,7 +1975,7 @@ Cette matrice est une estimation stratégique et doit évoluer avec les preuves 
 
 Les numéros ci-dessous donnent un ordre de construction, pas un engagement de calendrier. Les dépendances sont plus importantes que les versions.
 
-Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.3.2` raffine le contrat d’icônes ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
+Tant que Dirloom reste en `0.x`, `0.Y.0` marque un jalon produit ou une frontière de capacité (`PRESENTATION`, `CHANGE`, `MATERIALIZE`) et `0.Y.Z` un raffinement rétrocompatible de ce jalon. `v0.3.1` raffine l’ergonomie CLI de `v0.3` ; `v0.3.2` raffine le contrat d’icônes ; `v0.3.3` raffine la fidélité Nerd et quelques classifications ; `v0.4.0` reste réservé à CHANGE. Politique normative : [Release workflow](../release-workflow.md).
 
 ## v0.1 — Deterministic Foundation
 
@@ -2055,7 +2056,7 @@ Frontière : aucune notion structurelle de v0.4 (fingerprint, snapshot, verify, 
 
 **Niveau : raffinement PRESENTATION, avant CHANGE.**
 
-**Statut : freeze sur `release/v0.3.2`.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
+**Statut : publié (`v0.3.2`).** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
 
 Fonctions :
 
@@ -2065,6 +2066,21 @@ Fonctions :
 - canal `icons.ascii` additif dans les thèmes v1.
 
 Frontière : aucune notion structurelle de v0.4. Le défaut reste `icons: never`.
+
+## v0.3.3 — Nerd catalog fidelity, provenance & classification refinement
+
+**Niveau : raffinement PRESENTATION, avant CHANGE.**
+
+**Statut : développement sur `release/v0.3.3`.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
+
+Fonctions :
+
+- catalogue Nerd multi-collection gouverné, épinglé sur Nerd Fonts v3.5.1 ;
+- provenance et licences documentées pour chaque override Nerd ;
+- corrections de faux logos et de glyphes dossier sur JPEG/SVG ;
+- Compose/Bake en `manifest.container` et `.terraform.lock.hcl` en `manifest.terraform`.
+
+Frontière : `catalogVersion` reste 1 ; ASCII et Unicode restent gelés ; aucun nouveau mode d'icônes.
 
 ## Après v0.3 — Interactive Explorer
 

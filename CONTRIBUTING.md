@@ -11,7 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-Versioned product work lands by pull request on `release/vX.Y.Z`. The v0.3.2 freeze lives on `release/v0.3.2`; that branch accepts only freeze and release-candidate work. Do not open a feature PR to `main` for this version. See
+Versioned product work lands by pull request on `release/vX.Y.Z`. Current v0.3.3 work lands on `release/v0.3.3`. Do not open a feature PR to `main` for this version. See
 [Release workflow](docs/release-workflow.md).
 
 1. Create a focused branch.
@@ -39,7 +39,7 @@ go run ./cmd/release-artifacts prepare --dist dist --syft syft
 go run ./cmd/release-artifacts verify --dist dist
 ```
 
-Catalog expansions must keep `internal/presentation/catalog/testdata/classification-v0.2.yaml` frozen. That fixture is never regenerated automatically; `DIRLOOM_WRITE_CATALOG_FIXTURE=1` rewrites only `classification-v1.yaml`. After matcher changes, regenerate the exhaustive v1 fixture with that variable and materialize `testdata/showcase` with `DIRLOOM_WRITE_SHOWCASE=1`. Do not introduce prefix matchers, `catalogVersion: 2`, new roles, or a default icon mode other than `never`. Path promotions such as `requirements.txt` or `Chart.yaml` must be changelogued as intentional classification changes, distinct from the 256 frozen v0.2 matcher identities.
+Catalog expansions must keep `internal/presentation/catalog/testdata/classification-v0.2.yaml` frozen. That fixture is never regenerated automatically; `DIRLOOM_WRITE_CATALOG_FIXTURE=1` rewrites only `classification-v1.yaml`. After matcher changes, regenerate the exhaustive v1 fixture with that variable and materialize `testdata/showcase` with `DIRLOOM_WRITE_SHOWCASE=1`. Do not introduce prefix matchers, `catalogVersion: 2`, new roles, or a default icon mode other than `never`. Path promotions such as `requirements.txt` or `Chart.yaml`, and v0.3.3 classification corrections such as `docker-compose.yml`, must be changelogued as intentional classification changes, distinct from the 256 frozen v0.2 matcher identities. Nerd glyph changes must keep ASCII and Unicode frozen and must record provenance against the pinned Nerd Fonts version.
 
 ## Compatibility expectations
 

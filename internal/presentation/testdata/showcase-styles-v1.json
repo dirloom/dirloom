@@ -2,6 +2,1348 @@
   "schemaVersion": 1,
   "cases": [
     {
+      "path": "catalog-fidelity/App.svelte",
+      "name": "App.svelte",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.svelte",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svelte"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.svelte",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svelte"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.svelte",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svelte"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.svelte",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svelte"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/Dockerfile",
+      "name": "Dockerfile",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "executable"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "dockerfile"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "executable"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "dockerfile"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "executable"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "dockerfile"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "executable"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "dockerfile"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/Main.elm",
+      "name": "Main.elm",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.elm",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".elm"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.elm",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".elm"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.elm",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".elm"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.elm",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".elm"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/index.astro",
+      "name": "index.astro",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.astro",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".astro"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.astro",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".astro"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.astro",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".astro"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.astro",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".astro"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.cr",
+      "name": "main.cr",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.crystal",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cr"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.crystal",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cr"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.crystal",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cr"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.crystal",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cr"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.d",
+      "name": "main.d",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.d",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".d"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.d",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".d"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.d",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".d"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.d",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".d"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.dart",
+      "name": "main.dart",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.dart",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".dart"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.dart",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".dart"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.dart",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".dart"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.dart",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".dart"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.gleam",
+      "name": "main.gleam",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.gleam",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".gleam"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.gleam",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".gleam"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.gleam",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".gleam"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.gleam",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".gleam"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.ml",
+      "name": "main.ml",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.ocaml",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".ml"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.ocaml",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".ml"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.ocaml",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".ml"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.ocaml",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".ml"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.nim",
+      "name": "main.nim",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.nim",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".nim"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.nim",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".nim"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.nim",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".nim"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.nim",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".nim"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/main.v",
+      "name": "main.v",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.v",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".v"
+          },
+          "visualRole": "source",
+          "textColor": "#1D4ED8",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.v",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".v"
+          },
+          "visualRole": "source",
+          "textColor": "ansi:blue",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.v",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".v"
+          },
+          "visualRole": "source",
+          "textColor": "#7AA2F7",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.v",
+            "roles": [
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".v"
+          },
+          "visualRole": "source",
+          "textColor": "#66F0C0",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "catalog-fidelity/policy.cue",
+      "name": "policy.cue",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "source.cue",
+            "roles": [
+              "config",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cue"
+          },
+          "visualRole": "config",
+          "textColor": "#854D0E",
+          "iconColor": "#1D4ED8",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "source.cue",
+            "roles": [
+              "config",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cue"
+          },
+          "visualRole": "config",
+          "textColor": "ansi:yellow",
+          "iconColor": "ansi:blue",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "source.cue",
+            "roles": [
+              "config",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cue"
+          },
+          "visualRole": "config",
+          "textColor": "#F2C879",
+          "iconColor": "#7AA2F7",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "source.cue",
+            "roles": [
+              "config",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".cue"
+          },
+          "visualRole": "config",
+          "textColor": "#FFD166",
+          "iconColor": "#00FFD1",
+          "styles": null,
+          "icons": {
+            "ascii": "[SC]",
+            "unicode": "•",
+            "nerd": "󰅩"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
       "path": "dotnet-service/App.csproj",
       "name": "App.csproj",
       "type": "file",
@@ -950,7 +2292,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -976,7 +2318,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1002,7 +2344,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1028,7 +2370,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1064,7 +2406,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1093,7 +2435,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1122,7 +2464,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1151,7 +2493,7 @@
           "icons": {
             "ascii": "[SC]",
             "unicode": "•",
-            "nerd": "󰣆"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1303,7 +2645,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󰘦"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1333,7 +2675,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󰘦"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1363,7 +2705,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󰘦"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -1393,7 +2735,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󰘦"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -2957,6 +4299,121 @@
       }
     },
     {
+      "path": "infra-terraform-k8s/.terraform.lock.hcl",
+      "name": ".terraform.lock.hcl",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "lock",
+              "infra"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": ".terraform.lock.hcl"
+          },
+          "visualRole": "lock",
+          "textColor": "#9A3412",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "lock",
+              "infra"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": ".terraform.lock.hcl"
+          },
+          "visualRole": "lock",
+          "textColor": "ansi:yellow",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "lock",
+              "infra"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": ".terraform.lock.hcl"
+          },
+          "visualRole": "lock",
+          "textColor": "#E8A66A",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "lock",
+              "infra"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": ".terraform.lock.hcl"
+          },
+          "visualRole": "lock",
+          "textColor": "#FFB86B",
+          "iconColor": "#FF9A78",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
       "path": "infra-terraform-k8s/Chart.yaml",
       "name": "Chart.yaml",
       "type": "file",
@@ -2982,7 +4439,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3013,7 +4470,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3044,7 +4501,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3075,7 +4532,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3213,7 +4670,7 @@
       "themes": {
         "daylight": {
           "classification": {
-            "kind": "data.yaml",
+            "kind": "manifest.container",
             "roles": [
               "infra",
               "config"
@@ -3223,12 +4680,12 @@
           },
           "visualRole": "infra",
           "textColor": "#C2410C",
-          "iconColor": "#0369A1",
+          "iconColor": "#C2410C",
           "styles": null,
           "icons": {
-            "ascii": "[DT]",
-            "unicode": "◇",
-            "nerd": "󰈙"
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
           },
           "origins": {
             "kind": "catalog",
@@ -3240,7 +4697,7 @@
         },
         "default": {
           "classification": {
-            "kind": "data.yaml",
+            "kind": "manifest.container",
             "roles": [
               "infra",
               "config"
@@ -3250,12 +4707,12 @@
           },
           "visualRole": "infra",
           "textColor": "ansi:red",
-          "iconColor": "ansi:cyan",
+          "iconColor": "ansi:red",
           "styles": null,
           "icons": {
-            "ascii": "[DT]",
-            "unicode": "◇",
-            "nerd": "󰈙"
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
           },
           "origins": {
             "kind": "catalog",
@@ -3267,7 +4724,7 @@
         },
         "midnight": {
           "classification": {
-            "kind": "data.yaml",
+            "kind": "manifest.container",
             "roles": [
               "infra",
               "config"
@@ -3277,12 +4734,12 @@
           },
           "visualRole": "infra",
           "textColor": "#FF927E",
-          "iconColor": "#7DCFFF",
+          "iconColor": "#FF927E",
           "styles": null,
           "icons": {
-            "ascii": "[DT]",
-            "unicode": "◇",
-            "nerd": "󰈙"
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
           },
           "origins": {
             "kind": "catalog",
@@ -3294,7 +4751,7 @@
         },
         "vivid": {
           "classification": {
-            "kind": "data.yaml",
+            "kind": "manifest.container",
             "roles": [
               "infra",
               "config"
@@ -3304,14 +4761,482 @@
           },
           "visualRole": "infra",
           "textColor": "#FF7A5C",
-          "iconColor": "#00D4FF",
+          "iconColor": "#FF9A78",
           "styles": [
             "bold"
           ],
           "icons": {
-            "ascii": "[DT]",
-            "unicode": "◇",
-            "nerd": "󰈙"
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "infra-terraform-k8s/compose.yml",
+      "name": "compose.yml",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "infra-terraform-k8s/docker-bake.hcl",
+      "name": "docker-bake.hcl",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-bake.hcl"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-bake.hcl"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-bake.hcl"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-bake.hcl"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "infra-terraform-k8s/docker-compose.yaml",
+      "name": "docker-compose.yaml",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yaml"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yaml"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yaml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yaml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "infra-terraform-k8s/docker-compose.yml",
+      "name": "docker-compose.yml",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.container",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "docker-compose.yml"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "▣",
+            "nerd": "󰡨"
           },
           "origins": {
             "kind": "catalog",
@@ -3794,6 +5719,123 @@
       }
     },
     {
+      "path": "infra-terraform-k8s/terraform.tfvars",
+      "name": "terraform.tfvars",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tfvars"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tfvars"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tfvars"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "config"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tfvars"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
       "path": "infra-terraform-k8s/values.yaml",
       "name": "values.yaml",
       "type": "file",
@@ -3815,7 +5857,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3842,7 +5884,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3869,7 +5911,7 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
           },
           "origins": {
             "kind": "catalog",
@@ -3898,7 +5940,124 @@
           "icons": {
             "ascii": "[MF]",
             "unicode": "◇",
-            "nerd": "󱃾"
+            "nerd": ""
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "infra-terraform-k8s/variables.tf",
+      "name": "variables.tf",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tf"
+          },
+          "visualRole": "infra",
+          "textColor": "#C2410C",
+          "iconColor": "#C2410C",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tf"
+          },
+          "visualRole": "infra",
+          "textColor": "ansi:red",
+          "iconColor": "ansi:red",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tf"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF927E",
+          "iconColor": "#FF927E",
+          "styles": null,
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "manifest.terraform",
+            "roles": [
+              "infra",
+              "source"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".tf"
+          },
+          "visualRole": "infra",
+          "textColor": "#FF7A5C",
+          "iconColor": "#FF9A78",
+          "styles": [
+            "bold"
+          ],
+          "icons": {
+            "ascii": "[MF]",
+            "unicode": "◇",
+            "nerd": "󱁢"
           },
           "origins": {
             "kind": "catalog",
@@ -5104,6 +7263,260 @@
       }
     },
     {
+      "path": "mixed-platform/CHANGELOG.md",
+      "name": "CHANGELOG.md",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "document.changelog",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "changelog.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#92400E",
+          "iconColor": "#6B21A8",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰋚"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "document.changelog",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "changelog.md"
+          },
+          "visualRole": "contract",
+          "textColor": "ansi:yellow",
+          "iconColor": "ansi:magenta",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰋚"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "document.changelog",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "changelog.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFD166",
+          "iconColor": "#BB9AF7",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰋚"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "document.changelog",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "changelog.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFE066",
+          "iconColor": "#A78BFA",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰋚"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/LICENSE",
+      "name": "LICENSE",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "document.license",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "license"
+          },
+          "visualRole": "contract",
+          "textColor": "#92400E",
+          "iconColor": "#6B21A8",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰿃"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "document.license",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "license"
+          },
+          "visualRole": "contract",
+          "textColor": "ansi:yellow",
+          "iconColor": "ansi:magenta",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰿃"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "document.license",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "license"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFD166",
+          "iconColor": "#BB9AF7",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰿃"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "document.license",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "license"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFE066",
+          "iconColor": "#A78BFA",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰿃"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
       "path": "mixed-platform/LICENSE.md",
       "name": "LICENSE.md",
       "type": "file",
@@ -5128,7 +7541,7 @@
           "icons": {
             "ascii": "[DC]",
             "unicode": "¶",
-            "nerd": "󰈙"
+            "nerd": "󰿃"
           },
           "origins": {
             "kind": "catalog",
@@ -5158,7 +7571,7 @@
           "icons": {
             "ascii": "[DC]",
             "unicode": "¶",
-            "nerd": "󰈙"
+            "nerd": "󰿃"
           },
           "origins": {
             "kind": "catalog",
@@ -5188,7 +7601,7 @@
           "icons": {
             "ascii": "[DC]",
             "unicode": "¶",
-            "nerd": "󰈙"
+            "nerd": "󰿃"
           },
           "origins": {
             "kind": "catalog",
@@ -5218,7 +7631,7 @@
           "icons": {
             "ascii": "[DC]",
             "unicode": "¶",
-            "nerd": "󰈙"
+            "nerd": "󰿃"
           },
           "origins": {
             "kind": "catalog",
@@ -5346,6 +7759,133 @@
             "ascii": "[DC]",
             "unicode": "¶",
             "nerd": "󰈙"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/README.md",
+      "name": "README.md",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "document.markdown",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "readme.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#92400E",
+          "iconColor": "#6B21A8",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰍔"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "document.markdown",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "readme.md"
+          },
+          "visualRole": "contract",
+          "textColor": "ansi:yellow",
+          "iconColor": "ansi:magenta",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰍔"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "document.markdown",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "readme.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFD166",
+          "iconColor": "#BB9AF7",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰍔"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "document.markdown",
+            "roles": [
+              "contract",
+              "document"
+            ],
+            "matchedBy": "filename",
+            "matcherKey": "readme.md"
+          },
+          "visualRole": "contract",
+          "textColor": "#FFE066",
+          "iconColor": "#A78BFA",
+          "styles": [
+            "bold",
+            "underline"
+          ],
+          "icons": {
+            "ascii": "[DC]",
+            "unicode": "¶",
+            "nerd": "󰍔"
           },
           "origins": {
             "kind": "catalog",
@@ -5819,6 +8359,450 @@
             "ascii": "[MF]",
             "unicode": "◇",
             "nerd": "󱄅"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/image.jpeg",
+      "name": "image.jpeg",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpeg"
+          },
+          "visualRole": "media",
+          "textColor": "#9D174D",
+          "iconColor": "#9D174D",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpeg"
+          },
+          "visualRole": "media",
+          "textColor": "ansi:magenta",
+          "iconColor": "ansi:magenta",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpeg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF8FC1",
+          "iconColor": "#FF8FC1",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpeg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF75D8",
+          "iconColor": "#FF4FB8",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/image.jpg",
+      "name": "image.jpg",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpg"
+          },
+          "visualRole": "media",
+          "textColor": "#9D174D",
+          "iconColor": "#9D174D",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpg"
+          },
+          "visualRole": "media",
+          "textColor": "ansi:magenta",
+          "iconColor": "ansi:magenta",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF8FC1",
+          "iconColor": "#FF8FC1",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "media.image.jpeg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".jpg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF75D8",
+          "iconColor": "#FF4FB8",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰈥"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/image.png",
+      "name": "image.png",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "media.image.png",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".png"
+          },
+          "visualRole": "media",
+          "textColor": "#9D174D",
+          "iconColor": "#9D174D",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰸭"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "media.image.png",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".png"
+          },
+          "visualRole": "media",
+          "textColor": "ansi:magenta",
+          "iconColor": "ansi:magenta",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰸭"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "media.image.png",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".png"
+          },
+          "visualRole": "media",
+          "textColor": "#FF8FC1",
+          "iconColor": "#FF8FC1",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰸭"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "media.image.png",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".png"
+          },
+          "visualRole": "media",
+          "textColor": "#FF75D8",
+          "iconColor": "#FF4FB8",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰸭"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        }
+      }
+    },
+    {
+      "path": "mixed-platform/image.svg",
+      "name": "image.svg",
+      "type": "file",
+      "themes": {
+        "daylight": {
+          "classification": {
+            "kind": "media.image.svg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svg"
+          },
+          "visualRole": "media",
+          "textColor": "#9D174D",
+          "iconColor": "#9D174D",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰜡"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "default": {
+          "classification": {
+            "kind": "media.image.svg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svg"
+          },
+          "visualRole": "media",
+          "textColor": "ansi:magenta",
+          "iconColor": "ansi:magenta",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰜡"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "midnight": {
+          "classification": {
+            "kind": "media.image.svg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF8FC1",
+          "iconColor": "#FF8FC1",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰜡"
+          },
+          "origins": {
+            "kind": "catalog",
+            "role": "catalog",
+            "textColor": "theme-role",
+            "iconColor": "theme-kind",
+            "icons": "catalog-kind"
+          }
+        },
+        "vivid": {
+          "classification": {
+            "kind": "media.image.svg",
+            "roles": [
+              "media"
+            ],
+            "matchedBy": "extension",
+            "matcherKey": ".svg"
+          },
+          "visualRole": "media",
+          "textColor": "#FF75D8",
+          "iconColor": "#FF4FB8",
+          "styles": null,
+          "icons": {
+            "ascii": "[ME]",
+            "unicode": "◆",
+            "nerd": "󰜡"
           },
           "origins": {
             "kind": "catalog",

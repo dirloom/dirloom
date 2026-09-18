@@ -3,14 +3,8 @@ package clipboard
 
 import (
 	"bytes"
-	"context"
 	"errors"
-	"fmt"
-	"os/exec"
-	"time"
 )
-
-const copyTimeout = 5 * time.Second
 
 // Writer copies canonical UTF-8 render bytes. Identity at this boundary is
 // byte-for-byte with the renderer; native OS storage may recode the text.
@@ -40,20 +34,4 @@ func (fail Fail) Write([]byte) error {
 		return errors.New("clipboard write failed")
 	}
 	return fail.Err
-}
-
-type commandRunner func(ctx context.Context, name string, args []string, stdin []byte) error
-
-func runCommand(ctx context.Context, name string, args []string, stdin []byte) error {
-	if name == "" {
-		return fmt.Errorf("clipboard command is empty")
-	}
-	command := exec.CommandContext(ctx, name, args...) //nolint:gosec // Clipboard backends invoke fixed OS utilities by absolute path.
-	command.Stdin = bytes.NewReader(stdin)
-	command.Stdout = nil
-	command.Stderr = nil
-	if err := command.Run(); err != nil {
-		return fmt.Errorf("run %s: %w", name, err)
-	}
-	return nil
 }

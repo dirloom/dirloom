@@ -181,6 +181,7 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"v0.3.0",
 		"v0.3.1",
 		"v0.3.2",
+		"v0.3.3",
 		"v0.4.0",
 		"PRESENTATION",
 		"CHANGE",

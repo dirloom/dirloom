@@ -16,6 +16,9 @@ func Validate() error {
 	if err := validateKinds(); err != nil {
 		return err
 	}
+	if err := validateNerdGlyphs(); err != nil {
+		return err
+	}
 	seen := make(map[string]struct{}, len(manifest))
 	counts := make(map[MatchSource]int)
 	for _, entry := range manifest {

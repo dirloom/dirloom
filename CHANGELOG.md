@@ -4,6 +4,27 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+PRESENTATION refinement: Nerd catalog fidelity, provenance, and classification
+refinement, without changing `catalogVersion`, matcher counts, ASCII, Unicode,
+the theme schema, or the default `icons: never`.
+
+### Fixed
+
+- Correct Nerd glyph mappings for JPEG, SVG, LICENSE and CHANGELOG.
+- Replace misleading technology pseudo-logos with verified Nerd Fonts glyphs
+  or conservative semantic fallbacks.
+
+### Changed
+
+- Govern technology-specific Nerd glyphs using pinned, documented upstream
+  collections and provenance (Nerd Fonts v3.5.1).
+- Classify Docker Compose and Docker Bake files as `manifest.container`.
+- Classify `.terraform.lock.hcl` as `manifest.terraform` while preserving its
+  lock and infrastructure roles.
+
+`catalogVersion` remains 1 with 506 matchers, 119 kinds, and 16 roles. ASCII
+and Unicode catalogs are unchanged.
+
 ## [0.3.2] - 2026-09-18
 
 PRESENTATION refinement: portable ASCII icons and a declarative Nerd Font

@@ -1,0 +1,369 @@
+{
+  "nerd_fonts_version": "3.5.1",
+  "source_repository": "ryanoasis/nerd-fonts",
+  "source_tag": "v3.5.1",
+  "glyphnames_source": "glyphnames.json",
+  "retrieval_date": "2026-09-18",
+  "glyphs": {
+    "nf-md-file": {
+      "glyphnames_key": "md-file",
+      "char": "󰈔",
+      "code": "f0214"
+    },
+    "nf-md-code-braces": {
+      "glyphnames_key": "md-code_braces",
+      "char": "󰅩",
+      "code": "f0169"
+    },
+    "nf-md-code-json": {
+      "glyphnames_key": "md-code_json",
+      "char": "󰘦",
+      "code": "f0626"
+    },
+    "nf-md-database": {
+      "glyphnames_key": "md-database",
+      "char": "󰆼",
+      "code": "f01bc"
+    },
+    "nf-md-file-document": {
+      "glyphnames_key": "md-file_document",
+      "char": "󰈙",
+      "code": "f0219"
+    },
+    "nf-md-image": {
+      "glyphnames_key": "md-image",
+      "char": "󰋩",
+      "code": "f02e9"
+    },
+    "nf-md-archive": {
+      "glyphnames_key": "md-archive",
+      "char": "󰀼",
+      "code": "f003c"
+    },
+    "nf-md-format-font": {
+      "glyphnames_key": "md-format_font",
+      "char": "󰛖",
+      "code": "f06d6"
+    },
+    "nf-md-console": {
+      "glyphnames_key": "md-console",
+      "char": "󰆍",
+      "code": "f018d"
+    },
+    "nf-md-folder": {
+      "glyphnames_key": "md-folder",
+      "char": "󰉋",
+      "code": "f024b"
+    },
+    "nf-md-link": {
+      "glyphnames_key": "md-link",
+      "char": "󰌷",
+      "code": "f0337"
+    },
+    "nf-md-language-go": {
+      "glyphnames_key": "md-language_go",
+      "char": "󰟓",
+      "code": "f07d3"
+    },
+    "nf-md-language-rust": {
+      "glyphnames_key": "md-language_rust",
+      "char": "󱘗",
+      "code": "f1617"
+    },
+    "nf-md-language-python": {
+      "glyphnames_key": "md-language_python",
+      "char": "󰌠",
+      "code": "f0320"
+    },
+    "nf-md-language-javascript": {
+      "glyphnames_key": "md-language_javascript",
+      "char": "󰌞",
+      "code": "f031e"
+    },
+    "nf-md-language-typescript": {
+      "glyphnames_key": "md-language_typescript",
+      "char": "󰛦",
+      "code": "f06e6"
+    },
+    "nf-md-language-html5": {
+      "glyphnames_key": "md-language_html5",
+      "char": "󰌝",
+      "code": "f031d"
+    },
+    "nf-md-language-css3": {
+      "glyphnames_key": "md-language_css3",
+      "char": "󰌜",
+      "code": "f031c"
+    },
+    "nf-md-language-c": {
+      "glyphnames_key": "md-language_c",
+      "char": "󰙱",
+      "code": "f0671"
+    },
+    "nf-md-language-cpp": {
+      "glyphnames_key": "md-language_cpp",
+      "char": "󰙲",
+      "code": "f0672"
+    },
+    "nf-md-language-csharp": {
+      "glyphnames_key": "md-language_csharp",
+      "char": "󰌛",
+      "code": "f031b"
+    },
+    "nf-md-language-java": {
+      "glyphnames_key": "md-language_java",
+      "char": "󰬷",
+      "code": "f0b37"
+    },
+    "nf-md-language-kotlin": {
+      "glyphnames_key": "md-language_kotlin",
+      "char": "󱈙",
+      "code": "f1219"
+    },
+    "nf-md-language-php": {
+      "glyphnames_key": "md-language_php",
+      "char": "󰌟",
+      "code": "f031f"
+    },
+    "nf-md-language-ruby": {
+      "glyphnames_key": "md-language_ruby",
+      "char": "󰴭",
+      "code": "f0d2d"
+    },
+    "nf-md-language-swift": {
+      "glyphnames_key": "md-language_swift",
+      "char": "󰛥",
+      "code": "f06e5"
+    },
+    "nf-md-language-lua": {
+      "glyphnames_key": "md-language_lua",
+      "char": "󰢱",
+      "code": "f08b1"
+    },
+    "nf-md-language-r": {
+      "glyphnames_key": "md-language_r",
+      "char": "󰟔",
+      "code": "f07d4"
+    },
+    "nf-md-vuejs": {
+      "glyphnames_key": "md-vuejs",
+      "char": "󰡄",
+      "code": "f0844"
+    },
+    "nf-md-graphql": {
+      "glyphnames_key": "md-graphql",
+      "char": "󰡷",
+      "code": "f0877"
+    },
+    "nf-md-language-haskell": {
+      "glyphnames_key": "md-language_haskell",
+      "char": "󰲒",
+      "code": "f0c92"
+    },
+    "nf-md-language-fortran": {
+      "glyphnames_key": "md-language_fortran",
+      "char": "󱈚",
+      "code": "f121a"
+    },
+    "nf-md-nix": {
+      "glyphnames_key": "md-nix",
+      "char": "󱄅",
+      "code": "f1105"
+    },
+    "nf-md-terraform": {
+      "glyphnames_key": "md-terraform",
+      "char": "󱁢",
+      "code": "f1062"
+    },
+    "nf-md-docker": {
+      "glyphnames_key": "md-docker",
+      "char": "󰡨",
+      "code": "f0868"
+    },
+    "nf-md-powershell": {
+      "glyphnames_key": "md-powershell",
+      "char": "󰨊",
+      "code": "f0a0a"
+    },
+    "nf-md-bash": {
+      "glyphnames_key": "md-bash",
+      "char": "󱆃",
+      "code": "f1183"
+    },
+    "nf-md-nodejs": {
+      "glyphnames_key": "md-nodejs",
+      "char": "󰎙",
+      "code": "f0399"
+    },
+    "nf-md-dot-net": {
+      "glyphnames_key": "md-dot_net",
+      "char": "󰪮",
+      "code": "f0aae"
+    },
+    "nf-md-language-markdown": {
+      "glyphnames_key": "md-language_markdown",
+      "char": "󰍔",
+      "code": "f0354"
+    },
+    "nf-md-file-pdf-box": {
+      "glyphnames_key": "md-file_pdf_box",
+      "char": "󰈦",
+      "code": "f0226"
+    },
+    "nf-md-file-png-box": {
+      "glyphnames_key": "md-file_png_box",
+      "char": "󰸭",
+      "code": "f0e2d"
+    },
+    "nf-md-package-variant-closed": {
+      "glyphnames_key": "md-package_variant_closed",
+      "char": "󰏗",
+      "code": "f03d7"
+    },
+    "nf-md-zip-box": {
+      "glyphnames_key": "md-zip_box",
+      "char": "󰗄",
+      "code": "f05c4"
+    },
+    "nf-md-certificate": {
+      "glyphnames_key": "md-certificate",
+      "char": "󰄤",
+      "code": "f0124"
+    },
+    "nf-md-key": {
+      "glyphnames_key": "md-key",
+      "char": "󰌆",
+      "code": "f0306"
+    },
+    "nf-md-translate": {
+      "glyphnames_key": "md-translate",
+      "char": "󰗊",
+      "code": "f05ca"
+    },
+    "nf-md-notebook": {
+      "glyphnames_key": "md-notebook",
+      "char": "󰠮",
+      "code": "f082e"
+    },
+    "nf-md-xml": {
+      "glyphnames_key": "md-xml",
+      "char": "󰗀",
+      "code": "f05c0"
+    },
+    "nf-md-cog": {
+      "glyphnames_key": "md-cog",
+      "char": "󰒓",
+      "code": "f0493"
+    },
+    "nf-md-music": {
+      "glyphnames_key": "md-music",
+      "char": "󰝚",
+      "code": "f075a"
+    },
+    "nf-md-palette": {
+      "glyphnames_key": "md-palette",
+      "char": "󰏘",
+      "code": "f03d8"
+    },
+    "nf-md-video": {
+      "glyphnames_key": "md-video",
+      "char": "󰕧",
+      "code": "f0567"
+    },
+    "nf-md-protocol": {
+      "glyphnames_key": "md-protocol",
+      "char": "󰿘",
+      "code": "f0fd8"
+    },
+    "nf-md-code-braces-box": {
+      "glyphnames_key": "md-code_braces_box",
+      "char": "󱃖",
+      "code": "f10d6"
+    },
+    "nf-md-lambda": {
+      "glyphnames_key": "md-lambda",
+      "char": "󰘧",
+      "code": "f0627"
+    },
+    "nf-md-code-parentheses": {
+      "glyphnames_key": "md-code_parentheses",
+      "char": "󰅲",
+      "code": "f0172"
+    },
+    "nf-md-file-jpg-box": {
+      "glyphnames_key": "md-file_jpg_box",
+      "char": "󰈥",
+      "code": "f0225"
+    },
+    "nf-md-svg": {
+      "glyphnames_key": "md-svg",
+      "char": "󰜡",
+      "code": "f0721"
+    },
+    "nf-md-license": {
+      "glyphnames_key": "md-license",
+      "char": "󰿃",
+      "code": "f0fc3"
+    },
+    "nf-md-history": {
+      "glyphnames_key": "md-history",
+      "char": "󰋚",
+      "code": "f02da"
+    },
+    "nf-dev-svelte": {
+      "glyphnames_key": "dev-svelte",
+      "char": "",
+      "code": "e8b7"
+    },
+    "nf-dev-astro": {
+      "glyphnames_key": "dev-astro",
+      "char": "",
+      "code": "e735"
+    },
+    "nf-dev-dart": {
+      "glyphnames_key": "dev-dart",
+      "char": "",
+      "code": "e798"
+    },
+    "nf-dev-helm": {
+      "glyphnames_key": "dev-helm",
+      "char": "",
+      "code": "e7fb"
+    },
+    "nf-dev-ocaml": {
+      "glyphnames_key": "dev-ocaml",
+      "char": "",
+      "code": "e84e"
+    },
+    "nf-dev-nim": {
+      "glyphnames_key": "dev-nim",
+      "char": "",
+      "code": "e841"
+    },
+    "nf-dev-dlang": {
+      "glyphnames_key": "dev-dlang",
+      "char": "",
+      "code": "e7af"
+    },
+    "nf-dev-gleam": {
+      "glyphnames_key": "dev-gleam",
+      "char": "",
+      "code": "e914"
+    },
+    "nf-dev-elm": {
+      "glyphnames_key": "dev-elm",
+      "char": "",
+      "code": "e7ce"
+    },
+    "nf-dev-crystal": {
+      "glyphnames_key": "dev-crystal",
+      "char": "",
+      "code": "e7ac"
+    },
+    "nf-dev-fsharp": {
+      "glyphnames_key": "dev-fsharp",
+      "char": "",
+      "code": "e7a7"
+    }
+  }
+}

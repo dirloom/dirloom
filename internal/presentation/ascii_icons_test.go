@@ -107,3 +107,57 @@ func TestDecoratorASCIIAndStyleOrthogonality(t *testing.T) {
 		t.Fatal("icon mode must not restyle tree edges")
 	}
 }
+
+func TestDecoratorNerdSpacingAndIconModeOrthogonality(t *testing.T) {
+	theme, _ := Lookup(ThemeDefault)
+	context := render.NodeContext{Path: "src/main.go", Name: "main.go", Display: "main.go", Type: tree.NodeFile}
+	nerdGlyph := catalog.Glyphs("source.go").Nerd
+	unicodeGlyph := catalog.Glyphs("source.go").Unicode
+	asciiGlyph := catalog.Glyphs("source.go").ASCII
+	for _, spacing := range []int{0, 1, 4} {
+		theme.Icons.Spacing = spacing
+		compiled, err := Compile(theme)
+		if err != nil {
+			t.Fatal(err)
+		}
+		gap := strings.Repeat(" ", spacing)
+		nerdGot := NewDecorator(compiled, false, IconsNerd, ProfileANSI16).Node(context)
+		if nerdGot != nerdGlyph+gap+"main.go" {
+			t.Errorf("nerd spacing %d = %q", spacing, nerdGot)
+		}
+		asciiGot := NewDecorator(compiled, false, IconsASCII, ProfileANSI16).Node(context)
+		if asciiGot != asciiGlyph+gap+"main.go" {
+			t.Errorf("ascii spacing %d = %q", spacing, asciiGot)
+		}
+		unicodeGot := NewDecorator(compiled, false, IconsUnicode, ProfileANSI16).Node(context)
+		if unicodeGot != unicodeGlyph+gap+"main.go" {
+			t.Errorf("unicode spacing %d = %q", spacing, unicodeGot)
+		}
+		neverGot := NewDecorator(compiled, false, IconsNever, ProfileANSI16).Node(context)
+		if neverGot != "main.go" {
+			t.Errorf("never spacing %d = %q", spacing, neverGot)
+		}
+		if NewDecorator(compiled, false, IconsNerd, ProfileANSI16).Edge("|-- ") != "|-- " {
+			t.Fatal("nerd icons must not change ASCII connectors")
+		}
+		if NewDecorator(compiled, false, IconsNerd, ProfileANSI16).Edge("├── ") != "├── " {
+			t.Fatal("nerd icons must not change Unicode connectors")
+		}
+	}
+}
+
+func TestDecoratorStyleAndNerdIconsStayIndependent(t *testing.T) {
+	theme, _ := Lookup(ThemeVivid)
+	compiled, err := Compile(theme)
+	if err != nil {
+		t.Fatal(err)
+	}
+	context := render.NodeContext{Path: "src/main.go", Name: "main.go", Display: "main.go", Type: tree.NodeFile}
+	nerd := NewDecorator(compiled, false, IconsNerd, ProfileANSI16)
+	if !strings.HasPrefix(nerd.Node(context), catalog.Glyphs("source.go").Nerd) {
+		t.Fatalf("vivid nerd node = %q", nerd.Node(context))
+	}
+	if nerd.Edge("|-- ") != "|-- " || nerd.Edge("├── ") != "├── " {
+		t.Fatal("theme must not couple style connectors to nerd icons")
+	}
+}

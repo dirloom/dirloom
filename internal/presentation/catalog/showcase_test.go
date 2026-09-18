@@ -61,13 +61,23 @@ func presentationShowcaseScenarios() []showcaseScenario {
 			file("Main.java", true), dir(".gradle", true),
 		}},
 		{name: "infra-terraform-k8s", nodes: []showcaseNode{
-			file("main.tf", true), file("terraform.tfstate", true), file("Chart.yaml", true), file("values.yaml", true),
-			file("kustomization.yaml", true), file("compose.yaml", true), dir(".terraform", true), dir("charts", true), dir("k8s", true),
+			file("main.tf", true), file("variables.tf", true), file("terraform.tfvars", true), file(".terraform.lock.hcl", true),
+			file("terraform.tfstate", true), file("Chart.yaml", true), file("values.yaml", true),
+			file("kustomization.yaml", true), file("compose.yaml", true), file("compose.yml", true),
+			file("docker-compose.yml", true), file("docker-compose.yaml", true), file("docker-bake.hcl", true),
+			dir(".terraform", true), dir("charts", true), dir("k8s", true),
 		}},
 		{name: "mixed-platform", nodes: []showcaseNode{
-			file("README", true), file("LICENSE.md", true), file("flake.nix", true), file("flake.lock", true), file("site.hs", true),
-			file("ca.pem", true), file("logo.webp", true), file("archive.7z", true), file(".env.local", true),
+			file("README", true), file("README.md", true), file("LICENSE", true), file("LICENSE.md", true), file("CHANGELOG.md", true),
+			file("flake.nix", true), file("flake.lock", true), file("site.hs", true),
+			file("ca.pem", true), file("logo.webp", true), file("image.png", true), file("image.jpg", true),
+			file("image.jpeg", true), file("image.svg", true), file("archive.7z", true), file(".env.local", true),
 			file(".gitignore", true), dir(".github", true), dir(".devcontainer", true), file("mystery", false),
+		}},
+		{name: "catalog-fidelity", nodes: []showcaseNode{
+			file("App.svelte", true), file("index.astro", true), file("main.dart", true), file("main.ml", true),
+			file("main.nim", true), file("main.d", true), file("main.gleam", true), file("Main.elm", true),
+			file("main.v", true), file("main.cr", true), file("policy.cue", true), file("Dockerfile", true),
 		}},
 	}
 }

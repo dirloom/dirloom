@@ -33,11 +33,20 @@ func TestCatalogV02FrozenCompatibility(t *testing.T) {
 	if document.CatalogVersion != 1 || len(document.Cases) != FrozenV02EntryCount {
 		t.Fatalf("frozen v0.2 fixture = version %d, cases %d", document.CatalogVersion, len(document.Cases))
 	}
+	corrections := v033CorrectionByMatcherIdentity()
 	counts := map[MatchSource]int{}
 	for _, fixture := range document.Cases {
 		got := Classify(fixture.Name, fixture.RelativePath, fixture.Type)
+		identity := string(fixture.Source) + ":" + strings.ToLower(fixture.MatcherKey)
 		want := Classification{Kind: fixture.Kind, Roles: fixture.Roles, Source: fixture.Source, MatcherKey: fixture.MatcherKey}
-		if !reflect.DeepEqual(got, want) {
+		if next, ok := corrections[identity]; ok {
+			if got.Source != fixture.Source || got.MatcherKey != fixture.MatcherKey {
+				t.Errorf("%s frozen matcher identity changed: %#v", fixture.ID, got)
+			}
+			if !reflect.DeepEqual(got, next) {
+				t.Errorf("%s v0.3.3 correction = %#v, want %#v", fixture.ID, got, next)
+			}
+		} else if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: got %#v, want %#v", fixture.ID, got, want)
 		}
 		counts[fixture.Source]++

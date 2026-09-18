@@ -98,6 +98,51 @@ Unicode = portable
 Nerd    = richer PUA catalog
 ```
 
+## Nerd glyph governance
+
+`--icons nerd` uses a compiled, multi-collection catalog governed in v0.3.3.
+
+```text
+exact technology glyph
+> exact semantic glyph
+> generic semantic glyph
+> generic fallback
+```
+
+An exact approved logo is used when the pinned Nerd Fonts registry contains it with documented provenance and license. A correct generic icon is preferred to a metaphor that could be mistaken for a logo. Missing Nerd glyphs still fall back to the frozen Unicode channel, then to no glyph.
+
+Pinned registry:
+
+```text
+Nerd Fonts v3.5.1
+repository: ryanoasis/nerd-fonts
+tag: v3.5.1
+source: glyphnames.json
+retrieved: 2026-09-18
+```
+
+Approved collections in this release:
+
+```text
+Material Design Icons   generic concepts and documented language identities
+Devicons                technology-specific logos
+```
+
+Dirloom does not bundle a font, SVG, or image. It does not detect the installed font. ASCII and Unicode catalogs stay frozen; only the Nerd projection is refined. The offline contract fixture is `internal/presentation/catalog/testdata/nerd-fonts-v3.5.1-contract.json`.
+
+v0.3.3 also corrects a few existing filename classifications without adding matchers, kinds, or roles:
+
+| Path | Previous kind | v0.3.3 kind | Why |
+| --- | --- | --- | --- |
+| `docker-compose.yml` | `data.yaml` | `manifest.container` | Compose manifest |
+| `docker-compose.yaml` | `data.yaml` | `manifest.container` | Compose manifest |
+| `compose.yml` | `data.yaml` | `manifest.container` | Compose manifest |
+| `compose.yaml` | `data.yaml` | `manifest.container` | Compose manifest |
+| `docker-bake.hcl` | `document.text` | `manifest.container` | Docker Bake definition |
+| `.terraform.lock.hcl` | `document.text` | `manifest.terraform` | Terraform lockfile; `lock` role kept |
+
+Those changes keep matcher identity (`filename` + exact key) stable. They are semantic classification corrections, not new matchers.
+
 Family ASCII markers are four printable columns:
 
 ```text
@@ -158,7 +203,7 @@ symlink node type
 
 The final symlink is classified before its name, so a link named `README.md` remains `symlink`. Compound suffixes beat extensions: `.d.mts`, `.spec.ts`, `_test.go`, `.blade.php`, and `.pb.go` are resolved before `.mts`, `.ts`, `.go`, or `.php`.
 
-v0.3 may **promote** a real-world path that previously lost to a generic v0.2 extension or fallback. That does not rewrite the 256 frozen v0.2 matcher identities. Those matchers still return the same `Kind`, `Roles`, `MatchSource`, and `MatcherKey`. Promotions are new, more-specific matchers and are changelogued as intentional classification changes:
+v0.3 may **promote** a real-world path that previously lost to a generic v0.2 extension or fallback. That does not rewrite the 256 frozen v0.2 **matcher identities** (`MatchSource` + matcher value). v0.3 promotions are new, more-specific matchers. v0.3.3 additionally corrects the kind of six existing filename matchers listed above. Both are changelogued as intentional classification changes:
 
 | Path | v0.2 result | v0.3 result | Why |
 | --- | --- | --- | --- |
@@ -306,11 +351,12 @@ Catalog v1 remains the public contract. v0.3 grows the compiled matcher set and 
 - `catalogVersion` stays `1`;
 - the 16 roles and their order are unchanged;
 - matcher precedence is unchanged;
-- the 256 v0.2 **matcher identities** keep the same `Kind`, `Roles`, `MatchSource`, and `MatcherKey`;
-- new exact names or longer suffixes may promote paths that previously hit a generic extension or fallback. Those path-level promotions are intentional SemVer-reviewed classification changes, not a rewrite of the frozen matcher table.
+- the 256 v0.2 **matcher identities** keep the same `MatchSource` and matcher value;
+- v0.3 path promotions add more-specific matchers without rewriting that identity table;
+- v0.3.3 classification corrections change `Kind` (and keep roles) for six existing filename matchers only, as listed under Nerd glyph governance.
 
-Unicode glyphs for existing kinds stay stable. Nerd glyphs may become more specific; Unicode remains the portable fallback. Dirloom never bundles a font and never auto-detects a Nerd Font. The default icon mode remains `never`.
+Unicode glyphs for existing kinds stay stable. ASCII glyphs stay stable. Nerd glyphs are governed by the pinned v3.5.1 registry; Unicode remains the portable fallback. Dirloom never bundles a font and never auto-detects a Nerd Font. The default icon mode remains `never`.
 
-Renaming or removing a kind or role, changing a historical matcher classification, or modifying a documented built-in palette identity requires a changelog entry and Semantic Versioning review. Promoting a path with a new more-specific matcher is the supported v0.3 evolution path and must be listed in the changelog.
+Renaming or removing a kind or role, changing a historical matcher classification, or modifying a documented built-in palette identity requires a changelog entry and Semantic Versioning review. Promoting a path with a new more-specific matcher, or correcting an existing matcher kind as in v0.3.3, must be listed in the changelog.
 
 Future content-based classifiers, signed user catalogs, Git-state roles, and architecture/compliance states require explicit new contracts. Unknown identifiers are not accepted silently as runtime kinds.
