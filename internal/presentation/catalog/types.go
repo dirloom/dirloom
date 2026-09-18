@@ -96,10 +96,18 @@ type Entry struct {
 	Roles   []Role  `json:"roles" yaml:"roles"`
 }
 
+// GlyphSet is the three-channel glyph contract for one kind.
+type GlyphSet struct {
+	ASCII   string `json:"ascii,omitempty" yaml:"ascii,omitempty"`
+	Unicode string `json:"unicode" yaml:"unicode"`
+	Nerd    string `json:"nerd" yaml:"nerd"`
+}
+
 // KindDefinition defines inheritance and portable glyph fallbacks.
 type KindDefinition struct {
 	Kind    Kind   `json:"kind" yaml:"kind"`
 	Parent  Kind   `json:"parent,omitempty" yaml:"parent,omitempty"`
+	ASCII   string `json:"ascii" yaml:"ascii"`
 	Unicode string `json:"unicode" yaml:"unicode"`
 	Nerd    string `json:"nerd" yaml:"nerd"`
 }

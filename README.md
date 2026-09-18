@@ -22,11 +22,11 @@ Published status is independent of each package manager. GitHub Releases is alwa
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Latest published release: v0.3.0
-Current freeze: release/v0.3.1
+Latest published release: v0.3.1
+Current freeze: release/v0.3.2
 
 DISTRIBUTION STATUS
-GitHub     ✅ v0.3.0
+GitHub     ✅ v0.3.1
 Scoop      ✅ v0.1.1
 Homebrew   ⏳
 Winget     ⏳
@@ -191,13 +191,17 @@ Interactive text uses automatic color and keeps icons disabled until requested. 
 ```bash
 dirloom --theme vivid
 dirloom --theme vivid --icons
+dirloom --icons ascii
+dirloom --icons unicode
+dirloom --icons nerd
+dirloom --icons auto
 dirloom --theme vivid --icons nerd
 dirloom --icons unicode --theme midnight testdata/showcase/infra-terraform-k8s
 dirloom theme classify README.md --theme vivid
 dirloom theme classify Chart.yaml
 ```
 
-Pipes, redirects, CI, and `--output` stay neutral in automatic mode. Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Reproduce canonical historical text explicitly with:
+`--icons auto` selects Unicode unless a Nerd Font capability is declared with `DIRLOOM_NERD_FONT` or user config `terminal.capabilities.nerdFont`. It does not detect fonts. Pipes, redirects, CI, and `--output` still disable automatic color. Fenced Markdown, semantic Markdown, and JSON never contain ANSI or presentation icons. Reproduce canonical historical text explicitly with:
 
 ```bash
 dirloom --color never --icons never
@@ -231,7 +235,7 @@ dirloom [directory] [flags]
 | `--no-config` | Disable user and project configuration files. |
 | `--preset docs\|compact\|monorepo\|ai\|none` | Select a built-in preset or neutralize an inherited preset. |
 | `--color[=MODE]` | Control ANSI color for text output: `never`, `always`, or `auto`. Default: `auto`. `--color` alone means `--color=auto`. |
-| `--icons[=MODE]` | Control presentation icons for text output: `never`, `unicode`, `nerd`, or `auto`. Default when omitted: `never`. `--icons` alone means `--icons=auto`. |
+| `--icons[=MODE]` | Control presentation icons for text output: `never`, `ascii`, `unicode`, `nerd`, or `auto`. Default when omitted: `never`. `--icons` alone means `--icons=auto`. |
 | `--theme NAME\|PATH` | Select `default`, `midnight`, `daylight`, `vivid`, or a local YAML theme. |
 | `-o, --output FILE` | Transactionally write to a file instead of stdout. |
 | `--copy` | Copy the rendered tree to the clipboard instead of stdout. Mutually exclusive with `--output`. |
@@ -423,8 +427,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 ## Release
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
-`main` is the integration branch. The latest published tag is `v0.3.0`.
-`release/v0.3.1` is the active freeze for the next tag.
+`main` is the integration branch. The latest published tag is `v0.3.1`.
+`release/v0.3.2` is the active freeze for the next tag.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after publication.
@@ -447,12 +451,13 @@ See [Distribution](docs/distribution.md) and [Release workflow](docs/release-wor
 The voted product sequence builds from the deterministic v0.1 foundation:
 
 ```text
-v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
+v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE → v0.3.2 ICON CONTRACT → EXPLORER → v0.4 CHANGE → v0.5 MATERIALIZE
 ```
 
 - v0.2: released — install, `--copy`, completions, trusted GitHub releases (Release Done is independent of Winget merge);
 - v0.3: published (`v0.3.0`) — visual richness, a larger semantic catalog, and stronger project-centric terminal identity;
-- v0.3.1: freeze on `release/v0.3.1` — CLI guidance, contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
+- v0.3.1: published — CLI guidance, contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
+- v0.3.2: freeze on `release/v0.3.2` — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

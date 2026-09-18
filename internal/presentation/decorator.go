@@ -44,6 +44,8 @@ func (decorator *Decorator) Node(context render.NodeContext) string {
 		}
 	case IconsUnicode:
 		icon = style.icons.Unicode
+	case IconsASCII:
+		icon = style.icons.ASCII
 	}
 	if icon == "" {
 		if decorator.color {

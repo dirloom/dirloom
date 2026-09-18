@@ -87,6 +87,7 @@ type Effective struct {
 	Color             string
 	Icons             string
 	Theme             string
+	NerdFont          Optional[bool]
 	DiagramView       string
 	DiagramDirection  string
 	DiagramMaxNodes   *int

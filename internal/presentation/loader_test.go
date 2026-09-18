@@ -76,6 +76,7 @@ func TestThemeParserRejectsUnsafeAndAmbiguousDocuments(t *testing.T) {
 		"bad-color":       "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\npalette: {x: red}\n",
 		"bad-style":       "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {styles: [blink]}}\n",
 		"bad-icon":        "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {icons: {unicode: \"\\u001b[31m\"}}}\n",
+		"bad-ascii-icon":  "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\ntokens: {node.file: {icons: {ascii: \"→\"}}}\n",
 		"two-matchers":    "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a, extension: .go}}]\n",
 		"duplicate-match": "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nrules: [{match: {name: a}}, {match: {name: a}}]\n",
 		"bad-spacing":     "schemaVersion: 1\ncatalogVersion: 1\nname: x\nappearance: dark\nicons: {spacing: 5}\n",

@@ -421,7 +421,7 @@ dirloom . --theme vivid --icons nerd
 dirloom . --theme daylight --icons unicode
 ```
 
-`--icons auto` sélectionne Unicode uniquement sur un TTY éligible. Dirloom ne détecte ni la police installée ni le fond du terminal. En cas de glyphes absents, utilisez `--icons unicode` ou `--icons never`.
+`--icons auto` selects Unicode unless `DIRLOOM_NERD_FONT` or user config `terminal.capabilities.nerdFont` declares a Nerd Font capability. Dirloom ne détecte ni la police installée ni le fond du terminal. En cas de glyphes absents, utilisez `--icons ascii`, `--icons unicode` ou `--icons never`.
 
 Pour expliquer pourquoi `README.md`, `_test.go` ou `.pb.go` reçoit une icône, une couleur ou un rôle :
 

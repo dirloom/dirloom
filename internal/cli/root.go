@@ -180,7 +180,8 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 			resolved.SetThemeInfo(theme)
 			capabilities, err := deps.evaluator.Evaluate(presentation.CapabilityRequest{
 				Format: resolved.Effective.Format, ColorMode: resolved.Effective.Color, IconMode: resolved.Effective.Icons,
-				ColorExplicitCLI: overrides.Color.Set, OutputPath: opts.output, Clipboard: opts.copy, Writer: stdout,
+				ColorExplicitCLI: overrides.Color.Set, ConfiguredNerdFont: resolved.ConfiguredNerdFont(),
+				OutputPath: opts.output, Clipboard: opts.copy, Writer: stdout,
 			})
 			if err != nil {
 				return classifyPresentationError(err)
@@ -294,7 +295,7 @@ func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringVar(&opts.format, "format", "", "output format: text, markdown, markdown-tree, json, mermaid, graphviz (dot), or d2")
 	command.Flags().StringVar(&opts.style, "style", "", "tree style: unicode or ascii")
 	command.Flags().StringVar(&opts.color, "color", "", "terminal colors: never, always, or auto; omit the value for auto")
-	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, unicode, nerd, or auto; omit the value for auto")
+	command.Flags().StringVar(&opts.icons, "icons", "", "terminal icons: never, ascii, unicode, nerd, or auto; omit the value for auto")
 	command.Flags().StringVar(&opts.theme, "theme", "", "terminal theme: default, midnight, daylight, vivid, or a YAML path")
 	command.Flags().StringVar(&opts.diagramView, "diagram-view", "", "diagram view: structure")
 	command.Flags().StringVar(&opts.diagramDirection, "diagram-direction", "", "diagram direction: top-down or left-right")

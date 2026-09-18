@@ -4,6 +4,24 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-18
+
+PRESENTATION refinement: portable ASCII icons and a declarative Nerd Font
+capability, without redefining the v0.3 visual contract or the default
+`icons: never`.
+
+### Added
+
+- Add strict ASCII semantic icons through `--icons ascii`.
+- Add a declarative Nerd Font capability via `DIRLOOM_NERD_FONT` and user-only
+  `terminal.capabilities.nerdFont`.
+
+### Changed
+
+- Resolve `--icons auto` conservatively: Nerd only when that capability is
+  declared, otherwise portable Unicode. Auto no longer follows TTY, CI, pipe,
+  or `--output` heuristics.
+
 ## [0.3.1] - 2026-09-18
 
 PRESENTATION refinement: contextual CLI help and guided usage, without
@@ -102,7 +120,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/dirloom/dirloom/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dirloom/dirloom/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dirloom/dirloom/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dirloom/dirloom/compare/v0.1.1...v0.2.0

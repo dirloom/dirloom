@@ -133,6 +133,7 @@ func TestPublicHelpDocumentationMatchesCLIContracts(t *testing.T) {
 		"--icons",
 		"--color",
 		"never",
+		"ascii",
 		"unicode",
 		"nerd",
 		"auto",
@@ -143,7 +144,7 @@ func TestPublicHelpDocumentationMatchesCLIContracts(t *testing.T) {
 			t.Errorf("contextual help guide missing %q", want)
 		}
 	}
-	for _, mode := range []string{"never", "unicode", "nerd", "auto"} {
+	for _, mode := range []string{"never", "ascii", "unicode", "nerd", "auto"} {
 		if !strings.Contains(themeText, mode) {
 			t.Errorf("themes guide missing icon mode %q", mode)
 		}
@@ -174,13 +175,22 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 	text := string(data)
 	for _, want := range []string{
 		"Pre-1.0 versioning policy",
+		"Release branch integration",
 		"0.Y.0",
 		"0.Y.Z",
 		"v0.3.0",
 		"v0.3.1",
+		"v0.3.2",
 		"v0.4.0",
 		"PRESENTATION",
 		"CHANGE",
+		"release/vX.Y.Z",
+		"PR → release/vX.Y.Z",
+		"PR finale → main",
+		"Do not open versioned feature or fix pull requests against `main`.",
+		"scope freeze",
+		"Do not create `chore/v0.3.2-freeze`.",
+		"[0.3.2] - 2026-09-18",
 	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("release workflow missing %q", want)

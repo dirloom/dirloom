@@ -60,18 +60,27 @@ NO_COLOR=1 dirloom --color always
 | Mode | Behavior |
 | --- | --- |
 | `never` | Emit no presentation icons. This is the default. |
+| `ascii` | Force a strict printable-ASCII catalog. No Unicode, PUA, or emoji. |
 | `unicode` | Force portable Unicode glyphs for text. |
-| `nerd` | Force Nerd Font glyphs for text. |
-| `auto` | Use Unicode on an eligible TTY; otherwise emit no icons. |
+| `nerd` | Force Nerd Font glyphs for text. The explicit mode asserts that the display environment is compatible. |
+| `auto` | Use Nerd when a Nerd Font capability is declared; otherwise use Unicode. |
 
-Dirloom never assumes that a Nerd Font is installed and never selects Nerd glyphs automatically.
+`auto` does not detect fonts and does not infer Nerd support from the terminal, Windows, Windows Terminal, `WT_SESSION`, `TERM_PROGRAM`, TTY, or color depth. Declare the capability with `DIRLOOM_NERD_FONT=1` or user config:
+
+```yaml
+terminal:
+  capabilities:
+    nerdFont: true
+```
+
+That key is user/host configuration only. A project `.dirloom.yaml` cannot declare it.
 
 <!-- dirloom-theme-command:nerd -->
 ```bash
 dirloom --icons nerd --theme vivid
 ```
 
-For each semantic kind, Nerd mode falls back to its Unicode glyph, then to no glyph. Dirloom does not assume a fixed display width. The semantic catalog and glyph provenance are documented in [Semantic catalog](catalog.md).
+For each semantic kind, Nerd mode falls back to its Unicode glyph, then to no glyph. ASCII mode never falls back to Unicode. Dirloom does not assume a fixed display width. The semantic catalog and glyph provenance are documented in [Semantic catalog](catalog.md).
 
 `--icons` without a value is equivalent to `--icons=auto`. `--color` without a value is equivalent to `--color=auto`. A theme does not enable icons by itself:
 
@@ -83,6 +92,32 @@ dirloom help colors
 ```
 
 `dirloom help themes` teaches the theme system. `dirloom theme explain vivid` inspects one concrete definition. See [Contextual help](contextual-help.md).
+
+`--style` and `--icons` stay independent: `--style` draws connectors, `--icons` prefixes the node name.
+
+### Declared capability versus font
+
+Dirloom consumes a declared capability. It does not inspect the font.
+
+```text
+Windows Terminal + Cascadia/Caskaydia non-Nerd
+  --icons nerd
+  => PUA glyphs may not render: that is the explicit mode's responsibility
+
+Windows Terminal + JetBrainsMono Nerd Font
+  --icons nerd
+  => Nerd glyphs render
+
+Windows Terminal + any of those fonts
+  --icons auto
+  + no declared capability
+  => unicode
+
+Windows Terminal + JetBrainsMono Nerd Font
+  DIRLOOM_NERD_FONT=1
+  --icons auto
+  => nerd
+```
 
 ## Built-in themes
 
@@ -140,7 +175,7 @@ Kind-driven icon colors:
 
 `security` and `contract` are bold and underlined. `test`, `infra`, and `executable` are bold; `generated` and `vendor` are dimmed. Other roles keep their base text style. Icon spans remain free of text styles.
 
-Every built-in `vivid` color reaches at least 4.5:1 contrast against `#10131A`, including decorative icon colors. Ratios are tested from the sRGB values. The theme does not set a background and still requires explicit `--icons unicode`, `--icons nerd`, or `--icons auto` to display glyphs.
+Every built-in `vivid` color reaches at least 4.5:1 contrast against `#10131A`, including decorative icon colors. Ratios are tested from the sRGB values. The theme does not set a background and still requires explicit `--icons ascii`, `--icons unicode`, `--icons nerd`, or `--icons auto` to display glyphs.
 
 ## Use a custom theme
 
@@ -263,10 +298,10 @@ Styles are `bold`, `dim`, `italic`, and `underline`.
 - an absent property inherits;
 - `styles: []` clears inherited text styles;
 - `iconColor: null` makes the icon follow the effective text color;
-- `icons.unicode: null` or `icons.nerd: null` removes the inherited glyph in that channel at the binding where it is declared;
+- `icons.ascii: null`, `icons.unicode: null`, or `icons.nerd: null` removes the inherited glyph in that channel at the binding where it is declared;
 - icon spans receive color only; bold, dim, italic, and underline apply to the text span.
 
-Glyphs must be valid UTF-8, at most 64 bytes and four runes, and contain no ANSI, control, line-break, or bidirectional-formatting character.
+Glyphs must be valid UTF-8, at most 64 bytes and four runes, and contain no ANSI, control, line-break, or bidirectional-formatting character. ASCII glyphs must use only U+0020 to U+007E. `ascii` is optional in theme v1; existing themes that define only `unicode` and `nerd` remain valid.
 
 ### Tokens, kinds, and roles
 
@@ -413,11 +448,11 @@ All presentation errors occur before the project scan. Rendering finishes in mem
 
 ### Icons are absent
 
-The default is `icons: never`. Use `--icons unicode`, `--icons nerd`, or `--icons auto` on an eligible TTY. A theme never enables icons by itself.
+The default is `icons: never`. Use `--icons ascii`, `--icons unicode`, `--icons nerd`, or `--icons auto`. A theme never enables icons by itself.
 
 ### Nerd glyphs render as boxes
 
-Use `--icons unicode` or `--icons never`, or configure a compatible Nerd Font outside Dirloom. Dirloom cannot detect the installed font.
+Use `--icons unicode`, `--icons ascii`, or `--icons never`, or configure a compatible Nerd Font outside Dirloom. Dirloom does not detect the installed font. `--icons auto` selects Nerd only when `DIRLOOM_NERD_FONT` or user config `terminal.capabilities.nerdFont` declares that capability.
 
 ### Colors are absent
 

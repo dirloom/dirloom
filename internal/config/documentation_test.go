@@ -46,7 +46,7 @@ func TestPublicConfigurationExamplesUseTheRealSchema(t *testing.T) {
 					t.Errorf("team values = %#v", values)
 				}
 			case "user":
-				if !values.Depth.Set || values.Depth.Value != 3 || values.Style.Value != StyleASCII {
+				if !values.Depth.Set || values.Depth.Value != 3 || values.Style.Value != StyleASCII || !values.NerdFont.Set || !values.NerdFont.Value {
 					t.Errorf("user values = %#v", values)
 				}
 			case "unlimited":

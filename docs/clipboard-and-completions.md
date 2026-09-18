@@ -37,13 +37,13 @@ The clipboard is not treated as a pipe or CI destination.
 
 | Channel | `--color auto` | `--icons auto` |
 | --- | --- | --- |
-| Interactive TTY | ANSI | Unicode |
-| `--output`, pipe, CI | no ANSI | `never` |
-| `--copy` | no ANSI | Unicode, like interactive text |
+| Interactive TTY | ANSI | Unicode, or Nerd when a capability is declared |
+| `--output`, pipe, CI | no ANSI | Unicode, or Nerd when a capability is declared |
+| `--copy` | no ANSI | Unicode, or Nerd when a capability is declared |
 
 ANSI sequences are usually unwanted in paste targets, so automatic color is off. Unicode and Nerd glyphs often paste as-is into GitHub, chat tools, and tickets, so icons follow the renderer, the format, and the preset.
 
-Explicit `--color always|never` and `--icons never|unicode|nerd` still apply to text output. Markdown, JSON and diagram sources stay canonical: no ANSI and no presentation glyphs.
+Explicit `--color always|never` and `--icons never|ascii|unicode|nerd` still apply to text output. Markdown, JSON and diagram sources stay canonical: no ANSI and no presentation glyphs.
 
 `dirloom --icons unicode` and `dirloom --icons unicode --copy` therefore produce the same tree except for ANSI color.
 
