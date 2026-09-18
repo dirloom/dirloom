@@ -93,7 +93,7 @@ func TestPublicModeCatalogs(t *testing.T) {
 	if got, want := ColorModes(), []string{"never", "always", "auto"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("colors = %#v", got)
 	}
-	if got, want := IconModes(), []string{"never", "unicode", "nerd", "auto"}; !reflect.DeepEqual(got, want) {
+	if got, want := IconModes(), []string{"never", "ascii", "unicode", "nerd", "auto"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("icons = %#v", got)
 	}
 	if !IsBuiltIn("default") || IsBuiltIn("ocean") {

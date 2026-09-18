@@ -28,9 +28,13 @@ const (
 	ColorAuto   = "auto"
 
 	IconsNever   = "never"
+	IconsASCII   = "ascii"
 	IconsUnicode = "unicode"
 	IconsNerd    = "nerd"
 	IconsAuto    = "auto"
+
+	// NerdFontEnvironmentVariable declares a Nerd Font capability at runtime.
+	NerdFontEnvironmentVariable = "DIRLOOM_NERD_FONT"
 
 	ThemeDefault  = "default"
 	ThemeMidnight = "midnight"
@@ -46,8 +50,9 @@ var activeTokens = map[string]struct{}{
 	"tree.edge": {}, "node.directory": {}, "node.file": {}, "node.symlink": {},
 }
 
-// IconPair defines portable and Nerd Font glyphs for one visual token.
+// IconPair defines ASCII, portable Unicode, and Nerd Font glyphs for one visual token.
 type IconPair struct {
+	ASCII   string `json:"ascii,omitempty" yaml:"ascii,omitempty"`
 	Unicode string `json:"unicode" yaml:"unicode"`
 	Nerd    string `json:"nerd" yaml:"nerd"`
 }
@@ -70,6 +75,7 @@ type Binding struct {
 	colorSet       bool
 	iconColorSet   bool
 	stylesSet      bool
+	asciiIconSet   bool
 	unicodeIconSet bool
 	nerdIconSet    bool
 }
@@ -204,7 +210,9 @@ func IsInvalid(err error) bool {
 func ColorModes() []string { return []string{ColorNever, ColorAlways, ColorAuto} }
 
 // IconModes returns the public icon values in canonical order.
-func IconModes() []string { return []string{IconsNever, IconsUnicode, IconsNerd, IconsAuto} }
+func IconModes() []string {
+	return []string{IconsNever, IconsASCII, IconsUnicode, IconsNerd, IconsAuto}
+}
 
 // ThemeNames returns the built-in names in lexical order.
 func ThemeNames() []string {
@@ -353,7 +361,7 @@ func (theme Theme) WriteText(writer io.Writer) error {
 	}
 	for _, key := range sortedKeys(theme.Tokens) {
 		token := theme.Tokens[key]
-		if _, err := fmt.Fprintf(writer, "  %s: color=%s iconColor=%s styles=%s unicode=%q nerd=%q\n", key, token.Color, displayOptional(token.IconColor, "text"), formatStyles(token.Styles), token.Icons.Unicode, token.Icons.Nerd); err != nil {
+		if _, err := fmt.Fprintf(writer, "  %s: color=%s iconColor=%s styles=%s ascii=%q unicode=%q nerd=%q\n", key, token.Color, displayOptional(token.IconColor, "text"), formatStyles(token.Styles), token.Icons.ASCII, token.Icons.Unicode, token.Icons.Nerd); err != nil {
 			return err
 		}
 	}

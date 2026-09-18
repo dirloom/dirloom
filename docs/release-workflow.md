@@ -18,10 +18,12 @@ Examples:
 
 - `v0.3.0` — PRESENTATION
 - `v0.3.1` — PRESENTATION refinement / Contextual Help & CLI Guidance
+- `v0.3.2` — PRESENTATION refinement / Icon Capability Contract & Portable ASCII Icons
 - `v0.4.0` — CHANGE / Fingerprint, Snapshot, Verify, Diff
 
-`v0.4.0` stays reserved for the CHANGE milestone. Contextual help belongs to
-the PRESENTATION/CLI refinement line and must not be requalified as v0.4.
+`v0.4.0` stays reserved for the CHANGE milestone. Contextual help and the icon
+capability contract belong to the PRESENTATION refinement line and must not be
+requalified as v0.4.
 
 ## Active release
 

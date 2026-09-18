@@ -96,7 +96,11 @@ help vs explain:
   dirloom config explain       Reports the values actually resolved
 
 See the persistent configuration guide for the schema and discovery rules.
-`)+"\n", "presets", "themes", "filters"),
+
+Notes:
+  terminal.capabilities.nerdFont is USER CONFIG ONLY.
+  DIRLOOM_NERD_FONT is a runtime declaration used by --icons auto.
+`)+"\n", "presets", "themes", "filters", "icons"),
 	topicEntry("diagrams", "Mermaid, Graphviz and D2 exports", strings.TrimSpace(`
 DIAGRAMS
 
@@ -211,7 +215,7 @@ Examples:
   dirloom --format json --output structure.json
   dirloom --format mermaid
 `)+"\n", "diagrams", "output", "icons", "colors"),
-	topicEntry("icons", "Unicode, Nerd Font and automatic icons", strings.TrimSpace(`
+	topicEntry("icons", "ASCII, Unicode, Nerd Font and automatic icons", strings.TrimSpace(`
 ICON MODES
 
 Controls how Dirloom renders icons in terminal output.
@@ -220,21 +224,24 @@ Usage:
   dirloom [command] --icons[=MODE]
 
 Modes:
-  auto       Use portable Unicode icons when the environment is eligible
+  auto       Use Unicode, or Nerd when a Nerd Font capability is declared
+  ascii      Use a strict printable-ASCII catalog
   unicode    Use portable Unicode icons
   nerd       Use Nerd Font glyphs
   never      Disable icons (built-in default when the flag is omitted)
 
 Examples:
   dirloom --icons
+  dirloom --icons=ascii
   dirloom --icons=unicode
   dirloom --theme vivid --icons
   dirloom --theme midnight --icons=nerd
 
 Notes:
   --icons without a value is equivalent to --icons=auto.
-  Auto mode never assumes Nerd Font support.
-  Auto mode uses Unicode only when the environment is eligible.
+  Auto does not detect fonts and does not infer Nerd support from the terminal.
+  Auto uses Nerd only when DIRLOOM_NERD_FONT or user config declares it.
+  Otherwise auto selects portable Unicode.
   Selecting a theme does not enable icons by itself.
   Canonical and machine-oriented outputs remain undecorated.
 `)+"\n", "themes", "colors", "formats"),
@@ -292,7 +299,7 @@ whether color or icons are enabled.
 Do not confuse:
   theme   Which palette and glyph bindings to use
   color   Whether ANSI color is emitted (never, always, auto)
-  icons   Whether glyphs are emitted (never, unicode, nerd, auto)
+  icons   Whether glyphs are emitted (never, ascii, unicode, nerd, auto)
 
 Built-in themes:
   default    Terminal ANSI palette

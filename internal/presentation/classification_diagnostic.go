@@ -77,11 +77,11 @@ func (document ClassifyDocument) WriteText(writer io.Writer) error {
 	for index, role := range document.Classification.Roles {
 		roles[index] = string(role)
 	}
-	if _, err := fmt.Fprintf(writer, "Path: %s\nType: %s\nKind: %s\nRoles: %s\nVisual role: %s\nMatched by: %s (%s)\nTheme: %s (%s)\nText: color=%s styles=%s\nIcon: unicode=%s nerd=%s color=%s\n",
+	if _, err := fmt.Fprintf(writer, "Path: %s\nType: %s\nKind: %s\nRoles: %s\nVisual role: %s\nMatched by: %s (%s)\nTheme: %s (%s)\nText: color=%s styles=%s\nIcon: ascii=%s unicode=%s nerd=%s color=%s\n",
 		document.Path, document.Type, document.Classification.Kind, strings.Join(roles, ", "),
 		document.VisualRole, document.Classification.Source, document.Classification.MatcherKey,
 		document.Theme.Name, document.Theme.Source.Kind, document.Style.TextColor,
-		formatStyles(document.Style.Styles), quoteGlyph(document.Style.Icons.Unicode), quoteGlyph(document.Style.Icons.Nerd),
+		formatStyles(document.Style.Styles), quoteGlyph(document.Style.Icons.ASCII), quoteGlyph(document.Style.Icons.Unicode), quoteGlyph(document.Style.Icons.Nerd),
 		document.Style.IconColor,
 	); err != nil {
 		return err

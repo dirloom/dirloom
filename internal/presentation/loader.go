@@ -30,6 +30,7 @@ type nullableStringDocument struct {
 }
 
 type iconDocument struct {
+	ASCII   nullableStringDocument `yaml:"ascii"`
 	Unicode nullableStringDocument `yaml:"unicode"`
 	Nerd    nullableStringDocument `yaml:"nerd"`
 }
@@ -442,8 +443,14 @@ func validateIconDocument(document *iconDocument) error {
 	if document == nil {
 		return nil
 	}
-	for name, value := range map[string]nullableStringDocument{"unicode": document.Unicode, "nerd": document.Nerd} {
+	for name, value := range map[string]nullableStringDocument{"ascii": document.ASCII, "unicode": document.Unicode, "nerd": document.Nerd} {
 		if !value.Present || value.Null {
+			continue
+		}
+		if name == "ascii" {
+			if err := validateASCIIGlyph(value.Value); err != nil {
+				return fmt.Errorf("%s icon: %w", name, err)
+			}
 			continue
 		}
 		if err := validateGlyph(value.Value); err != nil {
@@ -527,6 +534,13 @@ func mergeToken(base Token, document tokenDocument) Token {
 		base.Styles = append([]string(nil), (*document.Styles)...)
 	}
 	if document.Icons != nil {
+		if document.Icons.ASCII.Present {
+			if document.Icons.ASCII.Null {
+				base.Icons.ASCII = ""
+			} else {
+				base.Icons.ASCII = document.Icons.ASCII.Value
+			}
+		}
 		if document.Icons.Unicode.Present {
 			if document.Icons.Unicode.Null {
 				base.Icons.Unicode = ""
@@ -561,6 +575,14 @@ func mergeBinding(base Binding, document bindingDocument) Binding {
 		base.Styles, base.stylesSet = append([]string(nil), (*document.Styles)...), true
 	}
 	if document.Icons != nil {
+		if document.Icons.ASCII.Present {
+			base.asciiIconSet = true
+			if document.Icons.ASCII.Null {
+				base.Icons.ASCII = ""
+			} else {
+				base.Icons.ASCII = document.Icons.ASCII.Value
+			}
+		}
 		if document.Icons.Unicode.Present {
 			base.unicodeIconSet = true
 			if document.Icons.Unicode.Null {
@@ -599,6 +621,9 @@ func publicRule(document ruleDocument) Rule {
 		result.Styles = append([]string(nil), (*document.Styles)...)
 	}
 	if document.Icons != nil {
+		if document.Icons.ASCII.Present && !document.Icons.ASCII.Null {
+			result.Icons.ASCII = document.Icons.ASCII.Value
+		}
 		if document.Icons.Unicode.Present && !document.Icons.Unicode.Null {
 			result.Icons.Unicode = document.Icons.Unicode.Value
 		}

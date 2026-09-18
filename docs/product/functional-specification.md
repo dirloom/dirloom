@@ -143,14 +143,15 @@ dirloom --color always --icons never
 dirloom --theme midnight
 ```
 
-Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe `color: auto`, `icons: never` et `theme: default` comme défauts intégrés. Un TTY interactif utilisable reçoit donc la couleur mais aucune icône sans activation explicite. `--icons auto` active Unicode seulement sur un TTY éligible ; un pipe, une redirection, `--output`, CI ou `TERM=dumb` reste neutre. Les presets NE DOIVENT PAS modifier ces valeurs.
+Les couleurs DOIVENT supporter `never`, `always` et `auto`. Les icônes DOIVENT supporter `never`, `ascii`, `unicode`, `nerd` et `auto`. La décision v0.2 fixe `color: auto`, `icons: never` et `theme: default` comme défauts intégrés. Un TTY interactif utilisable reçoit donc la couleur mais aucune icône sans activation explicite. `--icons auto` sélectionne Unicode, ou Nerd uniquement si une capability Nerd Font est déclarée (`DIRLOOM_NERD_FONT` ou user config `terminal.capabilities.nerdFont`). Auto ne détecte pas une police et n'infère pas le support Nerd depuis le terminal, un pipe, CI ou `--output`. Les presets NE DOIVENT PAS modifier ces valeurs.
 
-`--copy` N'EST PAS une destination non-TTY. En mode `auto`, la couleur ANSI DOIT être absente et les icônes Unicode DOIVENT être conservées comme pour un rendu texte interactif. `--color always|never` et `--icons never|unicode|nerd` restent respectés pour le format texte. Markdown, JSON et diagrammes restent canoniques.
+`--copy` N'EST PAS une destination non-TTY. En mode `auto`, la couleur ANSI DOIT être absente et les icônes DOIVENT suivre le contrat d'icônes `auto` (Unicode, ou Nerd si la capability est déclarée). `--color always|never` et `--icons never|ascii|unicode|nerd` restent respectés pour le format texte. Markdown, JSON et diagrammes restent canoniques.
 
 - `never` n'émet aucune séquence ANSI ni icône décorative ;
 - `auto` active la décoration seulement sur une surface compatible ;
 - `always` force la projection, y compris dans une redirection explicitement voulue ;
 - `unicode` sélectionne un jeu portable sans dépendance à Nerd Font ;
+- `ascii` sélectionne un catalogue strictement ASCII imprimable ;
 - `nerd` sélectionne le jeu enrichi et DOIT conserver un fallback configurable ;
 - `NO_COLOR` DOIT désactiver la couleur sauf si une option CLI explicite et documentée a priorité ;
 - les formats JSON canoniques NE DOIVENT jamais contenir d'ANSI ou d'icône de présentation.

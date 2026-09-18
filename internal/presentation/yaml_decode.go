@@ -60,6 +60,8 @@ func (document *iconDocument) UnmarshalYAML(node *yaml.Node) error {
 			return err
 		}
 		switch key.Value {
+		case "ascii":
+			document.ASCII = decoded
 		case "unicode":
 			document.Unicode = decoded
 		case "nerd":

@@ -33,7 +33,7 @@ dirloom help topics
 | `examples` | Common command recipes |
 | `filters` | Depth, ignore rules and visibility |
 | `formats` | Text, Markdown, JSON and diagram formats |
-| `icons` | Unicode, Nerd Font and automatic icons |
+| `icons` | ASCII, Unicode, Nerd Font and automatic icons |
 | `output` | stdout, clipboard and transactional files |
 | `presets` | Built-in project-tree presets |
 | `themes` | Built-in and custom terminal themes |
@@ -51,7 +51,7 @@ Only flags with a natural boolean-like form get an implicit value:
 --color[=MODE]
 ```
 
-`--icons` without a value means `--icons=auto`. `--color` without a value means `--color=auto`. Color modes are `never`, `always`, and `auto`. Icon modes are `never`, `unicode`, `nerd`, and `auto`. The built-in default remains `icons: never` when the flag is omitted.
+`--icons` without a value means `--icons=auto`. `--color` without a value means `--color=auto`. Color modes are `never`, `always`, and `auto`. Icon modes are `never`, `ascii`, `unicode`, `nerd`, and `auto`. The built-in default remains `icons: never` when the flag is omitted.
 
 These forms stay equivalent:
 
@@ -76,6 +76,7 @@ Error: invalid value "foobar" for --icons
 
 Valid values:
   never
+  ascii
   unicode
   nerd
   auto

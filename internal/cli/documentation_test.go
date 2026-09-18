@@ -133,6 +133,7 @@ func TestPublicHelpDocumentationMatchesCLIContracts(t *testing.T) {
 		"--icons",
 		"--color",
 		"never",
+		"ascii",
 		"unicode",
 		"nerd",
 		"auto",
@@ -143,7 +144,7 @@ func TestPublicHelpDocumentationMatchesCLIContracts(t *testing.T) {
 			t.Errorf("contextual help guide missing %q", want)
 		}
 	}
-	for _, mode := range []string{"never", "unicode", "nerd", "auto"} {
+	for _, mode := range []string{"never", "ascii", "unicode", "nerd", "auto"} {
 		if !strings.Contains(themeText, mode) {
 			t.Errorf("themes guide missing icon mode %q", mode)
 		}

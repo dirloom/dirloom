@@ -25,6 +25,7 @@ func TestNormalizeOptionalAutoFlags(t *testing.T) {
 		{name: "help is not an icon value", in: []string{"--icons", "--help"}, want: []string{"--icons=auto", "--help"}},
 		{name: "version is not a color value", in: []string{"--color", "--version"}, want: []string{"--color=auto", "--version"}},
 		{name: "separated known icon mode", in: []string{"root", "--no-config", "--icons", "unicode"}, want: []string{"root", "--no-config", "--icons=unicode"}},
+		{name: "separated ascii icon mode", in: []string{"--icons", "ascii"}, want: []string{"--icons=ascii"}},
 		{name: "equals icon mode is unchanged", in: []string{"--icons=nerd"}, want: []string{"--icons=nerd"}},
 		{name: "separated known color mode", in: []string{"--color", "always"}, want: []string{"--color=always"}},
 		{name: "equals color mode is unchanged", in: []string{"--color=never"}, want: []string{"--color=never"}},
@@ -112,6 +113,7 @@ func TestIconsAndColorAcceptImplicitAutoAndExplicitModes(t *testing.T) {
 
 	for _, args := range [][]string{
 		{root, "--no-config", "--icons", "never"},
+		{root, "--no-config", "--icons", "ascii"},
 		{root, "--no-config", "--icons", "unicode"},
 		{root, "--no-config", "--icons", "nerd"},
 		{root, "--no-config", "--icons", "auto"},
@@ -168,7 +170,7 @@ func TestInvalidEnumeratedFlagsAreActionable(t *testing.T) {
 	if code != 2 || stdout != "" {
 		t.Fatalf("icons invalid=(%q,%q,%d)", stdout, stderr, code)
 	}
-	for _, want := range []string{`invalid value "invalid" for --icons`, "Valid values:", "auto", "unicode", "nerd", "never", "dirloom help icons"} {
+	for _, want := range []string{`invalid value "invalid" for --icons`, "Valid values:", "auto", "ascii", "unicode", "nerd", "never", "dirloom help icons"} {
 		if !strings.Contains(stderr, want) {
 			t.Errorf("icons diagnostic missing %q\n%s", want, stderr)
 		}
@@ -435,6 +437,7 @@ func TestOptionalAutoFlagsKeepIndependentFlagsAndTerminator(t *testing.T) {
 
 	for _, args := range [][]string{
 		{root, "--no-config", "--icons=unicode"},
+		{root, "--no-config", "--icons=ascii"},
 		{root, "--no-config", "--icons=nerd"},
 		{root, "--no-config", "--icons=never"},
 		{root, "--no-config", "--icons=auto"},

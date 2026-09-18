@@ -13,13 +13,14 @@ import (
 
 // CapabilityRequest describes the selected output and the current destination.
 type CapabilityRequest struct {
-	Format           string
-	ColorMode        string
-	IconMode         string
-	ColorExplicitCLI bool
-	OutputPath       string
-	Clipboard        bool
-	Writer           io.Writer
+	Format             string
+	ColorMode          string
+	IconMode           string
+	ColorExplicitCLI   bool
+	ConfiguredNerdFont *bool
+	OutputPath         string
+	Clipboard          bool
+	Writer             io.Writer
 }
 
 // Capabilities is the deterministic terminal presentation decision.
@@ -112,19 +113,9 @@ func (evaluator *Evaluator) Evaluate(request CapabilityRequest) (Capabilities, e
 	if evaluator.env("NO_COLOR") != "" && (!request.ColorExplicitCLI || request.ColorMode != ColorAlways) {
 		colorEnabled = false
 	}
-	iconMode := IconsNever
-	switch request.IconMode {
-	case IconsNever:
-	case IconsUnicode:
-		iconMode = IconsUnicode
-	case IconsNerd:
-		iconMode = IconsNerd
-	case IconsAuto:
-		if autoEligible || request.Clipboard {
-			iconMode = IconsUnicode
-		}
-	default:
-		return Capabilities{}, invalidf("unsupported icon mode %q (expected never, unicode, nerd, or auto)", request.IconMode)
+	iconMode, err := evaluator.resolveIconMode(request)
+	if err != nil {
+		return Capabilities{}, err
 	}
 	result := Capabilities{ColorEnabled: colorEnabled, IconMode: iconMode, Profile: evaluator.profile(tty)}
 	if !colorEnabled || !tty {
@@ -145,6 +136,51 @@ func (evaluator *Evaluator) Evaluate(request CapabilityRequest) (Capabilities, e
 func (evaluator *Evaluator) env(name string) string {
 	value, _ := evaluator.lookupEnv(name)
 	return value
+}
+
+func (evaluator *Evaluator) resolveIconMode(request CapabilityRequest) (string, error) {
+	switch request.IconMode {
+	case IconsNever:
+		return IconsNever, nil
+	case IconsASCII:
+		return IconsASCII, nil
+	case IconsUnicode:
+		return IconsUnicode, nil
+	case IconsNerd:
+		return IconsNerd, nil
+	case IconsAuto:
+		nerdFont, err := evaluator.declaredNerdFont(request)
+		if err != nil {
+			return "", err
+		}
+		if nerdFont {
+			return IconsNerd, nil
+		}
+		return IconsUnicode, nil
+	default:
+		return "", invalidf("unsupported icon mode %q (expected never, ascii, unicode, nerd, or auto)", request.IconMode)
+	}
+}
+
+func (evaluator *Evaluator) declaredNerdFont(request CapabilityRequest) (bool, error) {
+	if value, ok := evaluator.lookupEnv(NerdFontEnvironmentVariable); ok && strings.TrimSpace(value) != "" {
+		return parseNerdFontEnvironment(value)
+	}
+	if request.ConfiguredNerdFont != nil {
+		return *request.ConfiguredNerdFont, nil
+	}
+	return false, nil
+}
+
+func parseNerdFontEnvironment(value string) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "1", "true", "yes", "on":
+		return true, nil
+	case "0", "false", "no", "off":
+		return false, nil
+	default:
+		return false, invalidf("invalid %s value %q\nexpected one of: 1, true, yes, on, 0, false, no, off", NerdFontEnvironmentVariable, value)
+	}
 }
 
 func (evaluator *Evaluator) profile(tty bool) ColorProfile {

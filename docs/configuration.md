@@ -195,6 +195,7 @@ The text report includes:
 - every effective scalar and its origin;
 - every effective ignore pattern and its origin;
 - requested color and icon modes, the resolved theme source, and their provenance;
+- the configured `terminal.capabilities.nerdFont` value and its origin, distinct from runtime icon resolution;
 - settings that are currently inactive.
 
 Use JSON for automation:
@@ -246,9 +247,27 @@ presentation:
   color: never
   icons: unicode
   theme: daylight
+
+terminal:
+  capabilities:
+    nerdFont: true
 ```
 
-A project can override any value without modifying the user file. `NO_COLOR` still disables a configured color mode; only an explicit CLI `--color always` overrides it.
+`terminal.capabilities.nerdFont` is **USER CONFIG ONLY**. It describes the current machine/user, not the project. A repository `.dirloom.yaml` or a file passed with `--config` that declares it is rejected.
+
+Priority for `--icons auto`:
+
+```text
+DIRLOOM_NERD_FONT
+        ↓
+user config terminal.capabilities.nerdFont
+        ↓
+false / capability absent → unicode
+```
+
+`--no-user-config` drops the file-backed capability. `--no-config` drops both configuration files. The environment variable remains a runtime declaration.
+
+A project can override any other value without modifying the user file. `NO_COLOR` still disables a configured color mode; only an explicit CLI `--color always` overrides it.
 
 If the user file selects a preset, a project can neutralize only that selection:
 

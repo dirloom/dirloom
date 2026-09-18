@@ -22,7 +22,7 @@ func TestCompilePublicRulesAndEveryMatcherShape(t *testing.T) {
 		t.Fatal(err)
 	}
 	pathRule := compiled.Inspect("src/main.go", "main.go", tree.NodeFile)
-	if pathRule.Classification.Kind != "source.go" || pathRule.VisualRole != catalog.RoleTest || pathRule.TextColor != "ansi:cyan" || pathRule.IconColor != "ansi:magenta" || pathRule.Icons != (IconPair{Unicode: "G", Nerd: "N"}) {
+	if pathRule.Classification.Kind != "source.go" || pathRule.VisualRole != catalog.RoleTest || pathRule.TextColor != "ansi:cyan" || pathRule.IconColor != "ansi:magenta" || pathRule.Icons != (IconPair{ASCII: "[SC]", Unicode: "G", Nerd: "N"}) {
 		t.Fatalf("path rule = %#v", pathRule)
 	}
 	if got := compiled.Inspect("README.md", "README.md", tree.NodeFile); got.TextColor != "ansi:yellow" {

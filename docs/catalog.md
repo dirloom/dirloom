@@ -90,7 +90,31 @@ directory
 symlink
 ```
 
-The complete v1 registry has 119 kinds, a maximum depth of four, no runtime-created identifiers, and a safe Unicode fallback for every kind. Glyphs belong to kinds, not individual matchers. v0.3 added language, manifest, and security identities without renaming or removing any v0.2 kind. Terraform/OpenTofu sources use `manifest.terraform`; Nix flakes and well-known Nix files use `manifest.nix`; generic `.hcl` and `.nix` stay on their source kinds.
+The complete v1 registry has 119 kinds, a maximum depth of four, no runtime-created identifiers, and a glyph in every channel for every kind. Glyphs belong to kinds, not individual matchers.
+
+```text
+ASCII   = maximum portability
+Unicode = portable
+Nerd    = richer PUA catalog
+```
+
+Family ASCII markers are four printable columns:
+
+```text
+file       [FI]
+source     [SC]
+manifest   [MF]
+data       [DT]
+document   [DC]
+media      [ME]
+archive    [AR]
+font       [FT]
+binary     [BN]
+directory  [DR]
+symlink    [LN]
+```
+
+Sub-kinds inherit their family marker by default, so `source.go`, `source.rust`, and `source.python` all render `[SC]` in ASCII mode. v0.3 added language, manifest, and security identities without renaming or removing any v0.2 kind. Terraform/OpenTofu sources use `manifest.terraform`; Nix flakes and well-known Nix files use `manifest.nix`; generic `.hcl` and `.nix` stay on their source kinds.
 
 ## Structural roles
 
@@ -191,7 +215,7 @@ Visual role: source
 Matched by: extension (.go)
 Theme: vivid (built-in)
 Text: color=#66F0C0 styles=none
-Icon: unicode="•" nerd="󰟓" color=#00FFD1
+Icon: ascii="[SC]" unicode="•" nerd="󰟓" color=#00FFD1
 ```
 
 With `vivid`, this two-tone result is intentional: the `source` role selects the text color while the `source.go` kind inherits the `source` icon color.
@@ -219,6 +243,7 @@ kinds:
     iconColor: source
   source.go:
     icons:
+      ascii: "[SC]"
       unicode: "•"
       nerd: "󰟓"
 
