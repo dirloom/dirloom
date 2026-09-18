@@ -25,53 +25,116 @@ Examples:
 capability contract belong to the PRESENTATION refinement line and must not be
 requalified as v0.4.
 
+## Release branch integration
+
+This rule is normative.
+
+> Every change that belongs to `vX.Y.Z` is integrated by pull request into
+> `release/vX.Y.Z`. Only `release/vX.Y.Z`, once complete, frozen, and
+> validated, opens the final pull request to `main`. The annotated tag
+> `vX.Y.Z` is created on `main` after that merge.
+
+```text
+main
+  │
+  └── create release/vX.Y.Z
+          │
+          └── create feat/… from release/vX.Y.Z
+                    │
+                    └── PR → release/vX.Y.Z
+                              │
+                              └── … other vX.Y.Z work
+                                      │
+                                      ▼
+                               freeze and validate
+                                      │
+                                      └── PR finale → main
+                                                   │
+                                                   ▼
+                                                tag vX.Y.Z
+```
+
+Do not open versioned feature or fix pull requests against `main`. Do not
+develop on `main` or on a previous `release/v*` branch for the current
+version. Do not tag from a feature branch.
+
+Open `release/vX.Y.Z` from the intended `main` SHA **before** the first
+feature branch of that version:
+
+```bash
+git fetch --prune origin
+git switch main
+git pull --ff-only origin main
+git switch -c release/vX.Y.Z
+git push -u origin release/vX.Y.Z
+```
+
+Then create work from that release branch:
+
+```bash
+git fetch --prune origin
+git switch release/vX.Y.Z
+git pull --ff-only origin release/vX.Y.Z
+git switch -c feat/vX.Y.Z-<topic>
+# … commit, push, open PR → release/vX.Y.Z
+```
+
+If a feature branch was started from `main` by mistake, repair it without
+retargeting to `main`. Create `release/vX.Y.Z` from the **same** base SHA as
+the feature, then retarget the pull request to `release/vX.Y.Z`. Rebase onto
+the release branch only when that branch already contains commits the feature
+does not have.
+
 ## Active release
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.3.1` |
-| Latest published release | `v0.3.0` |
-| Release branch | `release/v0.3.1` |
+| Version | `v0.3.2` |
+| Latest published release | `v0.3.1` |
+| Release branch | `release/v0.3.2` |
 | Integration branch | `main` |
 | Profile | CLI / package — build on tag after RC validation |
 
-`v0.3.0` remains the latest published GitHub tag. `release/v0.3.1` is the
-scope freeze: changelog, product status, snapshot and smoke only. No new
-features. Do not tag, draft or publish until this freeze merges to `main`
-and the release ceremony completes.
+`v0.3.1` is the latest published GitHub tag. `release/v0.3.2` is the
+composition branch for the next tag: feature work for this version merges
+there. It is not yet a freeze. Do not tag, draft or publish until the freeze
+merges to `main` and the release ceremony completes.
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch release/v0.3.1
-git pull --ff-only origin release/v0.3.1
-git switch -c chore/v0.3.1-freeze-follow-up
-# … freeze-only commit, push, open PR → release/v0.3.1
+git switch release/v0.3.2
+git pull --ff-only origin release/v0.3.2
+git switch -c feat/v0.3.2-icon-capabilities
+# … product commit, push, open PR → release/v0.3.2
 ```
 
-Use `main` as the base for work outside this freeze, with explicit Release
-Owner approval. Do not add v0.3.1 product scope after the freeze.
+Use `main` only as the source for opening `release/vX.Y.Z`, or for work that
+the Release Owner has explicitly excluded from the current version. Do not
+add v0.3.2 product scope through a pull request into `main`.
 
-## v0.3.1 freeze checklist
+## v0.3.2 freeze checklist
+
+The freeze has not started. When the Release Owner opens it:
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
-  → merge release → main → tag v0.3.1 → draft → verification → human GO → publish
+  → merge release → main → tag v0.3.2 → draft → verification → human GO → publish
 ```
 
-1. Keep the freeze changelog (`[0.3.1] - 2026-09-18`, empty `[Unreleased]`) on
-   `release/v0.3.1`. Do not tag or publish from this step.
+1. Keep the freeze changelog (`[0.3.2] - YYYY-MM-DD`, empty `[Unreleased]`) on
+   `release/v0.3.2`. Do not tag or publish from this step.
 2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
    completion syntax, GoReleaser check, snapshot, 13-artifact verify).
 3. Record GO/NO-GO with commit SHA and artifact checksums.
-4. Merge `release/v0.3.1` → `main` with a merge commit.
-5. Tag annotated `v0.3.1` on `main` only after smoke tests on candidate archives.
-   The binary reports `dirloom 0.3.1` (no leading `v`).
+4. Merge `release/v0.3.2` → `main` with a merge commit.
+5. Tag annotated `v0.3.2` on `main` only after smoke tests on candidate archives.
+   The binary reports `dirloom 0.3.2` (no leading `v`).
 6. The tag workflow leaves a **draft**. Verify 13 artifacts, 12 checksum lines,
    SBOMs, licences inside archives, and `gh attestation verify` on all 13
    subjects. Do not publish from CI.
-7. Human GO publishes the draft. Then delete `release/v0.3.1` after closure.
+7. Human GO publishes the draft. Then delete `release/v0.3.2` after closure.
 8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
    wait for the Winget merge.
 
@@ -97,6 +160,31 @@ approval.
 
 The Winget submission token lives in the GitHub Environment `package-publishing`.
 It is not available to pull-request workflows.
+
+## v0.3.1 release record
+
+v0.3.1 is published. The checklist below is the completed ceremony, kept for
+audit. It is not the current active release state.
+
+```text
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → merge release → main → tag v0.3.1 → draft → verification → human GO → publish
+```
+
+1. Keep the freeze changelog (`[0.3.1] - 2026-09-18`, empty `[Unreleased]`) on
+   `release/v0.3.1`. Do not tag or publish from this step.
+2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
+   completion syntax, GoReleaser check, snapshot, 13-artifact verify).
+3. Record GO/NO-GO with commit SHA and artifact checksums.
+4. Merge `release/v0.3.1` → `main` with a merge commit.
+5. Tag annotated `v0.3.1` on `main` only after smoke tests on candidate archives.
+   The binary reports `dirloom 0.3.1` (no leading `v`).
+6. The tag workflow leaves a **draft**. Verify 13 artifacts, 12 checksum lines,
+   SBOMs, licences inside archives, and `gh attestation verify` on all 13
+   subjects. Do not publish from CI.
+7. Human GO publishes the draft. Then delete `release/v0.3.1` after closure.
+8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
+   wait for the Winget merge.
 
 ## v0.3.0 release record
 
@@ -126,7 +214,7 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
    wait for the Winget merge. Flip each channel to Distribution Verified after
    install/upgrade/uninstall smoke.
 
-See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.0`.
+See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.1`.
 
 ## Inventory
 
@@ -138,7 +226,7 @@ checksums.txt has 12 hashes and excludes itself
 ```
 
 After publication, never replace artifacts under the same tag. A binary defect
-requires a new version such as v0.3.1. A broken package recipe is fixed in its
+requires a new version such as v0.3.2. A broken package recipe is fixed in its
 own repository and does not undo Release Done.
 
 Retain CI evidence for at least 90 days: commit SHA, tag, checksums, SBOMs,
@@ -152,6 +240,14 @@ install smokes.
 - After publication: no artifact replacement; ship a corrective version.
 - A failing manager can remain on the last Distribution Verified version while
   it is repaired.
+
+## Process correction (2026-09-18)
+
+Pull request #29 (`feat/v0.3.2-icon-capabilities`) targeted `main` before
+`release/v0.3.2` existed. `release/v0.3.2` was opened from `main` at
+`a1dcf800906cb97dc7d012fa6e0dbe26a5349e58` and #29 was retargeted to
+`release/v0.3.2`. Versioned work must not be merged to `main` except through
+that release branch.
 
 ## Process correction (2026-08-17)
 
