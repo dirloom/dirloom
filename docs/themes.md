@@ -62,7 +62,7 @@ NO_COLOR=1 dirloom --color always
 | `never` | Emit no presentation icons. This is the default. |
 | `ascii` | Force a strict printable-ASCII catalog. No Unicode, PUA, or emoji. |
 | `unicode` | Force portable Unicode glyphs for text. |
-| `nerd` | Force Nerd Font glyphs for text. The explicit mode asserts that the display environment is compatible. |
+| `nerd` | Force the governed multi-collection Nerd catalog. The explicit mode asserts that the display environment is compatible. |
 | `auto` | Use Nerd when a Nerd Font capability is declared; otherwise use Unicode. |
 
 `auto` does not detect fonts and does not infer Nerd support from the terminal, Windows, Windows Terminal, `WT_SESSION`, `TERM_PROGRAM`, TTY, or color depth. Declare the capability with `DIRLOOM_NERD_FONT=1` or user config:
@@ -80,7 +80,9 @@ That key is user/host configuration only. A project `.dirloom.yaml` cannot decla
 dirloom --icons nerd --theme vivid
 ```
 
-For each semantic kind, Nerd mode falls back to its Unicode glyph, then to no glyph. ASCII mode never falls back to Unicode. Dirloom does not assume a fixed display width. The semantic catalog and glyph provenance are documented in [Semantic catalog](catalog.md).
+For each semantic kind, Nerd mode falls back to its Unicode glyph, then to no glyph. ASCII mode never falls back to Unicode. Dirloom does not assume a fixed display width and does not detect Mono versus non-Mono fonts. `--icons nerd` now uses a governed multi-collection catalog pinned to Nerd Fonts v3.5.1. The semantic catalog, collections, and glyph provenance are documented in [Semantic catalog](catalog.md).
+
+Dirloom does not detect fonts. Dirloom does not bundle fonts. Explicit `nerd` means the user asserts compatibility.
 
 `--icons` without a value is equivalent to `--icons=auto`. `--color` without a value is equivalent to `--color=auto`. A theme does not enable icons by itself:
 

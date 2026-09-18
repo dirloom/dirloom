@@ -346,7 +346,7 @@ cases:
       name: docker-compose.yml
       relativePath: fixture/docker-compose.yml
       type: file
-      kind: data.yaml
+      kind: manifest.container
       roles:
         - infra
         - config
@@ -356,7 +356,7 @@ cases:
       name: compose.yaml
       relativePath: fixture/compose.yaml
       type: file
-      kind: data.yaml
+      kind: manifest.container
       roles:
         - infra
         - config
@@ -456,7 +456,7 @@ cases:
       name: .terraform.lock.hcl
       relativePath: fixture/.terraform.lock.hcl
       type: file
-      kind: document.text
+      kind: manifest.terraform
       roles:
         - lock
         - infra
@@ -636,7 +636,7 @@ cases:
       name: docker-bake.hcl
       relativePath: fixture/docker-bake.hcl
       type: file
-      kind: document.text
+      kind: manifest.container
       roles:
         - infra
         - config
@@ -1474,7 +1474,7 @@ cases:
       name: compose.yml
       relativePath: fixture/compose.yml
       type: file
-      kind: data.yaml
+      kind: manifest.container
       roles:
         - infra
         - config
@@ -1484,7 +1484,7 @@ cases:
       name: docker-compose.yaml
       relativePath: fixture/docker-compose.yaml
       type: file
-      kind: data.yaml
+      kind: manifest.container
       roles:
         - infra
         - config

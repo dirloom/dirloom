@@ -24,12 +24,12 @@ func filenameSpecs() []entrySpec {
 
 		// v0.2 containers, task runners, and CI
 		spec("dockerfile", "manifest.container", RoleInfra, RoleExecutable), spec("containerfile", "manifest.container", RoleInfra, RoleExecutable),
-		spec("docker-compose.yml", "data.yaml", RoleInfra, RoleConfig), spec("compose.yaml", "data.yaml", RoleInfra, RoleConfig),
+		spec("docker-compose.yml", "manifest.container", RoleInfra, RoleConfig), spec("compose.yaml", "manifest.container", RoleInfra, RoleConfig),
 		spec("makefile", "manifest.generic", RoleExecutable, RoleTooling), spec("cmakelists.txt", "manifest.generic", RoleConfig, RoleTooling),
 		spec("justfile", "manifest.generic", RoleExecutable, RoleTooling), spec("taskfile.yml", "data.yaml", RoleExecutable, RoleTooling),
 		spec(".gitlab-ci.yml", "data.yaml", RoleInfra, RoleConfig), spec("azure-pipelines.yml", "data.yaml", RoleInfra, RoleConfig),
 		spec("jenkinsfile", "manifest.generic", RoleInfra, RoleExecutable), spec("vagrantfile", "source.ruby", RoleInfra, RoleExecutable),
-		spec("ansible.cfg", "data.ini", RoleInfra, RoleConfig), spec(".terraform.lock.hcl", "document.text", RoleLock, RoleInfra),
+		spec("ansible.cfg", "data.ini", RoleInfra, RoleConfig), spec(".terraform.lock.hcl", "manifest.terraform", RoleLock, RoleInfra),
 		spec(".bazeliskrc", "data.ini", RoleConfig, RoleTooling), spec(".pre-commit-config.yaml", "data.yaml", RoleConfig, RoleTooling),
 
 		// v0.2 JavaScript tooling and contracts
@@ -40,7 +40,7 @@ func filenameSpecs() []entrySpec {
 		spec("graphql.schema", "source.graphql", RoleContract, RoleData), spec("buf.yaml", "data.yaml", RoleConfig, RoleTooling),
 		spec("buf.gen.yaml", "data.yaml", RoleGenerated, RoleConfig), spec("renovate.json", "data.json", RoleConfig, RoleTooling),
 		spec("dependabot.yml", "data.yaml", RoleSecurity, RoleConfig), spec("mkdocs.yml", "data.yaml", RoleDocument, RoleConfig),
-		spec("book.toml", "data.toml", RoleDocument, RoleConfig), spec("docker-bake.hcl", "document.text", RoleInfra, RoleConfig),
+		spec("book.toml", "data.toml", RoleDocument, RoleConfig), spec("docker-bake.hcl", "manifest.container", RoleInfra, RoleConfig),
 
 		// v0.3 JavaScript / TypeScript / Node ecosystem
 		spec("bun.lock", "document.text", RoleLock, RoleConfig), spec("deno.json", "data.json", RoleConfig, RoleTooling),
@@ -108,8 +108,8 @@ func filenameSpecs() []entrySpec {
 		spec("helmfile.yaml", "manifest.helm", RoleInfra, RoleConfig), spec("skaffold.yaml", "data.yaml", RoleInfra, RoleConfig),
 
 		// v0.3 containers
-		spec(".dockerignore", "document.text", RoleInfra, RoleConfig), spec("compose.yml", "data.yaml", RoleInfra, RoleConfig),
-		spec("docker-compose.yaml", "data.yaml", RoleInfra, RoleConfig), spec("devcontainer.json", "data.json", RoleConfig, RoleTooling),
+		spec(".dockerignore", "document.text", RoleInfra, RoleConfig), spec("compose.yml", "manifest.container", RoleInfra, RoleConfig),
+		spec("docker-compose.yaml", "manifest.container", RoleInfra, RoleConfig), spec("devcontainer.json", "data.json", RoleConfig, RoleTooling),
 
 		// v0.3 CI/CD
 		spec("action.yml", "data.yaml", RoleInfra, RoleConfig), spec("action.yaml", "data.yaml", RoleInfra, RoleConfig),

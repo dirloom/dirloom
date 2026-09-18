@@ -50,7 +50,20 @@ Configuration is resolved before the application service starts scanning. The re
 
 The winning presentation reference is validated and compiled before `app.Inspect` runs. A configuration-backed theme path is confined to its configuration directory after symlink resolution; masked paths are never opened. Terminal capability evaluation is also complete before scanning, including `NO_COLOR` and Windows virtual-terminal preparation.
 
-After the canonical scanner identifies a node type, presentation applies the pure semantic catalog to its name and normalized relative path. A winning user rule may replace the effective kind or visual role; the renderer then resolves base token, catalog glyph, parent-to-child kind bindings, role binding and direct rule fields. Icons and text use separate ANSI spans and resets. This projection cannot mutate node identity, membership or order.
+After the canonical scanner identifies a node type, presentation applies the pure semantic catalog to its name and normalized relative path. Classification is not a Nerd mapping: it yields a kind and roles, then a later projection selects ASCII, Unicode, or Nerd glyphs. Nerd projections carry compiled provenance metadata (official name, codepoint, collection, upstream, license) that is not resolved on the render hot path.
+
+```text
+classification
+        ↓
+semantic kind
+        ↓
+glyph projection
+        ├── ASCII
+        ├── Unicode
+        └── Nerd + provenance metadata
+```
+
+A classification refinement therefore stays in the catalog. The renderer still only draws the tree. A winning user rule may replace the effective kind or visual role; the renderer then resolves base token, catalog glyph, parent-to-child kind bindings, role binding and direct rule fields. Icons and text use separate ANSI spans and resets. This projection cannot mutate node identity, membership or order.
 
 `theme classify` is the only diagnostic adapter that accesses a target directly. It validates the theme first, confines the target to `--root`, performs one `Lstat`, does not follow the final symlink, and does not read contents or descendants.
 

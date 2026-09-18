@@ -12,22 +12,22 @@ var kindRegistry = buildKindRegistry()
 
 func buildKindRegistry() map[Kind]KindDefinition {
 	definitions := []KindDefinition{
-		{Kind: "file", ASCII: "[FI]", Unicode: "·", Nerd: "󰈔"},
-		{Kind: "source", Parent: "file", ASCII: "[SC]", Unicode: "•", Nerd: "󰅩"},
-		{Kind: "manifest", Parent: "file", ASCII: "[MF]", Unicode: "◇", Nerd: "󰘦"},
-		{Kind: "data", Parent: "file", ASCII: "[DT]", Unicode: "◇", Nerd: "󰆼"},
-		{Kind: "document", Parent: "file", ASCII: "[DC]", Unicode: "¶", Nerd: "󰈙"},
-		{Kind: "media", Parent: "file", ASCII: "[ME]", Unicode: "◆", Nerd: "󰉏"},
-		{Kind: "archive", Parent: "file", ASCII: "[AR]", Unicode: "▣", Nerd: "󰀼"},
-		{Kind: "font", Parent: "file", ASCII: "[FT]", Unicode: "A", Nerd: "󰛖"},
-		{Kind: "binary", Parent: "file", ASCII: "[BN]", Unicode: "▪", Nerd: "󰆍"},
-		{Kind: "directory", ASCII: "[DR]", Unicode: "▸", Nerd: "󰉋"},
-		{Kind: "symlink", ASCII: "[LN]", Unicode: "↗", Nerd: "󰌷"},
+		{Kind: "file", ASCII: "[FI]", Unicode: "·"},
+		{Kind: "source", Parent: "file", ASCII: "[SC]", Unicode: "•"},
+		{Kind: "manifest", Parent: "file", ASCII: "[MF]", Unicode: "◇"},
+		{Kind: "data", Parent: "file", ASCII: "[DT]", Unicode: "◇"},
+		{Kind: "document", Parent: "file", ASCII: "[DC]", Unicode: "¶"},
+		{Kind: "media", Parent: "file", ASCII: "[ME]", Unicode: "◆"},
+		{Kind: "archive", Parent: "file", ASCII: "[AR]", Unicode: "▣"},
+		{Kind: "font", Parent: "file", ASCII: "[FT]", Unicode: "A"},
+		{Kind: "binary", Parent: "file", ASCII: "[BN]", Unicode: "▪"},
+		{Kind: "directory", ASCII: "[DR]", Unicode: "▸"},
+		{Kind: "symlink", ASCII: "[LN]", Unicode: "↗"},
 	}
-	appendChildren := func(parent Kind, names []string, asciiGlyph, unicodeGlyph, nerdGlyph string) {
+	appendChildren := func(parent Kind, names []string, asciiGlyph, unicodeGlyph string) {
 		for _, name := range names {
 			definitions = append(definitions, KindDefinition{
-				Kind: Kind(string(parent) + "." + name), Parent: parent, ASCII: asciiGlyph, Unicode: unicodeGlyph, Nerd: nerdGlyph,
+				Kind: Kind(string(parent) + "." + name), Parent: parent, ASCII: asciiGlyph, Unicode: unicodeGlyph,
 			})
 		}
 	}
@@ -39,67 +39,32 @@ func buildKindRegistry() map[Kind]KindDefinition {
 		"html", "css", "vue", "svelte", "astro", "graphql", "protobuf", "webassembly",
 		"haskell", "ocaml", "nim", "d", "fortran", "gleam", "scheme", "racket",
 		"elm", "v", "crystal", "nix", "hcl", "cue", "jsonnet",
-	}, "[SC]", "•", "󰅩")
+	}, "[SC]", "•")
 	appendChildren("manifest", []string{
 		"node", "go", "rust", "python", "java", "dotnet", "dart", "container", "php", "generic",
 		"terraform", "helm", "nix",
-	}, "[MF]", "◇", "󰘦")
+	}, "[MF]", "◇")
 	appendChildren("data", []string{
 		"json", "yaml", "toml", "xml", "ini", "env", "tabular", "sql", "schema", "binary", "database", "notebook",
 		"properties", "plist", "certificate", "key", "localization",
-	}, "[DT]", "◇", "󰆼")
-	appendChildren("document", []string{"markdown", "rst", "asciidoc", "tex", "text", "pdf", "office", "ebook", "changelog", "license"}, "[DC]", "¶", "󰈙")
-	appendChildren("media", []string{"image", "image.png", "image.jpeg", "image.svg", "audio", "video", "design", "model"}, "[ME]", "◆", "󰉏")
-	appendChildren("archive", []string{"package", "compressed"}, "[AR]", "▣", "󰀼")
-	appendChildren("font", []string{"web"}, "[FT]", "A", "󰛖")
-	appendChildren("binary", []string{"executable", "library"}, "[BN]", "▪", "󰆍")
+	}, "[DT]", "◇")
+	appendChildren("document", []string{"markdown", "rst", "asciidoc", "tex", "text", "pdf", "office", "ebook", "changelog", "license"}, "[DC]", "¶")
+	appendChildren("media", []string{"image", "image.png", "image.jpeg", "image.svg", "audio", "video", "design", "model"}, "[ME]", "◆")
+	appendChildren("archive", []string{"package", "compressed"}, "[AR]", "▣")
+	appendChildren("font", []string{"web"}, "[FT]", "A")
+	appendChildren("binary", []string{"executable", "library"}, "[BN]", "▪")
 
-	// Unicode glyphs for existing kinds are compatibility-frozen. Nerd glyphs may
-	// become more specific; values listed here are the effective pair.
-	overrides := map[Kind]struct{ unicode, nerd string }{
-		"source.go": {"•", "󰟓"}, "source.rust": {"•", "󱘗"},
-		"source.python": {"•", "󰌠"}, "source.javascript": {"•", "󰌞"},
-		"source.typescript": {"•", "󰛦"}, "source.html": {"•", "󰌝"},
-		"source.css": {"•", "󰌜"}, "data.json": {"◇", "󰘦"},
-		"data.yaml": {"◇", "󰈙"}, "data.toml": {"◇", "󰈙"},
-		"document.markdown": {"¶", "󰍔"}, "document.pdf": {"¶", "󰈦"},
-		"media.image.png": {"◆", "󰸭"}, "archive.package": {"▣", "󰏗"},
-		"manifest.container": {"▣", "󰡨"},
-		"source.c":           {"•", "\U000F0671"}, "source.cpp": {"•", "\U000F0672"},
-		"source.csharp": {"•", "\U000F031B"}, "source.java": {"•", "\U000F0B37"},
-		"source.kotlin": {"•", "\U000F1219"}, "source.php": {"•", "\U000F031F"},
-		"source.ruby": {"•", "\U000F0D2D"}, "source.swift": {"•", "\U000F06E5"},
-		"source.lua": {"•", "\U000F08B1"}, "source.r": {"•", "\U000F07D4"},
-		"source.vue": {"•", "\U000F0844"}, "source.svelte": {"•", "\U000F059F"},
-		"source.astro": {"•", "\U000F06E4"}, "source.graphql": {"•", "\U000F0877"},
-		"source.protobuf": {"•", "\U000F0FD8"}, "source.haskell": {"•", "\U000F0C92"},
-		"source.ocaml": {"•", "\U000F0295"}, "source.nim": {"•", "\U000F02D8"},
-		"source.d": {"•", "\U000F01A6"}, "source.fortran": {"•", "\U000F121A"},
-		"source.gleam": {"•", "\U000F04A0"}, "source.scheme": {"•", "\U000F0627"},
-		"source.racket": {"•", "\U000F0172"}, "source.elm": {"•", "\U000F0405"},
-		"source.v": {"•", "\U000F016C"}, "source.crystal": {"•", "\U000F01C8"},
-		"source.nix": {"•", "\U000F1105"}, "source.hcl": {"•", "\U000F10D6"},
-		"source.cue": {"•", "\U000F0168"}, "source.jsonnet": {"•", "\U000F0626"},
-		"source.powershell": {"•", "\U000F0A0A"}, "source.shell": {"•", "\U000F1183"},
-		"source.fsharp": {"•", "\U000F0627"}, "source.dart": {"•", "\U000F08C6"},
-		"manifest.node": {"◇", "\U000F0399"}, "manifest.go": {"◇", "󰟓"},
-		"manifest.rust": {"◇", "󱘗"}, "manifest.python": {"◇", "󰌠"},
-		"manifest.java": {"◇", "\U000F0B37"}, "manifest.dotnet": {"◇", "\U000F0AAE"},
-		"manifest.php": {"◇", "\U000F031F"}, "manifest.terraform": {"◇", "\U000F1062"},
-		"manifest.helm": {"◇", "\U000F10FE"}, "manifest.nix": {"◇", "\U000F1105"},
-		"data.database": {"◇", "\U000F01BC"}, "data.notebook": {"◇", "\U000F082E"},
-		"data.properties": {"◇", "\U000F0493"}, "data.plist": {"◇", "\U000F05C0"},
-		"data.certificate": {"◇", "\U000F0124"}, "data.key": {"◇", "\U000F0306"},
-		"data.localization": {"◇", "\U000F05CA"}, "data.xml": {"◇", "\U000F05C0"},
-		"media.audio": {"◆", "\U000F075A"}, "media.video": {"◆", "\U000F0567"},
-		"media.design": {"◆", "\U000F03D8"}, "media.image": {"◆", "\U000F02E9"},
-		"archive.compressed": {"▣", "\U000F05C4"},
+	// Unicode glyphs for existing kinds are compatibility-frozen. The only
+	// child whose Unicode identity differs from its family default is the
+	// container manifest, which keeps the historical archive-like mark.
+	unicodeOverrides := map[Kind]string{
+		"manifest.container": "▣",
 	}
 	for index := range definitions {
-		if value, ok := overrides[definitions[index].Kind]; ok {
-			definitions[index].Unicode = value.unicode
-			definitions[index].Nerd = value.nerd
+		if value, ok := unicodeOverrides[definitions[index].Kind]; ok {
+			definitions[index].Unicode = value
 		}
+		definitions[index].Nerd = nerdGlyphFor(definitions[index].Kind)
 	}
 	result := make(map[Kind]KindDefinition, len(definitions))
 	for _, definition := range definitions {

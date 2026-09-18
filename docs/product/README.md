@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 18 septembre 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0` et `v0.3.1` sont publiées (socle déterministe, accessibilité, richesse visuelle, aide contextuelle). Les documents de ce dossier décrivent le produit que ce socle permet de construire. `v0.3.2` est en freeze sur `release/v0.3.2`.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0`, `v0.3.1` et `v0.3.2` sont publiées (socle déterministe, accessibilité, richesse visuelle, aide contextuelle, contrat d'icônes). Les documents de ce dossier décrivent le produit que ce socle permet de construire. `v0.3.3` est en freeze sur `release/v0.3.3`.
 
 ## Parcours de lecture
 
@@ -53,7 +53,8 @@ En cas d'écart, appliquer l'ordre suivant :
 | Accessibilité `v0.2` | Livré : `--copy`, `completion`, GitHub Releases de confiance, Scoop/Homebrew/Winget ; Release Done ≠ fusion Winget |
 | Richesse visuelle `v0.3` | Publiée en `v0.3.0` : catalogue sémantique étendu, kinds/glyphes, thèmes inchangés en schéma, showcase project-centric |
 | Aide contextuelle `v0.3.1` | Publiée : `dirloom help <topic>`, `--icons`/`--color` implicites `auto`, diagnostics actionnables ; `v0.4.0` reste CHANGE |
-| Contrat d'icônes `v0.3.2` | Freeze sur `release/v0.3.2` : `--icons ascii`, capability Nerd déclarative, `--icons auto` conservateur ; défaut `icons: never` |
+| Contrat d'icônes `v0.3.2` | Publié : `--icons ascii`, capability Nerd déclarative, `--icons auto` conservateur ; défaut `icons: never` |
+| Fidélité Nerd `v0.3.3` | Freeze sur `release/v0.3.3` : provenance Nerd Fonts v3.5.1, logos vérifiés ou fallbacks, Compose/Bake/Terraform lock |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |

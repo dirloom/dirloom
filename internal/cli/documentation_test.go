@@ -181,6 +181,7 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"v0.3.0",
 		"v0.3.1",
 		"v0.3.2",
+		"v0.3.3",
 		"v0.4.0",
 		"PRESENTATION",
 		"CHANGE",
@@ -191,6 +192,10 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"scope freeze",
 		"Do not create `chore/v0.3.2-freeze`.",
 		"[0.3.2] - 2026-09-18",
+		"Do not create `chore/v0.3.3-freeze`.",
+		"[0.3.3] - 2026-09-18",
+		"Optional extended terminal matrix",
+		"Release blocker: NO",
 	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("release workflow missing %q", want)
