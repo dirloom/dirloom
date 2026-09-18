@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.3.0` publiée ; freeze `v0.3.1` sur `release/v0.3.1`<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.3.1` publiée ; freeze `v0.3.2` sur `release/v0.3.2`<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2039,7 +2039,7 @@ Fonctions :
 
 **Niveau : raffinement post-v0.3, avant v0.4.**
 
-**Statut : freeze sur `release/v0.3.1`.** Ce n'est pas un nouveau jalon stratégique.
+**Statut : publié (`v0.3.1`).** Ce n'est pas un nouveau jalon stratégique.
 
 Fonctions :
 
@@ -2055,7 +2055,7 @@ Frontière : aucune notion structurelle de v0.4 (fingerprint, snapshot, verify, 
 
 **Niveau : raffinement PRESENTATION, avant CHANGE.**
 
-**Statut : chantier d'implémentation.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas le freeze `v0.3.0`.
+**Statut : freeze sur `release/v0.3.2`.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
 
 Fonctions :
 

@@ -96,9 +96,10 @@ does not have.
 | Profile | CLI / package — build on tag after RC validation |
 
 `v0.3.1` is the latest published GitHub tag. `release/v0.3.2` is the
-composition branch for the next tag: feature work for this version merges
-there. It is not yet a freeze. Do not tag, draft or publish until the freeze
-merges to `main` and the release ceremony completes.
+scope freeze: changelog, product status, snapshot and smoke only. No new
+features. Freeze-only commits land directly on this branch. Do not tag,
+draft or publish until this freeze merges to `main` and the release
+ceremony completes.
 
 ## Developer workflow
 
@@ -106,24 +107,24 @@ merges to `main` and the release ceremony completes.
 git fetch --prune origin
 git switch release/v0.3.2
 git pull --ff-only origin release/v0.3.2
-git switch -c feat/v0.3.2-icon-capabilities
-# … product commit, push, open PR → release/v0.3.2
+# freeze-only commits: changelog, product status, snapshot, smoke
+# land directly on release/v0.3.2 — no extra feature or chore branch
 ```
 
-Use `main` only as the source for opening `release/vX.Y.Z`, or for work that
-the Release Owner has explicitly excluded from the current version. Do not
-add v0.3.2 product scope through a pull request into `main`.
+Do not add v0.3.2 product scope after the freeze. Do not open a pull request
+to `main` until the Release Owner starts the final `release/v0.3.2` → `main`
+merge. Do not create `chore/v0.3.2-freeze`.
 
 ## v0.3.2 freeze checklist
 
-The freeze has not started. When the Release Owner opens it:
+The freeze is open on `release/v0.3.2`.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
   → merge release → main → tag v0.3.2 → draft → verification → human GO → publish
 ```
 
-1. Keep the freeze changelog (`[0.3.2] - YYYY-MM-DD`, empty `[Unreleased]`) on
+1. Keep the freeze changelog (`[0.3.2] - 2026-09-18`, empty `[Unreleased]`) on
    `release/v0.3.2`. Do not tag or publish from this step.
 2. Run the full validation matrix (CI including `release/**`, race, lint, vuln,
    completion syntax, GoReleaser check, snapshot, 13-artifact verify).

@@ -188,6 +188,9 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"PR → release/vX.Y.Z",
 		"PR finale → main",
 		"Do not open versioned feature or fix pull requests against `main`.",
+		"scope freeze",
+		"Do not create `chore/v0.3.2-freeze`.",
+		"[0.3.2] - 2026-09-18",
 	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("release workflow missing %q", want)
