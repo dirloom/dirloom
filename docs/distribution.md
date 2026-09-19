@@ -90,6 +90,13 @@ Homebrew and Winget must be exercised with **v0.1.1 before v0.2.0**. That separa
 
 The `Update package managers` workflow runs only on **published** GitHub Releases (and manual `workflow_dispatch`). It uses the protected `package-publishing` environment. The bot token is never available to pull-request workflows.
 
+`dirloom/dirloom` is the unique Homebrew writer. It opens a version PR in
+`dirloom/homebrew-tap` by patching only `version` and the four archive SHA-256
+fields in `Casks/dirloom.rb`. Completions, caveats and other cask stanzas stay
+owned by the tap. The tap `Update cask` workflow is `workflow_dispatch` recovery
+only; it must not run on a schedule, and it must delegate to
+`.github/scripts/update-homebrew.sh` rather than rewrite the cask.
+
 ## Maintainer procedure
 
 1. Snapshot GoReleaser, smoke archives, record GO.

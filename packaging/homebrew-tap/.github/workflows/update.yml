@@ -1,9 +1,17 @@
 name: Update cask
 
+# Recovery-only. The official Homebrew publisher is
+# dirloom/dirloom `.github/workflows/update-packages.yml` on a published
+# release (or its workflow_dispatch). Do not add a timed trigger: a second
+# writer collides on branch dirloom-<version>.
+
 on:
-  schedule:
-    - cron: "17 */6 * * *"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Optional Dirloom GitHub release tag. Empty selects the latest stable release.
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -17,90 +25,22 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Open a version PR for the latest stable GitHub Release
+      - name: Open a version PR via the official Dirloom publisher
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PACKAGE_BOT_TOKEN }}
+          REQUESTED_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          TAG="$(gh release view --repo dirloom/dirloom --json isDraft,isPrerelease,tagName --jq 'select((.isDraft|not) and (.isPrerelease|not)) | .tagName')"
-          VERSION="${TAG#v}"
-          work="$(mktemp -d)"
-          gh release download "$TAG" --repo dirloom/dirloom --pattern checksums.txt --dir "$work"
-          hash() { awk -v name="$1" '$2==name{print $1}' "$work/checksums.txt"; }
-          darwin_arm="$(hash dirloom_Darwin_arm64.tar.gz)"
-          darwin_x64="$(hash dirloom_Darwin_x86_64.tar.gz)"
-          linux_arm="$(hash dirloom_Linux_arm64.tar.gz)"
-          linux_x64="$(hash dirloom_Linux_x86_64.tar.gz)"
-          test -n "$darwin_arm" && test -n "$darwin_x64" && test -n "$linux_arm" && test -n "$linux_x64"
-          for archive in \
-            dirloom_Darwin_arm64.tar.gz \
-            dirloom_Darwin_x86_64.tar.gz \
-            dirloom_Linux_arm64.tar.gz \
-            dirloom_Linux_x86_64.tar.gz
-          do
-            gh release download "$TAG" --repo dirloom/dirloom --pattern "$archive" --dir "$work"
-            actual="$(sha256sum "$work/$archive" | awk '{print $1}')"
-            test "$actual" = "$(hash "$archive")"
-          done
-          branch="dirloom-${VERSION}"
-          count="$(gh pr list --head "$branch" --state open --json number --jq 'length')"
-          if [[ "${count:-0}" -ge 1 ]]; then
-            echo "Homebrew PR already open for ${VERSION}"
-            exit 0
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "PACKAGE_BOT_TOKEN is required on dirloom/homebrew-tap for recovery."
+            echo "Prefer workflow_dispatch on dirloom/dirloom Update package managers."
+            exit 1
           fi
-          git checkout -B "$branch"
-          current="$(grep -E '^  version "' Casks/dirloom.rb | head -n1 | cut -d'"' -f2 || true)"
-          if [[ "$current" == "$VERSION" ]]; then
-            echo "Homebrew cask already at ${VERSION}"
-            exit 0
+          git clone --depth 1 https://github.com/dirloom/dirloom.git /tmp/dirloom
+          if [[ -n "${REQUESTED_TAG}" ]]; then
+            TAG="$REQUESTED_TAG"
+          else
+            TAG="$(gh release view --repo dirloom/dirloom --json isDraft,isPrerelease,tagName --jq 'select((.isDraft|not) and (.isPrerelease|not)) | .tagName')"
           fi
-          cat > Casks/dirloom.rb <<EOF
-          cask "dirloom" do
-            arch arm: "arm64", intel: "x86_64"
-
-            version "${VERSION}"
-
-            on_macos do
-              sha256 arm:   "${darwin_arm}",
-                     intel: "${darwin_x64}"
-
-              url "https://github.com/dirloom/dirloom/releases/download/v#{version}/dirloom_Darwin_#{arch}.tar.gz"
-            end
-
-            on_linux do
-              sha256 arm:   "${linux_arm}",
-                     intel: "${linux_x64}"
-
-              url "https://github.com/dirloom/dirloom/releases/download/v#{version}/dirloom_Linux_#{arch}.tar.gz"
-            end
-
-            name "Dirloom"
-            desc "Clean project trees for humans and AI"
-            homepage "https://github.com/dirloom/dirloom"
-
-            livecheck do
-              url "https://github.com/dirloom/dirloom/releases/latest"
-              strategy :github_latest
-            end
-
-            binary "dirloom"
-
-            caveats <<~EOS
-              Generate shell completions from the installed binary:
-
-                dirloom completion bash
-                dirloom completion zsh
-                dirloom completion fish
-                dirloom completion powershell
-            EOS
-          end
-          EOF
-          git add Casks/dirloom.rb
-          if git diff --cached --quiet; then
-            echo "Homebrew cask already at ${VERSION}"
-            exit 0
-          fi
-          git -c user.name="dirloom-package-mgr" -c user.email="330109029+dirloom-package-mgr@users.noreply.github.com" commit -m "chore(cask): update dirloom to ${VERSION}"
-          git push -u origin "$branch"
-          gh pr create --head "$branch" --title "dirloom ${VERSION}" --body "Update the Dirloom cask to GitHub Release ${TAG}. Binaries are the official archives; hashes were recalculated independently from checksums.txt."
+          export TAG
+          bash /tmp/dirloom/.github/scripts/update-homebrew.sh
