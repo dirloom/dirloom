@@ -25,6 +25,11 @@ dirloom completion powershell
 
 ## Updates
 
-Version bumps are opened as pull requests by the Dirloom package bot. Direct pushes to `main` are not used. Mechanical version PRs need one maintainer approval; workflow changes need two independent approvals.
+Version bumps are opened as pull requests by the Dirloom package bot from
+`dirloom/dirloom` (`Update package managers` on a published release). This tap
+does not schedule its own writer. Direct pushes to `main` are not used.
+Mechanical version PRs need one maintainer approval; workflow changes need two
+independent approvals. The optional `Update cask` workflow is
+`workflow_dispatch` recovery only and delegates to the same publisher.
 
 Bootstrap the tap with the last published stable release (`v0.1.1`) before promoting a new product version.
