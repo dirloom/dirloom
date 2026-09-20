@@ -86,6 +86,46 @@ the feature, then retarget the pull request to `release/vX.Y.Z`. Rebase onto
 the release branch only when that branch already contains commits the feature
 does not have.
 
+## Publishable increments
+
+Each GitHub-publishable version is its own release-branch unit, including
+alphas and release candidates:
+
+```text
+v0.4.0-a1  →  release/v0.4.0-a1
+v0.4.0-a2  →  release/v0.4.0-a2
+v0.4.0-a3  →  release/v0.4.0-a3
+v0.4.0-rc1 →  release/v0.4.0-rc1
+v0.4.0     →  release/v0.4.0
+```
+
+Do not land several publishable increments on one shared `release/v0.4.0`
+branch. After freeze and validation, that increment's branch opens the final
+pull request to `main`. The annotated tag is created on the real merge
+commit in `main`.
+
+## GitHub Pre-releases and package managers
+
+GoReleaser leaves every tag as a **draft** and sets `prerelease: auto`. A
+SemVer prerelease identifier (`-a1`, `-rc1`, …) becomes a GitHub
+Pre-release; a stable tag such as `v0.4.0` does not.
+
+```text
+v0.4.0-a1 published
+  → GitHub Pre-release
+  → 13 artifacts / SBOM / attestations
+  → Scoop / Homebrew / Winget stable channels unchanged
+
+v0.4.0 published
+  → GitHub Release
+  → Scoop / Homebrew / Winget update PRs
+```
+
+The `Update package managers` jobs run on `release: published` only when
+`github.event.release.prerelease` is false, or on `workflow_dispatch`.
+`workflow_dispatch` remains the escape hatch to test a prerelease tag in a
+package repository without making that the default path.
+
 ## Active release
 
 | Field | Value |
