@@ -183,6 +183,7 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"v0.3.2",
 		"v0.3.3",
 		"v0.4.0",
+		"v0.4.0-a1",
 		"PRESENTATION",
 		"CHANGE",
 		"release/vX.Y.Z",
@@ -194,6 +195,10 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"[0.3.2] - 2026-09-18",
 		"Do not create `chore/v0.3.3-freeze`.",
 		"[0.3.3] - 2026-09-18",
+		"Do not create `chore/v0.4.0-a1-freeze`.",
+		"[0.4.0-a1] - 2026-09-20",
+		"prerelease / CLI package",
+		"release/v0.4.0-a2",
 		"Optional extended terminal matrix",
 		"Release blocker: NO",
 	} {

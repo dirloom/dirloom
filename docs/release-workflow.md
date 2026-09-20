@@ -20,6 +20,7 @@ Examples:
 - `v0.3.1` — PRESENTATION refinement / Contextual Help & CLI Guidance
 - `v0.3.2` — PRESENTATION refinement / Icon Capability Contract & Portable ASCII Icons
 - `v0.3.3` — PRESENTATION refinement / Nerd Catalog Fidelity, Provenance & Classification Refinement
+- `v0.4.0-a1` — CHANGE alpha / Artifact Identity & Fingerprint
 - `v0.4.0` — CHANGE / Fingerprint, Snapshot, Verify, Diff
 
 `v0.4.0` stays reserved for the CHANGE milestone. Contextual help and the icon
@@ -130,43 +131,79 @@ package repository without making that the default path.
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.3.3` |
-| Latest published release | `v0.3.2` |
-| Release branch | `release/v0.3.3` |
+| Version | `v0.4.0-a1` |
+| Latest published release | `v0.3.3` |
+| Release branch | `release/v0.4.0-a1` |
 | Integration branch | `main` |
-| Profile | CLI / package — build on tag after RC validation |
+| Profile | prerelease / CLI package |
 
-`v0.3.2` is the latest published GitHub tag. `release/v0.3.3` is the
+`v0.3.3` is the latest published GitHub tag. `release/v0.4.0-a1` is the
 scope freeze: changelog, product status, snapshot and smoke only. No new
 features. Freeze-only commits land directly on this branch. Do not tag,
 draft or publish until this freeze merges to `main` and the release
-ceremony completes.
+ceremony completes. Each publishable increment (`a1`, `a2`, `a3`, `rc1`,
+stable) keeps its own `release/v…` branch.
 
 ```text
-feature → release/v0.3.3
-release/v0.3.3 → main
-main → annotated tag v0.3.3
-tag workflow → draft
-human GO → publish
+feature → release/v0.4.0-a1
+release/v0.4.0-a1 → main
+main → annotated tag v0.4.0-a1
+tag workflow → draft GitHub Pre-release
+human GO → publish Pre-release
+stable package managers stay silent
 ```
 
 ## Developer workflow
 
 ```bash
 git fetch --prune origin
-git switch release/v0.3.3
-git pull --ff-only origin release/v0.3.3
+git switch release/v0.4.0-a1
+git pull --ff-only origin release/v0.4.0-a1
 # freeze-only commits: changelog, product status, snapshot, smoke
-# land directly on release/v0.3.3 — no extra feature or chore branch
+# land directly on release/v0.4.0-a1 — no extra feature or chore branch
 ```
 
-Do not add v0.3.3 product scope after the freeze. Do not open a pull request
-to `main` until the Release Owner starts the final `release/v0.3.3` → `main`
-merge. Do not create `chore/v0.3.3-freeze`.
+Do not add v0.4.0-a1 product scope after the freeze. Do not open a pull
+request to `main` until the Release Owner starts the final
+`release/v0.4.0-a1` → `main` merge. Do not create `chore/v0.4.0-a1-freeze`.
 
-## v0.3.3 freeze checklist
+## v0.4.0-a1 freeze checklist
 
-The freeze is open on `release/v0.3.3`.
+The freeze is open on `release/v0.4.0-a1`.
+
+```text
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → merge release → main → tag v0.4.0-a1 → draft Pre-release
+  → verification → human GO → publish Pre-release
+```
+
+1. Keep the freeze changelog (`[0.4.0-a1] - 2026-09-20`, empty
+   `[Unreleased]`) on `release/v0.4.0-a1`. Do not tag or publish from this
+   step.
+2. Run the full validation matrix (CI including `release/**`, race, lint,
+   vuln, completion syntax, GoReleaser check, snapshot, 13-artifact
+   verify).
+3. Record GO/NO-GO with commit SHA and artifact checksums.
+4. Merge `release/v0.4.0-a1` → `main` with a merge commit.
+5. Tag annotated `v0.4.0-a1` on `main` only after smoke tests on candidate
+   archives. The binary reports `dirloom 0.4.0-a1` (no leading `v`).
+6. The tag workflow leaves a **draft** GitHub Pre-release (`prerelease:
+   auto`). Verify 13 artifacts, 12 checksum lines, SBOMs, licences inside
+   archives, and `gh attestation verify` on all 13 subjects. Do not
+   publish from CI.
+7. Human GO publishes the draft Pre-release. Then delete
+   `release/v0.4.0-a1` after closure.
+8. Publication must **not** open Scoop, Homebrew or Winget PRs. Stable
+   package channels stay on `v0.3.3` until a non-prerelease tag.
+
+Do not create `chore/v0.4.0-a1-freeze`.
+
+## v0.3.3 release record
+
+v0.3.3 is published. The checklist below is the completed ceremony, kept
+for audit. It is not the current active release state.
+
+The **scope freeze** lived on `release/v0.3.3`.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
@@ -188,7 +225,7 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
 8. Publication opens Scoop, Homebrew and Winget PRs. **Release Done** does not
    wait for the Winget merge.
 
-Required visual gate is Windows Terminal with a compatible Nerd Font. The
+Required visual gate was Windows Terminal with a compatible Nerd Font. The
 extended WezTerm/Alacritty matrix is optional and is not a release blocker.
 
 ```text
@@ -206,13 +243,13 @@ Optional extended terminal matrix
 - Release blocker: NO
 ```
 
-WezTerm and Alacritty were not available. Absence does not block v0.3.3
+WezTerm and Alacritty were not available. Absence did not block v0.3.3
 because Nerd glyph/codepoint validity is covered automatically, Nerd Fonts
 v3.5.1 provenance is pinned, ASCII and Unicode channels are frozen by tests,
 spacing behavior is tested, Dirloom makes no terminal-width assumption, and
 the full CI matrix is green.
 
-Do not create `chore/v0.3.3-freeze`.
+Do not create `chore/v0.3.3-freeze`. That freeze is closed.
 
 ## v0.3.2 release record
 
@@ -319,7 +356,7 @@ snapshot → smoke → freeze reviewed → CI green → RELEASE READY
    wait for the Winget merge. Flip each channel to Distribution Verified after
    install/upgrade/uninstall smoke.
 
-See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.2`.
+See [Distribution](distribution.md). The latest published GitHub tag is `v0.3.3`.
 
 ## Inventory
 

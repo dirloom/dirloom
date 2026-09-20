@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a1] - 2026-09-20
+
+CHANGE alpha: structural artifact identity and `dirloom fingerprint`, plus
+Homebrew publisher uniqueness and GitHub Pre-release package-manager guards.
+This increment does not add snapshot, verify or diff.
+
 ### Added
 
 - Add `dirloom fingerprint` to identify the observed structural view as `dlm:v1:sha256:<digest>` without hashing file contents.
@@ -178,7 +184,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...HEAD
+[0.4.0-a1]: https://github.com/dirloom/dirloom/compare/v0.3.3...v0.4.0-a1
 [0.3.3]: https://github.com/dirloom/dirloom/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dirloom/dirloom/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dirloom/dirloom/compare/v0.3.0...v0.3.1
