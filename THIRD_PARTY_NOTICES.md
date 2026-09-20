@@ -6,9 +6,10 @@ Dirloom includes the following direct runtime dependencies:
 - `github.com/git-pkgs/gitignore` v1.2.0 — MIT License.
 - `golang.org/x/sys` v0.47.0 — BSD 3-Clause License.
 - `golang.org/x/term` v0.45.0 — BSD 3-Clause License.
+- `golang.org/x/text` v0.39.0 — BSD 3-Clause License.
 - `go.yaml.in/yaml/v3` v3.0.4 — MIT and Apache License 2.0.
 
-Transitive module metadata is pinned in `go.sum`. Full corresponding license texts are distributed in `LICENSES` and every release archive. The Go project licenses for `x/sys` and `x/term` are recorded separately as `LICENSES/BSD-3-Clause-x-sys.txt` and `LICENSES/BSD-3-Clause-x-term.txt`.
+Transitive module metadata is pinned in `go.sum`. Full corresponding license texts are distributed in `LICENSES` and every release archive. The Go project licenses for `x/sys`, `x/term` and `x/text` are recorded separately as `LICENSES/BSD-3-Clause-x-sys.txt`, `LICENSES/BSD-3-Clause-x-term.txt` and `LICENSES/BSD-3-Clause-x-text.txt`.
 
 ## Nerd Font glyph metadata
 

@@ -11,7 +11,12 @@ cmd/dirloom
        │    └─ internal/presentation
        ├─ internal/app
        │    ├─ internal/filter
-       │    └─ internal/tree
+       │    ├─ internal/tree
+       │    ├─ internal/source
+       │    │    ├─ internal/tree
+       │    │    └─ internal/artifact
+       │    └─ internal/identity
+       │         └─ internal/artifact
        ├─ internal/render
        │    ├─ internal/diagram
        │    └─ internal/outputformat
@@ -27,9 +32,12 @@ cmd/dirloom
 
 - `internal/cli`: Cobra flags, validation, stable exit-code mapping and stream routing.
 - `internal/config`: strict YAML parsing, the immutable built-in preset catalog, project and user discovery, layered inspection and presentation resolution, provenance and diagnostics.
-- `internal/app`: root and output resolution plus the reusable `Inspect` application service.
+- `internal/app`: root and output resolution plus the reusable `Inspect` and `Fingerprint` application services.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
+- `internal/artifact`: Canonical Structural Artifact v1, path canonicalization (NFC, `/`) and validation. No presentation or CLI dependency.
+- `internal/source`: `StructuralSource` abstraction and FilesystemSource adapter over the existing scanner.
+- `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
 - `internal/diagram`: canonical graph projection (`Document`, `ContractVersion`, `structure` view) with a single `tree` adapter.
 - `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
@@ -76,3 +84,5 @@ The tree stores normalized relative paths only as private tie-break metadata. Pu
 Rendering finishes in memory before stdout, the clipboard, or the transactional file writer receives bytes. Theme, mode and terminal-preparation errors therefore leave stdout, the clipboard and existing output files untouched. A forced interactive Windows color session restores the previous console mode after writing.
 
 The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--output` are rejected before configuration and scanning. Automatic color is disabled for the clipboard; automatic icons stay Unicode, like interactive text. The renderer validates UTF-8 once; the clipboard does not apply a stricter encoding policy.
+
+`dirloom fingerprint` reuses `app.Inspect` for a single scan, adapts the observation into a Canonical Structural Artifact, projects Identity v1, encodes it without JSON, and hashes with SHA-256. Presentation flags are ignored. Contracts: [Canonical Structural Artifact v1](canonical-structural-artifact-v1.md), [Identity Projection v1](contracts/identity-projection-v1.md), [Canonical Identity Encoding v1](contracts/canonical-identity-encoding-v1.md), [fingerprint command](reference/fingerprint.md), [ADR 0001](adr/0001-structural-fingerprint-identity.md). Local performance snapshots: [v0.4-a1 benchmarks](benchmarks/v0.4-a1.md).
