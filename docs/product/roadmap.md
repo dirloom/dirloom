@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.3.2` publiée ; freeze `v0.3.3` sur `release/v0.3.3`<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.3.3` publiée ; freeze `v0.4.0-a1` sur `release/v0.4.0-a1`<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2071,7 +2071,7 @@ Frontière : aucune notion structurelle de v0.4. Le défaut reste `icons: never`
 
 **Niveau : raffinement PRESENTATION, avant CHANGE.**
 
-**Statut : freeze sur `release/v0.3.3`.** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
+**Statut : publiée (`v0.3.3`).** Ce n'est pas un nouveau jalon stratégique et il ne rouvre pas CHANGE.
 
 Fonctions :
 
@@ -2118,6 +2118,19 @@ Fonctions :
 - `watch` expérimental.
 
 **Killer features :** Structural Diff, Snapshot + Verify.
+
+### v0.4.0-a1 — Artifact identity & fingerprint
+
+**Statut : freeze sur `release/v0.4.0-a1`.** Premier incrément publiable de CHANGE. Ce n'est pas encore `snapshot`, `verify` ni `diff`.
+
+Fonctions :
+
+- artefact structurel canonique v1 ;
+- projection d'identité v1 et encodage canonique v1 (DLMI) ;
+- `dirloom fingerprint` texte et JSON (`schemaVersion` 1) ;
+- GitHub Pre-release ; canaux Scoop/Homebrew/Winget stables inchangés.
+
+Frontière : pas de persistance de snapshot, pas de verify, pas de diff.
 
 ## v0.5 — Scaffold & Architecture Packs
 

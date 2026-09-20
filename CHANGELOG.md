@@ -4,12 +4,27 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a1] - 2026-09-20
+
+CHANGE alpha: structural artifact identity and `dirloom fingerprint`, plus
+Homebrew publisher uniqueness and GitHub Pre-release package-manager guards.
+This increment does not add snapshot, verify or diff.
+
+### Added
+
+- Add `dirloom fingerprint` to identify the observed structural view as `dlm:v1:sha256:<digest>` without hashing file contents.
+- Add Canonical Structural Artifact v1, Identity Projection v1 and Canonical Identity Encoding v1, reused by a single existing scanner traversal.
+- Publish fingerprint text and JSON (`schemaVersion` 1) contracts, plus architecture, encoding and command reference docs.
+
 ### Changed
 
 - Make `dirloom/dirloom` the unique Homebrew publisher: patch cask version and
   SHA-256 fields only, delete orphan `dirloom-<version>` branches, and keep the
   tap `Update cask` workflow as manual recovery (`workflow_dispatch`) rather
   than a scheduled writer.
+- Mark SemVer prerelease tags as GitHub Pre-releases (`prerelease: auto`) and
+  skip Scoop, Homebrew and Winget on those publications unless a maintainer
+  uses `workflow_dispatch`.
 
 ## [0.3.3] - 2026-09-18
 
@@ -169,7 +184,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...HEAD
+[0.4.0-a1]: https://github.com/dirloom/dirloom/compare/v0.3.3...v0.4.0-a1
 [0.3.3]: https://github.com/dirloom/dirloom/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dirloom/dirloom/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dirloom/dirloom/compare/v0.3.0...v0.3.1

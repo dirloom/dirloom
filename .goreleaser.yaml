@@ -69,3 +69,5 @@ changelog:
 
 release:
   draft: true
+  # SemVer prerelease tags (v0.4.0-a1, v0.4.0-rc1, …) become GitHub Pre-releases.
+  prerelease: auto

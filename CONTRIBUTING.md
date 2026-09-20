@@ -11,7 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-Versioned product work lands by pull request on `release/vX.Y.Z`. The v0.3.3 freeze lives on `release/v0.3.3`; that branch accepts only freeze and release-candidate work. Do not open a feature PR to `main` for this version. See
+Versioned product work lands by pull request on `release/vX.Y.Z`. The v0.4.0-a1 freeze lives on `release/v0.4.0-a1`; that branch accepts only freeze and release-candidate work. Do not open a feature PR to `main` for this version. See
 [Release workflow](docs/release-workflow.md).
 
 1. Create a focused branch.
