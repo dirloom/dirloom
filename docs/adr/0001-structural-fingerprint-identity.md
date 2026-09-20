@@ -1,6 +1,7 @@
 # ADR 0001 — Structural fingerprint identity
 
-> **Status:** accepted for `v0.4.0-a1`  
+> **Status:** accepted for `v0.4.0-a1`
+>
 > **Date:** 2026-09-17
 
 ## Context

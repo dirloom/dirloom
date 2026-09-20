@@ -1,9 +1,13 @@
 # Identity Projection v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`  
-> **Projection version:** `1`  
-> **Fingerprint namespace:** `dlm`  
-> **Hash:** SHA-256  
+> **Status:** normative contract for Dirloom `v0.4.0-a1`
+>
+> **Projection version:** `1`
+>
+> **Fingerprint namespace:** `dlm`
+>
+> **Hash:** SHA-256
+>
 > **Related:** [Canonical Structural Artifact v1](../canonical-structural-artifact-v1.md), [Canonical Identity Encoding v1](canonical-identity-encoding-v1.md)
 
 Identity Projection v1 maps a validated Canonical Structural Artifact to an ordered list of identity records. Those records — not JSON, not the observation tree, not presentation — are what Canonical Encoding v1 serializes and what SHA-256 hashes.

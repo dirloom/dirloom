@@ -3,6 +3,7 @@ package identity
 import (
 	"encoding/binary"
 	"io"
+	"math"
 
 	"github.com/dirloom/dirloom/internal/artifact"
 )
@@ -16,8 +17,9 @@ const (
 // EncodeV1 writes Canonical Identity Encoding v1 to writer. Records must
 // already be Identity Projection v1 (sorted). Writer errors are returned.
 func EncodeV1(writer io.Writer, records []Record) error {
-	if len(records) > int(^uint32(0)) {
-		return artifact.InternalError("identity record count exceeds encoding limit")
+	count, err := boundedU32(len(records))
+	if err != nil {
+		return err
 	}
 	if err := writeFull(writer, []byte(magic)); err != nil {
 		return artifact.EncodingFailure(err)
@@ -25,7 +27,7 @@ func EncodeV1(writer io.Writer, records []Record) error {
 	if err := writeFull(writer, []byte{byte(ProjectionVersion), byte(EncodingVersion)}); err != nil {
 		return artifact.EncodingFailure(err)
 	}
-	if err := writeU32(writer, uint32(len(records))); err != nil {
+	if err := writeU32(writer, count); err != nil {
 		return artifact.EncodingFailure(err)
 	}
 	for _, record := range records {
@@ -63,13 +65,24 @@ func writeString(writer io.Writer, value string) error {
 	if len(value) > maxRecordBytes {
 		return artifact.InternalError("identity string exceeds encoding limit")
 	}
-	if err := writeU32(writer, uint32(len(value))); err != nil {
+	length, err := boundedU32(len(value))
+	if err != nil {
+		return err
+	}
+	if err := writeU32(writer, length); err != nil {
 		return artifact.EncodingFailure(err)
 	}
 	if err := writeFull(writer, []byte(value)); err != nil {
 		return artifact.EncodingFailure(err)
 	}
 	return nil
+}
+
+func boundedU32(n int) (uint32, error) {
+	if n < 0 || uint64(n) > math.MaxUint32 {
+		return 0, artifact.InternalError("identity length exceeds encoding limit")
+	}
+	return uint32(n), nil //nolint:gosec // n is checked against math.MaxUint32
 }
 
 func writeU32(writer io.Writer, value uint32) error {

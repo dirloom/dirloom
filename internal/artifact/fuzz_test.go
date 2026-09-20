@@ -81,7 +81,7 @@ func FuzzArtifactValidation(f *testing.F) {
 	f.Add("..", "/abs", uint8(9), "a")
 	f.Add("café", "cafe\u0301", uint8(2), "")
 	f.Fuzz(func(t *testing.T, rootName, childPath string, kind byte, childName string) {
-		nodeKind := Kind("file")
+		var nodeKind Kind
 		if decoded, err := KindFromCode(kind); err == nil {
 			nodeKind = decoded
 		} else {

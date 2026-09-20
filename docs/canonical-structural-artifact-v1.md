@@ -1,7 +1,9 @@
 # Canonical Structural Artifact v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`  
-> **Audience:** engineering  
+> **Status:** normative contract for Dirloom `v0.4.0-a1`
+>
+> **Audience:** engineering
+>
 > **Related:** [Identity Projection v1](contracts/identity-projection-v1.md), [Canonical Identity Encoding v1](contracts/canonical-identity-encoding-v1.md), [fingerprint command](reference/fingerprint.md)
 
 This document defines the **Canonical Structural Artifact**: the shared structural truth used by Structural Version Control. Presentation, configuration provenance and filesystem location are outside this model.

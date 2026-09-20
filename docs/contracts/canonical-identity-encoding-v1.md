@@ -1,7 +1,9 @@
 # Canonical Identity Encoding v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`  
-> **Encoding version:** `1`  
+> **Status:** normative contract for Dirloom `v0.4.0-a1`
+>
+> **Encoding version:** `1`
+>
 > **Related:** [Identity Projection v1](identity-projection-v1.md)
 
 Identity bytes are a purpose-built binary document written to an `io.Writer`. Dirloom MUST NOT hash `json.Marshal` output, `fmt` formatting, or any map iteration order.
