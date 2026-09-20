@@ -27,6 +27,7 @@ jobs:
 
   homebrew:
     name: Homebrew PR
+    # Unique Homebrew writer. The tap must not schedule a competing updater.
     runs-on: ubuntu-latest
     environment: package-publishing
     steps:

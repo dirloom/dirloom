@@ -10,6 +10,13 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 - Add Canonical Structural Artifact v1, Identity Projection v1 and Canonical Identity Encoding v1, reused by a single existing scanner traversal.
 - Publish fingerprint text and JSON (`schemaVersion` 1) contracts, plus architecture, encoding and command reference docs.
 
+### Changed
+
+- Make `dirloom/dirloom` the unique Homebrew publisher: patch cask version and
+  SHA-256 fields only, delete orphan `dirloom-<version>` branches, and keep the
+  tap `Update cask` workflow as manual recovery (`workflow_dispatch`) rather
+  than a scheduled writer.
+
 ## [0.3.3] - 2026-09-18
 
 PRESENTATION refinement: Nerd catalog fidelity, provenance, and classification
