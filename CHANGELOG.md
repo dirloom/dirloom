@@ -16,6 +16,9 @@ All notable changes to Dirloom are documented here. The project follows Semantic
   SHA-256 fields only, delete orphan `dirloom-<version>` branches, and keep the
   tap `Update cask` workflow as manual recovery (`workflow_dispatch`) rather
   than a scheduled writer.
+- Mark SemVer prerelease tags as GitHub Pre-releases (`prerelease: auto`) and
+  skip Scoop, Homebrew and Winget on those publications unless a maintainer
+  uses `workflow_dispatch`.
 
 ## [0.3.3] - 2026-09-18
 

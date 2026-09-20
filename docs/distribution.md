@@ -88,7 +88,14 @@ Homebrew and Winget must be exercised with **v0.1.1 before v0.2.0**. That separa
 4. **Winget.** Identity is `Dirloom.Dirloom`. Bootstrap with zip + nested portable `dirloom.exe`. If a v0.1.0 new-package PR is already open and validated, do not open a competing PR; submit v0.1.1 after it merges. Use WingetCreate 1.12.13.0.
 5. **Product tag.** Tag v0.2.0 only after Homebrew is bootstrapped with v0.1.1 and Winget has an opened (not necessarily merged) v0.1.1 or validated v0.1.0 identity PR. Release workflow leaves a **draft**. Human GO publishes it. Never replace artifacts under that tag.
 
-The `Update package managers` workflow runs only on **published** GitHub Releases (and manual `workflow_dispatch`). It uses the protected `package-publishing` environment. The bot token is never available to pull-request workflows.
+The `Update package managers` workflow runs on **published non-prerelease**
+GitHub Releases, and on manual `workflow_dispatch`. Published GitHub
+Pre-releases (`vX.Y.Z-aN`, `vX.Y.Z-rcN`, and any other SemVer prerelease
+identifier) skip Scoop, Homebrew and Winget so stable channels stay on the
+last stable tag. Maintainers may still exercise those jobs against a
+prerelease tag with `workflow_dispatch`. The workflow uses the protected
+`package-publishing` environment. The bot token is never available to
+pull-request workflows.
 
 `dirloom/dirloom` is the unique Homebrew writer. It opens a version PR in
 `dirloom/homebrew-tap` by patching only `version` and the four archive SHA-256
@@ -104,7 +111,11 @@ only; it must not run on a schedule, and it must delegate to
 3. Tag `vX.Y.Z` on `main`.
 4. The Release workflow builds a **draft**, attaches SBOMs, rewrites `checksums.txt`, attests 13 subjects, and verifies attestations. It does not publish.
 5. Human GO publishes the draft.
-6. The package workflow opens Scoop, Homebrew and Winget PRs. Jobs are idempotent if a matching PR or version already exists.
+6. On a published **non-prerelease** release, the package workflow opens Scoop,
+   Homebrew and Winget PRs. Jobs are idempotent if a matching PR or version
+   already exists. Published Pre-releases skip those jobs; use
+   `workflow_dispatch` only when a maintainer intentionally tests a prerelease
+   tag.
 7. Release Done closes the milestone. Distribution Verified flips per channel after install smoke.
 
 Rollback: before publication, revert on the release branch. After publication, never replace artifacts. A broken manager recipe stays on the previous version while it is fixed in its own repository; that does not undo Release Done.

@@ -15,6 +15,7 @@ permissions:
 jobs:
   scoop:
     name: Scoop PR
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     environment: package-publishing
     steps:
@@ -28,6 +29,7 @@ jobs:
   homebrew:
     name: Homebrew PR
     # Unique Homebrew writer. The tap must not schedule a competing updater.
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     environment: package-publishing
     steps:
@@ -40,6 +42,7 @@ jobs:
 
   winget:
     name: Winget PR
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
     runs-on: windows-latest
     environment: package-publishing
     steps:
