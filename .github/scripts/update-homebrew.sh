@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Open an idempotent version PR against dirloom/homebrew-tap.
+# Dirloom/dirloom is the unique Homebrew publisher. The tap owns Casks/dirloom.rb;
+# this script patches only version and the four archive SHA-256 fields.
+# Requires GH_TOKEN (bot) with contents:write and pull-requests:write on that repo.
+
 TAG="${TAG:?tag is required}"
 VERSION="${TAG#v}"
 TAP_REPO="${HOMEBREW_TAP_REPO:-dirloom/homebrew-tap}"
 ROOT_REPO="${GITHUB_REPOSITORY:-dirloom/dirloom}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/patch-homebrew-cask.sh
+source "${SCRIPT_DIR}/lib/patch-homebrew-cask.sh"
+
+BOT_NAME="dirloom-package-mgr"
+BOT_EMAIL="330109029+dirloom-package-mgr@users.noreply.github.com"
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
   echo "GH_TOKEN is required" >&2
@@ -44,81 +55,58 @@ fi
 
 gh repo clone "$TAP_REPO" "$work/tap"
 cd "$work/tap"
+git fetch origin main
+git checkout --track origin/main 2>/dev/null || git checkout main
+
+cask="Casks/dirloom.rb"
+if [[ ! -f "$cask" ]]; then
+  echo "Homebrew tap is missing ${cask}; the tap owns the cask and the publisher will not create it." >&2
+  exit 1
+fi
+
+current="$(grep -E '^  version "' "$cask" | head -n1 | cut -d'"' -f2 || true)"
+if [[ "$current" == "$VERSION" ]]; then
+  echo "Homebrew cask already at ${VERSION}"
+  exit 0
+fi
+
 branch="dirloom-${VERSION}"
 count="$(gh pr list --repo "$TAP_REPO" --head "$branch" --state open --json number --jq 'length')"
 if [[ "${count:-0}" -ge 1 ]]; then
   echo "Homebrew PR already open for ${VERSION}"
   exit 0
 fi
-git checkout -B "$branch"
-mkdir -p Casks
-cat > Casks/dirloom.rb <<EOF
-cask "dirloom" do
-  arch arm: "arm64", intel: "x86_64"
 
-  version "${VERSION}"
+if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+  tip="$(git ls-remote origin "refs/heads/${branch}" | awk '{print $1}')"
+  email="$(gh api "repos/${TAP_REPO}/commits/${tip}" --jq .commit.author.email)"
+  message="$(gh api "repos/${TAP_REPO}/commits/${tip}" --jq .commit.message)"
+  if [[ "$email" == "$BOT_EMAIL" || "$message" == chore\(cask\):\ update\ dirloom\ to\ * ]]; then
+    echo "Deleting orphan automation branch ${branch}"
+    git push origin --delete "$branch"
+  else
+    echo "Remote branch ${branch} exists without a PR and is not a package-bot cask bump; refusing to overwrite." >&2
+    exit 1
+  fi
+fi
 
-  on_macos do
-    sha256 arm:   "${darwin_arm}",
-           intel: "${darwin_x64}"
+git checkout -B "$branch" origin/main
+before="${work}/dirloom.rb.before"
+cp "$cask" "$before"
+patch_homebrew_cask "$cask" "$VERSION" "$darwin_arm" "$darwin_x64" "$linux_arm" "$linux_x64"
+assert_homebrew_cask_release_fields_only "$before" "$cask"
 
-    url "https://github.com/dirloom/dirloom/releases/download/v#{version}/dirloom_Darwin_#{arch}.tar.gz"
-  end
-  on_linux do
-    sha256 arm:   "${linux_arm}",
-           intel: "${linux_x64}"
-
-    url "https://github.com/dirloom/dirloom/releases/download/v#{version}/dirloom_Linux_#{arch}.tar.gz"
-  end
-
-  name "Dirloom"
-  desc "Clean project trees for humans and AI"
-  homepage "https://github.com/dirloom/dirloom"
-
-  livecheck do
-    url "https://github.com/dirloom/dirloom/releases/latest"
-    strategy :github_latest
-  end
-
-  binary "dirloom"
-
-  postflight do
-    executable = staged_path/"dirloom"
-    prefix = Pathname.new(HOMEBREW_PREFIX)
-    begin
-      bash_dir = prefix/"etc/bash_completion.d"
-      zsh_dir = prefix/"share/zsh/site-functions"
-      fish_dir = prefix/"share/fish/vendor_completions.d"
-      pwsh_dir = prefix/"share/pwsh/completions"
-      bash_dir.mkpath
-      zsh_dir.mkpath
-      fish_dir.mkpath
-      pwsh_dir.mkpath
-      (bash_dir/"dirloom").write system_command(executable, args: ["completion", "bash"]).stdout
-      (zsh_dir/"_dirloom").write system_command(executable, args: ["completion", "zsh"]).stdout
-      (fish_dir/"dirloom.fish").write system_command(executable, args: ["completion", "fish"]).stdout
-      (pwsh_dir/"dirloom.ps1").write system_command(executable, args: ["completion", "powershell"]).stdout
-    rescue => e
-      puts "Could not install generated shell completions (#{e.message}); run dirloom completion <shell> manually."
-    end
-  end
-
-  caveats <<~EOS
-    Generate shell completions from the installed binary if they were not
-    installed automatically:
-
-      dirloom completion bash
-      dirloom completion zsh
-      dirloom completion fish
-      dirloom completion powershell
-  EOS
-end
-EOF
-git add Casks/dirloom.rb
+git add -- "$cask"
+changed_files="$(git diff --cached --name-only)"
+if [[ "$changed_files" != "$cask" ]]; then
+  echo "Homebrew publisher staged unexpected paths:" >&2
+  printf '%s\n' "$changed_files" >&2
+  exit 1
+fi
 if git diff --cached --quiet; then
   echo "Homebrew cask already at ${VERSION}"
   exit 0
 fi
-git -c user.name="dirloom-package-mgr" -c user.email="330109029+dirloom-package-mgr@users.noreply.github.com" commit -m "chore(cask): update dirloom to ${VERSION}"
+git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit -m "chore(cask): update dirloom to ${VERSION}"
 git push -u origin "$branch"
-gh pr create --repo "$TAP_REPO" --head "$branch" --title "dirloom ${VERSION}" --body "Update the Dirloom cask to GitHub Release ${TAG}. Binaries are the official archives; Dirloom is not rebuilt. Hashes were recalculated independently from checksums.txt."
+gh pr create --repo "$TAP_REPO" --head "$branch" --title "dirloom ${VERSION}" --body "Update the Dirloom cask to GitHub Release ${TAG}. Binaries are the official archives; Dirloom is not rebuilt. Hashes were recalculated independently from checksums.txt. Packaging stanzas in Casks/dirloom.rb are owned by the tap and are not rewritten."
