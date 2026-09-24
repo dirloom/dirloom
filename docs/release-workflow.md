@@ -133,16 +133,20 @@ package repository without making that the default path.
 | --- | --- |
 | Version | `v0.4.0-a2` |
 | Latest published release | `v0.4.0-a1` |
+| Release candidate being frozen | `v0.4.0-a2` |
 | Release branch | `release/v0.4.0-a2` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
+| Scope | persistent self-verifying snapshots |
+| Not in this increment | verify, diff |
 
-`v0.4.0-a1` is the latest published GitHub Pre-release tag. Active development
-for the next publishable increment is `v0.4.0-a2` on `release/v0.4.0-a2`.
-Implementation work lands through feature branches targeting
-`release/v0.4.0-a2` (for example `feat/v0.4.0-a2-snapshot`). Do not open
-versioned feature pull requests against `main`. Each publishable increment
-(`a1`, `a2`, `a3`, `rc1`, stable) keeps its own `release/v…` branch.
+`v0.4.0-a1` is the latest published GitHub Pre-release tag. The release
+candidate being frozen is `v0.4.0-a2` on `release/v0.4.0-a2`. Its scope is
+Snapshot Schema v1 and `dirloom snapshot`. It does not add verify or diff.
+The profile stays prerelease: a future tag is a GitHub Pre-release and does
+not update Scoop, Homebrew or Winget. Do not open versioned feature pull
+requests against `main`. Each publishable increment (`a1`, `a2`, `a3`,
+`rc1`, stable) keeps its own `release/v…` branch.
 
 ```text
 feature → release/v0.4.0-a2
@@ -155,15 +159,50 @@ stable package managers stay silent
 
 ## Developer workflow
 
+The implementation is frozen. Freeze-only commits land directly on
+`release/v0.4.0-a2`. Do not add product scope. Do not start A3.
+
 ```bash
 git fetch --prune origin
 git switch release/v0.4.0-a2
 git pull --ff-only origin release/v0.4.0-a2
-git switch -c feat/v0.4.0-a2-snapshot
 ```
 
 Do not open a pull request to `main` until the Release Owner starts the final
-`release/v0.4.0-a2` → `main` merge.
+`release/v0.4.0-a2` → `main` merge. Do not tag or publish from the freeze.
+
+## v0.4.0-a2 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a2`.
+
+```text
+snapshot → smoke → freeze reviewed → CI green → RELEASE READY
+  → wait for Human GO
+  → merge release → main → tag v0.4.0-a2 → draft Pre-release
+  → verification → human GO → publish Pre-release
+```
+
+1. Keep the freeze changelog (`[0.4.0-a2] - 2026-09-24`, empty
+   `[Unreleased]`) on `release/v0.4.0-a2`. Do not tag or publish from this
+   step. Do not merge to `main` before Human GO.
+2. Run the full validation matrix (CI including `release/**`, race, lint,
+   vuln, completion syntax, GoReleaser check, snapshot, 13-artifact
+   verify).
+3. Record GO/NO-GO with commit SHA, CI run, smoke results and artifact
+   inventory.
+4. After Human GO, merge `release/v0.4.0-a2` → `main` with a merge commit.
+5. Tag annotated `v0.4.0-a2` on `main` only after smoke tests on candidate
+   archives. The binary reports `dirloom 0.4.0-a2` (no leading `v`).
+6. The tag workflow leaves a **draft** GitHub Pre-release (`prerelease:
+   auto`). Verify 13 artifacts, 12 checksum lines, SBOMs, licences inside
+   archives, and `gh attestation verify` on all 13 subjects. Do not
+   publish from CI.
+7. Human GO publishes the draft Pre-release. Then delete
+   `release/v0.4.0-a2` after closure.
+8. Publication must **not** open Scoop, Homebrew or Winget PRs. Stable
+   package channels stay on `v0.3.3` until a non-prerelease tag.
+
+Do not create `chore/v0.4.0-a2-freeze`. Do not start A3.
 
 ## v0.4.0-a1 release record
 

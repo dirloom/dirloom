@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 18 septembre 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0`, `v0.3.1`, `v0.3.2`, `v0.3.3` et `v0.4.0-a1` sont publiées. `v0.4.0-a2` est en développement actif sur `release/v0.4.0-a2`. Les documents de ce dossier décrivent le produit que ce socle permet de construire.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0`, `v0.3.1`, `v0.3.2`, `v0.3.3` et `v0.4.0-a1` sont publiées. `v0.4.0-a2` est le candidat en freeze sur `release/v0.4.0-a2` (profil prerelease ; snapshots ; pas de verify/diff). Les documents de ce dossier décrivent le produit que ce socle permet de construire.
 
 ## Parcours de lecture
 
@@ -57,7 +57,7 @@ En cas d'écart, appliquer l'ordre suivant :
 | Contrat d'icônes `v0.3.2` | Publié : `--icons ascii`, capability Nerd déclarative, `--icons auto` conservateur ; défaut `icons: never` |
 | Fidélité Nerd `v0.3.3` | Publiée : provenance Nerd Fonts v3.5.1, logos vérifiés ou fallbacks, Compose/Bake/Terraform lock |
 | Identité structurelle `v0.4.0-a1` | Publié : `dirloom fingerprint`, artefact/projection/encodage v1 |
-| Snapshots `v0.4.0-a2` | Développement actif sur `release/v0.4.0-a2` : Snapshot Schema v1, `dirloom snapshot` ; pas de verify/diff |
+| Snapshots `v0.4.0-a2` | Freeze sur `release/v0.4.0-a2` : Snapshot Schema v1, `dirloom snapshot` ; profil prerelease ; pas de verify/diff |
 | Desktop | Alpha/beta en `v1.x`, produit stable et intelligence multi-repositories en `v2.x` |
 | Agents de code | Jalon `v0.9` : Context Compiler, receipts, MCP, skills et Context Firewall |
 | Exports graphiques | Socle v0.2 livré : vue `structure`, `diagram.Document`, sources Mermaid/Graphviz/D2, alias `dot`, budget `maxNodes` illimité |

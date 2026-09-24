@@ -4,7 +4,7 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
-## [0.4.0-a2] - Unreleased
+## [0.4.0-a2] - 2026-09-24
 
 CHANGE alpha: persistent self-verifying structural snapshots on top of Fingerprint
 v1. This increment does not add verify or diff.
@@ -17,7 +17,7 @@ v1. This increment does not add verify or diff.
 
 ### Changed
 
-- Document latest published `v0.4.0-a1` and active development on `release/v0.4.0-a2`.
+- Document latest published `v0.4.0-a1` and the frozen prerelease candidate `v0.4.0-a2` on `release/v0.4.0-a2`.
 
 ## [0.4.0-a1] - 2026-09-20
 
@@ -199,7 +199,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...HEAD
+[0.4.0-a2]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...v0.4.0-a2
 [0.4.0-a1]: https://github.com/dirloom/dirloom/compare/v0.3.3...v0.4.0-a1
 [0.3.3]: https://github.com/dirloom/dirloom/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dirloom/dirloom/compare/v0.3.1...v0.3.2

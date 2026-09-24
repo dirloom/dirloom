@@ -23,8 +23,9 @@ Published status is independent of each package manager. GitHub Releases is alwa
 ```text
 RELEASE STATUS
 Latest published release: v0.4.0-a1
-Active development: v0.4.0-a2
+Release candidate being frozen: v0.4.0-a2
 Release branch: release/v0.4.0-a2
+Profile: prerelease
 
 DISTRIBUTION STATUS
 GitHub     ✅ v0.4.0-a1 (Pre-release)
@@ -439,7 +440,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published tag is `v0.4.0-a1`.
-Active development is `v0.4.0-a2` on `release/v0.4.0-a2`.
+`release/v0.4.0-a2` is the active freeze for the prerelease candidate `v0.4.0-a2`.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -471,7 +472,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3.2: published — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
 - v0.3.3: published — Nerd catalog fidelity, provenance, and classification refinement;
 - v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
-- v0.4.0-a2: active development on `release/v0.4.0-a2` — persistent self-verifying snapshots;
+- v0.4.0-a2: freeze on `release/v0.4.0-a2` — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff; stable package managers unchanged);
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.
