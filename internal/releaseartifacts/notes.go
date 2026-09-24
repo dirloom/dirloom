@@ -140,7 +140,7 @@ func WriteReleaseNotes(changelogPath, version, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o750); err != nil {
 		return err
 	}
 	return os.WriteFile(outputPath, []byte(section), 0o644) //nolint:gosec // Release notes are intentionally world-readable.
