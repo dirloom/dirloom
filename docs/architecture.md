@@ -15,8 +15,11 @@ cmd/dirloom
        │    ├─ internal/source
        │    │    ├─ internal/tree
        │    │    └─ internal/artifact
-       │    └─ internal/identity
-       │         └─ internal/artifact
+       │    ├─ internal/identity
+       │    │    └─ internal/artifact
+       │    └─ internal/snapshot
+       │         ├─ internal/artifact
+       │         └─ internal/identity
        ├─ internal/render
        │    ├─ internal/diagram
        │    └─ internal/outputformat
@@ -32,12 +35,13 @@ cmd/dirloom
 
 - `internal/cli`: Cobra flags, validation, stable exit-code mapping and stream routing.
 - `internal/config`: strict YAML parsing, the immutable built-in preset catalog, project and user discovery, layered inspection and presentation resolution, provenance and diagnostics.
-- `internal/app`: root and output resolution plus the reusable `Inspect` and `Fingerprint` application services.
+- `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint` and `Snapshot` application services.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
 - `internal/artifact`: Canonical Structural Artifact v1, path canonicalization (NFC, `/`) and validation. No presentation or CLI dependency.
 - `internal/source`: `StructuralSource` abstraction and FilesystemSource adapter over the existing scanner.
 - `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
+- `internal/snapshot`: Snapshot Schema v1, Capture Semantics v1, Artifact Projection v1, deterministic JSON encode/decode and shared self-verifying validator.
 - `internal/diagram`: canonical graph projection (`Document`, `ContractVersion`, `structure` view) with a single `tree` adapter.
 - `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
@@ -86,3 +90,5 @@ Rendering finishes in memory before stdout, the clipboard, or the transactional 
 The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--output` are rejected before configuration and scanning. Automatic color is disabled for the clipboard; automatic icons stay Unicode, like interactive text. The renderer validates UTF-8 once; the clipboard does not apply a stricter encoding policy.
 
 `dirloom fingerprint` reuses `app.Inspect` for a single scan, adapts the observation into a Canonical Structural Artifact, projects Identity v1, encodes it without JSON, and hashes with SHA-256. Presentation flags are ignored. Contracts: [Canonical Structural Artifact v1](canonical-structural-artifact-v1.md), [Identity Projection v1](contracts/identity-projection-v1.md), [Canonical Identity Encoding v1](contracts/canonical-identity-encoding-v1.md), [fingerprint command](reference/fingerprint.md), [ADR 0001](adr/0001-structural-fingerprint-identity.md). Local performance snapshots: [v0.4-a1 benchmarks](benchmarks/v0.4-a1.md).
+
+`dirloom snapshot` reuses the same single observation path, builds Snapshot Artifact Projection v1 plus Capture Semantics v1, embeds Fingerprint v1, and emits deterministic JSON (stdout or transactional `--output`). Snapshot persistence is separate from Identity Projection. Contracts: [Snapshot Schema v1](contracts/snapshot-schema-v1.md), [snapshot command](reference/snapshot.md), [ADR 0002](adr/0002-snapshot-persistence-and-compatibility.md). Local performance snapshots: [v0.4-a2 benchmarks](benchmarks/v0.4-a2.md).

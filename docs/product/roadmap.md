@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.3.3` publiée ; freeze `v0.4.0-a1` sur `release/v0.4.0-a1`<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a1` publiée ; développement actif `v0.4.0-a2` sur `release/v0.4.0-a2`<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2121,7 +2121,7 @@ Fonctions :
 
 ### v0.4.0-a1 — Artifact identity & fingerprint
 
-**Statut : freeze sur `release/v0.4.0-a1`.** Premier incrément publiable de CHANGE. Ce n'est pas encore `snapshot`, `verify` ni `diff`.
+**Statut : publié (`v0.4.0-a1`).** Premier incrément publiable de CHANGE. Ce n'est pas encore `snapshot`, `verify` ni `diff`.
 
 Fonctions :
 
@@ -2131,6 +2131,20 @@ Fonctions :
 - GitHub Pre-release ; canaux Scoop/Homebrew/Winget stables inchangés.
 
 Frontière : pas de persistance de snapshot, pas de verify, pas de diff.
+
+### v0.4.0-a2 — Persistent self-verifying snapshots
+
+**Statut : développement actif sur `release/v0.4.0-a2`.** Deuxième incrément publiable de CHANGE. Ce n'est pas encore `verify` ni `diff`.
+
+Fonctions :
+
+- Snapshot Schema v1 (`schemaVersion` / `artifactVersion` / `requiredFeatures`) ;
+- Snapshot Artifact Projection v1 et Capture Semantics v1 ;
+- `dirloom snapshot` (stdout JSON ou `--output architecture.dlm.json` transactionnel) ;
+- validateur partagé avec auto-vérification Fingerprint v1 ;
+- politique de compatibilité additive documentée.
+
+Frontière : pas de comparaison live, pas de verify, pas de diff.
 
 ## v0.5 — Scaffold & Architecture Packs
 

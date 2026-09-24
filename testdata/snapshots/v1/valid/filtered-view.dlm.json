@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "artifactVersion": 1,
+  "fingerprint": "dlm:v1:sha256:1ddf76dcab13156284446a154aca77629574eae1bb27798454570ede77569630",
+  "requiredFeatures": [],
+  "capture": {
+    "depth": 1,
+    "dirsOnly": true,
+    "hidden": true,
+    "useDefaultIgnores": false,
+    "useGitignore": false,
+    "ignore": [
+      "generated",
+      "tmp"
+    ]
+  },
+  "artifact": {
+    "nodes": [
+      {
+        "path": ".",
+        "kind": "directory"
+      },
+      {
+        "path": "README.md",
+        "kind": "file"
+      },
+      {
+        "path": "src",
+        "kind": "directory"
+      },
+      {
+        "path": "src/main.go",
+        "kind": "file"
+      }
+    ]
+  }
+}

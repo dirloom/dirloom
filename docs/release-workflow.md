@@ -131,18 +131,46 @@ package repository without making that the default path.
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.4.0-a1` |
-| Latest published release | `v0.3.3` |
-| Release branch | `release/v0.4.0-a1` |
+| Version | `v0.4.0-a2` |
+| Latest published release | `v0.4.0-a1` |
+| Release branch | `release/v0.4.0-a2` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
 
-`v0.3.3` is the latest published GitHub tag. `release/v0.4.0-a1` is the
-scope freeze: changelog, product status, snapshot and smoke only. No new
-features. Freeze-only commits land directly on this branch. Do not tag,
-draft or publish until this freeze merges to `main` and the release
-ceremony completes. Each publishable increment (`a1`, `a2`, `a3`, `rc1`,
-stable) keeps its own `release/v…` branch.
+`v0.4.0-a1` is the latest published GitHub Pre-release tag. Active development
+for the next publishable increment is `v0.4.0-a2` on `release/v0.4.0-a2`.
+Implementation work lands through feature branches targeting
+`release/v0.4.0-a2` (for example `feat/v0.4.0-a2-snapshot`). Do not open
+versioned feature pull requests against `main`. Each publishable increment
+(`a1`, `a2`, `a3`, `rc1`, stable) keeps its own `release/v…` branch.
+
+```text
+feature → release/v0.4.0-a2
+release/v0.4.0-a2 → main
+main → annotated tag v0.4.0-a2
+tag workflow → draft GitHub Pre-release
+human GO → publish Pre-release
+stable package managers stay silent
+```
+
+## Developer workflow
+
+```bash
+git fetch --prune origin
+git switch release/v0.4.0-a2
+git pull --ff-only origin release/v0.4.0-a2
+git switch -c feat/v0.4.0-a2-snapshot
+```
+
+Do not open a pull request to `main` until the Release Owner starts the final
+`release/v0.4.0-a2` → `main` merge.
+
+## v0.4.0-a1 release record
+
+v0.4.0-a1 is published. The freeze checklist below is the completed ceremony,
+kept for audit. It is not the current active release state.
+
+The **scope freeze** lived on `release/v0.4.0-a1`.
 
 ```text
 feature → release/v0.4.0-a1
@@ -153,7 +181,7 @@ human GO → publish Pre-release
 stable package managers stay silent
 ```
 
-## Developer workflow
+Historical freeze workflow (completed):
 
 ```bash
 git fetch --prune origin
@@ -169,7 +197,7 @@ request to `main` until the Release Owner starts the final
 
 ## v0.4.0-a1 freeze checklist
 
-The freeze is open on `release/v0.4.0-a1`.
+The freeze was completed on `release/v0.4.0-a1`.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
