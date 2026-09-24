@@ -24,22 +24,21 @@ func Decode(r io.Reader) (Document, error) {
 
 // DecodeBytes decodes snapshot JSON from a byte slice.
 func DecodeBytes(data []byte) (Document, error) {
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 {
+	if len(trimJSONWhitespace(data)) == 0 {
 		return Document{}, invalidJSON("empty snapshot document")
 	}
-	if !utf8.Valid(trimmed) {
+	if !utf8.Valid(data) {
 		return Document{}, invalidJSON("snapshot JSON is not valid UTF-8")
 	}
-	if err := rejectDuplicateKeys(trimmed); err != nil {
+	if err := rejectDuplicateKeys(data); err != nil {
 		return Document{}, err
 	}
-	if err := rejectTrailingTokens(trimmed); err != nil {
+	if err := rejectTrailingTokens(data); err != nil {
 		return Document{}, err
 	}
 
 	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(trimmed, &raw); err != nil {
+	if err := json.Unmarshal(data, &raw); err != nil {
 		return Document{}, invalidJSON("invalid snapshot JSON: %v", err)
 	}
 
@@ -327,6 +326,12 @@ func decodeNullableInt(raw json.RawMessage, label string) (*int, error) {
 		return nil, invalidField("%s must be non-negative", label)
 	}
 	return &value, nil
+}
+
+// trimJSONWhitespace removes only the four whitespace bytes JSON allows.
+// Unicode spaces such as U+00A0 must not be stripped before parsing.
+func trimJSONWhitespace(data []byte) []byte {
+	return bytes.Trim(data, " \t\r\n")
 }
 
 func isJSONNull(raw json.RawMessage) bool {
