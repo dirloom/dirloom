@@ -261,8 +261,6 @@ dirloom [directory] [flags]
 
 `dirloom fingerprint [directory]` prints `dlm:v1:sha256:<digest>` for the structural view Dirloom observes after filters. It does not hash file contents. Presentation flags are ignored. See [fingerprint](docs/reference/fingerprint.md).
 
-`dirloom snapshot [directory]` writes Snapshot Schema v1 JSON (stdout or transactional `--output architecture.dlm.json`). The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
-
 `dirloom snapshot [directory]` writes Snapshot Schema v1 JSON to stdout or, with `--output architecture.dlm.json`, transactionally to a file. The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
 
 ## Filtering

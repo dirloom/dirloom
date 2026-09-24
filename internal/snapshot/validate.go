@@ -2,7 +2,9 @@ package snapshot
 
 import (
 	"io"
+	"strings"
 
+	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/identity"
 )
 
@@ -36,6 +38,9 @@ func Validate(doc Document) (Validated, error) {
 	if err := art.Validate(); err != nil {
 		return Validated{}, invalidArtifact(err)
 	}
+	if err := assertCaptureConsistent(doc.Capture, doc.Artifact.Nodes); err != nil {
+		return Validated{}, err
+	}
 
 	computed, err := identity.Compute(art)
 	if err != nil {
@@ -52,6 +57,32 @@ func Validate(doc Document) (Validated, error) {
 		Artifact:    art,
 		Fingerprint: computed,
 	}, nil
+}
+
+// assertCaptureConsistent rejects capture metadata that the persisted nodes
+// themselves disprove. gitignore and custom ignores need the original source
+// and are not rechecked here.
+func assertCaptureConsistent(capture CaptureV1, nodes []NodeV1) error {
+	if capture.Depth != nil && *capture.Depth < 0 {
+		return invalidField("capture.depth must be non-negative")
+	}
+	for _, node := range nodes {
+		if capture.DirsOnly && artifact.Kind(node.Kind) != artifact.KindDirectory {
+			return invalidField("capture.dirsOnly forbids snapshot node %q of kind %q", node.Path, node.Kind)
+		}
+		if capture.Depth != nil && pathDepth(node.Path) > *capture.Depth {
+			return invalidField("capture.depth %d forbids snapshot node %q", *capture.Depth, node.Path)
+		}
+	}
+	return nil
+}
+
+// pathDepth counts canonical segments. The root "." is depth 0. '\' is not a separator.
+func pathDepth(path string) int {
+	if path == "" || path == string(artifact.RootPath) {
+		return 0
+	}
+	return strings.Count(path, "/") + 1
 }
 
 // Load decodes and validates a snapshot from r.

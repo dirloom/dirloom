@@ -17,10 +17,7 @@
         "path": ".",
         "kind": "directory"
       },
-      {
-        "path": "x",
-        "kind": "socket"
-      }
+      {"path": "x", "kind": "socket"}
     ]
   }
 }

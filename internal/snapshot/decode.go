@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"unicode/utf8"
 )
 
 // knownRequiredFeatures is empty for Snapshot Schema v1 writers/readers.
@@ -26,6 +27,9 @@ func DecodeBytes(data []byte) (Document, error) {
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
 		return Document{}, invalidJSON("empty snapshot document")
+	}
+	if !utf8.Valid(trimmed) {
+		return Document{}, invalidJSON("snapshot JSON is not valid UTF-8")
 	}
 	if err := rejectDuplicateKeys(trimmed); err != nil {
 		return Document{}, err

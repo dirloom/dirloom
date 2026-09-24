@@ -58,8 +58,12 @@ func toWire(doc Document) wireDocument {
 }
 
 // Encode writes deterministic UTF-8 Snapshot JSON (2-space indent, no HTML
-// escaping, final newline).
+// escaping, final newline). Invalid documents are rejected before any byte
+// is written.
 func Encode(w io.Writer, doc Document) error {
+	if _, err := Validate(doc); err != nil {
+		return err
+	}
 	wire := toWire(doc)
 	encoder := json.NewEncoder(w)
 	encoder.SetEscapeHTML(false)

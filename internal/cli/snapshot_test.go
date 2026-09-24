@@ -1,12 +1,15 @@
 package cli
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/snapshot"
 )
 
@@ -151,3 +154,126 @@ func TestSnapshotFilterConfigParity(t *testing.T) {
 		t.Fatalf("%#v", capture)
 	}
 }
+
+func TestSnapshotStdoutShortWrite(t *testing.T) {
+	root := writeFingerprintFixture(t)
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) {
+		return "", os.ErrNotExist
+	}))
+	var want, stderr bytes.Buffer
+	args := []string{"snapshot", root, "--no-config"}
+	if code := executeWithLoader(context.Background(), args, &want, &stderr, "v0.1.0-test", loader); code != 0 || stderr.Len() != 0 {
+		t.Fatalf("baseline=(%s,%d)", stderr.String(), code)
+	}
+	writer := &limitedWriter{max: 3}
+	stderr.Reset()
+	if code := executeWithLoader(context.Background(), args, writer, &stderr, "v0.1.0-test", loader); code != 0 || stderr.Len() != 0 {
+		t.Fatalf("short write=(%s,%d)", stderr.String(), code)
+	}
+	if writer.String() != want.String() {
+		t.Fatalf("short write dropped bytes: got %d want %d", writer.Len(), want.Len())
+	}
+}
+
+func TestSnapshotStructuralFlagsConfigAndMutations(t *testing.T) {
+	root := t.TempDir()
+	writeFiles(t, root, [][2]string{
+		{"src/main.go", "x"},
+		{".hidden", "x"},
+		{"skip.log", "x"},
+		{".gitignore", "*.log\n"},
+		{"node_modules/pkg/index.js", "x"},
+		{"keep.go", "x"},
+		{"generated/out.go", "x"},
+	})
+	base := snapshotStdout(t, nil, root, "--no-config")
+	if snapshotStdout(t, nil, root, "--no-config", "--hidden") == base {
+		t.Fatal("--hidden did not change the snapshot")
+	}
+	depth := snapshotStdout(t, nil, root, "--no-config", "--depth", "1")
+	if depth == base || strings.Contains(depth, "main.go") {
+		t.Fatal("--depth 1 still contains src/main.go or matched the full snapshot")
+	}
+	dirs := snapshotStdout(t, nil, root, "--no-config", "--dirs-only")
+	if dirs == base || strings.Contains(dirs, `"kind": "file"`) {
+		t.Fatal("--dirs-only still contains a file")
+	}
+	if snapshotStdout(t, nil, root, "--no-config", "--no-gitignore") == base {
+		t.Fatal("--no-gitignore did not change the snapshot")
+	}
+	if snapshotStdout(t, nil, root, "--no-config", "--no-default-ignore") == base {
+		t.Fatal("--no-default-ignore did not change the snapshot")
+	}
+
+	userDir := t.TempDir()
+	writeCLIConfig(t, filepath.Join(userDir, "dirloom", "config.yaml"), "schemaVersion: 1\nignore:\n  - generated\n")
+	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) { return userDir, nil }))
+	fromUser := snapshotStdout(t, loader, root)
+	if strings.Contains(fromUser, `"path": "generated"`) {
+		t.Fatalf("user config did not ignore generated:\n%s", fromUser)
+	}
+	withoutUser := snapshotStdout(t, loader, root, "--no-user-config")
+	if !strings.Contains(withoutUser, `"path": "generated"`) || withoutUser == fromUser {
+		t.Fatal("--no-user-config did not restore generated")
+	}
+
+	if err := os.WriteFile(filepath.Join(root, "added.go"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	added := snapshotStdout(t, nil, root, "--no-config")
+	if added == base {
+		t.Fatal("addition did not change the snapshot")
+	}
+	if err := os.Rename(filepath.Join(root, "added.go"), filepath.Join(root, "renamed.go")); err != nil {
+		t.Fatal(err)
+	}
+	renamed := snapshotStdout(t, nil, root, "--no-config")
+	if renamed == added {
+		t.Fatal("rename did not change the snapshot")
+	}
+	if err := os.Remove(filepath.Join(root, "renamed.go")); err != nil {
+		t.Fatal(err)
+	}
+	if snapshotStdout(t, nil, root, "--no-config") == renamed {
+		t.Fatal("removal did not change the snapshot")
+	}
+
+	file := filepath.Join(root, "keep.go")
+	stdout, stderr, code := executeForTest(t, "snapshot", file, "--no-config")
+	if code == 0 || stdout != "" || !strings.Contains(stderr, "not a directory") {
+		t.Fatalf("regular file target=(%q,%q,%d)", stdout, stderr, code)
+	}
+}
+
+func snapshotStdout(t *testing.T, loader *configuration.Loader, args ...string) string {
+	t.Helper()
+	var stdout, stderr string
+	var code int
+	if loader == nil {
+		stdout, stderr, code = executeForTest(t, append([]string{"snapshot"}, args...)...)
+	} else {
+		stdout, stderr, code = executeForTestWithLoader(t, loader, append([]string{"snapshot"}, args...)...)
+	}
+	if code != 0 || stderr != "" {
+		t.Fatalf("%v=(%q,%q,%d)", args, stdout, stderr, code)
+	}
+	if _, err := snapshot.LoadBytes([]byte(stdout)); err != nil {
+		t.Fatal(err)
+	}
+	return stdout
+}
+
+type limitedWriter struct {
+	buf bytes.Buffer
+	max int
+}
+
+func (w *limitedWriter) Write(p []byte) (int, error) {
+	if len(p) > w.max {
+		p = p[:w.max]
+	}
+	return w.buf.Write(p)
+}
+
+func (w *limitedWriter) String() string { return w.buf.String() }
+func (w *limitedWriter) Len() int       { return w.buf.Len() }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "artifactVersion": 1,
-  "fingerprint": "dlm:v1:sha256:1ddf76dcab13156284446a154aca77629574eae1bb27798454570ede77569630",
+  "fingerprint": "dlm:v1:sha256:5b4f933447bbe71702350e2e3d756a2c68867ced199107794e92c83edc03141b",
   "requiredFeatures": [],
   "capture": {
     "depth": 1,
@@ -21,16 +21,8 @@
         "kind": "directory"
       },
       {
-        "path": "README.md",
-        "kind": "file"
-      },
-      {
         "path": "src",
         "kind": "directory"
-      },
-      {
-        "path": "src/main.go",
-        "kind": "file"
       }
     ]
   }
