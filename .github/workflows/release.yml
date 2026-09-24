@@ -54,6 +54,17 @@ jobs:
             dist/dirloom_Darwin_arm64.tar.gz.spdx.json \
             --clobber
 
+      - name: Set release notes from CHANGELOG.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          go run ./cmd/release-artifacts notes \
+            --version "${GITHUB_REF_NAME}" \
+            --changelog CHANGELOG.md \
+            --output dist/release-notes.md
+          gh release edit "${GITHUB_REF_NAME}" --notes-file dist/release-notes.md
+
       - name: Attest release artefacts
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
