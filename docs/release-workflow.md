@@ -3,6 +3,18 @@
 Dirloom follows the Ginov **release branch** model documented in the
 [Release workflow & Git-Ops hub](https://knowledge.floxio.ai/doc/guide-release-workflow-git-ops-hub-6ERj1DbE2s).
 
+Release notes policy lives in
+[CHANGELOG policy](release/changelog-policy.md) and
+[Release notes template](release/release-notes-template.md).
+`CHANGELOG.md` is the unique source of truth. GoReleaser does not generate a
+changelog from Git history (`changelog.disable: true`).
+
+> When preparing a release, the agent never writes an independent GitHub
+> Release description. It updates `CHANGELOG.md` according to
+> `docs/release/changelog-policy.md`. The workflow then extracts the section
+> that matches the tag. Any divergence between `CHANGELOG.md` and the GitHub
+> Release is a release defect.
+
 ## Pre-1.0 versioning policy
 
 While Dirloom remains in 0.x:

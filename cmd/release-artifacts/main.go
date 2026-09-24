@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dirloom/dirloom/internal/releaseartifacts"
 )
@@ -16,8 +17,13 @@ func main() {
 	verify := flag.NewFlagSet("verify", flag.ExitOnError)
 	verifyDist := verify.String("dist", "dist", "GoReleaser dist directory")
 
+	notes := flag.NewFlagSet("notes", flag.ExitOnError)
+	notesVersion := notes.String("version", "", "release version or tag (v optional)")
+	notesChangelog := notes.String("changelog", "CHANGELOG.md", "path to CHANGELOG.md")
+	notesOutput := notes.String("output", "dist/release-notes.md", "output markdown path")
+
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: release-artifacts prepare|verify [--dist dir]")
+		fmt.Fprintln(os.Stderr, "usage: release-artifacts prepare|verify|notes [flags]")
 		os.Exit(2)
 	}
 	switch os.Args[1] {
@@ -34,6 +40,16 @@ func main() {
 			os.Exit(1)
 		}
 		if err := releaseartifacts.VerifyArchivePayloads(*verifyDist); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	case "notes":
+		_ = notes.Parse(os.Args[2:])
+		if strings.TrimSpace(*notesVersion) == "" {
+			fmt.Fprintln(os.Stderr, "--version is required")
+			os.Exit(2)
+		}
+		if err := releaseartifacts.WriteReleaseNotes(*notesChangelog, *notesVersion, *notesOutput); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

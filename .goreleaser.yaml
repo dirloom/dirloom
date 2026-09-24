@@ -57,15 +57,9 @@ checksum:
   # draft that briefly advertises an archives-only inventory.
   disable: true
 
+# CHANGELOG.md is the unique source of truth. Do not generate notes from git.
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore:'
-      - '^ci:'
-      - '^Merge '
+  disable: true
 
 release:
   draft: true
