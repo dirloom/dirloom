@@ -303,6 +303,23 @@ func TestSnapshotPOSIXBackslashFilenameRoundTrip(t *testing.T) {
 	}
 }
 
+func TestDecodeRejectsNonJSONUnicodeWhitespace(t *testing.T) {
+	valid := mustValidEmpty(t)
+	nbsp := []byte{0xC2, 0xA0}
+	leading := append(append([]byte{}, nbsp...), valid...)
+	trailing := append(append([]byte{}, valid...), nbsp...)
+	for _, body := range [][]byte{leading, trailing} {
+		_, err := snapshot.DecodeBytes(body)
+		if err == nil || snapshot.CodeOf(err) != snapshot.CodeInvalidJSON {
+			t.Fatalf("%q: %v", body[:min(8, len(body))], err)
+		}
+	}
+	framed := append(append([]byte(" \t\r\n"), valid...), []byte(" \t\r\n")...)
+	if _, err := snapshot.DecodeBytes(framed); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestDecodeRejectsInvalidUTF8(t *testing.T) {
 	body := mustValidEmpty(t)
 	body = append(body, 0xff)
