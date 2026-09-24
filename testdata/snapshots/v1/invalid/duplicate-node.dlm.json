@@ -17,10 +17,7 @@
         "path": ".",
         "kind": "directory"
       },
-      {
-        "path": "a.txt",
-        "kind": "file"
-      },
+      {"path": "a.txt", "kind": "file"},
       {
         "path": "a.txt",
         "kind": "file"

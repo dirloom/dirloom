@@ -101,4 +101,28 @@ func TestSnapshotMemorySource(t *testing.T) {
 	}
 }
 
+func TestSnapshotBrokenSymlinkRoundTrip(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Symlink("missing-target", filepath.Join(root, "broken")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	result, err := Snapshot(context.Background(), InspectRequest{Root: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := snapshot.LoadBytes(result.Bytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found *snapshot.NodeV1
+	for i := range loaded.Document.Artifact.Nodes {
+		if loaded.Document.Artifact.Nodes[i].Path == "broken" {
+			found = &loaded.Document.Artifact.Nodes[i]
+		}
+	}
+	if found == nil || found.Kind != "symlink" || found.Target == nil || *found.Target != "missing-target" {
+		t.Fatalf("broken = %#v", found)
+	}
+}
+
 func intPtr(v int) *int { return &v }

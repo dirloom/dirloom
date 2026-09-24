@@ -87,7 +87,7 @@ func newSnapshotCommand(stdout io.Writer, loader *configuration.Loader, sources 
 				}
 				return nil
 			}
-			if _, err := stdout.Write(result.Bytes); err != nil {
+			if err := writeAll(stdout, result.Bytes); err != nil {
 				return fmt.Errorf("write snapshot: %w", err)
 			}
 			return nil

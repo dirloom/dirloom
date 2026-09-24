@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 
@@ -52,7 +53,12 @@ func main() {
 		{Path: "link", Name: "link", Kind: artifact.KindSymlink, Target: "src/main.go"},
 	}}}
 	depth := 1
-	filtered := mustBuild(nested, snapshot.CaptureV1{
+	// The persisted artifact must be one that depth=1 and dirsOnly=true can observe:
+	// the root and its immediate directories, with no files and no deeper nodes.
+	filteredArt := artifact.Artifact{Root: artifact.Node{Path: ".", Name: ".", Kind: artifact.KindDirectory, Children: []artifact.Node{
+		{Path: "src", Name: "src", Kind: artifact.KindDirectory},
+	}}}
+	filtered := mustBuild(filteredArt, snapshot.CaptureV1{
 		Depth: &depth, DirsOnly: true, Hidden: true,
 		UseDefaultIgnores: false, UseGitignore: false,
 		Ignore: []string{"generated", "tmp"},
@@ -67,12 +73,18 @@ func main() {
 	write("valid/filtered-view.dlm.json", filtered)
 
 	_ = os.WriteFile(filepath.Join(root, "invalid/invalid-json.dlm.json"), []byte("{"), 0o644)
-	badSchema := mustBuild(empty, defaultCap)
-	badSchema.SchemaVersion = 9
-	write("invalid/unknown-schema.dlm.json", badSchema)
-	badArt := mustBuild(empty, defaultCap)
-	badArt.ArtifactVersion = 9
-	write("invalid/unknown-artifact-version.dlm.json", badArt)
+	validEmpty, err := snapshot.Marshal(mustBuild(empty, defaultCap))
+	if err != nil {
+		panic(err)
+	}
+	writeBytes := func(rel string, body []byte) {
+		if err := os.WriteFile(filepath.Join(root, rel), body, 0o644); err != nil {
+			panic(err)
+		}
+	}
+	// Corrupt fixtures are patched bytes. The production writer refuses invalid documents.
+	writeBytes("invalid/unknown-schema.dlm.json", bytesReplace(validEmpty, `"schemaVersion": 1`, `"schemaVersion": 9`, 1))
+	writeBytes("invalid/unknown-artifact-version.dlm.json", bytesReplace(validEmpty, `"artifactVersion": 1`, `"artifactVersion": 9`, 1))
 
 	_ = os.WriteFile(filepath.Join(root, "invalid/missing-fingerprint.dlm.json"), []byte(`{
   "schemaVersion": 1,
@@ -83,33 +95,22 @@ func main() {
 }
 `), 0o644)
 
-	malformed := mustBuild(empty, defaultCap)
-	malformed.Artifact.Nodes = append(malformed.Artifact.Nodes, snapshot.NodeV1{Path: "src/../x.go", Kind: "file"})
-	b, _ := snapshot.Marshal(malformed)
-	_ = os.WriteFile(filepath.Join(root, "invalid/malformed-path.dlm.json"), b, 0o644)
-
-	dup := mustBuild(single, defaultCap)
-	dup.Artifact.Nodes = append(dup.Artifact.Nodes, snapshot.NodeV1{Path: "a.txt", Kind: "file"})
-	b, _ = snapshot.Marshal(dup)
-	_ = os.WriteFile(filepath.Join(root, "invalid/duplicate-node.dlm.json"), b, 0o644)
-
-	hier := mustBuild(empty, defaultCap)
-	hier.Artifact.Nodes = append(hier.Artifact.Nodes, snapshot.NodeV1{Path: "src/main.go", Kind: "file"})
-	b, _ = snapshot.Marshal(hier)
-	_ = os.WriteFile(filepath.Join(root, "invalid/invalid-hierarchy.dlm.json"), b, 0o644)
-
-	kind := mustBuild(empty, defaultCap)
-	kind.Artifact.Nodes = append(kind.Artifact.Nodes, snapshot.NodeV1{Path: "x", Kind: "socket"})
-	b, _ = snapshot.Marshal(kind)
-	_ = os.WriteFile(filepath.Join(root, "invalid/invalid-kind.dlm.json"), b, 0o644)
-
-	mismatch := mustBuild(empty, defaultCap)
-	mismatch.Fingerprint = "dlm:v1:sha256:0000000000000000000000000000000000000000000000000000000000000000"
-	write("invalid/fingerprint-mismatch.dlm.json", mismatch)
-
-	feat := mustBuild(empty, defaultCap)
-	feat.RequiredFeatures = []string{"unknown-feature"}
-	write("invalid/unknown-required-feature.dlm.json", feat)
+	writeBytes("invalid/malformed-path.dlm.json", insertNode(validEmpty, `{"path": "src/../x.go", "kind": "file"}`))
+	validSingle, err := snapshot.Marshal(mustBuild(single, defaultCap))
+	if err != nil {
+		panic(err)
+	}
+	writeBytes("invalid/duplicate-node.dlm.json", insertNode(validSingle, `{"path": "a.txt", "kind": "file"}`))
+	writeBytes("invalid/invalid-hierarchy.dlm.json", insertNode(validEmpty, `{"path": "src/main.go", "kind": "file"}`))
+	writeBytes("invalid/invalid-kind.dlm.json", insertNode(validEmpty, `{"path": "x", "kind": "socket"}`))
+	fingerprint := fingerprintField(validEmpty)
+	writeBytes("invalid/fingerprint-mismatch.dlm.json", bytesReplace(
+		validEmpty,
+		fingerprint,
+		`"fingerprint": "dlm:v1:sha256:0000000000000000000000000000000000000000000000000000000000000000"`,
+		1,
+	))
+	writeBytes("invalid/unknown-required-feature.dlm.json", bytesReplace(validEmpty, `"requiredFeatures": []`, `"requiredFeatures": ["unknown-feature"]`, 1))
 
 	_ = os.WriteFile(filepath.Join(root, "invalid/duplicate-required-feature.dlm.json"), []byte(`{
   "schemaVersion": 1,
@@ -131,4 +132,36 @@ func main() {
   "artifact": {"nodes": [{"path": ".", "kind": "directory"}]}
 }
 `), 0o644)
+}
+
+func bytesReplace(data []byte, old, new string, n int) []byte {
+	out := bytes.Replace(data, []byte(old), []byte(new), n)
+	if bytes.Equal(out, data) {
+		panic("snapshot golden pattern not found: " + old)
+	}
+	return out
+}
+
+func fingerprintField(data []byte) string {
+	const key = `"fingerprint": "`
+	start := bytes.Index(data, []byte(key))
+	if start < 0 {
+		panic("fingerprint field missing")
+	}
+	end := bytes.IndexByte(data[start+len(key):], '"')
+	if end < 0 {
+		panic("fingerprint field unterminated")
+	}
+	return string(data[start : start+len(key)+end+1])
+}
+
+func insertNode(data []byte, nodeJSON string) []byte {
+	const root = `{
+        "path": ".",
+        "kind": "directory"
+      }`
+	if !bytes.Contains(data, []byte(root)) {
+		panic("root node not found")
+	}
+	return bytesReplace(data, root, root+",\n      "+nodeJSON, 1)
 }

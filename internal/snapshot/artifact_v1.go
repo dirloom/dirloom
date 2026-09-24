@@ -150,9 +150,8 @@ func assertPersistedCanonicalPath(path string) error {
 	if !norm.NFC.IsNormalString(path) {
 		return invalidArtifact(invalidField("snapshot node path %q is not NFC", path))
 	}
-	if strings.Contains(path, "\\") {
-		return invalidArtifact(invalidField("snapshot node path %q must use / separators", path))
-	}
+	// '\' is a legal POSIX filename character. Canonicalize with the POSIX
+	// separator rejects non-canonical forms without treating '\' as a separator.
 	canonical, err := artifact.Canonicalize(path, artifact.POSIXSeparator)
 	if err != nil {
 		return invalidArtifact(err)

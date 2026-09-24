@@ -256,6 +256,146 @@ func TestSymlinkTargetRequiredAndEmptyAllowed(t *testing.T) {
 	}
 }
 
+func TestCanonicalWriterRejectsInvalidDocument(t *testing.T) {
+	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc.SchemaVersion = 99
+	if _, err := snapshot.Marshal(doc); err == nil || snapshot.CodeOf(err) != snapshot.CodeUnsupportedSchema {
+		t.Fatalf("schema: %v", err)
+	}
+	doc.SchemaVersion = 1
+	doc.Fingerprint = "dlm:v1:sha256:" + strings.Repeat("0", 64)
+	if _, err := snapshot.Marshal(doc); err == nil || snapshot.CodeOf(err) != snapshot.CodeFingerprintMismatch {
+		t.Fatalf("fingerprint: %v", err)
+	}
+}
+
+func TestSnapshotPOSIXBackslashFilenameRoundTrip(t *testing.T) {
+	art := artifact.Artifact{Root: artifact.Node{
+		Path: artifact.RootPath, Name: ".", Kind: artifact.KindDirectory,
+		Children: []artifact.Node{
+			{Path: `a\b.txt`, Name: `a\b.txt`, Kind: artifact.KindFile},
+			{Path: `dir`, Name: "dir", Kind: artifact.KindDirectory, Children: []artifact.Node{
+				{Path: `dir/a\b.txt`, Name: `a\b.txt`, Kind: artifact.KindFile},
+			}},
+		},
+	}}
+	doc, err := snapshot.Build(art, snapshot.CaptureV1{Ignore: []string{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := snapshot.Marshal(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := snapshot.LoadBytes(encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, node := range loaded.Document.Artifact.Nodes {
+		got[node.Path] = node.Kind
+	}
+	if got[`a\b.txt`] != "file" || got[`dir/a\b.txt`] != "file" {
+		t.Fatalf("%#v", got)
+	}
+}
+
+func TestDecodeRejectsInvalidUTF8(t *testing.T) {
+	body := mustValidEmpty(t)
+	body = append(body, 0xff)
+	_, err := snapshot.DecodeBytes(body)
+	if err == nil || snapshot.CodeOf(err) != snapshot.CodeInvalidJSON || !strings.Contains(err.Error(), "UTF-8") {
+		t.Fatalf("%v", err)
+	}
+}
+
+func TestLoadRejectsProvableCaptureContradictions(t *testing.T) {
+	body := mustValidEmpty(t)
+	fileNode := patchSnapshot(t, body, `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "README.md",
+        "kind": "file"
+      }
+    ]`)
+	dirsOnly := patchSnapshot(t, []byte(fileNode), `"dirsOnly": false`, `"dirsOnly": true`)
+	if _, err := snapshot.LoadBytes([]byte(dirsOnly)); err == nil || snapshot.CodeOf(err) != snapshot.CodeInvalidField {
+		t.Fatalf("dirsOnly: %v", err)
+	}
+	deep := patchSnapshot(t, body, `"depth": null`, `"depth": 0`)
+	deep = patchSnapshot(t, []byte(deep), `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "src",
+        "kind": "directory"
+      }
+    ]`)
+	if _, err := snapshot.LoadBytes([]byte(deep)); err == nil || snapshot.CodeOf(err) != snapshot.CodeInvalidField {
+		t.Fatalf("depth: %v", err)
+	}
+}
+
+func TestLoadRejectsInvalidArtifactShapes(t *testing.T) {
+	body := mustValidEmpty(t)
+	cases := []struct {
+		name string
+		body string
+	}{
+		{"null-nodes", patchSnapshot(t, body, `"nodes": [
+      {
+        "path": ".",
+        "kind": "directory"
+      }
+    ]`, `"nodes": null`)},
+		{"target-on-file", patchSnapshot(t, body, `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "a.txt",
+        "kind": "file",
+        "target": "nope"
+      }
+    ]`)},
+		{"missing-symlink-target", patchSnapshot(t, body, `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "link",
+        "kind": "symlink"
+      }
+    ]`)},
+		{"parent-not-directory", patchSnapshot(t, body, `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "a.txt",
+        "kind": "file"
+      },
+      {
+        "path": "a.txt/child",
+        "kind": "file"
+      }
+    ]`)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := snapshot.LoadBytes([]byte(tc.body)); err == nil {
+				t.Fatal("expected error")
+			}
+		})
+	}
+}
+
 func TestGoldenValidFixtures(t *testing.T) {
 	dir := filepath.Join("..", "..", "testdata", "snapshots", "v1", "valid")
 	entries, err := os.ReadDir(dir)
@@ -338,80 +478,72 @@ type errWriter struct{ err error }
 
 func (w *errWriter) Write([]byte) (int, error) { return 0, w.err }
 
-func mustBuildUnknownSchema(t *testing.T) string {
+func mustValidEmpty(t *testing.T) []byte {
 	t.Helper()
 	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	doc.SchemaVersion = 99
 	b, err := snapshot.Marshal(doc)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return string(b)
+	return b
+}
+
+func patchSnapshot(t *testing.T, body []byte, old, new string) string {
+	t.Helper()
+	out := bytes.Replace(body, []byte(old), []byte(new), 1)
+	if bytes.Equal(out, body) {
+		t.Fatalf("pattern %q not found", old)
+	}
+	return string(out)
+}
+
+func mustBuildUnknownSchema(t *testing.T) string {
+	t.Helper()
+	return patchSnapshot(t, mustValidEmpty(t), `"schemaVersion": 1`, `"schemaVersion": 99`)
 }
 
 func mustBuildUnknownArtifact(t *testing.T) string {
 	t.Helper()
-	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc.ArtifactVersion = 99
-	b, err := snapshot.Marshal(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return string(b)
+	return patchSnapshot(t, mustValidEmpty(t), `"artifactVersion": 1`, `"artifactVersion": 99`)
 }
 
 func mustBuildUnknownFeature(t *testing.T) string {
 	t.Helper()
-	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc.RequiredFeatures = []string{"future-feature"}
-	b, err := snapshot.Marshal(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return string(b)
+	return patchSnapshot(t, mustValidEmpty(t), `"requiredFeatures": []`, `"requiredFeatures": ["future-feature"]`)
 }
 
 func mustBuildDuplicateFeature(t *testing.T) string {
 	t.Helper()
 	body := mustBuildUnknownFeature(t)
-	return strings.Replace(body, `"requiredFeatures": [
-    "future-feature"
-  ]`, `"requiredFeatures": ["x","x"]`, 1)
+	return strings.Replace(body, `"requiredFeatures": ["future-feature"]`, `"requiredFeatures": ["x","x"]`, 1)
 }
 
 func mustBuildMalformedPath(t *testing.T) string {
 	t.Helper()
-	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc.Artifact.Nodes = append(doc.Artifact.Nodes, snapshot.NodeV1{Path: "src/../other.go", Kind: "file"})
-	b, err := snapshot.Marshal(doc)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return string(b)
+	return patchSnapshot(t, mustValidEmpty(t), `"kind": "directory"
+      }
+    ]`, `"kind": "directory"
+      },
+      {
+        "path": "src/../other.go",
+        "kind": "file"
+      }
+    ]`)
 }
 
 func mustBuildFingerprintMismatch(t *testing.T) string {
 	t.Helper()
-	doc, err := snapshot.Build(emptyArtifact(), snapshot.CaptureV1{Ignore: []string{}})
-	if err != nil {
-		t.Fatal(err)
+	body := mustValidEmpty(t)
+	start := bytes.Index(body, []byte(`"fingerprint": "`))
+	if start < 0 {
+		t.Fatal("fingerprint missing")
 	}
-	doc.Fingerprint = "dlm:v1:sha256:" + strings.Repeat("0", 64)
-	b, err := snapshot.Marshal(doc)
-	if err != nil {
-		t.Fatal(err)
+	end := bytes.IndexByte(body[start:], ',')
+	if end < 0 {
+		t.Fatal("fingerprint field unterminated")
 	}
-	return string(b)
+	return patchSnapshot(t, body, string(body[start:start+end]), `"fingerprint": "dlm:v1:sha256:`+strings.Repeat("0", 64)+`"`)
 }

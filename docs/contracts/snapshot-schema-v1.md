@@ -86,7 +86,7 @@ Flat list of nodes. Hierarchy is reconstructable from canonical parent paths.
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `path` | yes | Already-canonical relative path (`/` separators, NFC, root `.`) |
+| `path` | yes | Already-canonical relative path (`/` is the only separator, NFC, root `.`). A `\` inside a segment is a POSIX filename character and must be preserved. |
 | `kind` | yes | `directory`, `file`, `symlink`, or `junction` |
 | `target` | symlink/junction only | Present even when empty; forbidden on other kinds |
 
@@ -135,6 +135,10 @@ Every v1 writer emits `"requiredFeatures": []`.
 | Unknown additive JSON field in a supported v1 document | Accept and ignore |
 | Duplicate JSON object key | Reject |
 | Extra JSON document / trailing non-whitespace | Reject |
+
+Snapshot bytes must be valid UTF-8. Invalid UTF-8 is rejected before parsing and is never replaced with U+FFFD.
+
+Readers also reject capture metadata that the artifact itself disproves: `dirsOnly: true` with a file, symlink, or junction, and `depth: N` with a node deeper than N.
 
 “Strict JSON” means syntactically valid JSON, exactly one document, required
 fields present with correct types, duplicate keys rejected, canonical path

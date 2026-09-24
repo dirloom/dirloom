@@ -17,10 +17,7 @@
         "path": ".",
         "kind": "directory"
       },
-      {
-        "path": "src/../x.go",
-        "kind": "file"
-      }
+      {"path": "src/../x.go", "kind": "file"}
     ]
   }
 }
