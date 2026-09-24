@@ -22,11 +22,12 @@ Published status is independent of each package manager. GitHub Releases is alwa
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Latest published release: v0.3.3
-Current freeze: release/v0.4.0-a1
+Latest published release: v0.4.0-a1
+Active development: v0.4.0-a2
+Release branch: release/v0.4.0-a2
 
 DISTRIBUTION STATUS
-GitHub     ✅ v0.3.3
+GitHub     ✅ v0.4.0-a1 (Pre-release)
 Scoop      ✅ v0.1.1
 Homebrew   ⏳
 Winget     ⏳
@@ -104,6 +105,9 @@ dirloom completion bash
 
 # Fingerprint the observed structural view (not file contents)
 dirloom fingerprint
+
+# Persist a self-verifying structural snapshot
+dirloom snapshot --output architecture.dlm.json
 ```
 
 PowerShell composition still works, but `--copy` is the native clipboard path:
@@ -113,7 +117,7 @@ dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md) and [`dirloom fingerprint`](docs/reference/fingerprint.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, ecosystem-specific commands and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md) and [`dirloom snapshot`](docs/reference/snapshot.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots and current product limitations.
 
 ## Getting help
 
@@ -256,6 +260,10 @@ dirloom [directory] [flags]
 `dirloom help [command | topic]` resolves commands first, then compiled topics. `dirloom help topics` lists conceptual topics. See [Contextual help](docs/contextual-help.md).
 
 `dirloom fingerprint [directory]` prints `dlm:v1:sha256:<digest>` for the structural view Dirloom observes after filters. It does not hash file contents. Presentation flags are ignored. See [fingerprint](docs/reference/fingerprint.md).
+
+`dirloom snapshot [directory]` writes Snapshot Schema v1 JSON (stdout or transactional `--output architecture.dlm.json`). The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
+
+`dirloom snapshot [directory]` writes Snapshot Schema v1 JSON to stdout or, with `--output architecture.dlm.json`, transactionally to a file. The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
 
 ## Filtering
 
@@ -413,7 +421,7 @@ CLI arguments
 
 The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse`, snapshot and diff interfaces able to reuse the same core.
 
-See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md) for structural identity, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
+See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md) and [docs/reference/snapshot.md](docs/reference/snapshot.md) for structural identity and durable snapshots, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
 ## Development
 
@@ -432,8 +440,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 ## Release
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
-`main` is the integration branch. The latest published tag is `v0.3.3`.
-`release/v0.4.0-a1` is the active freeze for the next tag.
+`main` is the integration branch. The latest published tag is `v0.4.0-a1`.
+Active development is `v0.4.0-a2` on `release/v0.4.0-a2`.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -464,7 +472,8 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3.1: published — CLI guidance, contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
 - v0.3.2: published — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
 - v0.3.3: published — Nerd catalog fidelity, provenance, and classification refinement;
-- v0.4.0-a1: freeze on `release/v0.4.0-a1` — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
+- v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
+- v0.4.0-a2: active development on `release/v0.4.0-a2` — persistent self-verifying snapshots;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

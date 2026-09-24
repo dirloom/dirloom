@@ -4,6 +4,21 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a2] - Unreleased
+
+CHANGE alpha: persistent self-verifying structural snapshots on top of Fingerprint
+v1. This increment does not add verify or diff.
+
+### Added
+
+- Add `dirloom snapshot` to persist Snapshot Schema v1 JSON (stdout or transactional `--output`).
+- Add Snapshot Artifact Projection v1, Capture Semantics v1, deterministic JSON encode/decode and a shared self-verifying validator.
+- Publish snapshot schema/ADR/reference docs plus large-snapshot benchmark baseline.
+
+### Changed
+
+- Document latest published `v0.4.0-a1` and active development on `release/v0.4.0-a2`.
+
 ## [0.4.0-a1] - 2026-09-20
 
 CHANGE alpha: structural artifact identity and `dirloom fingerprint`, plus
