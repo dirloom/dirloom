@@ -11,7 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-Versioned product work lands by pull request on `release/vX.Y.Z`. The v0.4.0-a2 freeze lives on `release/v0.4.0-a2`; that branch accepts only freeze and release-candidate work. Do not open a feature PR to `main` for this version. See
+Versioned product work lands by pull request on `release/vX.Y.Z`. `v0.4.0-a2` is published and closed. No release branch is active until a Human GO starts `v0.4.0-a3` on `release/v0.4.0-a3`. Do not open a feature PR to `main` for a versioned increment. See
 [Release workflow](docs/release-workflow.md). Release notes are governed by
 [CHANGELOG policy](docs/release/changelog-policy.md) and the
 [release notes template](docs/release/release-notes-template.md): update
