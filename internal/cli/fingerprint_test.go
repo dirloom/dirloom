@@ -275,6 +275,46 @@ func TestPublicFingerprintDocumentation(t *testing.T) {
 	}
 }
 
+func TestPublicSnapshotDocumentation(t *testing.T) {
+	path := filepath.Join("..", "..", "docs", "reference", "snapshot.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, want := range []string{
+		"dirloom snapshot",
+		"architecture.dlm.json",
+		"schemaVersion",
+		"artifactVersion",
+		"requiredFeatures",
+		"dlm:v1:sha256:",
+		"corrupt",
+		"transactional",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("snapshot guide missing %q", want)
+		}
+	}
+	schema, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "snapshot-schema-v1.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	schemaText := string(schema)
+	for _, want := range []string{"schemaVersion", "artifactVersion", "requiredFeatures", "dlm:v1:sha256:"} {
+		if !strings.Contains(schemaText, want) {
+			t.Errorf("snapshot schema missing %q", want)
+		}
+	}
+	readme, err := os.ReadFile(filepath.Join("..", "..", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "docs/reference/snapshot.md") {
+		t.Fatal("README does not link snapshot reference")
+	}
+}
+
 func writeFingerprintFixture(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()

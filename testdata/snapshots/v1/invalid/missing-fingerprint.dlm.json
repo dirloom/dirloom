@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "artifactVersion": 1,
+  "requiredFeatures": [],
+  "capture": {"depth": null, "dirsOnly": false, "hidden": false, "useDefaultIgnores": true, "useGitignore": true, "ignore": []},
+  "artifact": {"nodes": [{"path": ".", "kind": "directory"}]}
+}

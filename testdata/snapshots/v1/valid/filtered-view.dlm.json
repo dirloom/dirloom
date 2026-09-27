@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "artifactVersion": 1,
+  "fingerprint": "dlm:v1:sha256:5b4f933447bbe71702350e2e3d756a2c68867ced199107794e92c83edc03141b",
+  "requiredFeatures": [],
+  "capture": {
+    "depth": 1,
+    "dirsOnly": true,
+    "hidden": true,
+    "useDefaultIgnores": false,
+    "useGitignore": false,
+    "ignore": [
+      "generated",
+      "tmp"
+    ]
+  },
+  "artifact": {
+    "nodes": [
+      {
+        "path": ".",
+        "kind": "directory"
+      },
+      {
+        "path": "src",
+        "kind": "directory"
+      }
+    ]
+  }
+}

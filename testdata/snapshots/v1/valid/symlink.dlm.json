@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "artifactVersion": 1,
+  "fingerprint": "dlm:v1:sha256:cb6c28709d47f8e1896600e9ae36f8edcf8db6277bc09efed2b45b6a4c8c2149",
+  "requiredFeatures": [],
+  "capture": {
+    "depth": null,
+    "dirsOnly": false,
+    "hidden": false,
+    "useDefaultIgnores": true,
+    "useGitignore": true,
+    "ignore": []
+  },
+  "artifact": {
+    "nodes": [
+      {
+        "path": ".",
+        "kind": "directory"
+      },
+      {
+        "path": "link",
+        "kind": "symlink",
+        "target": "src/main.go"
+      },
+      {
+        "path": "src",
+        "kind": "directory"
+      },
+      {
+        "path": "src/main.go",
+        "kind": "file"
+      }
+    ]
+  }
+}
