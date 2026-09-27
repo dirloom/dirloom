@@ -201,7 +201,7 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"[0.4.0-a2] - 2026-09-24",
 		"prerelease / CLI package",
 		"release/v0.4.0-a2",
-		"Release candidate being frozen",
+		"No release branch is active",
 		"Optional extended terminal matrix",
 		"Release blocker: NO",
 	} {

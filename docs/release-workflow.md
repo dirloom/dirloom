@@ -139,26 +139,39 @@ The `Update package managers` jobs run on `release: published` only when
 `workflow_dispatch` remains the escape hatch to test a prerelease tag in a
 package repository without making that the default path.
 
-## Active release
+## Current release state
+
+`v0.4.0-a2` is the latest published GitHub Pre-release.
+No release branch is active until a Human GO starts `v0.4.0-a3` on its own
+branch `release/v0.4.0-a3`. Do not create `release/v0.4.0-a3` before that GO.
+Do not start A3. `CHANGELOG.md` remains the unique source of truth for
+release notes. Do not open versioned feature pull requests against `main`.
+Each publishable increment (`a1`, `a2`, `a3`, `rc1`, stable) keeps its own
+`release/v…` branch.
 
 | Field | Value |
 | --- | --- |
-| Version | `v0.4.0-a2` |
-| Latest published release | `v0.4.0-a1` |
-| Release candidate being frozen | `v0.4.0-a2` |
-| Release branch | `release/v0.4.0-a2` |
+| Latest published release | `v0.4.0-a2` |
+| Active release branch | none |
+| Next increment branch | `release/v0.4.0-a3` after Human GO |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Scope | persistent self-verifying snapshots |
-| Not in this increment | verify, diff |
+| Published A2 scope | persistent self-verifying snapshots |
+| Not yet delivered | verify, diff |
 
-`v0.4.0-a1` is the latest published GitHub Pre-release tag. The release
-candidate being frozen is `v0.4.0-a2` on `release/v0.4.0-a2`. Its scope is
-Snapshot Schema v1 and `dirloom snapshot`. It does not add verify or diff.
-The profile stays prerelease: a future tag is a GitHub Pre-release and does
-not update Scoop, Homebrew or Winget. Do not open versioned feature pull
-requests against `main`. Each publishable increment (`a1`, `a2`, `a3`,
-`rc1`, stable) keeps its own `release/v…` branch.
+```text
+v0.4.0-a2 published / closed
+no release branch active
+Human GO → release/v0.4.0-a3
+```
+
+## v0.4.0-a2 release record
+
+v0.4.0-a2 is published and closed. The freeze checklist below is the
+completed ceremony, kept for audit. It is not the current active release
+state.
+
+The **scope freeze** lived on `release/v0.4.0-a2`.
 
 ```text
 feature → release/v0.4.0-a2
@@ -169,27 +182,25 @@ human GO → publish Pre-release
 stable package managers stay silent
 ```
 
-## Developer workflow
-
-The implementation is frozen. Freeze-only commits land directly on
-`release/v0.4.0-a2`. Do not add product scope. Do not start A3.
+Historical freeze workflow (completed):
 
 ```bash
 git fetch --prune origin
 git switch release/v0.4.0-a2
 git pull --ff-only origin release/v0.4.0-a2
+# freeze-only commits: changelog, product status, snapshot, smoke
+# land directly on release/v0.4.0-a2 — no extra feature or chore branch
 ```
 
-Do not open a pull request to `main` until the Release Owner starts the final
-`release/v0.4.0-a2` → `main` merge. Do not tag or publish from the freeze.
+Do not add v0.4.0-a2 product scope after the freeze. Do not create
+`chore/v0.4.0-a2-freeze`.
 
 ## v0.4.0-a2 freeze checklist
 
-The scope freeze lives on `release/v0.4.0-a2`.
+The freeze was completed on `release/v0.4.0-a2`.
 
 ```text
 snapshot → smoke → freeze reviewed → CI green → RELEASE READY
-  → wait for Human GO
   → merge release → main → tag v0.4.0-a2 → draft Pre-release
   → verification → human GO → publish Pre-release
 ```
