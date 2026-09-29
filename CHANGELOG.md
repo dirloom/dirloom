@@ -4,6 +4,11 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a3] - 2026-09-30
+
+CHANGE alpha: live structural verification against Snapshot Schema v1
+using Fingerprint v1 equality. This increment does not add structural diff.
+
 ### Added
 
 - Add `dirloom verify` to compare one live tree with a Snapshot Schema v1 file using Fingerprint v1 equality.
@@ -205,7 +210,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...HEAD
+[0.4.0-a3]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...v0.4.0-a3
 [0.4.0-a2]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...v0.4.0-a2
 [0.4.0-a1]: https://github.com/dirloom/dirloom/compare/v0.3.3...v0.4.0-a1
 [0.3.3]: https://github.com/dirloom/dirloom/compare/v0.3.2...v0.3.3
