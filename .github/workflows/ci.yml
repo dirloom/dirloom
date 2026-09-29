@@ -58,6 +58,16 @@ jobs:
       - name: Build
         run: go build -trimpath ./cmd/dirloom
 
+      - name: Verify shell smoke
+        if: runner.os != 'Windows'
+        shell: bash
+        run: go test ./internal/cli -count=1 -run TestVerifyShellExitCodes
+
+      - name: Verify shell smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: go test ./internal/cli -count=1 -run TestVerifyShellExitCodes
+
   race:
     name: Race detector
     runs-on: ubuntu-latest

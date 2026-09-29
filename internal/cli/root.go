@@ -59,6 +59,23 @@ func (e *usageError) Error() string {
 
 func (e *usageError) Unwrap() error { return e.err }
 
+// exitError carries a verify-specific process status. Silent suppresses the
+// generic "Error:" diagnostic so mismatch and machine results stay on stdout.
+type exitError struct {
+	Code   int
+	Err    error
+	Silent bool
+}
+
+func (e *exitError) Error() string {
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return fmt.Sprintf("exit status %d", e.Code)
+}
+
+func (e *exitError) Unwrap() error { return e.Err }
+
 type commandDependencies struct {
 	loader    *configuration.Loader
 	evaluator *presentation.Evaluator
@@ -94,15 +111,26 @@ func executeWithDependencies(ctx context.Context, args []string, stdout, stderr 
 func execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string, deps commandDependencies) int {
 	command := newRootCommandWithRuntime(stdout, stderr, version, deps)
 	command.SetArgs(normalizeOptionalAutoFlags(args))
-	if err := command.ExecuteContext(ctx); err != nil {
-		_, _ = fmt.Fprintf(stderr, "Error: %s\n", err)
-		var invalid *usageError
-		if errors.As(err, &invalid) {
-			return 2
-		}
-		return 1
+	return processStatus(command.ExecuteContext(ctx), stderr)
+}
+
+func processStatus(err error, stderr io.Writer) int {
+	if err == nil {
+		return 0
 	}
-	return 0
+	var exited *exitError
+	if errors.As(err, &exited) {
+		if !exited.Silent && exited.Err != nil {
+			_, _ = fmt.Fprintf(stderr, "Error: %s\n", exited.Err)
+		}
+		return exited.Code
+	}
+	_, _ = fmt.Fprintf(stderr, "Error: %s\n", err)
+	var invalid *usageError
+	if errors.As(err, &invalid) {
+		return 2
+	}
+	return 1
 }
 
 // NewRootCommand constructs the root Cobra command without process globals.
@@ -147,6 +175,8 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
   dirloom fingerprint --format json
   dirloom snapshot
   dirloom snapshot --output architecture.dlm.json
+  dirloom verify architecture.dlm.json
+  dirloom verify architecture.dlm.json --format json
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown
   dirloom help icons
@@ -268,6 +298,7 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 	command.AddCommand(newThemeCommand(stdout, &sources))
 	command.AddCommand(newFingerprintCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newSnapshotCommand(stdout, deps.loader, &sources))
+	command.AddCommand(newVerifyCommand(stdout))
 	command.AddCommand(newCompletionCommand(stdout))
 	command.SetHelpCommand(newHelpCommand())
 	return command

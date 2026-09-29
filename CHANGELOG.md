@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add `dirloom verify` to compare one live tree with a Snapshot Schema v1 file using Fingerprint v1 equality.
+- Add Verify Result Schema v1 (`--format json`) and verify exits 0 through 6. A structural mismatch exits 1 without an `Error:` diagnostic.
+- Capture Semantics stored in the snapshot select the live scan. Current project and user configuration are not reread. The reference file is excluded only when it is inside the root and absent from the expected artifact.
+
 ## [0.4.0-a2] - 2026-09-24
 
 CHANGE alpha: persistent self-verifying structural snapshots on top of Fingerprint
