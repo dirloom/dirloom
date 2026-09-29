@@ -14,12 +14,24 @@ import (
 	"github.com/dirloom/dirloom/internal/presentation"
 )
 
+func TestLegacyStructuralExitCodesUnchanged(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing")
+	stdout, stderr, code := executeForTest(t, "fingerprint", missing, "--no-config")
+	if code != 1 || stdout != "" || !strings.Contains(stderr, "Error:") {
+		t.Fatalf("fingerprint missing=(%q, %q, %d)", stdout, stderr, code)
+	}
+	stdout, stderr, code = executeForTest(t, "snapshot", "a", "b")
+	if code != 2 || stdout != "" || !strings.Contains(stderr, "Error:") {
+		t.Fatalf("snapshot usage=(%q, %q, %d)", stdout, stderr, code)
+	}
+}
+
 func TestHelpAndVersion(t *testing.T) {
 	stdout, stderr, code := executeForTest(t, "--help")
 	if code != 0 || stderr != "" {
 		t.Fatalf("help code=%d stderr=%q", code, stderr)
 	}
-	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "--copy", "markdown-tree", "mermaid", "graphviz", "d2", "--diagram-view", "--diagram-direction", "--diagram-max-nodes", "config", "preset", "theme", "completion", "fingerprint"} {
+	for _, expected := range []string{"Usage:", "Arguments:", "Flags:", "Examples:", "--dirs-only", "--no-gitignore", "--config", "--no-user-config", "--no-config", "--preset", "--color", "--icons", "--theme", "--copy", "markdown-tree", "mermaid", "graphviz", "d2", "--diagram-view", "--diagram-direction", "--diagram-max-nodes", "config", "preset", "theme", "completion", "fingerprint", "verify"} {
 		if !strings.Contains(stdout, expected) {
 			t.Errorf("help is missing %q\n%s", expected, stdout)
 		}

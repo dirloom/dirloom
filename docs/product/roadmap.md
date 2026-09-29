@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a2` publiée ; aucune branche de release active<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a2` publiée ; `v0.4.0-a3` implémentée sur `release/v0.4.0-a3` (verify, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2134,7 +2134,7 @@ Frontière : pas de persistance de snapshot, pas de verify, pas de diff.
 
 ### v0.4.0-a2 — Persistent self-verifying snapshots
 
-**Statut : publié (`v0.4.0-a2`).** Deuxième incrément publiable de CHANGE, profil prerelease, clôturé. Ce n'est pas encore `verify` ni `diff`. `v0.4.0-a3` n'est pas démarrée.
+**Statut : publié (`v0.4.0-a2`).** Deuxième incrément publiable de CHANGE, profil prerelease, clôturé. Ce n'est pas `diff`. La vérification live est l'incrément `v0.4.0-a3`.
 
 Fonctions :
 
@@ -2145,6 +2145,20 @@ Fonctions :
 - politique de compatibilité additive documentée.
 
 Frontière : pas de comparaison live, pas de verify, pas de diff.
+
+### v0.4.0-a3 — Live structural verification
+
+**Statut : implémenté sur `release/v0.4.0-a3`, non publié.** Troisième incrément de CHANGE. Ce n'est pas `diff` et ce n'est pas une clôture de release.
+
+Fonctions :
+
+- `dirloom verify <snapshot> [directory]` ;
+- comparaison par égalité de Fingerprint v1, une seule observation live ;
+- Capture Semantics v1 du snapshot comme seul périmètre d'observation ;
+- sorties texte et JSON (Verify Result Schema v1) ;
+- codes de sortie 0 à 6, mismatch distinct d'un snapshot invalide.
+
+Frontière : pas de diff nœud à nœud, pas de détection de renommage ou de déplacement, pas de hash de contenu, pas de source Git.
 
 ## v0.5 — Scaffold & Architecture Packs
 

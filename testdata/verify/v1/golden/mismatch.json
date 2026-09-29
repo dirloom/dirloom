@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "status": "MISMATCH",
+  "expectedFingerprint": "dlm:v1:sha256:8d7bb7426bde9feaebf277739ecc2a805de75988b019f6b586afa0f2efdc8147",
+  "actualFingerprint": "dlm:v1:sha256:c99d7be77307bafc7a84034d7d035539a51f5c1854b2e6f255929c9f80eebb58"
+}

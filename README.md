@@ -108,6 +108,10 @@ dirloom fingerprint
 
 # Persist a self-verifying structural snapshot
 dirloom snapshot --output architecture.dlm.json
+
+# Check that the live tree still matches that snapshot
+dirloom verify architecture.dlm.json
+dirloom verify architecture.dlm.json --format json
 ```
 
 PowerShell composition still works, but `--copy` is the native clipboard path:
@@ -117,7 +121,7 @@ dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md) and [`dirloom snapshot`](docs/reference/snapshot.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md) and [`dirloom verify`](docs/reference/verify.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification and current product limitations.
 
 ## Getting help
 
@@ -262,6 +266,8 @@ dirloom [directory] [flags]
 `dirloom fingerprint [directory]` prints `dlm:v1:sha256:<digest>` for the structural view Dirloom observes after filters. It does not hash file contents. Presentation flags are ignored. See [fingerprint](docs/reference/fingerprint.md).
 
 `dirloom snapshot [directory]` writes Snapshot Schema v1 JSON to stdout or, with `--output architecture.dlm.json`, transactionally to a file. The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
+
+`dirloom verify <snapshot> [directory]` reports whether the live structure still matches that snapshot. Capture Semantics from the snapshot select the scan. The result is Fingerprint v1 equality, not a diff and not a content hash. `--format json` writes Verify Result Schema v1. See [verify](docs/reference/verify.md).
 
 ## Filtering
 
@@ -417,9 +423,9 @@ CLI arguments
     → stdout or transactional file output
 ```
 
-The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse`, snapshot and diff interfaces able to reuse the same core.
+The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse` and diff interfaces able to reuse the same core. `Verify` is one of those application services: it loads a snapshot and scans once without rendering.
 
-See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md) and [docs/reference/snapshot.md](docs/reference/snapshot.md) for structural identity and durable snapshots, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
+See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md), [docs/reference/snapshot.md](docs/reference/snapshot.md) and [docs/reference/verify.md](docs/reference/verify.md) for structural identity, durable snapshots and live verification, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
 ## Development
 
@@ -472,7 +478,8 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3.2: published — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
 - v0.3.3: published — Nerd catalog fidelity, provenance, and classification refinement;
 - v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
-- v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff; stable package managers unchanged);
+- v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff in that increment; stable package managers unchanged);
+- v0.4.0-a3: implemented on `release/v0.4.0-a3` — live structural verification (`dirloom verify`); not published; no diff;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

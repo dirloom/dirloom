@@ -221,3 +221,42 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		t.Fatal("roadmap must not present contextual help as a v0.4.0 beta")
 	}
 }
+
+func TestVerifyDocumentationDiscoverable(t *testing.T) {
+	readme, err := os.ReadFile(filepath.Join("..", "..", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	reference, err := os.ReadFile(filepath.Join("..", "..", "docs", "reference", "verify.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "verify-result-v1.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	adr, err := os.ReadFile(filepath.Join("..", "..", "docs", "adr", "0003-snapshot-verification.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	architecture, err := os.ReadFile(filepath.Join("..", "..", "docs", "architecture.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "dirloom verify") || !strings.Contains(string(readme), "docs/reference/verify.md") {
+		t.Fatal("README missing verify discoverability")
+	}
+	for _, want := range []string{"Capture Semantics", "exit", "MATCH", "MISMATCH", "dirloom diff", "PowerShell", "GitLab"} {
+		if !strings.Contains(string(reference), want) {
+			t.Errorf("verify reference missing %q", want)
+		}
+	}
+	for _, want := range []string{"schemaVersion", "INVALID_SNAPSHOT", "snapshot_fingerprint_mismatch", "verify_observation_failure"} {
+		if !strings.Contains(string(contract), want) {
+			t.Errorf("verify contract missing %q", want)
+		}
+	}
+	if !strings.Contains(string(adr), "Fingerprint v1") || !strings.Contains(string(architecture), "dirloom verify") {
+		t.Fatal("architecture decision or architecture doc missing verify")
+	}
+}

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "INVALID_SNAPSHOT",
+  "diagnostic": {
+    "code": "snapshot_fingerprint_mismatch",
+    "message": "snapshot fingerprint mismatch: embedded dlm:v1:sha256:0000000000000000000000000000000000000000000000000000000000000000, computed dlm:v1:sha256:8d7bb7426bde9feaebf277739ecc2a805de75988b019f6b586afa0f2efdc8147"
+  }
+}

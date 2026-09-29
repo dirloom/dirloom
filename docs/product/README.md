@@ -4,7 +4,7 @@
 > **Dernière consolidation :** 18 septembre 2026<br>
 > **Périmètre :** évolution post-v0.1 de Dirloom
 
-Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0`, `v0.3.1`, `v0.3.2`, `v0.3.3`, `v0.4.0-a1` et `v0.4.0-a2` sont publiées. `v0.4.0-a2` est une GitHub Pre-release close : snapshots persistants auto-vérifiants. `verify` et `diff` ne sont pas encore livrés. `v0.4.0-a3` n'est pas démarrée. Les documents de ce dossier décrivent le produit que ce socle permet de construire.
+Dirloom transforme la structure logicielle en un artefact que l'on peut capturer, comparer, interroger, gouverner, matérialiser et fournir aux outils. Les versions `v0.3.0`, `v0.3.1`, `v0.3.2`, `v0.3.3`, `v0.4.0-a1` et `v0.4.0-a2` sont publiées. `v0.4.0-a2` est une GitHub Pre-release close : snapshots persistants auto-vérifiants. `v0.4.0-a3` est implémentée sur `release/v0.4.0-a3` (`dirloom verify`) et n'est pas encore publiée. `diff` n'est pas livré. Les documents de ce dossier décrivent le produit que ce socle permet de construire.
 
 ## Parcours de lecture
 
