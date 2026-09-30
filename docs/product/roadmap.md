@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a2` publiée ; `v0.4.0-a3` implémentée sur `release/v0.4.0-a3` (verify, non publiée)<br>
+> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a3` publiée ; `v0.4.0-a4` en développement actif sur `release/v0.4.0-a4` (structural diff, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2148,7 +2148,7 @@ Frontière : pas de comparaison live, pas de verify, pas de diff.
 
 ### v0.4.0-a3 — Live structural verification
 
-**Statut : implémenté sur `release/v0.4.0-a3`, non publié.** Troisième incrément de CHANGE. Ce n'est pas `diff` et ce n'est pas une clôture de release.
+**Statut : publié (`v0.4.0-a3`).** Troisième incrément de CHANGE, clôturé. Ce n'est pas `diff`.
 
 Fonctions :
 
@@ -2159,6 +2159,20 @@ Fonctions :
 - codes de sortie 0 à 6, mismatch distinct d'un snapshot invalide.
 
 Frontière : pas de diff nœud à nœud, pas de détection de renommage ou de déplacement, pas de hash de contenu, pas de source Git.
+
+### v0.4.0-a4 — Structural diff
+
+**Statut : développement actif sur `release/v0.4.0-a4`, non publié.** Quatrième incrément de CHANGE. Ce n'est pas une clôture de release.
+
+Fonctions :
+
+- `dirloom diff <source-a> <source-b>` avec sources `snapshot:<path>` et `live:<directory>` ;
+- moteur de comparaison O(N+M) sur Identity Projection v1, une seule observation par source ;
+- vocabulaire figé ADDED / REMOVED / CHANGED, ordre canonique path-first, racine jamais listée ;
+- Capture Semantics v1 du snapshot opposé comme seul périmètre d'observation d'une source live ;
+- sorties texte et JSON (Diff Result Schema v1), codes de sortie 0 à 6, différences structurelles en exit 1 sans diagnostic d'erreur.
+
+Frontière : pas de détection de renommage ou de déplacement (un renommage vaut REMOVED + ADDED), pas de hash de contenu, pas de source Git, pas de diff live↔live.
 
 ## v0.5 — Scaffold & Architecture Packs
 

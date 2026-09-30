@@ -177,6 +177,8 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
   dirloom snapshot --output architecture.dlm.json
   dirloom verify architecture.dlm.json
   dirloom verify architecture.dlm.json --format json
+  dirloom diff snapshot:architecture.dlm.json live:.
+  dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --format json
   dirloom --ignore node_modules --ignore dist
   dirloom --output structure.md --format markdown
   dirloom help icons
@@ -299,6 +301,7 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
 	command.AddCommand(newFingerprintCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newSnapshotCommand(stdout, deps.loader, &sources))
 	command.AddCommand(newVerifyCommand(stdout))
+	command.AddCommand(newDiffCommand(stdout))
 	command.AddCommand(newCompletionCommand(stdout))
 	command.SetHelpCommand(newHelpCommand())
 	return command

@@ -112,6 +112,10 @@ dirloom snapshot --output architecture.dlm.json
 # Check that the live tree still matches that snapshot
 dirloom verify architecture.dlm.json
 dirloom verify architecture.dlm.json --format json
+
+# List what structurally changed since that snapshot
+dirloom diff snapshot:architecture.dlm.json live:.
+dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --format json
 ```
 
 PowerShell composition still works, but `--copy` is the native clipboard path:
@@ -121,7 +125,7 @@ dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md) and [`dirloom verify`](docs/reference/verify.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md), [`dirloom verify`](docs/reference/verify.md) and [`dirloom diff`](docs/reference/diff.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification, structural diff and current product limitations.
 
 ## Getting help
 
@@ -268,6 +272,8 @@ dirloom [directory] [flags]
 `dirloom snapshot [directory]` writes Snapshot Schema v1 JSON to stdout or, with `--output architecture.dlm.json`, transactionally to a file. The embedded fingerprint self-verifies the structural artifact; it does not hash file contents or the JSON bytes. Presentation flags are ignored. See [snapshot](docs/reference/snapshot.md).
 
 `dirloom verify <snapshot> [directory]` reports whether the live structure still matches that snapshot. Capture Semantics from the snapshot select the scan. The result is Fingerprint v1 equality, not a diff and not a content hash. `--format json` writes Verify Result Schema v1. See [verify](docs/reference/verify.md).
+
+`dirloom diff <source-a> <source-b>` lists the added, removed and changed canonical paths between two sources (`snapshot:<path>` or `live:<directory>`). A live side is observed with the opposite snapshot's Capture Semantics. File contents are not hashed and a rename is one REMOVED plus one ADDED. Structural differences exit 1 with stderr empty. `--format json` writes Diff Result Schema v1. See [diff](docs/reference/diff.md).
 
 ## Filtering
 
@@ -444,9 +450,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 ## Release
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
-`main` is the integration branch. The latest published tag is `v0.4.0-a2`.
-`v0.4.0-a2` is published and closed. No release branch is active until a
-Human GO starts `v0.4.0-a3` on `release/v0.4.0-a3`.
+`main` is the integration branch. The latest published tag is `v0.4.0-a3`.
+`v0.4.0-a3` is published and closed. `release/v0.4.0-a4` is the active
+release branch for the structural diff increment.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -479,7 +485,8 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3.3: published — Nerd catalog fidelity, provenance, and classification refinement;
 - v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
 - v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff in that increment; stable package managers unchanged);
-- v0.4.0-a3: implemented on `release/v0.4.0-a3` — live structural verification (`dirloom verify`); not published; no diff;
+- v0.4.0-a3: published — live structural verification (`dirloom verify`; GitHub Pre-release; no diff);
+- v0.4.0-a4: active development on `release/v0.4.0-a4` — structural diff (`dirloom diff`); not published;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.

@@ -141,28 +141,28 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a2` is the latest published GitHub Pre-release.
-No release branch is active until a Human GO starts `v0.4.0-a3` on its own
-branch `release/v0.4.0-a3`. Do not create `release/v0.4.0-a3` before that GO.
-Do not start A3. `CHANGELOG.md` remains the unique source of truth for
-release notes. Do not open versioned feature pull requests against `main`.
-Each publishable increment (`a1`, `a2`, `a3`, `rc1`, stable) keeps its own
-`release/v…` branch.
+`v0.4.0-a3` is the latest published GitHub Pre-release.
+`release/v0.4.0-a4` is the active release branch for the structural diff
+increment. The A4 feature work lives on `feat/v0.4.0-a4-structural-diff`,
+which targets `release/v0.4.0-a4` by pull request. `CHANGELOG.md` remains
+the unique source of truth for release notes. Do not open versioned feature
+pull requests against `main`. Each publishable increment (`a1`, `a2`, `a3`,
+`a4`, `rc1`, stable) keeps its own `release/v…` branch.
 
 | Field | Value |
 | --- | --- |
-| Latest published release | `v0.4.0-a2` |
-| Active release branch | none |
-| Next increment branch | `release/v0.4.0-a3` after Human GO |
+| Latest published release | `v0.4.0-a3` |
+| Active release branch | `release/v0.4.0-a4` |
+| Active feature branch | `feat/v0.4.0-a4-structural-diff` → PR to `release/v0.4.0-a4` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Published A2 scope | persistent self-verifying snapshots |
-| Not yet delivered | verify, diff |
+| Published A3 scope | live structural verification |
+| Not yet delivered | diff (A4 in development) |
 
 ```text
-v0.4.0-a2 published / closed
-no release branch active
-Human GO → release/v0.4.0-a3
+v0.4.0-a3 published / closed
+release/v0.4.0-a4 active
+feat/v0.4.0-a4-structural-diff active → PR to release/v0.4.0-a4
 ```
 
 ## v0.4.0-a2 release record

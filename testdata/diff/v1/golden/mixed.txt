@@ -1,0 +1,12 @@
+Structural Diff
+
+Summary: 1 added, 1 removed, 1 changed, 3 total
+
+ADDED
+  + b.txt
+
+REMOVED
+  - a.txt
+
+CHANGED
+  ~ link (target: a -> b)

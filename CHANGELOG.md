@@ -4,6 +4,13 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add `dirloom diff <source-a> <source-b>` to list added, removed and changed canonical paths between `snapshot:<path>` and `live:<directory>` sources. A live side is observed once with the opposite snapshot's Capture Semantics; current configuration is never read.
+- Add the structural comparison engine over Identity Projection v1: one projection per artifact, one O(N+M) merge, frozen ADDED/REMOVED/CHANGED vocabulary, path-first canonical ordering, and a validated StructuralDiff model. A rename or move is one REMOVED plus one ADDED; there is no move detection.
+- Add Diff Result Schema v1 (`--format json`) and diff exits 0 through 6. Structural differences exit 1 without an `Error:` diagnostic; usage failures stay exit 2 with a human stderr diagnostic even under `--format json`.
+- Publish diff contract/ADR/reference docs plus the comparison benchmark baseline.
+
 ## [0.4.0-a3] - 2026-09-30
 
 CHANGE alpha: live structural verification against Snapshot Schema v1

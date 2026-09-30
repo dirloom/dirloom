@@ -68,6 +68,16 @@ jobs:
         shell: pwsh
         run: go test ./internal/cli -count=1 -run TestVerifyShellExitCodes
 
+      - name: Diff shell smoke
+        if: runner.os != 'Windows'
+        shell: bash
+        run: go test ./internal/cli -count=1 -run TestDiffShellExitCodes
+
+      - name: Diff shell smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: go test ./internal/cli -count=1 -run TestDiffShellExitCodes
+
   race:
     name: Race detector
     runs-on: ubuntu-latest
