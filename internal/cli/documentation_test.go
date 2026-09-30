@@ -291,10 +291,17 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 			t.Errorf("diff reference missing %q", want)
 		}
 	}
-	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "OBSERVATION_ERROR", "INTERNAL_ERROR"} {
+	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "SNAPSHOT_READ_ERROR", "OBSERVATION_ERROR", "INTERNAL_ERROR", `"operation"`, "`sources`"} {
 		if !strings.Contains(string(contract), want) {
 			t.Errorf("diff contract missing %q", want)
 		}
+	}
+	golden, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v1", "golden", "snapshot-read-error.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(golden), `"status": "SNAPSHOT_READ_ERROR"`) {
+		t.Fatal("snapshot-read-error golden does not encode SNAPSHOT_READ_ERROR")
 	}
 	if !strings.Contains(string(adr), "Identity Projection v1") || !strings.Contains(string(architecture), "Comparison Engine") {
 		t.Fatal("architecture decision or architecture doc missing diff")

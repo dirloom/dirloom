@@ -2,8 +2,10 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/dirloom/dirloom/internal/artifact"
@@ -26,17 +28,17 @@ func goldenNodeState(kind artifact.Kind, target *string) *comparison.NodeState {
 	return &comparison.NodeState{Kind: kind, Target: target}
 }
 
-// withGoldenMetadata fills the metadata Validate requires; the human renderer
-// never prints it.
+// withGoldenMetadata fills the versions and source refs Validate requires; the
+// human renderer never prints them.
 func withGoldenMetadata(models map[string]comparison.StructuralDiff) map[string]comparison.StructuralDiff {
 	ref := comparison.SourceRef{Kind: "memory", NodeCount: 1}
 	for name, model := range models {
 		model.Metadata = comparison.Metadata{
 			ComparisonVersion:         comparison.Version,
 			IdentityProjectionVersion: comparison.IdentityProjectionVersion,
-			A:                         ref,
-			B:                         ref,
 		}
+		model.SourceA = ref
+		model.SourceB = ref
 		models[name] = model
 	}
 	return models
@@ -130,4 +132,67 @@ func TestDiffJSONGoldens(t *testing.T) {
 		t.Fatalf("observation=(%q, %q, %d)", stdout, stderr, code)
 	}
 	assertDiffGolden(t, "observation-error.json", stdout)
+
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:missing.dlm.json", "snapshot:"+empty, "--format", "json")
+	if code != 5 || stderr != "" {
+		t.Fatalf("snapshot-read=(%q, %q, %d)", stdout, stderr, code)
+	}
+	assertSnapshotReadErrorGolden(t, stdout)
+	assertFrozenDiffJSONContract(t, readGolden(t, "no-differences.json"), true)
+	assertFrozenDiffJSONContract(t, readGolden(t, "differences.json"), false)
+}
+
+func readGolden(t *testing.T, name string) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v1", "golden", name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+// assertSnapshotReadErrorGolden locks SNAPSHOT_READ_ERROR in the committed
+// golden and in the live JSON document. The host OS supplies the cause after
+// "snapshot read failure: open missing.dlm.json: "; that suffix is not part of
+// the frozen schema, so it is rewritten to the golden's message before the
+// byte comparison.
+func assertSnapshotReadErrorGolden(t *testing.T, stdout string) {
+	t.Helper()
+	const prefix = "snapshot read failure: open missing.dlm.json: "
+	golden := readGolden(t, "snapshot-read-error.json")
+	if !strings.Contains(golden, `"status": "SNAPSHOT_READ_ERROR"`) {
+		t.Fatal("golden does not encode SNAPSHOT_READ_ERROR")
+	}
+	var live struct {
+		Status     string `json:"status"`
+		Diagnostic struct {
+			Source  string `json:"source"`
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"diagnostic"`
+	}
+	if err := json.Unmarshal([]byte(stdout), &live); err != nil {
+		t.Fatal(err)
+	}
+	if live.Status != "SNAPSHOT_READ_ERROR" || live.Diagnostic.Source != "a" || live.Diagnostic.Code != "snapshot_read_failure" {
+		t.Fatalf("live = %+v", live)
+	}
+	if !strings.HasPrefix(live.Diagnostic.Message, prefix) {
+		t.Fatalf("message = %q", live.Diagnostic.Message)
+	}
+	var want struct {
+		Diagnostic struct {
+			Message string `json:"message"`
+		} `json:"diagnostic"`
+	}
+	if err := json.Unmarshal([]byte(golden), &want); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(want.Diagnostic.Message, prefix) {
+		t.Fatalf("golden message = %q", want.Diagnostic.Message)
+	}
+	normalized := strings.Replace(stdout, live.Diagnostic.Message, want.Diagnostic.Message, 1)
+	if normalized != golden {
+		t.Fatalf("snapshot-read-error.json\n got %q\nwant %q", normalized, golden)
+	}
 }

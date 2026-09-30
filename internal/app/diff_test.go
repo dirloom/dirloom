@@ -93,8 +93,8 @@ func TestDiffSourceCombinations(t *testing.T) {
 		if DiffStatusOf(diff) != DiffNoDifferences {
 			t.Fatalf("status = %s", DiffStatusOf(diff))
 		}
-		if diff.Metadata.A.Kind != source.KindSnapshot || diff.Metadata.B.Kind != source.KindSnapshot {
-			t.Fatalf("kinds = %s %s", diff.Metadata.A.Kind, diff.Metadata.B.Kind)
+		if diff.SourceA.Kind != source.KindSnapshot || diff.SourceB.Kind != source.KindSnapshot {
+			t.Fatalf("kinds = %s %s", diff.SourceA.Kind, diff.SourceB.Kind)
 		}
 	})
 	t.Run("snapshot against live", func(t *testing.T) {
@@ -105,8 +105,8 @@ func TestDiffSourceCombinations(t *testing.T) {
 		if DiffStatusOf(diff) != DiffNoDifferences {
 			t.Fatalf("status = %s", DiffStatusOf(diff))
 		}
-		if diff.Metadata.A.Kind != source.KindSnapshot || diff.Metadata.B.Kind != source.KindFilesystem {
-			t.Fatalf("kinds = %s %s", diff.Metadata.A.Kind, diff.Metadata.B.Kind)
+		if diff.SourceA.Kind != source.KindSnapshot || diff.SourceB.Kind != source.KindFilesystem {
+			t.Fatalf("kinds = %s %s", diff.SourceA.Kind, diff.SourceB.Kind)
 		}
 	})
 	t.Run("live against snapshot", func(t *testing.T) {
@@ -117,8 +117,8 @@ func TestDiffSourceCombinations(t *testing.T) {
 		if DiffStatusOf(diff) != DiffNoDifferences {
 			t.Fatalf("status = %s", DiffStatusOf(diff))
 		}
-		if diff.Metadata.A.Kind != source.KindFilesystem || diff.Metadata.B.Kind != source.KindSnapshot {
-			t.Fatalf("kinds = %s %s", diff.Metadata.A.Kind, diff.Metadata.B.Kind)
+		if diff.SourceA.Kind != source.KindFilesystem || diff.SourceB.Kind != source.KindSnapshot {
+			t.Fatalf("kinds = %s %s", diff.SourceA.Kind, diff.SourceB.Kind)
 		}
 	})
 	t.Run("live against live is a usage failure", func(t *testing.T) {
@@ -508,8 +508,8 @@ func TestDiffDeepPathsAndFanOut(t *testing.T) {
 	if diff.Summary.Removed != 1 || diff.Summary.Added != 2 || diff.Summary.Total != 3 {
 		t.Fatalf("summary = %+v", diff.Summary)
 	}
-	if diff.Metadata.A.NodeCount != 1001 || diff.Metadata.B.NodeCount != 1002 {
-		t.Fatalf("node counts = %+v", diff.Metadata)
+	if diff.SourceA.NodeCount != 1001 || diff.SourceB.NodeCount != 1002 {
+		t.Fatalf("node counts = %+v %+v", diff.SourceA, diff.SourceB)
 	}
 }
 

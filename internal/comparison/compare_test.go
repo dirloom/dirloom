@@ -19,11 +19,11 @@ func TestCompareEmptyAndIdentical(t *testing.T) {
 	if diff.Metadata.ComparisonVersion != Version || diff.Metadata.IdentityProjectionVersion != 1 {
 		t.Fatalf("metadata = %+v", diff.Metadata)
 	}
-	if diff.Metadata.A.Kind != source.KindMemory || diff.Metadata.B.Kind != source.KindMemory {
-		t.Fatalf("kinds = %+v", diff.Metadata)
+	if diff.SourceA.Kind != source.KindMemory || diff.SourceB.Kind != source.KindMemory {
+		t.Fatalf("kinds = %+v %+v", diff.SourceA, diff.SourceB)
 	}
-	if diff.Metadata.A.NodeCount != 1 || diff.Metadata.B.NodeCount != 1 {
-		t.Fatalf("node counts = %+v", diff.Metadata)
+	if diff.SourceA.NodeCount != 1 || diff.SourceB.NodeCount != 1 {
+		t.Fatalf("node counts = %+v %+v", diff.SourceA, diff.SourceB)
 	}
 
 	same := nestedArtifact()
@@ -31,8 +31,8 @@ func TestCompareEmptyAndIdentical(t *testing.T) {
 	if len(again.Changes) != 0 || again.Summary.Total != 0 {
 		t.Fatalf("identical = %+v", again)
 	}
-	if again.Metadata.A.NodeCount != 4 || again.Metadata.B.NodeCount != 4 {
-		t.Fatalf("node counts = %+v", again.Metadata)
+	if again.SourceA.NodeCount != 4 || again.SourceB.NodeCount != 4 {
+		t.Fatalf("node counts = %+v %+v", again.SourceA, again.SourceB)
 	}
 }
 
@@ -283,8 +283,8 @@ func TestCompareDeepPathsAndFanOut(t *testing.T) {
 		t.Fatalf("summary = %+v", diff.Summary)
 	}
 	// root + wide files + (d0..d40) directories + leaf.txt
-	if diff.Metadata.A.NodeCount != 1+len(wide)+(depth+1)+1 {
-		t.Fatalf("node count = %d", diff.Metadata.A.NodeCount)
+	if diff.SourceA.NodeCount != 1+len(wide)+(depth+1)+1 {
+		t.Fatalf("node count = %d", diff.SourceA.NodeCount)
 	}
 }
 
@@ -297,11 +297,11 @@ func TestValidateRejectsBrokenModels(t *testing.T) {
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: IdentityProjectionVersion,
-			A:                         SourceRef{Kind: source.KindMemory, NodeCount: 2},
-			B:                         SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		},
-		Changes: []Change{{Path: "a.txt", Op: OpRemoved, Before: &file}},
+		SourceA: SourceRef{Kind: source.KindMemory, NodeCount: 2},
+		SourceB: SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		Summary: Summary{Removed: 1, Total: 1},
+		Changes: []Change{{Path: "a.txt", Op: OpRemoved, Before: &file}},
 	}
 	if err := valid.Validate(); err != nil {
 		t.Fatalf("valid model: %v", err)
@@ -320,12 +320,12 @@ func TestValidateRejectsBrokenModels(t *testing.T) {
 		},
 		"empty source kind": func() StructuralDiff {
 			d := valid
-			d.Metadata.A.Kind = ""
+			d.SourceA.Kind = ""
 			return d
 		},
 		"zero node count": func() StructuralDiff {
 			d := valid
-			d.Metadata.B.NodeCount = 0
+			d.SourceB.NodeCount = 0
 			return d
 		},
 		"root change": func() StructuralDiff {
@@ -463,9 +463,9 @@ func invertDiff(d StructuralDiff) StructuralDiff {
 		Metadata: Metadata{
 			ComparisonVersion:         d.Metadata.ComparisonVersion,
 			IdentityProjectionVersion: d.Metadata.IdentityProjectionVersion,
-			A:                         d.Metadata.B,
-			B:                         d.Metadata.A,
 		},
+		SourceA: d.SourceB,
+		SourceB: d.SourceA,
 		Summary: Summary{
 			Added:   d.Summary.Removed,
 			Removed: d.Summary.Added,

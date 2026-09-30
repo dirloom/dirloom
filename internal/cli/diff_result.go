@@ -16,16 +16,20 @@ type diffJSONDocument struct {
 	SchemaVersion int             `json:"schemaVersion"`
 	Status        string          `json:"status"`
 	Metadata      *diffMetadata   `json:"metadata,omitempty"`
+	Sources       *diffSources    `json:"sources,omitempty"`
 	Summary       *diffSummary    `json:"summary,omitempty"`
 	Changes       *[]diffChange   `json:"changes,omitempty"`
 	Diagnostic    *diffDiagnostic `json:"diagnostic,omitempty"`
 }
 
 type diffMetadata struct {
-	ComparisonVersion         int           `json:"comparisonVersion"`
-	IdentityProjectionVersion int           `json:"identityProjectionVersion"`
-	A                         diffSourceRef `json:"a"`
-	B                         diffSourceRef `json:"b"`
+	ComparisonVersion         int `json:"comparisonVersion"`
+	IdentityProjectionVersion int `json:"identityProjectionVersion"`
+}
+
+type diffSources struct {
+	A diffSourceRef `json:"a"`
+	B diffSourceRef `json:"b"`
 }
 
 type diffSourceRef struct {
@@ -41,10 +45,10 @@ type diffSummary struct {
 }
 
 type diffChange struct {
-	Path   string         `json:"path"`
-	Op     string         `json:"op"`
-	Before *diffNodeState `json:"before,omitempty"`
-	After  *diffNodeState `json:"after,omitempty"`
+	Path      string         `json:"path"`
+	Operation string         `json:"operation"`
+	Before    *diffNodeState `json:"before,omitempty"`
+	After     *diffNodeState `json:"after,omitempty"`
 }
 
 // diffNodeState carries target with explicit presence: a non-nil pointer to an
@@ -151,8 +155,10 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 		Metadata: &diffMetadata{
 			ComparisonVersion:         diff.Metadata.ComparisonVersion,
 			IdentityProjectionVersion: diff.Metadata.IdentityProjectionVersion,
-			A:                         diffSourceRef{Kind: string(diff.Metadata.A.Kind), NodeCount: diff.Metadata.A.NodeCount},
-			B:                         diffSourceRef{Kind: string(diff.Metadata.B.Kind), NodeCount: diff.Metadata.B.NodeCount},
+		},
+		Sources: &diffSources{
+			A: diffSourceRef{Kind: string(diff.SourceA.Kind), NodeCount: diff.SourceA.NodeCount},
+			B: diffSourceRef{Kind: string(diff.SourceB.Kind), NodeCount: diff.SourceB.NodeCount},
 		},
 		Summary: &diffSummary{
 			Added:   diff.Summary.Added,
@@ -165,7 +171,7 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 }
 
 func diffChangeJSON(change comparison.Change) diffChange {
-	out := diffChange{Path: change.Path.String(), Op: string(change.Op)}
+	out := diffChange{Path: change.Path.String(), Operation: string(change.Op)}
 	if change.Before != nil {
 		out.Before = diffNodeStateJSON(*change.Before)
 	}

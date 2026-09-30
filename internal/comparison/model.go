@@ -71,12 +71,11 @@ type SourceRef struct {
 	NodeCount int
 }
 
-// Metadata describes the comparison itself.
+// Metadata describes the comparison contract versions. It never names the
+// compared sources: those are sibling fields on StructuralDiff.
 type Metadata struct {
 	ComparisonVersion         int
 	IdentityProjectionVersion int
-	A                         SourceRef
-	B                         SourceRef
 }
 
 // Change is one canonical path that differs between A (before) and B (after).
@@ -99,8 +98,10 @@ type Summary struct {
 // StructuralDiff is the validated comparison outcome.
 type StructuralDiff struct {
 	Metadata Metadata
-	Changes  []Change
+	SourceA  SourceRef
+	SourceB  SourceRef
 	Summary  Summary
+	Changes  []Change
 }
 
 // Validate checks the Structural Diff model invariants. Every violation is a
@@ -112,10 +113,10 @@ func (d StructuralDiff) Validate() error {
 	if d.Metadata.IdentityProjectionVersion != identity.ProjectionVersion {
 		return artifact.InternalError("identity projection version %d is not %d", d.Metadata.IdentityProjectionVersion, identity.ProjectionVersion)
 	}
-	if err := d.Metadata.A.validate("a"); err != nil {
+	if err := d.SourceA.validate("a"); err != nil {
 		return err
 	}
-	if err := d.Metadata.B.validate("b"); err != nil {
+	if err := d.SourceB.validate("b"); err != nil {
 		return err
 	}
 	added, removed, changed := 0, 0, 0

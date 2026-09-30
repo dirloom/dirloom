@@ -39,11 +39,11 @@ func Compare(ctx context.Context, a, b source.Source) (StructuralDiff, error) {
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: identity.ProjectionVersion,
-			A:                         SourceRef{Kind: a.Kind(), NodeCount: len(recordsA)},
-			B:                         SourceRef{Kind: b.Kind(), NodeCount: len(recordsB)},
 		},
-		Changes: changes,
+		SourceA: SourceRef{Kind: a.Kind(), NodeCount: len(recordsA)},
+		SourceB: SourceRef{Kind: b.Kind(), NodeCount: len(recordsB)},
 		Summary: summarize(changes),
+		Changes: changes,
 	}
 	if err := diff.Validate(); err != nil {
 		return StructuralDiff{}, err

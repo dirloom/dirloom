@@ -108,15 +108,14 @@ func TestDiffHumanAndMachineStreams(t *testing.T) {
 
 	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+empty, "snapshot:"+empty, "--format", "json")
 	assertDiffJSON(t, stdout, stderr, code, 0, "NO_DIFFERENCES")
-	if !strings.Contains(stdout, `"changes": []`) {
-		t.Fatalf("changes must be [] not null: %q", stdout)
-	}
+	assertFrozenDiffJSONContract(t, stdout, true)
 
 	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+empty, "snapshot:"+single, "--format", "json")
 	doc := assertDiffJSON(t, stdout, stderr, code, 1, "DIFFERENCES")
 	if doc.Summary == nil || doc.Summary.Added != 1 || doc.Summary.Total != 1 {
 		t.Fatalf("summary=%+v", doc.Summary)
 	}
+	assertFrozenDiffJSONContract(t, stdout, false)
 }
 
 func TestDiffClassifiedExits(t *testing.T) {
@@ -248,6 +247,49 @@ type diffJSONBody struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
 	} `json:"diagnostic"`
+}
+
+// assertFrozenDiffJSONContract locks Diff Result Schema v1: top-level sources,
+// metadata without a/b, operation instead of op, and changes as [] when empty.
+func assertFrozenDiffJSONContract(t *testing.T, stdout string, empty bool) {
+	t.Helper()
+	var doc map[string]any
+	if err := json.Unmarshal([]byte(stdout), &doc); err != nil {
+		t.Fatal(err)
+	}
+	sources, ok := doc["sources"].(map[string]any)
+	if !ok || sources["a"] == nil || sources["b"] == nil {
+		t.Fatalf("sources = %#v", doc["sources"])
+	}
+	metadata, ok := doc["metadata"].(map[string]any)
+	if !ok {
+		t.Fatalf("metadata = %#v", doc["metadata"])
+	}
+	if _, buried := metadata["a"]; buried {
+		t.Fatal("metadata.a must be absent")
+	}
+	if _, buried := metadata["b"]; buried {
+		t.Fatal("metadata.b must be absent")
+	}
+	if metadata["comparisonVersion"] != float64(1) || metadata["identityProjectionVersion"] != float64(1) {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+	changes, ok := doc["changes"].([]any)
+	if !ok {
+		t.Fatalf("changes must be an array, got %#v", doc["changes"])
+	}
+	if empty && len(changes) != 0 {
+		t.Fatalf("empty diff changes = %#v", changes)
+	}
+	if strings.Contains(stdout, `"op"`) {
+		t.Fatalf("public field op must be absent: %s", stdout)
+	}
+	if !empty && !strings.Contains(stdout, `"operation"`) {
+		t.Fatalf("public field operation missing: %s", stdout)
+	}
+	if empty && !strings.Contains(stdout, `"changes": []`) {
+		t.Fatalf("changes must be [] not null: %q", stdout)
+	}
 }
 
 func assertDiffJSON(t *testing.T, stdout, stderr string, code, wantCode int, status string) diffJSONBody {

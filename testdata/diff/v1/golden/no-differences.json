@@ -3,7 +3,9 @@
   "status": "NO_DIFFERENCES",
   "metadata": {
     "comparisonVersion": 1,
-    "identityProjectionVersion": 1,
+    "identityProjectionVersion": 1
+  },
+  "sources": {
     "a": {
       "kind": "snapshot",
       "nodeCount": 1

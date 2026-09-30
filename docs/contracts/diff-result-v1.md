@@ -19,16 +19,22 @@ Top-level field order is fixed by the encoder struct:
 | `schemaVersion` | always `1` |
 | `status` | always |
 | `metadata` | success statuses (`NO_DIFFERENCES`, `DIFFERENCES`) |
+| `sources` | success statuses |
 | `summary` | success statuses |
 | `changes` | success statuses; `[]` when empty, never null |
 | `diagnostic` | failure statuses |
 
-`metadata` describes the comparison, never the environment:
+`metadata` describes the comparison contract, never the environment and never the compared inputs:
 
 | Field | Value |
 | --- | --- |
 | `comparisonVersion` | always `1` |
 | `identityProjectionVersion` | always `1` |
+
+`sources` names the two compared inputs:
+
+| Field | Value |
+| --- | --- |
 | `a` | `{ "kind": string, "nodeCount": number }` for source A |
 | `b` | `{ "kind": string, "nodeCount": number }` for source B |
 
@@ -40,18 +46,18 @@ Top-level field order is fixed by the encoder struct:
 
 ## Change vocabulary
 
-A change is one canonical path compared between source A (before) and source B (after):
+A change is one canonical path compared between source A (before) and source B (after). The public JSON field is `"operation"`.
 
 | Field | Presence |
 | --- | --- |
 | `path` | always; canonical Identity Projection v1 path, never the root `.` |
-| `op` | `ADDED`, `REMOVED`, or `CHANGED` |
+| `operation` | `ADDED`, `REMOVED`, or `CHANGED` |
 | `after` | `ADDED` and `CHANGED` |
 | `before` | `REMOVED` and `CHANGED` |
 
 A node state is `{ "kind": string }` plus `target` for kinds that carry one (`symlink`, `junction`). `target` is present with an explicit value whenever the kind carries one, including the empty string; it is absent otherwise.
 
-| `op` | Meaning |
+| `operation` | Meaning |
 | --- | --- |
 | `ADDED` | `path` exists in B and not in A; only `after` is present |
 | `REMOVED` | `path` exists in A and not in B; only `before` is present |
@@ -67,6 +73,7 @@ Changes are sorted by ascending canonical path as UTF-8 bytes. There is at most 
 | `DIFFERENCES` | 1 | Both sources observed, at least one structural change |
 | `INVALID_SNAPSHOT` | 3 | A `snapshot:` input is corrupt or semantically invalid Snapshot Schema v1 |
 | `UNSUPPORTED_SNAPSHOT` | 4 | A `snapshot:` input uses a schema, artifact version, or required feature this release cannot accept |
+| `SNAPSHOT_READ_ERROR` | 5 | A `snapshot:` input could not be read |
 | `OBSERVATION_ERROR` | 5 | A source could not be read or did not yield a trustworthy artifact |
 | `INTERNAL_ERROR` | 6 | Broken Dirloom invariant |
 

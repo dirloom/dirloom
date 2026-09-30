@@ -105,10 +105,10 @@ func modelFromBytes(data []byte) StructuralDiff {
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: IdentityProjectionVersion,
-			A:                         SourceRef{Kind: source.KindMemory, NodeCount: 1},
-			B:                         SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		},
-		Changes: changes,
+		SourceA: SourceRef{Kind: source.KindMemory, NodeCount: 1},
+		SourceB: SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		Summary: Summary{Added: 1, Removed: 1, Changed: 1, Total: len(changes)},
+		Changes: changes,
 	}
 }
