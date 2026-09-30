@@ -141,58 +141,62 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a3` is published and closed. It is the latest GitHub Pre-release.
-The latest stable release is `v0.3.3`. `release/v0.4.0-a4` is frozen and
-release-ready. Feature pull request #47 is merged and feature work on
-`feat/v0.4.0-a4-structural-diff` is complete. `main` still carries the
-`v0.4.0-a3` release-commit lineage. A5 has not started. `CHANGELOG.md`
+`v0.4.0-a4` is the latest published GitHub Pre-release and is closed. The
+latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. No release branch is active. A5 has not started. `CHANGELOG.md`
 remains the unique source of truth for release notes. Do not open versioned
 feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
-| Latest published GitHub Pre-release | `v0.4.0-a3` |
+| Latest published GitHub Pre-release | `v0.4.0-a4` |
 | Latest stable release | `v0.3.3` |
-| Active release candidate | `v0.4.0-a4` on `release/v0.4.0-a4` |
-| Candidate state | FROZEN / RELEASE READY |
-| Feature pull request | #47 merged (`feat/v0.4.0-a4-structural-diff`) |
+| Active release branch | none |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
 | A5 | NOT STARTED |
 
 ```text
-v0.4.0-a3 published / closed
-
-release/v0.4.0-a4
-FROZEN / RELEASE READY
-
-PR #47 merged
-feat/v0.4.0-a4-structural-diff complete
-
-main still at v0.4.0-a3 release commit lineage
-
+v0.4.0-a4 published / closed
+latest stable v0.3.3
+active release branch: none
 A5 NOT STARTED
 ```
 
-## v0.4.0-a4 freeze checklist
+## v0.4.0-a4 release record
 
-The scope freeze lives on `release/v0.4.0-a4`. Do not create
-`chore/v0.4.0-a4-freeze`.
+v0.4.0-a4 is published and closed. The checklist below is the completed
+ceremony, kept for audit. It is not the current active release state.
+Do not create `chore/v0.4.0-a4-freeze`. The scope freeze lived on
+`release/v0.4.0-a4`.
 
 ```text
-feature → release                  DONE
-release CI                         PASS
-freeze                             ACTIVE
-final release PR → main            PENDING
-tag                                PENDING
-draft prerelease                   PENDING
-publication                        PENDING
-package managers                   MUST STAY v0.3.3
+feature → release                DONE
+freeze                           DONE
+release CI                       PASS
+release → main                   DONE
+main CI                          PASS
+tag v0.4.0-a4                    DONE
+draft prerelease                 VERIFIED
+publication                      DONE
+package managers                 SKIPPED
+branches                         DELETED
+A4                               CLOSED
 ```
 
-Feature branch of record: `feat/v0.4.0-a4-structural-diff`. Release CI of
-record before freeze: GitHub Actions run `36758222099` on
-`af007c816c8c6f5ae3c87dbf1fe6dcb1c95f1f00`.
+Recorded identifiers:
+
+- Feature branch `feat/v0.4.0-a4-structural-diff` at `a2499b20a02269582901a7385f21b588b87f6419`, merged by pull request #47 into `release/v0.4.0-a4` at `af007c816c8c6f5ae3c87dbf1fe6dcb1c95f1f00`.
+- Release CI before freeze: https://github.com/dirloom/dirloom/actions/runs/36758222099
+- Freeze commit: `da23bc4a455d6e87b1f19bcb90a7e34060128aef`
+- Freeze CI: https://github.com/dirloom/dirloom/actions/runs/36761263881
+- Release pull request #48 merged to `main` at `0b0b51e631795715dd96d81294532e35263d81ad`
+- Main CI: https://github.com/dirloom/dirloom/actions/runs/36761711579
+- Annotated tag `v0.4.0-a4` points at `0b0b51e631795715dd96d81294532e35263d81ad`
+- Release workflow: https://github.com/dirloom/dirloom/actions/runs/36761938148
+- Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a4 (`publishedAt` `2026-09-30T18:57:45Z`)
+- Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/36762306813
+- `release/v0.4.0-a4` and `feat/v0.4.0-a4-structural-diff` deleted after publication.
 
 ## v0.4.0-a2 release record
 
