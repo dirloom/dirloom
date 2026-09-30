@@ -4,6 +4,13 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a4] - 2026-09-30
+
+CHANGE alpha: deterministic structural diff over Canonical Structural
+Artifacts using Identity Projection v1, with ADDED, REMOVED and CHANGED
+operations and Diff Result Schema v1. This increment does not add move
+detection or Git sources.
+
 ### Added
 
 - Add `dirloom diff <source-a> <source-b>` to list added, removed and changed canonical paths between `snapshot:<path>` and `live:<directory>` sources. A live side is observed once with the opposite snapshot's Capture Semantics; current configuration is never read.
@@ -217,7 +224,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...HEAD
+[0.4.0-a4]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...v0.4.0-a4
 [0.4.0-a3]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...v0.4.0-a3
 [0.4.0-a2]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...v0.4.0-a2
 [0.4.0-a1]: https://github.com/dirloom/dirloom/compare/v0.3.3...v0.4.0-a1

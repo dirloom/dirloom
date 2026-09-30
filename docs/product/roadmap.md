@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — `v0.4.0-a3` publiée ; `v0.4.0-a4` en développement actif sur `release/v0.4.0-a4` (structural diff, non publiée)<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a3` ; stable `v0.3.3` ; `v0.4.0-a4` figée sur `release/v0.4.0-a4` (release ready, non publiée) ; A5 non démarrée<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2162,7 +2162,7 @@ Frontière : pas de diff nœud à nœud, pas de détection de renommage ou de d�
 
 ### v0.4.0-a4 — Structural diff
 
-**Statut : développement actif sur `release/v0.4.0-a4`, non publié.** Quatrième incrément de CHANGE. Ce n'est pas une clôture de release.
+**Statut : figé sur `release/v0.4.0-a4`, release ready, non publié.** Quatrième incrément de CHANGE. La pull request de feature #47 est mergée. Ce n'est pas encore une publication et A5 n'est pas démarrée.
 
 Fonctions :
 
