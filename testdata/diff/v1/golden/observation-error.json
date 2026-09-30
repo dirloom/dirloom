@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "source": "b",
+    "code": "source_read_failure",
+    "message": "directory \"definitely-missing-dir\" does not exist"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "SNAPSHOT_READ_ERROR",
+  "diagnostic": {
+    "source": "a",
+    "code": "snapshot_read_failure",
+    "message": "snapshot read failure: open missing.dlm.json: The system cannot find the file specified."
+  }
+}

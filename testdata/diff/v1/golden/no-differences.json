@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "NO_DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1
+  },
+  "sources": {
+    "a": {
+      "kind": "snapshot",
+      "nodeCount": 1
+    },
+    "b": {
+      "kind": "snapshot",
+      "nodeCount": 1
+    }
+  },
+  "summary": {
+    "added": 0,
+    "removed": 0,
+    "changed": 0,
+    "total": 0
+  },
+  "changes": []
+}

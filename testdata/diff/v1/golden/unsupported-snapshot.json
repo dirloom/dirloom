@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "UNSUPPORTED_SNAPSHOT",
+  "diagnostic": {
+    "source": "a",
+    "code": "unsupported_snapshot_schema",
+    "message": "unsupported snapshot schemaVersion 9"
+  }
+}

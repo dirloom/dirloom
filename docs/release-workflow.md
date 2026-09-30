@@ -141,29 +141,58 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a2` is the latest published GitHub Pre-release.
-No release branch is active until a Human GO starts `v0.4.0-a3` on its own
-branch `release/v0.4.0-a3`. Do not create `release/v0.4.0-a3` before that GO.
-Do not start A3. `CHANGELOG.md` remains the unique source of truth for
-release notes. Do not open versioned feature pull requests against `main`.
-Each publishable increment (`a1`, `a2`, `a3`, `rc1`, stable) keeps its own
-`release/v…` branch.
+`v0.4.0-a3` is published and closed. It is the latest GitHub Pre-release.
+The latest stable release is `v0.3.3`. `release/v0.4.0-a4` is frozen and
+release-ready. Feature pull request #47 is merged and feature work on
+`feat/v0.4.0-a4-structural-diff` is complete. `main` still carries the
+`v0.4.0-a3` release-commit lineage. A5 has not started. `CHANGELOG.md`
+remains the unique source of truth for release notes. Do not open versioned
+feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
-| Latest published release | `v0.4.0-a2` |
-| Active release branch | none |
-| Next increment branch | `release/v0.4.0-a3` after Human GO |
+| Latest published GitHub Pre-release | `v0.4.0-a3` |
+| Latest stable release | `v0.3.3` |
+| Active release candidate | `v0.4.0-a4` on `release/v0.4.0-a4` |
+| Candidate state | FROZEN / RELEASE READY |
+| Feature pull request | #47 merged (`feat/v0.4.0-a4-structural-diff`) |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Published A2 scope | persistent self-verifying snapshots |
-| Not yet delivered | verify, diff |
+| A5 | NOT STARTED |
 
 ```text
-v0.4.0-a2 published / closed
-no release branch active
-Human GO → release/v0.4.0-a3
+v0.4.0-a3 published / closed
+
+release/v0.4.0-a4
+FROZEN / RELEASE READY
+
+PR #47 merged
+feat/v0.4.0-a4-structural-diff complete
+
+main still at v0.4.0-a3 release commit lineage
+
+A5 NOT STARTED
 ```
+
+## v0.4.0-a4 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a4`. Do not create
+`chore/v0.4.0-a4-freeze`.
+
+```text
+feature → release                  DONE
+release CI                         PASS
+freeze                             ACTIVE
+final release PR → main            PENDING
+tag                                PENDING
+draft prerelease                   PENDING
+publication                        PENDING
+package managers                   MUST STAY v0.3.3
+```
+
+Feature branch of record: `feat/v0.4.0-a4-structural-diff`. Release CI of
+record before freeze: GitHub Actions run `36758222099` on
+`af007c816c8c6f5ae3c87dbf1fe6dcb1c95f1f00`.
 
 ## v0.4.0-a2 release record
 

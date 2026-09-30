@@ -17,8 +17,11 @@ cmd/dirloom
        │    │    └─ internal/artifact
        │    ├─ internal/identity
        │    │    └─ internal/artifact
-       │    └─ internal/snapshot
-       │         ├─ internal/artifact
+       │    ├─ internal/snapshot
+       │    │    ├─ internal/artifact
+       │    │    └─ internal/identity
+       │    └─ internal/comparison
+       │         ├─ internal/source
        │         └─ internal/identity
        ├─ internal/render
        │    ├─ internal/diagram
@@ -42,6 +45,7 @@ cmd/dirloom
 - `internal/source`: `StructuralSource` abstraction and FilesystemSource adapter over the existing scanner.
 - `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
 - `internal/snapshot`: Snapshot Schema v1, Capture Semantics v1, Artifact Projection v1, deterministic JSON encode/decode and shared self-verifying validator.
+- `internal/comparison`: StructuralDiff model, model validator and the O(N+M) comparison engine over Identity Projection v1. No filesystem, CLI or presentation dependency.
 - `internal/diagram`: canonical graph projection (`Document`, `ContractVersion`, `structure` view) with a single `tree` adapter.
 - `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
@@ -94,3 +98,16 @@ The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--o
 `dirloom snapshot` reuses the same single observation path, builds Snapshot Artifact Projection v1 plus Capture Semantics v1, embeds Fingerprint v1, and emits deterministic JSON (stdout or transactional `--output`). Snapshot persistence is separate from Identity Projection. Contracts: [Snapshot Schema v1](contracts/snapshot-schema-v1.md), [snapshot command](reference/snapshot.md), [ADR 0002](adr/0002-snapshot-persistence-and-compatibility.md). Local performance snapshots: [v0.4-a2 benchmarks](benchmarks/v0.4-a2.md).
 
 `dirloom verify` loads that snapshot through the shared validator, observes the selected root once with the persisted Capture Semantics, and compares typed Fingerprint v1 values. Mismatch is a normal exit, not an error diagnostic. It does not re-read project or user configuration and it does not emit a structural diff. Contracts: [Verify Result Schema v1](contracts/verify-result-v1.md), [verify command](reference/verify.md), [ADR 0003](adr/0003-snapshot-verification.md). Local performance snapshots: [v0.4-a3 benchmarks](benchmarks/v0.4-a3.md).
+
+`dirloom diff` compares two structural sources (`snapshot:<path>` or `live:<directory>`) through the comparison engine and lists added, removed, and changed canonical paths. The data flow is one-directional:
+
+```text
+Source (snapshot adapter or filesystem observation)
+    → Canonical Structural Artifact v1
+    → Identity Projection v1 (once per artifact)
+    → Comparison Engine (two-way merge over sorted records)
+    → StructuralDiff (validated model)
+    → human renderer or JSON renderer
+```
+
+The comparison engine is neither the human renderer nor the JSON renderer: it produces the validated `StructuralDiff` model and never formats bytes. A live side is observed once with the opposite snapshot's Capture Semantics through the same shared helper verify uses, with conditional reference-file self-exclusion; current configuration is never consulted. There is no move detection: a rename is one REMOVED plus one ADDED. Contracts: [Diff Result Schema v1](contracts/diff-result-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md).

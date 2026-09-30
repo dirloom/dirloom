@@ -1,0 +1,7 @@
+Structural Diff
+
+Summary: 0 added, 0 removed, 2 changed, 2 total
+
+CHANGED
+  ~ link (target: target-a -> target-b)
+  ~ ptr (kind: symlink -> file, target: target-a -> <none>)

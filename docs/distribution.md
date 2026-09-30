@@ -18,20 +18,28 @@ Linux
 
 ## Two independent statuses
 
-**Release Done** is a product milestone. It is complete when v0.2.0 is published on GitHub with verified archives, checksums, SBOMs and attestations, `--copy` and `completion` are shipped, and the Scoop, Homebrew and Winget pull requests have been opened. A waiting Microsoft Winget merge does **not** reopen the milestone.
+**Release Done** is a product milestone, independent of any one version number.
+
+- A stable release is done when the GitHub publication is verified and the stable package-manager update workflow has been triggered.
+- A prerelease is done when the GitHub Pre-release is published and verified, and the stable package-manager channels are intentionally unchanged.
+
+A waiting Microsoft Winget merge does **not** reopen the milestone. The v0.2.0 ceremony below remains the historical bootstrap of those channels.
 
 **Distribution Verified** is operational and tracked per channel after a clean install, version check, upgrade and uninstall on that manager.
 
 <!-- dirloom-distribution-status -->
 ```text
 RELEASE STATUS
-Released at GitHub tag v0.2.0; v0.3.0 freeze on release/v0.3.0
+Latest stable release: v0.3.3
+Latest GitHub Pre-release: v0.4.0-a3
+v0.4.0-a4: frozen release candidate
 
 DISTRIBUTION STATUS
-GitHub     ✅ v0.2.0
-Scoop      ✅ v0.1.1
-Homebrew   ⏳
-Winget     ⏳
+GitHub Stable   ✅ v0.3.3
+GitHub Preview  ✅ v0.4.0-a3
+Scoop           ✅ v0.3.3
+Homebrew        ✅ v0.3.3
+Winget          ✅ v0.3.3
 ```
 
 ## Identifiers
