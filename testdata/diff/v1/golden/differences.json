@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "a": {
+      "kind": "snapshot",
+      "nodeCount": 2
+    },
+    "b": {
+      "kind": "snapshot",
+      "nodeCount": 4
+    }
+  },
+  "summary": {
+    "added": 3,
+    "removed": 1,
+    "changed": 0,
+    "total": 4
+  },
+  "changes": [
+    {
+      "path": "README.md",
+      "op": "ADDED",
+      "after": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "a.txt",
+      "op": "REMOVED",
+      "before": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "src",
+      "op": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/main.go",
+      "op": "ADDED",
+      "after": {
+        "kind": "file"
+      }
+    }
+  ]
+}

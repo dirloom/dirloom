@@ -1,0 +1,6 @@
+Structural Diff
+
+Summary: 0 added, 0 removed, 1 changed, 1 total
+
+CHANGED
+  ~ node (kind: file -> directory)
