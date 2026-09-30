@@ -23,12 +23,13 @@ Published status is independent of each package manager. GitHub Releases is alwa
 ```text
 RELEASE STATUS
 Latest stable release: v0.3.3
-Latest GitHub Pre-release: v0.4.0-a3
-v0.4.0-a4: frozen release candidate
+Latest GitHub Pre-release: v0.4.0-a4
+Active release branch: none
+v0.4.0-a4: published / closed
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
-GitHub Preview  ✅ v0.4.0-a3
+GitHub Preview  ✅ v0.4.0-a4
 Scoop           ✅ v0.3.3
 Homebrew        ✅ v0.3.3
 Winget          ✅ v0.3.3
@@ -452,9 +453,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a3`. The latest stable release is `v0.3.3`. `release/v0.4.0-a4` is
-frozen and release-ready for structural diff. Feature pull request #47 is
-merged. A5 has not started.
+`v0.4.0-a4`. The latest stable release is `v0.3.3`. No release branch is
+active. `v0.4.0-a4` is published and closed. A5 has not started.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -488,7 +488,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
 - v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff in that increment; stable package managers unchanged);
 - v0.4.0-a3: published — live structural verification (`dirloom verify`; GitHub Pre-release; no diff);
-- v0.4.0-a4: frozen release candidate on `release/v0.4.0-a4` — structural diff (`dirloom diff`); not published; feature pull request #47 merged; A5 not started;
+- v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`); A5 not started;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification and structural diff;
 - v0.5: scaffold, templates and Architecture Packs.
