@@ -201,7 +201,8 @@ func TestReleaseWorkflowDocumentsPre1Versioning(t *testing.T) {
 		"[0.4.0-a2] - 2026-09-24",
 		"prerelease / CLI package",
 		"release/v0.4.0-a2",
-		"No release branch is active",
+		"release/v0.4.0-a4",
+		"feat/v0.4.0-a4-structural-diff",
 		"Optional extended terminal matrix",
 		"Release blocker: NO",
 	} {
@@ -258,5 +259,44 @@ func TestVerifyDocumentationDiscoverable(t *testing.T) {
 	}
 	if !strings.Contains(string(adr), "Fingerprint v1") || !strings.Contains(string(architecture), "dirloom verify") {
 		t.Fatal("architecture decision or architecture doc missing verify")
+	}
+}
+
+func TestDiffDocumentationDiscoverable(t *testing.T) {
+	readme, err := os.ReadFile(filepath.Join("..", "..", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	reference, err := os.ReadFile(filepath.Join("..", "..", "docs", "reference", "diff.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "diff-result-v1.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	adr, err := os.ReadFile(filepath.Join("..", "..", "docs", "adr", "0004-structural-diff.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	architecture, err := os.ReadFile(filepath.Join("..", "..", "docs", "architecture.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "dirloom diff") || !strings.Contains(string(readme), "docs/reference/diff.md") {
+		t.Fatal("README missing diff discoverability")
+	}
+	for _, want := range []string{"snapshot:<path>", "live:<directory>", "Capture Semantics", "ADDED", "REMOVED", "CHANGED", "No structural differences.", "PowerShell", "GitLab"} {
+		if !strings.Contains(string(reference), want) {
+			t.Errorf("diff reference missing %q", want)
+		}
+	}
+	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "OBSERVATION_ERROR", "INTERNAL_ERROR"} {
+		if !strings.Contains(string(contract), want) {
+			t.Errorf("diff contract missing %q", want)
+		}
+	}
+	if !strings.Contains(string(adr), "Identity Projection v1") || !strings.Contains(string(architecture), "Comparison Engine") {
+		t.Fatal("architecture decision or architecture doc missing diff")
 	}
 }
