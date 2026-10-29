@@ -157,19 +157,45 @@ func TestDiffContentOnlyChange(t *testing.T) {
 	}
 }
 
-func TestDiffMoveIsRemoveAndAdd(t *testing.T) {
+// movedFileTree snapshots a tree, then moves a/one.txt to b/one.txt.
+func movedFileTree(t *testing.T) (snap, root string) {
+	t.Helper()
 	store := t.TempDir()
-	root := writeTree(t, t.TempDir(), [][2]string{{"a/one.txt", "a"}, {"b/.keep", ""}})
-	snap := mustDiffSnapshotFile(t, store, "ref.dlm.json", mustFilesystemSnapshot(t, root))
+	root = writeTree(t, t.TempDir(), [][2]string{{"a/one.txt", "a"}, {"b/.keep", ""}})
+	snap = mustDiffSnapshotFile(t, store, "ref.dlm.json", mustFilesystemSnapshot(t, root))
 	if err := os.Rename(filepath.Join(root, "a", "one.txt"), filepath.Join(root, "b", "one.txt")); err != nil {
 		t.Fatal(err)
 	}
+	return snap, root
+}
+
+func TestDiffDetectsMovesByDefault(t *testing.T) {
+	snap, root := movedFileTree(t)
 	diff := mustDiff(t, DiffRequest{
 		A: DiffSourceSpec{Kind: DiffSourceSnapshot, Path: snap},
 		B: DiffSourceSpec{Kind: DiffSourceLive, Path: root},
 	})
-	if DiffStatusOf(diff) != DiffDifferences {
-		t.Fatalf("status = %s", DiffStatusOf(diff))
+	if DiffStatusOf(diff) != DiffDifferences || diff.Metadata.MoveDetection != comparison.MoveDetectionStructuralV1 {
+		t.Fatalf("status = %s, metadata = %+v", DiffStatusOf(diff), diff.Metadata)
+	}
+	if diff.Summary != (comparison.Summary{Moved: 1, Total: 1}) {
+		t.Fatalf("summary = %+v", diff.Summary)
+	}
+	move := diff.Changes[0]
+	if move.Op != comparison.OpMoved || move.From != "a/one.txt" || move.Path != "b/one.txt" || move.Evidence != comparison.EvidenceName || move.Nodes != 1 {
+		t.Fatalf("move = %+v", move)
+	}
+}
+
+func TestDiffWithoutMoveDetectionIsRemoveAndAdd(t *testing.T) {
+	snap, root := movedFileTree(t)
+	diff := mustDiff(t, DiffRequest{
+		A:             DiffSourceSpec{Kind: DiffSourceSnapshot, Path: snap},
+		B:             DiffSourceSpec{Kind: DiffSourceLive, Path: root},
+		MoveDetection: comparison.MoveDetectionNone,
+	})
+	if DiffStatusOf(diff) != DiffDifferences || diff.Metadata.MoveDetection != comparison.MoveDetectionNone {
+		t.Fatalf("status = %s, metadata = %+v", DiffStatusOf(diff), diff.Metadata)
 	}
 	var removed, added []artifact.Path
 	for _, change := range diff.Changes {
@@ -178,10 +204,8 @@ func TestDiffMoveIsRemoveAndAdd(t *testing.T) {
 			removed = append(removed, change.Path)
 		case comparison.OpAdded:
 			added = append(added, change.Path)
-		case comparison.OpChanged:
-			// A move never produces CHANGED entries.
 		default:
-			t.Fatalf("unexpected operation %q: no move detection vocabulary may exist", change.Op)
+			t.Fatalf("unexpected operation %q without move detection", change.Op)
 		}
 	}
 	if len(removed) != 1 || removed[0] != "a/one.txt" {
@@ -189,6 +213,18 @@ func TestDiffMoveIsRemoveAndAdd(t *testing.T) {
 	}
 	if len(added) != 1 || added[0] != "b/one.txt" {
 		t.Fatalf("added = %v", added)
+	}
+}
+
+func TestDiffRejectsUnknownMoveDetection(t *testing.T) {
+	snap, root := movedFileTree(t)
+	_, err := Diff(context.Background(), DiffRequest{
+		A:             DiffSourceSpec{Kind: DiffSourceSnapshot, Path: snap},
+		B:             DiffSourceSpec{Kind: DiffSourceLive, Path: root},
+		MoveDetection: comparison.MoveDetection("content-v1"),
+	})
+	if !artifact.IsInternal(err) || ClassifyDiffFailure(err) != FailureInternal {
+		t.Fatalf("err = %v", err)
 	}
 }
 

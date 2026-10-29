@@ -152,7 +152,7 @@ func assertDiffShellJSON(t *testing.T, path, status string) {
 	if err := json.Unmarshal(data, &doc); err != nil {
 		t.Fatalf("%s: %v\n%s", path, err, data)
 	}
-	if doc.SchemaVersion != 1 || doc.Status != status {
+	if doc.SchemaVersion != diffResultSchemaVersion || doc.Status != status {
 		t.Fatalf("%s = %+v", path, doc)
 	}
 }

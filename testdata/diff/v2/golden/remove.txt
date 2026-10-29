@@ -1,0 +1,6 @@
+Structural Diff
+
+Summary: 0 added, 1 removed, 0 changed, 0 moved, 1 total
+
+REMOVED
+  - src/legacy.go

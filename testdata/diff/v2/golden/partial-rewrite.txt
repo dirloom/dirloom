@@ -1,0 +1,15 @@
+Structural Diff
+
+Summary: 3 added, 1 removed, 0 changed, 2 moved, 6 total
+
+ADDED
+  + src/features
+  + src/features/payment
+  + src/features/payment/new.go
+
+REMOVED
+  - src/old/payment
+
+MOVED
+  > src/old/payment/api -> src/features/payment/api (subtree, 2 nodes)
+  > src/old/payment/service.go -> src/features/payment/service.go (name, 1 node)
