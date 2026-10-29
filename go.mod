@@ -1,6 +1,6 @@
 module github.com/dirloom/dirloom
 
-go 1.26.2
+go 1.26.10
 
 require (
 	github.com/git-pkgs/gitignore v1.2.0
