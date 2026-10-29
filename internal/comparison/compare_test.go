@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/dirloom/dirloom/internal/artifact"
@@ -16,7 +17,7 @@ func TestCompareEmptyAndIdentical(t *testing.T) {
 	if diff.Summary != (Summary{}) || len(diff.Changes) != 0 {
 		t.Fatalf("empty = %+v", diff)
 	}
-	if diff.Metadata.ComparisonVersion != Version || diff.Metadata.IdentityProjectionVersion != 1 {
+	if diff.Metadata.ComparisonVersion != Version || diff.Metadata.IdentityProjectionVersion != 1 || diff.Metadata.MoveDetection != MoveDetectionNone {
 		t.Fatalf("metadata = %+v", diff.Metadata)
 	}
 	if diff.SourceA.Kind != source.KindMemory || diff.SourceB.Kind != source.KindMemory {
@@ -196,7 +197,7 @@ func TestCompareRootNeverEmitted(t *testing.T) {
 func TestCompareObservesEachSourceExactlyOnce(t *testing.T) {
 	counterA := &countingSource{inner: source.Memory{Artifact: nestedArtifact()}}
 	counterB := &countingSource{inner: source.Memory{Artifact: nestedArtifact()}}
-	if _, err := Compare(context.Background(), counterA, counterB); err != nil {
+	if _, err := Compare(context.Background(), counterA, counterB, noMoves); err != nil {
 		t.Fatal(err)
 	}
 	if counterA.calls != 1 || counterB.calls != 1 {
@@ -205,30 +206,30 @@ func TestCompareObservesEachSourceExactlyOnce(t *testing.T) {
 }
 
 func TestCompareNilAndBrokenSources(t *testing.T) {
-	if _, err := Compare(context.Background(), nil, source.Memory{Artifact: directoryArtifact()}); !artifact.IsInternal(err) {
+	if _, err := Compare(context.Background(), nil, source.Memory{Artifact: directoryArtifact()}, noMoves); !artifact.IsInternal(err) {
 		t.Fatalf("nil a = %v", err)
 	}
-	if _, err := Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, nil); !artifact.IsInternal(err) {
+	if _, err := Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, nil, noMoves); !artifact.IsInternal(err) {
 		t.Fatalf("nil b = %v", err)
 	}
-	if _, err := Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, stubSource{}); !artifact.IsInternal(err) {
+	if _, err := Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, stubSource{}, noMoves); !artifact.IsInternal(err) {
 		t.Fatalf("nil artifact = %v", err)
 	}
 
 	broken := errors.New("unreadable")
-	_, err := Compare(context.Background(), stubSource{err: artifact.SourceReadFailure(broken)}, source.Memory{Artifact: directoryArtifact()})
+	_, err := Compare(context.Background(), stubSource{err: artifact.SourceReadFailure(broken)}, source.Memory{Artifact: directoryArtifact()}, noMoves)
 	side, ok := SideOf(err)
 	if !ok || side != SideA {
 		t.Fatalf("side = %q %v", side, ok)
 	}
-	_, err = Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, stubSource{err: artifact.SourceReadFailure(broken)})
+	_, err = Compare(context.Background(), source.Memory{Artifact: directoryArtifact()}, stubSource{err: artifact.SourceReadFailure(broken)}, noMoves)
 	side, ok = SideOf(err)
 	if !ok || side != SideB {
 		t.Fatalf("side = %q %v", side, ok)
 	}
 	// A failing side A must not trigger an observation of side B.
 	counter := &countingSource{inner: source.Memory{Artifact: directoryArtifact()}}
-	_, err = Compare(context.Background(), stubSource{err: broken}, counter)
+	_, err = Compare(context.Background(), stubSource{err: broken}, counter, noMoves)
 	if err == nil || counter.calls != 0 {
 		t.Fatalf("b observed %d times after a failed", counter.calls)
 	}
@@ -237,7 +238,7 @@ func TestCompareNilAndBrokenSources(t *testing.T) {
 func TestCompareContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := Compare(ctx, source.Memory{Artifact: directoryArtifact()}, source.Memory{Artifact: directoryArtifact()}); !errors.Is(err, context.Canceled) {
+	if _, err := Compare(ctx, source.Memory{Artifact: directoryArtifact()}, source.Memory{Artifact: directoryArtifact()}, noMoves); !errors.Is(err, context.Canceled) {
 		t.Fatalf("canceled = %v", err)
 	}
 }
@@ -297,6 +298,7 @@ func TestValidateRejectsBrokenModels(t *testing.T) {
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: IdentityProjectionVersion,
+			MoveDetection:             MoveDetectionNone,
 		},
 		SourceA: SourceRef{Kind: source.KindMemory, NodeCount: 2},
 		SourceB: SourceRef{Kind: source.KindMemory, NodeCount: 1},
@@ -390,8 +392,13 @@ func TestValidateRejectsBrokenModels(t *testing.T) {
 		},
 		"unknown operation": func() StructuralDiff {
 			d := valid
-			d.Changes = []Change{{Path: "a.txt", Op: Operation("MOVED"), Before: &file, After: &file}}
+			d.Changes = []Change{{Path: "a.txt", Op: Operation("RENAMED"), Before: &file, After: &file}}
 			d.Summary = Summary{Total: 1}
+			return d
+		},
+		"unknown move detection": func() StructuralDiff {
+			d := valid
+			d.Metadata.MoveDetection = ""
 			return d
 		},
 		"wrong summary": func() StructuralDiff {
@@ -457,19 +464,17 @@ func TestPropertyCompareDeterminism(t *testing.T) {
 }
 
 // invertDiff swaps the sides of a diff: ADDED becomes REMOVED, REMOVED
-// becomes ADDED, and CHANGED swaps before/after.
+// becomes ADDED, CHANGED swaps before/after, and MOVED swaps path/from.
 func invertDiff(d StructuralDiff) StructuralDiff {
 	inverted := StructuralDiff{
-		Metadata: Metadata{
-			ComparisonVersion:         d.Metadata.ComparisonVersion,
-			IdentityProjectionVersion: d.Metadata.IdentityProjectionVersion,
-		},
-		SourceA: d.SourceB,
-		SourceB: d.SourceA,
+		Metadata: d.Metadata,
+		SourceA:  d.SourceB,
+		SourceB:  d.SourceA,
 		Summary: Summary{
 			Added:   d.Summary.Removed,
 			Removed: d.Summary.Added,
 			Changed: d.Summary.Changed,
+			Moved:   d.Summary.Moved,
 			Total:   d.Summary.Total,
 		},
 	}
@@ -482,14 +487,38 @@ func invertDiff(d StructuralDiff) StructuralDiff {
 			inverted.Changes = append(inverted.Changes, Change{Path: change.Path, Op: OpAdded, After: change.Before})
 		case OpChanged:
 			inverted.Changes = append(inverted.Changes, Change{Path: change.Path, Op: OpChanged, Before: change.After, After: change.Before})
+		case OpMoved:
+			inverted.Changes = append(inverted.Changes, Change{
+				Path: change.From, Op: OpMoved, From: change.Path,
+				Before: change.After, After: change.Before,
+				Evidence: change.Evidence, Nodes: change.Nodes,
+			})
 		}
 	}
+	// A MOVED is listed by destination, so swapping sides can reorder it.
+	sort.Slice(inverted.Changes, func(i, j int) bool {
+		return inverted.Changes[i].Path < inverted.Changes[j].Path
+	})
 	return inverted
 }
 
+var (
+	noMoves      = Options{MoveDetection: MoveDetectionNone}
+	structuralV1 = Options{MoveDetection: MoveDetectionStructuralV1}
+)
+
+// mustCompare runs the A4 path-anchored comparison without move detection.
+// Every caller also proves that structural-v1 keeps the move detection
+// properties on the same inputs.
 func mustCompare(t testing.TB, a, b artifact.Artifact) StructuralDiff {
 	t.Helper()
-	diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b})
+	checkMoveProperties(t, a, b, mustCompareWith(t, a, b, structuralV1))
+	return mustCompareWith(t, a, b, noMoves)
+}
+
+func mustCompareWith(t testing.TB, a, b artifact.Artifact, opts Options) StructuralDiff {
+	t.Helper()
+	diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, opts)
 	if err != nil {
 		t.Fatal(err)
 	}

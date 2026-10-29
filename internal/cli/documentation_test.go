@@ -271,7 +271,11 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "diff-result-v1.md"))
+	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "diff-result-v2.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	moves, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "move-detection-structural-v1.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,31 +283,45 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	moveADR, err := os.ReadFile(filepath.Join("..", "..", "docs", "adr", "0005-move-detection.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	architecture, err := os.ReadFile(filepath.Join("..", "..", "docs", "architecture.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(readme), "dirloom diff") || !strings.Contains(string(readme), "docs/reference/diff.md") {
-		t.Fatal("README missing diff discoverability")
+	for _, want := range []string{"dirloom diff", "docs/reference/diff.md", "--no-moves", "Diff Result Schema v2"} {
+		if !strings.Contains(string(readme), want) {
+			t.Errorf("README missing %q", want)
+		}
 	}
-	for _, want := range []string{"snapshot:<path>", "live:<directory>", "Capture Semantics", "ADDED", "REMOVED", "CHANGED", "No structural differences.", "PowerShell", "GitLab"} {
+	for _, want := range []string{"snapshot:<path>", "live:<directory>", "Capture Semantics", "ADDED", "REMOVED", "CHANGED", "MOVED", "--no-moves", "structural-v1", "not proof", "No structural differences.", "PowerShell", "GitLab", "diff-result-v2.md"} {
 		if !strings.Contains(string(reference), want) {
 			t.Errorf("diff reference missing %q", want)
 		}
 	}
-	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "SNAPSHOT_READ_ERROR", "OBSERVATION_ERROR", "INTERNAL_ERROR", `"operation"`, "`sources`"} {
+	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "SNAPSHOT_READ_ERROR", "OBSERVATION_ERROR", "INTERNAL_ERROR", `"operation"`, "`sources`", "`moveDetection`", "`MOVED`", "--no-moves"} {
 		if !strings.Contains(string(contract), want) {
 			t.Errorf("diff contract missing %q", want)
 		}
 	}
-	golden, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v1", "golden", "snapshot-read-error.json"))
+	for _, want := range []string{"R1", "R2", "not proof of a move", "Not detected", "## Complexity"} {
+		if !strings.Contains(string(moves), want) {
+			t.Errorf("move detection contract missing %q", want)
+		}
+	}
+	golden, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v2", "golden", "snapshot-read-error.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(golden), `"status": "SNAPSHOT_READ_ERROR"`) {
 		t.Fatal("snapshot-read-error golden does not encode SNAPSHOT_READ_ERROR")
 	}
-	if !strings.Contains(string(adr), "Identity Projection v1") || !strings.Contains(string(architecture), "Comparison Engine") {
-		t.Fatal("architecture decision or architecture doc missing diff")
+	if !strings.Contains(string(adr), "Identity Projection v1") || !strings.Contains(string(moveADR), "structural-v1") {
+		t.Fatal("architecture decisions missing diff or move detection")
+	}
+	if !strings.Contains(string(architecture), "Comparison Engine") || !strings.Contains(string(architecture), "Move Detector") {
+		t.Fatal("architecture doc missing diff or move detection")
 	}
 }

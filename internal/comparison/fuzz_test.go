@@ -2,6 +2,7 @@ package comparison
 
 import (
 	"context"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
@@ -20,7 +21,7 @@ func FuzzCompareGenerated(f *testing.F) {
 		half := len(data) / 2
 		a := artifactFromBytes(data[:half])
 		b := artifactFromBytes(data[half:])
-		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b})
+		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, noMoves)
 		if err != nil {
 			t.Fatalf("valid generated artifacts: %v", err)
 		}
@@ -38,7 +39,7 @@ func FuzzCompareGenerated(f *testing.F) {
 		if diff.Summary.Total != len(diff.Changes) {
 			t.Fatalf("summary = %+v for %d changes", diff.Summary, len(diff.Changes))
 		}
-		again, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b})
+		again, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, noMoves)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,13 +47,44 @@ func FuzzCompareGenerated(f *testing.F) {
 			t.Fatal("comparison is not deterministic")
 		}
 		inverted := invertDiff(diff)
-		backward, err := Compare(context.Background(), source.Memory{Artifact: b}, source.Memory{Artifact: a})
+		backward, err := Compare(context.Background(), source.Memory{Artifact: b}, source.Memory{Artifact: a}, noMoves)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(inverted, backward) {
 			t.Fatal("symmetry broken: invert(diff(A,B)) != diff(B,A)")
 		}
+		moved, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, structuralV1)
+		if err != nil {
+			t.Fatalf("structural-v1 on valid generated artifacts: %v", err)
+		}
+		checkMoveProperties(t, a, b, moved)
+	})
+}
+
+// FuzzMoveDetection derives source B from a generated source A through
+// relocations, renames, additions, removals and copies, then checks that
+// structural-v1 yields a valid model that expands losslessly to the plain
+// diff, is symmetric and is deterministic.
+func FuzzMoveDetection(f *testing.F) {
+	f.Add(uint64(1), uint64(2), uint8(3), false)
+	f.Add(uint64(5), uint64(8), uint8(1), true)
+	f.Add(uint64(13), uint64(21), uint8(7), true)
+	f.Add(uint64(0), uint64(0), uint8(0), false)
+	f.Fuzz(func(t *testing.T, seedA, seedB uint64, mutations uint8, generic bool) {
+		rng := rand.New(rand.NewPCG(seedA, seedB))
+		names := &nameSource{rng: rng, generic: generic}
+		base := randomMutTree(rng, names, 0)
+		mutated := base.clone()
+		for i := 0; i < int(mutations%8); i++ {
+			mutateRandom(rng, mutated, names)
+		}
+		a, b := base.artifact(), mutated.artifact()
+		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, structuralV1)
+		if err != nil {
+			t.Fatalf("valid generated artifacts: %v", err)
+		}
+		checkMoveProperties(t, a, b, diff)
 	})
 }
 
@@ -82,7 +114,8 @@ func modelFromBytes(data []byte) StructuralDiff {
 	target := "t"
 	link := NodeState{Kind: artifact.KindSymlink, Target: &target}
 	states := []NodeState{file, dir, link}
-	ops := []Operation{OpAdded, OpRemoved, OpChanged, Operation("MOVED"), Operation("")}
+	ops := []Operation{OpAdded, OpRemoved, OpChanged, OpMoved, Operation("")}
+	evidence := []Evidence{EvidenceName, EvidenceSubtree, Evidence("")}
 	var changes []Change
 	for i, b := range data {
 		path := artifact.Path("p" + itoa(int(b)%4))
@@ -98,13 +131,18 @@ func modelFromBytes(data []byte) StructuralDiff {
 			after := states[int(b)%len(states)]
 			change.After = &after
 		}
-		_ = i
+		if b%5 == 0 {
+			change.From = artifact.Path("p" + itoa(int(b)%3) + "/q" + itoa(i%2))
+			change.Evidence = evidence[int(b)%len(evidence)]
+			change.Nodes = int(b) % 3
+		}
 		changes = append(changes, change)
 	}
 	return StructuralDiff{
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: IdentityProjectionVersion,
+			MoveDetection:             MoveDetectionStructuralV1,
 		},
 		SourceA: SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		SourceB: SourceRef{Kind: source.KindMemory, NodeCount: 1},

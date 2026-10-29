@@ -38,14 +38,14 @@ cmd/dirloom
 
 - `internal/cli`: Cobra flags, validation, stable exit-code mapping and stream routing.
 - `internal/config`: strict YAML parsing, the immutable built-in preset catalog, project and user discovery, layered inspection and presentation resolution, provenance and diagnostics.
-- `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint`, `Snapshot`, and `Verify` application services.
+- `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint`, `Snapshot`, `Verify`, and `Diff` application services.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
 - `internal/artifact`: Canonical Structural Artifact v1, path canonicalization (NFC, `/`) and validation. No presentation or CLI dependency.
 - `internal/source`: `StructuralSource` abstraction and FilesystemSource adapter over the existing scanner.
 - `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
 - `internal/snapshot`: Snapshot Schema v1, Capture Semantics v1, Artifact Projection v1, deterministic JSON encode/decode and shared self-verifying validator.
-- `internal/comparison`: StructuralDiff model, model validator and the O(N+M) comparison engine over Identity Projection v1. No filesystem, CLI or presentation dependency.
+- `internal/comparison`: StructuralDiff model, model validator, the O(N+M) comparison engine over Identity Projection v1, and the Move Detection structural-v1 detector with its shape index. No filesystem, CLI or presentation dependency.
 - `internal/diagram`: canonical graph projection (`Document`, `ContractVersion`, `structure` view) with a single `tree` adapter.
 - `internal/outputformat`: public format catalog, aliases and capability flags shared by CLI, config, render and presentation.
 - `internal/render`: canonical Unicode, ASCII, fenced Markdown, semantic Markdown, JSON schema v1 and diagram DSL contracts plus a presentation-neutral text decorator boundary.
@@ -99,15 +99,18 @@ The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--o
 
 `dirloom verify` loads that snapshot through the shared validator, observes the selected root once with the persisted Capture Semantics, and compares typed Fingerprint v1 values. Mismatch is a normal exit, not an error diagnostic. It does not re-read project or user configuration and it does not emit a structural diff. Contracts: [Verify Result Schema v1](contracts/verify-result-v1.md), [verify command](reference/verify.md), [ADR 0003](adr/0003-snapshot-verification.md). Local performance snapshots: [v0.4-a3 benchmarks](benchmarks/v0.4-a3.md).
 
-`dirloom diff` compares two structural sources (`snapshot:<path>` or `live:<directory>`) through the comparison engine and lists added, removed, and changed canonical paths. The data flow is one-directional:
+`dirloom diff` compares two structural sources (`snapshot:<path>` or `live:<directory>`) through the comparison engine and lists added, removed, changed, and moved canonical paths. The data flow is one-directional:
 
 ```text
 Source (snapshot adapter or filesystem observation)
     → Canonical Structural Artifact v1
     → Identity Projection v1 (once per artifact)
     → Comparison Engine (two-way merge over sorted records)
+    → Move Detector (structural-v1; skipped with --no-moves)
     → StructuralDiff (validated model)
     → human renderer or JSON renderer
 ```
 
-The comparison engine is neither the human renderer nor the JSON renderer: it produces the validated `StructuralDiff` model and never formats bytes. A live side is observed once with the opposite snapshot's Capture Semantics through the same shared helper verify uses, with conditional reference-file self-exclusion; current configuration is never consulted. There is no move detection: a rename is one REMOVED plus one ADDED. Contracts: [Diff Result Schema v1](contracts/diff-result-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md).
+The comparison engine is neither the human renderer nor the JSON renderer: it produces the validated `StructuralDiff` model and never formats bytes. A live side is observed once with the opposite snapshot's Capture Semantics through the same shared helper verify uses, with conditional reference-file self-exclusion; current configuration is never consulted.
+
+The Move Detector is a pure post-pass over the two record lists and the merge result. It never observes a source and reads no contents. It interns rename-invariant subtree shapes, counts names and shapes over each whole tree, and relabels a REMOVED and an ADDED node as one MOVED only when the correspondence is unique. CHANGED entries and paths present on both sides are never touched, so expanding every MOVED gives back the merge result. Contracts: [Diff Result Schema v2](contracts/diff-result-v2.md), [Move Detection structural-v1](contracts/move-detection-structural-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md), [ADR 0005](adr/0005-move-detection.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md), [v0.4-a5 benchmarks](benchmarks/v0.4-a5.md).

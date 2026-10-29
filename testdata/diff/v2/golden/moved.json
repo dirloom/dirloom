@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 2,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "structural-v1"
+  },
+  "sources": {
+    "a": {
+      "kind": "snapshot",
+      "nodeCount": 7
+    },
+    "b": {
+      "kind": "filesystem",
+      "nodeCount": 8
+    }
+  },
+  "summary": {
+    "added": 1,
+    "removed": 0,
+    "changed": 0,
+    "moved": 1,
+    "total": 2
+  },
+  "changes": [
+    {
+      "path": "src/features",
+      "operation": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/features/payment",
+      "operation": "MOVED",
+      "from": "src/old/payment",
+      "before": {
+        "kind": "directory"
+      },
+      "after": {
+        "kind": "directory"
+      },
+      "evidence": "subtree",
+      "nodes": 4
+    }
+  ]
+}

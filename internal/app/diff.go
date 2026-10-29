@@ -84,10 +84,23 @@ func ParseDiffSource(expression string) (DiffSourceSpec, error) {
 	return DiffSourceSpec{Kind: kind, Path: path}, nil
 }
 
-// DiffRequest names the two sources to compare, in user order.
+// DiffRequest names the two sources to compare, in user order, and the move
+// detection strategy. An empty MoveDetection selects structural-v1.
 type DiffRequest struct {
-	A DiffSourceSpec
-	B DiffSourceSpec
+	A             DiffSourceSpec
+	B             DiffSourceSpec
+	MoveDetection comparison.MoveDetection
+}
+
+func (r DiffRequest) options() (comparison.Options, error) {
+	strategy := r.MoveDetection
+	if strategy == "" {
+		strategy = comparison.MoveDetectionStructuralV1
+	}
+	if !strategy.Valid() {
+		return comparison.Options{}, artifact.InternalError("unsupported move detection %q", strategy)
+	}
+	return comparison.Options{MoveDetection: strategy}, nil
 }
 
 // Diff resolves both sources and compares them through the comparison engine.
@@ -96,6 +109,10 @@ type DiffRequest struct {
 // Semantics v1. live against live is a usage failure.
 func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, error) {
 	if err := ctx.Err(); err != nil {
+		return comparison.StructuralDiff{}, err
+	}
+	opts, err := request.options()
+	if err != nil {
 		return comparison.StructuralDiff{}, err
 	}
 	if err := validateDiffSpec(request.A, "a"); err != nil {
@@ -117,7 +134,7 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 		if err != nil {
 			return comparison.StructuralDiff{}, err
 		}
-		return comparison.Compare(ctx, srcA, srcB)
+		return comparison.Compare(ctx, srcA, srcB, opts)
 	}
 
 	// live against snapshot: load the snapshot first, then build the live
@@ -130,7 +147,7 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 	if err != nil {
 		return comparison.StructuralDiff{}, err
 	}
-	return comparison.Compare(ctx, srcA, srcB)
+	return comparison.Compare(ctx, srcA, srcB, opts)
 }
 
 func validateDiffSpec(spec DiffSourceSpec, side string) error {

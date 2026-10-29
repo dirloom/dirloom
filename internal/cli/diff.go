@@ -11,7 +11,8 @@ import (
 )
 
 type diffOptions struct {
-	format string
+	format  string
+	noMoves bool
 }
 
 func newDiffCommand(stdout io.Writer) *cobra.Command {
@@ -20,14 +21,20 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 		Use:   "diff <source-a> <source-b>",
 		Short: "Compare two structural sources and list what changed",
 		Long: "Compare two structural sources through Identity Projection v1 and list the\n" +
-			"added, removed, and changed canonical paths. A source is snapshot:<path> or\n" +
-			"live:<directory>. A live side is observed with the Capture Semantics stored\n" +
-			"in the opposite snapshot; current project and user configuration are not read.\n" +
-			"File contents are not hashed. A rename or move is one REMOVED plus one ADDED.\n" +
+			"added, removed, changed, and moved canonical paths. A source is\n" +
+			"snapshot:<path> or live:<directory>. A live side is observed with the Capture\n" +
+			"Semantics stored in the opposite snapshot; current project and user\n" +
+			"configuration are not read. File contents are not hashed.\n\n" +
+			"Move detection (structural-v1) reports a removed and an added node as one\n" +
+			"MOVED when their name and structure are unique in each source, or when a\n" +
+			"non-empty directory with a unique structure was renamed in place. A MOVED is a\n" +
+			"structural correspondence, not proof that a file was moved; ambiguous cases\n" +
+			"stay REMOVED plus ADDED. --no-moves lists every changed path instead.\n" +
 			"Structural differences are a normal result, not an error.",
 		Example: `  dirloom diff snapshot:architecture.dlm.json live:.
   dirloom diff live:. snapshot:architecture.dlm.json
   dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json
+  dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --no-moves
   dirloom diff snapshot:architecture.dlm.json live:./src --format json`,
 		Args: func(_ *cobra.Command, args []string) error {
 			if len(args) != 2 {
@@ -51,7 +58,11 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 			if err != nil {
 				return &usageError{err: err}
 			}
-			result, diffErr := app.Diff(cmd.Context(), app.DiffRequest{A: specA, B: specB})
+			moveDetection := comparison.MoveDetectionStructuralV1
+			if opts.noMoves {
+				moveDetection = comparison.MoveDetectionNone
+			}
+			result, diffErr := app.Diff(cmd.Context(), app.DiffRequest{A: specA, B: specB, MoveDetection: moveDetection})
 			if diffErr != nil {
 				if app.DiffUsage(diffErr) {
 					return &usageError{err: diffErr}
@@ -62,6 +73,7 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 		},
 	}
 	command.Flags().StringVar(&opts.format, "format", "text", "output format: text or json")
+	command.Flags().BoolVar(&opts.noMoves, "no-moves", false, "report moves as REMOVED and ADDED (disable move detection)")
 	registerDiffCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}

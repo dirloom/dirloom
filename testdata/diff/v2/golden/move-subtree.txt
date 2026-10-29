@@ -1,0 +1,9 @@
+Structural Diff
+
+Summary: 1 added, 0 removed, 0 changed, 1 moved, 2 total
+
+ADDED
+  + src/features
+
+MOVED
+  > src/old/payment -> src/features/payment (subtree, 4 nodes)

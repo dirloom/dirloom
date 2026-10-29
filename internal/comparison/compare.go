@@ -9,11 +9,15 @@ import (
 )
 
 // Compare observes each source exactly once, projects both artifacts through
-// Identity Projection v1, and merges the sorted record lists in one pass.
-// The result is validated before it is returned.
-func Compare(ctx context.Context, a, b source.Source) (StructuralDiff, error) {
+// Identity Projection v1, merges the sorted record lists in one pass, then
+// applies the move detection strategy named by opts. The result is validated
+// before it is returned.
+func Compare(ctx context.Context, a, b source.Source, opts Options) (StructuralDiff, error) {
 	if err := ctx.Err(); err != nil {
 		return StructuralDiff{}, err
+	}
+	if !opts.MoveDetection.Valid() {
+		return StructuralDiff{}, artifact.InternalError("unsupported move detection %q", opts.MoveDetection)
 	}
 	if a == nil || b == nil {
 		return StructuralDiff{}, artifact.InternalError("comparison source is nil")
@@ -35,10 +39,17 @@ func Compare(ctx context.Context, a, b source.Source) (StructuralDiff, error) {
 		return StructuralDiff{}, &SideError{Side: SideB, Err: err}
 	}
 	changes := mergeRecords(recordsA, recordsB)
+	if opts.MoveDetection == MoveDetectionStructuralV1 {
+		changes, err = detectMovesStructuralV1(recordsA, recordsB, changes)
+		if err != nil {
+			return StructuralDiff{}, err
+		}
+	}
 	diff := StructuralDiff{
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: identity.ProjectionVersion,
+			MoveDetection:             opts.MoveDetection,
 		},
 		SourceA: SourceRef{Kind: a.Kind(), NodeCount: len(recordsA)},
 		SourceB: SourceRef{Kind: b.Kind(), NodeCount: len(recordsB)},
@@ -142,8 +153,10 @@ func summarize(changes []Change) Summary {
 			summary.Removed++
 		case OpChanged:
 			summary.Changed++
+		case OpMoved:
+			summary.Moved++
 		}
 	}
-	summary.Total = summary.Added + summary.Removed + summary.Changed
+	summary.Total = summary.Added + summary.Removed + summary.Changed + summary.Moved
 	return summary
 }
