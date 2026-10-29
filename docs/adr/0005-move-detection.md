@@ -1,6 +1,6 @@
 # ADR 0005 — Move detection
 
-> **Status:** proposed for `v0.4.0-a5`
+> **Status:** accepted for `v0.4.0-a5`
 >
 > **Date:** 2026-10-29
 

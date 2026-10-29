@@ -141,30 +141,61 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a4` is the latest published GitHub Pre-release and is closed. The
-latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a5` is the active release branch for the move
-detection increment. The A5 feature work lives on
-`feat/v0.4.0-a5-move-detection`, which targets `release/v0.4.0-a5` by pull
-request. `CHANGELOG.md` remains the unique source of truth for release notes.
-Do not open versioned feature pull requests against `main`.
+`v0.4.0-a4` is published and closed. It is the latest GitHub Pre-release.
+The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. `release/v0.4.0-a5` is frozen and release-ready. Feature pull
+request #51 is merged and feature work on `feat/v0.4.0-a5-move-detection` is
+complete. `main` carries the `v0.4.0-a4` release lineage plus the Go 1.26.10
+toolchain merge (#50). A6 has not started. `CHANGELOG.md` remains the unique
+source of truth for release notes. Do not open versioned feature pull
+requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a4` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | `release/v0.4.0-a5` (from `main` at `6bbb274`, Go 1.26.10) |
-| Active feature branch | `feat/v0.4.0-a5-move-detection` → PR to `release/v0.4.0-a5` |
+| Active release candidate | `v0.4.0-a5` on `release/v0.4.0-a5` |
+| Candidate state | FROZEN / RELEASE READY |
+| Feature pull request | #51 merged (`feat/v0.4.0-a5-move-detection`) |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Not yet delivered | move detection (A5 in development) |
+| A6 | NOT STARTED |
 
 ```text
 v0.4.0-a4 published / closed
-latest stable v0.3.3
-release/v0.4.0-a5 active
-feat/v0.4.0-a5-move-detection active → PR to release/v0.4.0-a5
+
+release/v0.4.0-a5
+FROZEN / RELEASE READY
+
+PR #51 merged
+feat/v0.4.0-a5-move-detection complete
+
+main at 6bbb274 (v0.4.0-a4 lineage + Go 1.26.10)
+
+A6 NOT STARTED
 ```
+
+## v0.4.0-a5 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a5`. Do not create
+`chore/v0.4.0-a5-freeze`.
+
+```text
+feature → release                  DONE
+release CI                         PASS
+freeze                             ACTIVE
+final release PR → main            PENDING
+tag                                PENDING
+draft prerelease                   PENDING
+publication                        PENDING
+package managers                   MUST STAY v0.3.3
+```
+
+Feature branch of record: `feat/v0.4.0-a5-move-detection` at
+`5b309e2877f8023eb2e6b54461ac250321cc732f`, merged by pull request #51 into
+`release/v0.4.0-a5` at `74844b0a067cfa59055dd2c4165ce534ed692f13`. Release
+CI of record before freeze: GitHub Actions run `40940034439` on that merge
+commit.
 
 ## v0.4.0-a4 release record
 

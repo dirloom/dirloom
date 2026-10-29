@@ -4,6 +4,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a5] - 2026-10-29
+
+CHANGE alpha: conservative structural move detection in `dirloom diff`
+(`structural-v1`), with the MOVED operation and Diff Result Schema v2. This
+increment does not add content-based detection, Git sources or history.
+
 ### Added
 
 - Add move detection (`structural-v1`) to `dirloom diff`. A removed and an added node are reported as one `MOVED` change when their name and structure occur exactly once in each source, or when a non-empty directory with a unique structure is renamed in place. A moved subtree is a single entry with `from`, `evidence` (`subtree` or `name`) and `nodes`. Ambiguous cases stay `REMOVED` plus `ADDED`. A `MOVED` is a structural correspondence, not proof of a move, and file contents are still never read.
@@ -239,7 +245,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...HEAD
+[0.4.0-a5]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...v0.4.0-a5
 [0.4.0-a4]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...v0.4.0-a4
 [0.4.0-a3]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...v0.4.0-a3
 [0.4.0-a2]: https://github.com/dirloom/dirloom/compare/v0.4.0-a1...v0.4.0-a2

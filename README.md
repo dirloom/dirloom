@@ -24,9 +24,7 @@ Published status is independent of each package manager. GitHub Releases is alwa
 RELEASE STATUS
 Latest stable release: v0.3.3
 Latest GitHub Pre-release: v0.4.0-a4
-Active release branch: release/v0.4.0-a5
-v0.4.0-a4: published / closed
-v0.4.0-a5: in development, not published
+v0.4.0-a5: frozen release candidate
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
@@ -457,9 +455,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a4`. The latest stable release is `v0.3.3`. `v0.4.0-a4` is published
-and closed. `release/v0.4.0-a5` is the active release branch for the move
-detection increment; it is not published.
+`v0.4.0-a4`. The latest stable release is `v0.3.3`. `release/v0.4.0-a5` is
+frozen and release-ready for move detection. Feature pull request #51 is
+merged. A6 has not started.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -494,7 +492,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff in that increment; stable package managers unchanged);
 - v0.4.0-a3: published — live structural verification (`dirloom verify`; GitHub Pre-release; no diff);
 - v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a5: active development on `release/v0.4.0-a5` — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2); not published;
+- v0.4.0-a5: frozen release candidate on `release/v0.4.0-a5` — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2); not published; feature pull request #51 merged; A6 not started;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification, structural diff and move detection;
 - v0.5: scaffold, templates and Architecture Packs.
