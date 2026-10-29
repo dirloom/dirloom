@@ -2,6 +2,7 @@ package comparison
 
 import (
 	"context"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
@@ -53,6 +54,32 @@ func FuzzCompareGenerated(f *testing.F) {
 		if !reflect.DeepEqual(inverted, backward) {
 			t.Fatal("symmetry broken: invert(diff(A,B)) != diff(B,A)")
 		}
+	})
+}
+
+// FuzzMoveDetection derives source B from a generated source A through
+// relocations, renames, additions, removals and copies, then checks that
+// structural-v1 yields a valid model that expands losslessly to the plain
+// diff, is symmetric and is deterministic.
+func FuzzMoveDetection(f *testing.F) {
+	f.Add(uint64(1), uint64(2), uint8(3), false)
+	f.Add(uint64(5), uint64(8), uint8(1), true)
+	f.Add(uint64(13), uint64(21), uint8(7), true)
+	f.Add(uint64(0), uint64(0), uint8(0), false)
+	f.Fuzz(func(t *testing.T, seedA, seedB uint64, mutations uint8, generic bool) {
+		rng := rand.New(rand.NewPCG(seedA, seedB))
+		names := &nameSource{rng: rng, generic: generic}
+		base := randomMutTree(rng, names, 0)
+		mutated := base.clone()
+		for i := 0; i < int(mutations%8); i++ {
+			mutateRandom(rng, mutated, names)
+		}
+		a, b := base.artifact(), mutated.artifact()
+		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, structuralV1)
+		if err != nil {
+			t.Fatalf("valid generated artifacts: %v", err)
+		}
+		checkMoveProperties(t, a, b, diff)
 	})
 }
 

@@ -507,8 +507,12 @@ var (
 	structuralV1 = Options{MoveDetection: MoveDetectionStructuralV1}
 )
 
+// mustCompare runs the A4 path-anchored comparison without move detection.
+// Every caller also proves that structural-v1 keeps the move detection
+// properties on the same inputs.
 func mustCompare(t testing.TB, a, b artifact.Artifact) StructuralDiff {
 	t.Helper()
+	checkMoveProperties(t, a, b, mustCompareWith(t, a, b, structuralV1))
 	return mustCompareWith(t, a, b, noMoves)
 }
 

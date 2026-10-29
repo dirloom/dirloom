@@ -408,7 +408,7 @@ func describe(changes []Change) []string {
 // checkMoveProperties asserts the contract invariants that need both
 // sources: lossless expansion back to the path-anchored merge (I1),
 // symmetry (I4) and determinism (I5).
-func checkMoveProperties(t *testing.T, a, b artifact.Artifact, diff StructuralDiff) {
+func checkMoveProperties(t testing.TB, a, b artifact.Artifact, diff StructuralDiff) {
 	t.Helper()
 	none := mustCompareWith(t, a, b, noMoves)
 	expanded := expandMoves(t, a, b, diff.Changes)
@@ -426,7 +426,7 @@ func checkMoveProperties(t *testing.T, a, b artifact.Artifact, diff StructuralDi
 
 // expandMoves replaces each MOVED by REMOVED for every record of the A
 // subtree of From and ADDED for every record of the B subtree of Path.
-func expandMoves(t *testing.T, a, b artifact.Artifact, changes []Change) []Change {
+func expandMoves(t testing.TB, a, b artifact.Artifact, changes []Change) []Change {
 	t.Helper()
 	recordsA, err := identity.ProjectV1(a)
 	if err != nil {

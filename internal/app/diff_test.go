@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -70,13 +71,46 @@ func mustDiffSide(t *testing.T, err error) comparison.Side {
 	return side
 }
 
+// mustDiff runs request. With the default move detection it also runs the
+// same request without detection and checks that both agree: identical
+// changes when nothing moved, and otherwise exactly nodes records per MOVED
+// on each side.
 func mustDiff(t *testing.T, request DiffRequest) comparison.StructuralDiff {
 	t.Helper()
 	diff, err := Diff(context.Background(), request)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if request.MoveDetection == "" {
+		plainRequest := request
+		plainRequest.MoveDetection = comparison.MoveDetectionNone
+		plain, err := Diff(context.Background(), plainRequest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertMovesExpandTo(t, diff, plain)
+	}
 	return diff
+}
+
+func assertMovesExpandTo(t *testing.T, moved, plain comparison.StructuralDiff) {
+	t.Helper()
+	nodes := 0
+	for _, change := range moved.Changes {
+		if change.Op == comparison.OpMoved {
+			nodes += change.Nodes
+		}
+	}
+	if plain.Summary.Moved != 0 || moved.Summary.Changed != plain.Summary.Changed ||
+		moved.Summary.Added+nodes != plain.Summary.Added || moved.Summary.Removed+nodes != plain.Summary.Removed {
+		t.Fatalf("moves do not expand to the plain diff: %+v (%d moved nodes) vs %+v", moved.Summary, nodes, plain.Summary)
+	}
+	if moved.SourceA != plain.SourceA || moved.SourceB != plain.SourceB {
+		t.Fatalf("sources differ: %+v %+v vs %+v %+v", moved.SourceA, moved.SourceB, plain.SourceA, plain.SourceB)
+	}
+	if moved.Summary.Moved == 0 && !reflect.DeepEqual(moved.Changes, plain.Changes) {
+		t.Fatalf("no move, yet changes differ:\n%+v\n%+v", moved.Changes, plain.Changes)
+	}
 }
 
 func TestDiffSourceCombinations(t *testing.T) {
@@ -214,6 +248,49 @@ func TestDiffWithoutMoveDetectionIsRemoveAndAdd(t *testing.T) {
 	if len(added) != 1 || added[0] != "b/one.txt" {
 		t.Fatalf("added = %v", added)
 	}
+}
+
+// TestDiffMoveDetectionOnRealFilesystems runs structural-v1 over live trees
+// whose names change encoding or case, as Windows, macOS and Linux store them.
+func TestDiffMoveDetectionOnRealFilesystems(t *testing.T) {
+	t.Run("NFD spelling of a moved file", func(t *testing.T) {
+		nfc := "café-notes.md"
+		nfd := "café-notes.md"
+		root := writeTree(t, t.TempDir(), [][2]string{{"old/" + nfc, "x"}, {"new/.keep", ""}})
+		snap := mustDiffSnapshotFile(t, t.TempDir(), "ref.dlm.json", mustFilesystemSnapshot(t, root))
+		if err := os.Rename(filepath.Join(root, "old", nfc), filepath.Join(root, "new", nfd)); err != nil {
+			t.Fatal(err)
+		}
+		diff := mustDiff(t, DiffRequest{
+			A: DiffSourceSpec{Kind: DiffSourceSnapshot, Path: snap},
+			B: DiffSourceSpec{Kind: DiffSourceLive, Path: root},
+		})
+		if diff.Summary != (comparison.Summary{Moved: 1, Total: 1}) {
+			t.Fatalf("changes = %+v", diff.Changes)
+		}
+		move := diff.Changes[0]
+		if move.From != artifact.Path("old/"+nfc) || move.Path != artifact.Path("new/"+nfc) || move.Evidence != comparison.EvidenceName {
+			t.Fatalf("move = %+v", move)
+		}
+	})
+	t.Run("case-only directory rename", func(t *testing.T) {
+		root := writeTree(t, t.TempDir(), [][2]string{{"Payment/api.go", "x"}, {"Payment/model.go", "y"}})
+		snap := mustDiffSnapshotFile(t, t.TempDir(), "ref.dlm.json", mustFilesystemSnapshot(t, root))
+		if err := os.Rename(filepath.Join(root, "Payment"), filepath.Join(root, "payment")); err != nil {
+			t.Fatal(err)
+		}
+		diff := mustDiff(t, DiffRequest{
+			A: DiffSourceSpec{Kind: DiffSourceSnapshot, Path: snap},
+			B: DiffSourceSpec{Kind: DiffSourceLive, Path: root},
+		})
+		if diff.Summary != (comparison.Summary{Moved: 1, Total: 1}) {
+			t.Fatalf("changes = %+v", diff.Changes)
+		}
+		move := diff.Changes[0]
+		if move.From != "Payment" || move.Path != "payment" || move.Evidence != comparison.EvidenceSubtree || move.Nodes != 3 {
+			t.Fatalf("move = %+v", move)
+		}
+	})
 }
 
 func TestDiffRejectsUnknownMoveDetection(t *testing.T) {
