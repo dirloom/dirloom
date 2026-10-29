@@ -22,7 +22,7 @@ func BenchmarkCompare(b *testing.B) {
 			b.Run(fmt.Sprintf("%d/%d%%", size, changedPercent), func(b *testing.B) {
 				b.ReportAllocs()
 				for i := 0; i < b.N; i++ {
-					diff, err := Compare(context.Background(), sourceA, sourceB)
+					diff, err := Compare(context.Background(), sourceA, sourceB, noMoves)
 					if err != nil {
 						b.Fatal(err)
 					}

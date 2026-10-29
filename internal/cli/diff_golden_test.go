@@ -36,6 +36,7 @@ func withGoldenMetadata(models map[string]comparison.StructuralDiff) map[string]
 		model.Metadata = comparison.Metadata{
 			ComparisonVersion:         comparison.Version,
 			IdentityProjectionVersion: comparison.IdentityProjectionVersion,
+			MoveDetection:             comparison.MoveDetectionNone,
 		}
 		model.SourceA = ref
 		model.SourceB = ref

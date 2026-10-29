@@ -20,7 +20,7 @@ func FuzzCompareGenerated(f *testing.F) {
 		half := len(data) / 2
 		a := artifactFromBytes(data[:half])
 		b := artifactFromBytes(data[half:])
-		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b})
+		diff, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, noMoves)
 		if err != nil {
 			t.Fatalf("valid generated artifacts: %v", err)
 		}
@@ -38,7 +38,7 @@ func FuzzCompareGenerated(f *testing.F) {
 		if diff.Summary.Total != len(diff.Changes) {
 			t.Fatalf("summary = %+v for %d changes", diff.Summary, len(diff.Changes))
 		}
-		again, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b})
+		again, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, noMoves)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,7 +46,7 @@ func FuzzCompareGenerated(f *testing.F) {
 			t.Fatal("comparison is not deterministic")
 		}
 		inverted := invertDiff(diff)
-		backward, err := Compare(context.Background(), source.Memory{Artifact: b}, source.Memory{Artifact: a})
+		backward, err := Compare(context.Background(), source.Memory{Artifact: b}, source.Memory{Artifact: a}, noMoves)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -82,7 +82,8 @@ func modelFromBytes(data []byte) StructuralDiff {
 	target := "t"
 	link := NodeState{Kind: artifact.KindSymlink, Target: &target}
 	states := []NodeState{file, dir, link}
-	ops := []Operation{OpAdded, OpRemoved, OpChanged, Operation("MOVED"), Operation("")}
+	ops := []Operation{OpAdded, OpRemoved, OpChanged, OpMoved, Operation("")}
+	evidence := []Evidence{EvidenceName, EvidenceSubtree, Evidence("")}
 	var changes []Change
 	for i, b := range data {
 		path := artifact.Path("p" + itoa(int(b)%4))
@@ -98,13 +99,18 @@ func modelFromBytes(data []byte) StructuralDiff {
 			after := states[int(b)%len(states)]
 			change.After = &after
 		}
-		_ = i
+		if b%5 == 0 {
+			change.From = artifact.Path("p" + itoa(int(b)%3) + "/q" + itoa(i%2))
+			change.Evidence = evidence[int(b)%len(evidence)]
+			change.Nodes = int(b) % 3
+		}
 		changes = append(changes, change)
 	}
 	return StructuralDiff{
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: IdentityProjectionVersion,
+			MoveDetection:             MoveDetectionStructuralV1,
 		},
 		SourceA: SourceRef{Kind: source.KindMemory, NodeCount: 1},
 		SourceB: SourceRef{Kind: source.KindMemory, NodeCount: 1},

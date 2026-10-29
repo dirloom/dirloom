@@ -117,7 +117,7 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 		if err != nil {
 			return comparison.StructuralDiff{}, err
 		}
-		return comparison.Compare(ctx, srcA, srcB)
+		return comparison.Compare(ctx, srcA, srcB, comparison.Options{MoveDetection: comparison.MoveDetectionNone})
 	}
 
 	// live against snapshot: load the snapshot first, then build the live
@@ -130,7 +130,7 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 	if err != nil {
 		return comparison.StructuralDiff{}, err
 	}
-	return comparison.Compare(ctx, srcA, srcB)
+	return comparison.Compare(ctx, srcA, srcB, comparison.Options{MoveDetection: comparison.MoveDetectionNone})
 }
 
 func validateDiffSpec(spec DiffSourceSpec, side string) error {

@@ -5,21 +5,25 @@
 package comparison
 
 import (
+	"strings"
+
 	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/identity"
 	"github.com/dirloom/dirloom/internal/source"
 )
 
 const (
-	// Version is the comparison model version frozen by Diff Result Schema v1.
+	// Version is the path-anchored comparison version frozen by Diff Result
+	// Schema v1. Move detection is versioned separately by MoveDetection and
+	// does not change it.
 	Version = 1
 	// IdentityProjectionVersion is the Identity Projection contract the
 	// comparison is anchored to. It must equal identity.ProjectionVersion.
 	IdentityProjectionVersion = identity.ProjectionVersion
 )
 
-// Operation is the closed Structural Diff vocabulary. There is no MOVED or
-// RENAMED operation: a rename is one REMOVED plus one ADDED.
+// Operation is the closed Structural Diff vocabulary. There is no RENAMED
+// operation: a rename in place is a MOVED whose parent is unchanged.
 type Operation string
 
 const (
@@ -30,16 +34,59 @@ const (
 	// OpChanged marks a path present in both whose Identity Projection v1
 	// record differs (kind, or target of a target-carrying kind).
 	OpChanged Operation = "CHANGED"
+	// OpMoved marks a removed node of A and an added node of B that
+	// correspond under the move detection strategy. Path is the destination
+	// in B, From the origin in A.
+	OpMoved Operation = "MOVED"
 )
 
-// Valid reports whether op is one of the v1 operations.
+// Valid reports whether op is one of the operations.
 func (op Operation) Valid() bool {
 	switch op {
-	case OpAdded, OpRemoved, OpChanged:
+	case OpAdded, OpRemoved, OpChanged, OpMoved:
 		return true
 	default:
 		return false
 	}
+}
+
+// MoveDetection names the strategy that relabels REMOVED and ADDED records
+// as MOVED after the path-anchored merge.
+type MoveDetection string
+
+const (
+	// MoveDetectionNone keeps the path-anchored merge result unchanged.
+	MoveDetectionNone MoveDetection = "none"
+	// MoveDetectionStructuralV1 is Move Detection structural-v1.
+	MoveDetectionStructuralV1 MoveDetection = "structural-v1"
+)
+
+// Valid reports whether m is a known strategy.
+func (m MoveDetection) Valid() bool {
+	return m == MoveDetectionNone || m == MoveDetectionStructuralV1
+}
+
+// Evidence is the closed vocabulary justifying a MOVED change. It is not a
+// confidence score.
+type Evidence string
+
+const (
+	// EvidenceSubtree means the moved node has descendants whose names, kinds
+	// and targets are identical on both sides.
+	EvidenceSubtree Evidence = "subtree"
+	// EvidenceName means the moved node has no descendant: only its name and
+	// state identify it.
+	EvidenceName Evidence = "name"
+)
+
+// Valid reports whether e is a known evidence class.
+func (e Evidence) Valid() bool {
+	return e == EvidenceSubtree || e == EvidenceName
+}
+
+// Options selects comparison behavior beyond the path-anchored merge.
+type Options struct {
+	MoveDetection MoveDetection
 }
 
 // NodeState is one side of a change. Target is present exactly when Kind
@@ -71,27 +118,36 @@ type SourceRef struct {
 	NodeCount int
 }
 
-// Metadata describes the comparison contract versions. It never names the
-// compared sources: those are sibling fields on StructuralDiff.
+// Metadata describes the comparison contract versions and the move detection
+// strategy. It never names the compared sources: those are sibling fields on
+// StructuralDiff.
 type Metadata struct {
 	ComparisonVersion         int
 	IdentityProjectionVersion int
+	MoveDetection             MoveDetection
 }
 
 // Change is one canonical path that differs between A (before) and B (after).
-// ADDED carries only After, REMOVED only Before, CHANGED carries both.
+// ADDED carries only After, REMOVED only Before, CHANGED and MOVED carry
+// both. From, Evidence and Nodes are set on MOVED only: Nodes counts the
+// records the move covers, root included.
 type Change struct {
-	Path   artifact.Path
-	Op     Operation
-	Before *NodeState
-	After  *NodeState
+	Path     artifact.Path
+	Op       Operation
+	From     artifact.Path
+	Before   *NodeState
+	After    *NodeState
+	Evidence Evidence
+	Nodes    int
 }
 
-// Summary counts changes by operation. Total is always Added+Removed+Changed.
+// Summary counts changes by operation. Total is always
+// Added+Removed+Changed+Moved.
 type Summary struct {
 	Added   int
 	Removed int
 	Changed int
+	Moved   int
 	Total   int
 }
 
@@ -113,18 +169,21 @@ func (d StructuralDiff) Validate() error {
 	if d.Metadata.IdentityProjectionVersion != identity.ProjectionVersion {
 		return artifact.InternalError("identity projection version %d is not %d", d.Metadata.IdentityProjectionVersion, identity.ProjectionVersion)
 	}
+	if !d.Metadata.MoveDetection.Valid() {
+		return artifact.InternalError("unsupported move detection %q", d.Metadata.MoveDetection)
+	}
 	if err := d.SourceA.validate("a"); err != nil {
 		return err
 	}
 	if err := d.SourceB.validate("b"); err != nil {
 		return err
 	}
-	added, removed, changed := 0, 0, 0
+	added, removed, changed, moved := 0, 0, 0, 0
 	for i, change := range d.Changes {
 		if err := change.validate(); err != nil {
 			return err
 		}
-		if change.Path == artifact.RootPath {
+		if change.Path == artifact.RootPath || change.From == artifact.RootPath {
 			return artifact.InternalError("change %d targets the root path %q", i, artifact.RootPath)
 		}
 		if i > 0 && d.Changes[i-1].Path >= change.Path {
@@ -137,16 +196,85 @@ func (d StructuralDiff) Validate() error {
 			removed++
 		case OpChanged:
 			changed++
+		case OpMoved:
+			moved++
 		}
 	}
-	if d.Summary.Added != added || d.Summary.Removed != removed || d.Summary.Changed != changed {
-		return artifact.InternalError("summary %d/%d/%d does not match changes %d/%d/%d",
-			d.Summary.Added, d.Summary.Removed, d.Summary.Changed, added, removed, changed)
+	if moved > 0 && d.Metadata.MoveDetection == MoveDetectionNone {
+		return artifact.InternalError("%d moved changes without move detection", moved)
 	}
-	if d.Summary.Total != added+removed+changed || d.Summary.Total != len(d.Changes) {
+	if d.Summary.Added != added || d.Summary.Removed != removed || d.Summary.Changed != changed || d.Summary.Moved != moved {
+		return artifact.InternalError("summary %d/%d/%d/%d does not match changes %d/%d/%d/%d",
+			d.Summary.Added, d.Summary.Removed, d.Summary.Changed, d.Summary.Moved, added, removed, changed, moved)
+	}
+	if d.Summary.Total != added+removed+changed+moved || d.Summary.Total != len(d.Changes) {
 		return artifact.InternalError("summary total %d does not match %d changes", d.Summary.Total, len(d.Changes))
 	}
+	if moved > 0 {
+		return d.validateMoves()
+	}
 	return nil
+}
+
+// validateMoves checks the invariants that span several changes: every path
+// and origin appears once, and nothing is reported below a moved subtree on
+// the side that subtree was absorbed from.
+func (d StructuralDiff) validateMoves() error {
+	paths := make(map[artifact.Path]struct{}, len(d.Changes))
+	for _, change := range d.Changes {
+		paths[change.Path] = struct{}{}
+	}
+	origins := make(map[artifact.Path]struct{})
+	destinations := make(map[artifact.Path]struct{})
+	for _, change := range d.Changes {
+		if change.Op != OpMoved {
+			continue
+		}
+		if _, ok := paths[change.From]; ok {
+			return artifact.InternalError("move origin %q is also a change path", change.From)
+		}
+		if _, ok := origins[change.From]; ok {
+			return artifact.InternalError("move origin %q appears twice", change.From)
+		}
+		origins[change.From] = struct{}{}
+		destinations[change.Path] = struct{}{}
+	}
+	for _, change := range d.Changes {
+		var nested bool
+		switch change.Op {
+		case OpRemoved:
+			nested = hasAncestorIn(change.Path, origins)
+		case OpAdded:
+			nested = hasAncestorIn(change.Path, destinations)
+		case OpChanged:
+			nested = hasAncestorIn(change.Path, origins) || hasAncestorIn(change.Path, destinations)
+		case OpMoved:
+			nested = hasAncestorIn(change.From, origins) || hasAncestorIn(change.Path, destinations)
+		}
+		if nested {
+			return artifact.InternalError("%s change %q lies inside a moved subtree", change.Op, change.Path)
+		}
+	}
+	return nil
+}
+
+// hasAncestorIn reports whether a proper non-root ancestor of path is in set.
+func hasAncestorIn(path artifact.Path, set map[artifact.Path]struct{}) bool {
+	for {
+		parent, ok := path.Parent()
+		if !ok || parent == artifact.RootPath {
+			return false
+		}
+		if _, hit := set[parent]; hit {
+			return true
+		}
+		path = parent
+	}
+}
+
+// isAncestor reports whether ancestor is a proper ancestor of path.
+func isAncestor(ancestor, path artifact.Path) bool {
+	return strings.HasPrefix(string(path), string(ancestor)+"/")
 }
 
 func (ref SourceRef) validate(side string) error {
@@ -182,6 +310,13 @@ func (c Change) validate() error {
 		if c.Before.Equal(*c.After) {
 			return artifact.InternalError("changed change %q has identical before and after", c.Path)
 		}
+	case OpMoved:
+		if err := c.validateMove(); err != nil {
+			return err
+		}
+	}
+	if c.Op != OpMoved && (c.From != "" || c.Evidence != "" || c.Nodes != 0) {
+		return artifact.InternalError("%s change %q carries move fields", c.Op, c.Path)
 	}
 	if c.Before != nil {
 		if err := c.Before.validate(c.Path); err != nil {
@@ -192,6 +327,37 @@ func (c Change) validate() error {
 		if err := c.After.validate(c.Path); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// validateMove checks the shape of one MOVED change. Under structural-v1 a
+// move never changes the node state, and evidence is "name" exactly when the
+// move covers a single record.
+func (c Change) validateMove() error {
+	if c.Before == nil || c.After == nil {
+		return artifact.InternalError("moved change %q must carry before and after", c.Path)
+	}
+	if !c.Before.Equal(*c.After) {
+		return artifact.InternalError("moved change %q changes the node state", c.Path)
+	}
+	if c.From == "" {
+		return artifact.InternalError("moved change %q has no origin", c.Path)
+	}
+	if c.From == c.Path || isAncestor(c.From, c.Path) || isAncestor(c.Path, c.From) {
+		return artifact.InternalError("moved change %q has an overlapping origin %q", c.Path, c.From)
+	}
+	if !c.Evidence.Valid() {
+		return artifact.InternalError("moved change %q has unsupported evidence %q", c.Path, c.Evidence)
+	}
+	if c.Nodes < 1 {
+		return artifact.InternalError("moved change %q covers %d nodes", c.Path, c.Nodes)
+	}
+	if (c.Evidence == EvidenceName) != (c.Nodes == 1) {
+		return artifact.InternalError("moved change %q has evidence %q for %d nodes", c.Path, c.Evidence, c.Nodes)
+	}
+	if c.Evidence == EvidenceSubtree && c.Before.Kind != artifact.KindDirectory {
+		return artifact.InternalError("moved change %q has subtree evidence on kind %q", c.Path, c.Before.Kind)
 	}
 	return nil
 }
