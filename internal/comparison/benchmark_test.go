@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dirloom/dirloom/internal/artifact"
+	"github.com/dirloom/dirloom/internal/identity"
 	"github.com/dirloom/dirloom/internal/source"
 )
 
@@ -81,6 +82,43 @@ func BenchmarkCompareMoves(b *testing.B) {
 					}
 				})
 			}
+		}
+	}
+}
+
+// BenchmarkDetectMoves isolates the structural-v1 detector from projection,
+// merge and validation, so its scaling can be read without their cost.
+func BenchmarkDetectMoves(b *testing.B) {
+	scenarios := []struct {
+		name string
+		a, b func(size int) artifact.Artifact
+	}{
+		{"relocated-50%",
+			func(size int) artifact.Artifact { return moduleArtifact(size, 0) },
+			func(size int) artifact.Artifact { return moduleArtifact(size, 50) }},
+		{"ambiguous",
+			func(size int) artifact.Artifact { return generatedArtifact(size, false) },
+			func(size int) artifact.Artifact { return generatedArtifact(size, true) }},
+	}
+	for _, size := range []int{1000, 10000, 100000} {
+		for _, scenario := range scenarios {
+			recordsA, err := identity.ProjectV1(scenario.a(size))
+			if err != nil {
+				b.Fatal(err)
+			}
+			recordsB, err := identity.ProjectV1(scenario.b(size))
+			if err != nil {
+				b.Fatal(err)
+			}
+			changes := mergeRecords(recordsA, recordsB)
+			b.Run(fmt.Sprintf("%d/%s", size, scenario.name), func(b *testing.B) {
+				b.ReportAllocs()
+				for i := 0; i < b.N; i++ {
+					if _, err := detectMovesStructuralV1(recordsA, recordsB, changes); err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
 		}
 	}
 }
