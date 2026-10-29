@@ -16,6 +16,8 @@ const (
 	// KindSnapshot identifies an already-validated snapshot artifact reused as
 	// a structural source.
 	KindSnapshot Kind = "snapshot"
+	// KindGit identifies a committed Git tree (Git Tree Source v1).
+	KindGit Kind = "git"
 )
 
 // Source observes a structure and returns a canonical artifact.
