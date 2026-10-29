@@ -143,24 +143,27 @@ package repository without making that the default path.
 
 `v0.4.0-a4` is the latest published GitHub Pre-release and is closed. The
 latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. No release branch is active. A5 has not started. `CHANGELOG.md`
-remains the unique source of truth for release notes. Do not open versioned
-feature pull requests against `main`.
+`v0.3.3`. `release/v0.4.0-a5` is the active release branch for the move
+detection increment. The A5 feature work lives on
+`feat/v0.4.0-a5-move-detection`, which targets `release/v0.4.0-a5` by pull
+request. `CHANGELOG.md` remains the unique source of truth for release notes.
+Do not open versioned feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a4` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | none |
+| Active release branch | `release/v0.4.0-a5` (from `main` at `6bbb274`, Go 1.26.10) |
+| Active feature branch | `feat/v0.4.0-a5-move-detection` → PR to `release/v0.4.0-a5` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| A5 | NOT STARTED |
+| Not yet delivered | move detection (A5 in development) |
 
 ```text
 v0.4.0-a4 published / closed
 latest stable v0.3.3
-active release branch: none
-A5 NOT STARTED
+release/v0.4.0-a5 active
+feat/v0.4.0-a5-move-detection active → PR to release/v0.4.0-a5
 ```
 
 ## v0.4.0-a4 release record

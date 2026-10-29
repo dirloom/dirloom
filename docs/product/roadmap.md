@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a4` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; A5 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a4` publiée et clôturée ; stable `v0.3.3` ; branche de release active `release/v0.4.0-a5` (Move Detection, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2162,7 +2162,7 @@ Frontière : pas de diff nœud à nœud, pas de détection de renommage ou de d�
 
 ### v0.4.0-a4 — Structural diff
 
-**Statut : publié (`v0.4.0-a4`), clôturé.** Quatrième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`. A5 n'est pas démarrée.
+**Statut : publié (`v0.4.0-a4`), clôturé.** Quatrième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
 
 Fonctions :
 
@@ -2173,6 +2173,20 @@ Fonctions :
 - sorties texte et JSON (Diff Result Schema v1), codes de sortie 0 à 6, différences structurelles en exit 1 sans diagnostic d'erreur.
 
 Frontière : pas de détection de renommage ou de déplacement (un renommage vaut REMOVED + ADDED), pas de hash de contenu, pas de source Git, pas de diff live↔live.
+
+### v0.4.0-a5 — Move detection
+
+**Statut : en développement sur `release/v0.4.0-a5`, non publié.** Cinquième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
+
+Fonctions :
+
+- opération `MOVED` dans `dirloom diff`, rapportée à la racine d'un sous-arbre identique avec `from`, `evidence` (`subtree` ou `name`) et `nodes` ;
+- stratégie versionnée `structural-v1` : formes structurelles exactes et invariantes au renommage, unicité globale dans chaque source, aucun score ni seuil ;
+- relocalisation (même nom, même structure) et renommage sur place d'un dossier non vide ;
+- `--no-moves` pour retrouver la liste chemin par chemin de `v0.4.0-a4` ;
+- Diff Result Schema v2 (`metadata.moveDetection`, `summary.moved`), qui remplace v1 ; statuts et codes de sortie inchangés.
+
+Frontière : un `MOVED` est une correspondance structurelle, pas la preuve d'un déplacement réel. Pas de lecture de contenu, pas de déplacement combiné à un renommage, pas de renommage de fichier, pas d'inférence de parent pour un sous-arbre modifié, pas de détection de copie, pas de source Git.
 
 ## v0.5 — Scaffold & Architecture Packs
 

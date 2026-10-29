@@ -4,6 +4,17 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add move detection (`structural-v1`) to `dirloom diff`. A removed and an added node are reported as one `MOVED` change when their name and structure occur exactly once in each source, or when a non-empty directory with a unique structure is renamed in place. A moved subtree is a single entry with `from`, `evidence` (`subtree` or `name`) and `nodes`. Ambiguous cases stay `REMOVED` plus `ADDED`. A `MOVED` is a structural correspondence, not proof of a move, and file contents are still never read.
+- Add `dirloom diff --no-moves` to list every changed path as `v0.4.0-a4` did.
+- Publish the Move Detection structural-v1 contract, ADR 0005, the diff reference update and move detection benchmarks.
+
+### Changed
+
+- Change `dirloom diff --format json` to Diff Result Schema v2: `schemaVersion: 2`, `metadata.moveDetection`, `summary.moved` counted in `total`, and the `MOVED` operation. Diff Result Schema v1 is no longer emitted; a consumer that checks `schemaVersion` fails instead of misreading the document. With `--no-moves`, the `changes` array and the added, removed and changed counts are exactly those of `v0.4.0-a4`. Statuses, exit codes and diagnostic codes are unchanged.
+- Change the human `dirloom diff` output: the summary line includes the moved count, and a `MOVED` section lists `from -> path (evidence, nodes)`.
+
 ### Security
 
 - Build Dirloom with Go 1.26.10 instead of Go 1.26.2, picking up the upstream Go security fixes released from Go 1.26.3 through Go 1.26.10.

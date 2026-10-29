@@ -126,4 +126,4 @@ $code = $LASTEXITCODE
 
 ## A3 and A4
 
-Verify reports whether the fingerprints are equal. A later diff command can name added paths, removed paths, type changes, and target changes. Verify does not emit that data and does not reserve a fake diff field in the JSON result.
+Verify reports whether the fingerprints are equal. [`dirloom diff`](diff.md) names added paths, removed paths, type and target changes, and moves. Verify does not emit that data and does not reserve a fake diff field in the JSON result.
