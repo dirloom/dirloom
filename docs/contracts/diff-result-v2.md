@@ -49,7 +49,7 @@ Top-level field order is fixed by the encoder struct:
 
 `summary` is `{ "added": n, "removed": n, "changed": n, "moved": n, "total": n }` in that order, with the exact invariant `total = added + removed + changed + moved`, which equals the length of `changes`.
 
-`diagnostic` is `{ "source": "a" | "b", "code": string, "message": string }`. `source` names the side whose resolution or observation failed; it is omitted only when no side is responsible (internal error before either side was resolved).
+`diagnostic` is `{ "source": "a" | "b", "code": string, "message": string }`. `source` names the side whose resolution or observation failed; it is omitted only when no side is responsible: an internal error before either side was resolved, or a comparison, move detection, or validation invariant failure after both sides were observed.
 
 ## Change vocabulary
 

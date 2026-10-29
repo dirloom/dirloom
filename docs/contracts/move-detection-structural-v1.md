@@ -14,6 +14,8 @@ A `MOVED` states that, under the rules below, one removed node and one added nod
 
 Without contents or history, structurally identical objects are indistinguishable. If `docs/old/guide.md` is deleted and an unrelated `docs/guide.md` is created in the same comparison, and `guide.md` appears nowhere else in either tree, `structural-v1` reports `MOVED docs/old/guide.md -> docs/guide.md` with `evidence: name`. Global uniqueness makes such coincidences rarer; it cannot rule them out. `evidence: name` is the weakest class and consumers should present it accordingly. `evidence: subtree` rests on the names and kinds of every descendant and is stronger, but it is still a structural correspondence.
 
+Link targets are compared as recorded strings and are never resolved. A symlink or junction relocated with the same relative target (`../shared`) is a `MOVED`, even though that target now resolves to a different place.
+
 ## Inputs
 
 - the Identity Projection v1 records of source A and of source B, each sorted by canonical path as UTF-8 bytes;
@@ -145,9 +147,9 @@ Let N and M be the record counts of A and B, and L the total name bytes.
 | counts: one increment per node for `key` and one for `shape` | O(N+M) |
 | pairing: one lookup per candidate in `CA` | O(N) |
 | absorption: each record is marked at most once, because root pairs cover disjoint subtrees | O(N+M) |
-| validation: ancestor walks with set lookups | linear in total canonical path bytes |
+| validation: for each `MOVED`, binary searches for the prefix `from/` and `path/` in the path-sorted changes and origins | linear in total canonical path bytes, plus O(K log C) path comparisons for K moves among C changes |
 
-There is no candidate-by-candidate comparison: repeated keys and shapes are rejected by counting. Adversarial inputs (thousands of identical generated folders, deep chains, wide fan-out) cannot make detection quadratic. Benchmarks confirm this empirically; they do not replace this argument.
+There is no candidate-by-candidate comparison: repeated keys and shapes are rejected by counting. Validation never walks the ancestors of a path: hashing every ancestor's full path would cost O(depth²) bytes per path on deep chains. Adversarial inputs (thousands of identical generated folders, deep chains, wide fan-out) cannot make detection quadratic. Benchmarks confirm this empirically; they do not replace this argument.
 
 ## Not detected
 
