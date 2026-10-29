@@ -30,6 +30,7 @@ func TestDiffShellExitCodes(t *testing.T) {
 	runBashDiffSmoke(t, bin, work, out)
 	assertDiffShellJSON(t, filepath.Join(out, "same.json"), "NO_DIFFERENCES")
 	assertDiffShellJSON(t, filepath.Join(out, "diff.json"), "DIFFERENCES")
+	assertDiffShellMoveJSON(t, filepath.Join(out, "move.json"))
 }
 
 func runBashDiffSmoke(t *testing.T, bin, work, out string) {
@@ -79,6 +80,17 @@ set +e
 code=$?
 set -e
 test "$code" -eq 5
+mkdir -p movework/old/payment/api
+printf 'package api\n' > movework/old/payment/api/handler.go
+printf 'package payment\n' > movework/old/payment/service.go
+"$bin" snapshot movework --no-config --output move.dlm.json
+mv movework/old/payment movework/payment
+set +e
+"$bin" diff snapshot:move.dlm.json live:movework --format json >"$out/move.json" 2>"$out/move.err"
+code=$?
+set -e
+test "$code" -eq 1
+test ! -s "$out/move.err"
 `
 	cmd := exec.Command(bash, "-c", script, "bash", work, bin, out)
 	output, err := cmd.CombinedOutput()
@@ -124,6 +136,16 @@ if ($LASTEXITCODE -ne 3) { throw "invalid LASTEXITCODE=$LASTEXITCODE" }
 if ($LASTEXITCODE -ne 4) { throw "unsupported LASTEXITCODE=$LASTEXITCODE" }
 & $Bin diff snapshot:missing.dlm.json snapshot:architecture.dlm.json > (Join-Path $Out 'missing.out') 2> (Join-Path $Out 'missing.err')
 if ($LASTEXITCODE -ne 5) { throw "missing LASTEXITCODE=$LASTEXITCODE" }
+New-Item -ItemType Directory -Force -Path (Join-Path $Work 'movework/old/payment/api') | Out-Null
+Set-Content -Encoding ascii -Path (Join-Path $Work 'movework/old/payment/api/handler.go') -Value "package api"
+Set-Content -Encoding ascii -Path (Join-Path $Work 'movework/old/payment/service.go') -Value "package payment"
+& $Bin snapshot movework --no-config --output move.dlm.json
+if ($LASTEXITCODE -ne 0) { throw "move snapshot LASTEXITCODE=$LASTEXITCODE" }
+Move-Item -Path (Join-Path $Work 'movework/old/payment') -Destination (Join-Path $Work 'movework/payment')
+& $Bin diff snapshot:move.dlm.json live:movework --format json > (Join-Path $Out 'move.json') 2> (Join-Path $Out 'move.err')
+if ($LASTEXITCODE -ne 1) { throw "move LASTEXITCODE=$LASTEXITCODE" }
+$moveErr = Get-Content -Raw (Join-Path $Out 'move.err') -ErrorAction SilentlyContinue
+if ($moveErr) { throw "move stderr not empty: $moveErr" }
 `
 	scriptPath := filepath.Join(t.TempDir(), "diff-smoke.ps1")
 	if err := os.WriteFile(scriptPath, []byte(script), 0o644); err != nil {
@@ -136,6 +158,39 @@ if ($LASTEXITCODE -ne 5) { throw "missing LASTEXITCODE=$LASTEXITCODE" }
 	}
 	assertDiffShellJSON(t, filepath.Join(out, "same.json"), "NO_DIFFERENCES")
 	assertDiffShellJSON(t, filepath.Join(out, "diff.json"), "DIFFERENCES")
+	assertDiffShellMoveJSON(t, filepath.Join(out, "move.json"))
+}
+
+// assertDiffShellMoveJSON checks the move-only scenario: old/payment moved to
+// payment while old/ stays, so the single change is one MOVED of 4 nodes.
+func assertDiffShellMoveJSON(t *testing.T, path string) {
+	t.Helper()
+	assertDiffShellJSON(t, path, "DIFFERENCES")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = bytes.TrimPrefix(data, []byte{0xEF, 0xBB, 0xBF})
+	var doc struct {
+		Summary struct {
+			Added, Removed, Changed, Moved, Total int
+		} `json:"summary"`
+		Changes []struct {
+			Path      string `json:"path"`
+			Operation string `json:"operation"`
+			From      string `json:"from"`
+			Nodes     int    `json:"nodes"`
+		} `json:"changes"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		t.Fatalf("%s: %v\n%s", path, err, data)
+	}
+	if doc.Summary.Moved != 1 || doc.Summary.Total != 1 || len(doc.Changes) != 1 {
+		t.Fatalf("%s summary = %+v", path, doc.Summary)
+	}
+	if move := doc.Changes[0]; move.Operation != "MOVED" || move.From != "old/payment" || move.Path != "payment" || move.Nodes != 4 {
+		t.Fatalf("%s move = %+v", path, move)
+	}
 }
 
 func assertDiffShellJSON(t *testing.T, path, status string) {
@@ -152,7 +207,7 @@ func assertDiffShellJSON(t *testing.T, path, status string) {
 	if err := json.Unmarshal(data, &doc); err != nil {
 		t.Fatalf("%s: %v\n%s", path, err, data)
 	}
-	if doc.SchemaVersion != 1 || doc.Status != status {
+	if doc.SchemaVersion != diffResultSchemaVersion || doc.Status != status {
 		t.Fatalf("%s = %+v", path, doc)
 	}
 }

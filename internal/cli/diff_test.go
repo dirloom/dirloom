@@ -11,6 +11,7 @@ import (
 
 	"github.com/dirloom/dirloom/internal/app"
 	"github.com/dirloom/dirloom/internal/artifact"
+	"github.com/dirloom/dirloom/internal/comparison"
 	configuration "github.com/dirloom/dirloom/internal/config"
 )
 
@@ -96,26 +97,63 @@ func TestDiffHumanAndMachineStreams(t *testing.T) {
 	if code != 1 || stderr != "" || strings.Contains(stdout, "Error:") || strings.Contains(stdout, "\x1b") {
 		t.Fatalf("differences=(%q, %q, %d)", stdout, stderr, code)
 	}
-	if !strings.Contains(stdout, "Structural Diff\n") || !strings.Contains(stdout, "Summary: 1 added, 0 removed, 0 changed, 1 total\n") {
+	if !strings.Contains(stdout, "Structural Diff\n") || !strings.Contains(stdout, "Summary: 1 added, 0 removed, 0 changed, 0 moved, 1 total\n") {
 		t.Fatalf("header=%q", stdout)
 	}
 	if !strings.Contains(stdout, "ADDED\n  + a.txt\n") {
 		t.Fatalf("added section=%q", stdout)
 	}
-	if strings.Contains(stdout, "REMOVED") || strings.Contains(stdout, "CHANGED") {
+	if strings.Contains(stdout, "REMOVED") || strings.Contains(stdout, "CHANGED") || strings.Contains(stdout, "\nMOVED\n") {
 		t.Fatalf("empty sections must be omitted=%q", stdout)
 	}
 
 	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+empty, "snapshot:"+empty, "--format", "json")
 	assertDiffJSON(t, stdout, stderr, code, 0, "NO_DIFFERENCES")
-	assertFrozenDiffJSONContract(t, stdout, true)
+	assertDiffJSONContract(t, stdout, true, comparison.MoveDetectionStructuralV1)
 
 	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+empty, "snapshot:"+single, "--format", "json")
 	doc := assertDiffJSON(t, stdout, stderr, code, 1, "DIFFERENCES")
-	if doc.Summary == nil || doc.Summary.Added != 1 || doc.Summary.Total != 1 {
+	if doc.Summary == nil || doc.Summary.Added != 1 || doc.Summary.Moved != 0 || doc.Summary.Total != 1 {
 		t.Fatalf("summary=%+v", doc.Summary)
 	}
-	assertFrozenDiffJSONContract(t, stdout, false)
+	assertDiffJSONContract(t, stdout, false, comparison.MoveDetectionStructuralV1)
+}
+
+func TestDiffNoMovesFlag(t *testing.T) {
+	stdout, stderr, code := executeForTest(t, "diff", "--help")
+	if code != 0 || stderr != "" || !strings.Contains(stdout, "--no-moves") || !strings.Contains(stdout, "not proof that a file was moved") {
+		t.Fatalf("help=(%q, %q, %d)", stdout, stderr, code)
+	}
+
+	base, root := movedPaymentTree(t)
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+base, "live:"+root)
+	if code != 1 || stderr != "" {
+		t.Fatalf("default=(%q, %q, %d)", stdout, stderr, code)
+	}
+	if !strings.Contains(stdout, "Summary: 1 added, 0 removed, 0 changed, 1 moved, 2 total\n") ||
+		!strings.Contains(stdout, "MOVED\n  > src/old/payment -> src/features/payment (subtree, 4 nodes)\n") {
+		t.Fatalf("default text=%q", stdout)
+	}
+
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+base, "live:"+root, "--no-moves")
+	if code != 1 || stderr != "" {
+		t.Fatalf("no-moves=(%q, %q, %d)", stdout, stderr, code)
+	}
+	if !strings.Contains(stdout, "Summary: 5 added, 4 removed, 0 changed, 0 moved, 9 total\n") || strings.Contains(stdout, "\nMOVED\n") {
+		t.Fatalf("no-moves text=%q", stdout)
+	}
+
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+base, "live:"+root, "--no-moves", "--format", "json")
+	doc := assertDiffJSON(t, stdout, stderr, code, 1, "DIFFERENCES")
+	if doc.Metadata == nil || doc.Metadata.MoveDetection != "none" || doc.Summary == nil || doc.Summary.Moved != 0 {
+		t.Fatalf("no-moves json=%+v", doc)
+	}
+
+	// --no-moves belongs to diff only.
+	stdout, stderr, code = executeForTest(t, "verify", base, root, "--no-moves")
+	if code != 2 || stdout != "" || !strings.Contains(stderr, "no-moves") {
+		t.Fatalf("verify --no-moves=(%q, %q, %d)", stdout, stderr, code)
+	}
 }
 
 func TestDiffClassifiedExits(t *testing.T) {
@@ -202,7 +240,7 @@ func TestDiffInternalRendering(t *testing.T) {
 func TestDiffJSONEscape(t *testing.T) {
 	var buf bytes.Buffer
 	if err := writeDiffJSON(&buf, diffJSONDocument{
-		SchemaVersion: 1,
+		SchemaVersion: diffResultSchemaVersion,
 		Status:        "OBSERVATION_ERROR",
 		Diagnostic:    &diffDiagnostic{Code: "source_read_failure", Message: "a < b & c"},
 	}); err != nil {
@@ -236,10 +274,14 @@ func TestDiffCompletions(t *testing.T) {
 type diffJSONBody struct {
 	SchemaVersion int    `json:"schemaVersion"`
 	Status        string `json:"status"`
-	Summary       *struct {
+	Metadata      *struct {
+		MoveDetection string `json:"moveDetection"`
+	} `json:"metadata"`
+	Summary *struct {
 		Added   int `json:"added"`
 		Removed int `json:"removed"`
 		Changed int `json:"changed"`
+		Moved   int `json:"moved"`
 		Total   int `json:"total"`
 	} `json:"summary"`
 	Diagnostic *struct {
@@ -249,13 +291,21 @@ type diffJSONBody struct {
 	} `json:"diagnostic"`
 }
 
-// assertFrozenDiffJSONContract locks Diff Result Schema v1: top-level sources,
-// metadata without a/b, operation instead of op, and changes as [] when empty.
-func assertFrozenDiffJSONContract(t *testing.T, stdout string, empty bool) {
+// assertDiffJSONContract locks Diff Result Schema v2: top-level sources,
+// metadata without a/b but with moveDetection, operation instead of op, a
+// moved count in the summary, and changes as [] when empty.
+func assertDiffJSONContract(t *testing.T, stdout string, empty bool, moveDetection comparison.MoveDetection) {
 	t.Helper()
 	var doc map[string]any
 	if err := json.Unmarshal([]byte(stdout), &doc); err != nil {
 		t.Fatal(err)
+	}
+	if doc["schemaVersion"] != float64(2) {
+		t.Fatalf("schemaVersion = %#v", doc["schemaVersion"])
+	}
+	summary, ok := doc["summary"].(map[string]any)
+	if !ok || summary["moved"] == nil {
+		t.Fatalf("summary = %#v", doc["summary"])
 	}
 	sources, ok := doc["sources"].(map[string]any)
 	if !ok || sources["a"] == nil || sources["b"] == nil {
@@ -271,7 +321,7 @@ func assertFrozenDiffJSONContract(t *testing.T, stdout string, empty bool) {
 	if _, buried := metadata["b"]; buried {
 		t.Fatal("metadata.b must be absent")
 	}
-	if metadata["comparisonVersion"] != float64(1) || metadata["identityProjectionVersion"] != float64(1) {
+	if metadata["comparisonVersion"] != float64(1) || metadata["identityProjectionVersion"] != float64(1) || metadata["moveDetection"] != string(moveDetection) {
 		t.Fatalf("metadata = %#v", metadata)
 	}
 	changes, ok := doc["changes"].([]any)
@@ -301,7 +351,7 @@ func assertDiffJSON(t *testing.T, stdout, stderr string, code, wantCode int, sta
 	if err := json.Unmarshal([]byte(stdout), &doc); err != nil {
 		t.Fatal(err)
 	}
-	if doc.SchemaVersion != 1 || doc.Status != status {
+	if doc.SchemaVersion != diffResultSchemaVersion || doc.Status != status {
 		t.Fatalf("%+v", doc)
 	}
 	return doc

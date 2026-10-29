@@ -10,7 +10,8 @@ import (
 	"github.com/dirloom/dirloom/internal/comparison"
 )
 
-const diffResultSchemaVersion = 1
+// diffResultSchemaVersion is Diff Result Schema v2. v1 is no longer emitted.
+const diffResultSchemaVersion = 2
 
 type diffJSONDocument struct {
 	SchemaVersion int             `json:"schemaVersion"`
@@ -23,8 +24,9 @@ type diffJSONDocument struct {
 }
 
 type diffMetadata struct {
-	ComparisonVersion         int `json:"comparisonVersion"`
-	IdentityProjectionVersion int `json:"identityProjectionVersion"`
+	ComparisonVersion         int    `json:"comparisonVersion"`
+	IdentityProjectionVersion int    `json:"identityProjectionVersion"`
+	MoveDetection             string `json:"moveDetection"`
 }
 
 type diffSources struct {
@@ -41,14 +43,20 @@ type diffSummary struct {
 	Added   int `json:"added"`
 	Removed int `json:"removed"`
 	Changed int `json:"changed"`
+	Moved   int `json:"moved"`
 	Total   int `json:"total"`
 }
 
+// diffChange field order is the Diff Result Schema v2 encoder order. From,
+// Evidence and Nodes are set on MOVED only, where Nodes is always at least 1.
 type diffChange struct {
 	Path      string         `json:"path"`
 	Operation string         `json:"operation"`
+	From      string         `json:"from,omitempty"`
 	Before    *diffNodeState `json:"before,omitempty"`
 	After     *diffNodeState `json:"after,omitempty"`
+	Evidence  string         `json:"evidence,omitempty"`
+	Nodes     int            `json:"nodes,omitempty"`
 }
 
 // diffNodeState carries target with explicit presence: a non-nil pointer to an
@@ -74,11 +82,12 @@ func writeDiffText(writer io.Writer, diff comparison.StructuralDiff) error {
 	}
 	var builder strings.Builder
 	builder.WriteString("Structural Diff\n\n")
-	fmt.Fprintf(&builder, "Summary: %d added, %d removed, %d changed, %d total\n",
-		diff.Summary.Added, diff.Summary.Removed, diff.Summary.Changed, diff.Summary.Total)
+	fmt.Fprintf(&builder, "Summary: %d added, %d removed, %d changed, %d moved, %d total\n",
+		diff.Summary.Added, diff.Summary.Removed, diff.Summary.Changed, diff.Summary.Moved, diff.Summary.Total)
 	writeDiffSection(&builder, "ADDED", "+", diff.Changes, comparison.OpAdded)
 	writeDiffSection(&builder, "REMOVED", "-", diff.Changes, comparison.OpRemoved)
 	writeDiffSection(&builder, "CHANGED", "~", diff.Changes, comparison.OpChanged)
+	writeDiffSection(&builder, "MOVED", ">", diff.Changes, comparison.OpMoved)
 	return writeAll(writer, []byte(builder.String()))
 }
 
@@ -97,14 +106,26 @@ func writeDiffSection(builder *strings.Builder, title, prefix string, changes []
 		builder.WriteString("  ")
 		builder.WriteString(prefix)
 		builder.WriteString(" ")
-		builder.WriteString(change.Path.String())
-		if change.Op == comparison.OpChanged {
+		switch change.Op {
+		case comparison.OpChanged:
+			builder.WriteString(change.Path.String())
 			builder.WriteString(" (")
 			builder.WriteString(changedAttributes(change.Before, change.After))
 			builder.WriteString(")")
+		case comparison.OpMoved:
+			fmt.Fprintf(builder, "%s -> %s (%s, %s)", change.From, change.Path, change.Evidence, nodeCount(change.Nodes))
+		default:
+			builder.WriteString(change.Path.String())
 		}
 		builder.WriteString("\n")
 	}
+}
+
+func nodeCount(n int) string {
+	if n == 1 {
+		return "1 node"
+	}
+	return fmt.Sprintf("%d nodes", n)
 }
 
 // changedAttributes lists only the attributes that differ between before and
@@ -155,6 +176,7 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 		Metadata: &diffMetadata{
 			ComparisonVersion:         diff.Metadata.ComparisonVersion,
 			IdentityProjectionVersion: diff.Metadata.IdentityProjectionVersion,
+			MoveDetection:             string(diff.Metadata.MoveDetection),
 		},
 		Sources: &diffSources{
 			A: diffSourceRef{Kind: string(diff.SourceA.Kind), NodeCount: diff.SourceA.NodeCount},
@@ -164,6 +186,7 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 			Added:   diff.Summary.Added,
 			Removed: diff.Summary.Removed,
 			Changed: diff.Summary.Changed,
+			Moved:   diff.Summary.Moved,
 			Total:   diff.Summary.Total,
 		},
 		Changes: &changes,
@@ -171,7 +194,13 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 }
 
 func diffChangeJSON(change comparison.Change) diffChange {
-	out := diffChange{Path: change.Path.String(), Operation: string(change.Op)}
+	out := diffChange{
+		Path:      change.Path.String(),
+		Operation: string(change.Op),
+		From:      change.From.String(),
+		Evidence:  string(change.Evidence),
+		Nodes:     change.Nodes,
+	}
 	if change.Before != nil {
 		out.Before = diffNodeStateJSON(*change.Before)
 	}

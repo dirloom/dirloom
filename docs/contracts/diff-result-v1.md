@@ -1,5 +1,7 @@
 # Diff Result Schema v1
 
+> **Status:** superseded by [Diff Result Schema v2](diff-result-v2.md) in `v0.4.0-a5`. Emitted by `v0.4.0-a4` only. Kept as the reference for the frozen `testdata/diff/v1/golden/` fixtures.
+
 Machine-readable output of `dirloom diff --format json`. This schema does not modify Snapshot Schema v1, Identity Projection v1, Canonical Identity Encoding v1, Fingerprint v1, or Verify Result Schema v1. The JSON bytes are not fingerprinted.
 
 ## Document

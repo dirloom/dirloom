@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "none"
+  },
+  "sources": {
+    "a": {
+      "kind": "snapshot",
+      "nodeCount": 7
+    },
+    "b": {
+      "kind": "filesystem",
+      "nodeCount": 8
+    }
+  },
+  "summary": {
+    "added": 5,
+    "removed": 4,
+    "changed": 0,
+    "moved": 0,
+    "total": 9
+  },
+  "changes": [
+    {
+      "path": "src/features",
+      "operation": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/features/payment",
+      "operation": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/features/payment/api",
+      "operation": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/features/payment/api/handler.go",
+      "operation": "ADDED",
+      "after": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "src/features/payment/service.go",
+      "operation": "ADDED",
+      "after": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "src/old/payment",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/old/payment/api",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/old/payment/api/handler.go",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "src/old/payment/service.go",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "file"
+      }
+    }
+  ]
+}
