@@ -141,61 +141,83 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a4` is published and closed. It is the latest GitHub Pre-release.
-The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a5` is frozen and release-ready. Feature pull
-request #51 is merged and feature work on `feat/v0.4.0-a5-move-detection` is
-complete. `main` carries the `v0.4.0-a4` release lineage plus the Go 1.26.10
-toolchain merge (#50). A6 has not started. `CHANGELOG.md` remains the unique
-source of truth for release notes. Do not open versioned feature pull
-requests against `main`.
+`v0.4.0-a5` is the latest published GitHub Pre-release and is closed. The
+latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. No release branch is active. A6 has not started. `CHANGELOG.md`
+remains the unique source of truth for release notes. Do not open versioned
+feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
-| Latest published GitHub Pre-release | `v0.4.0-a4` |
+| Latest published GitHub Pre-release | `v0.4.0-a5` |
 | Latest stable release | `v0.3.3` |
-| Active release candidate | `v0.4.0-a5` on `release/v0.4.0-a5` |
-| Candidate state | FROZEN / RELEASE READY |
-| Feature pull request | #51 merged (`feat/v0.4.0-a5-move-detection`) |
+| Active release branch | none |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
 | A6 | NOT STARTED |
 
 ```text
-v0.4.0-a4 published / closed
-
-release/v0.4.0-a5
-FROZEN / RELEASE READY
-
-PR #51 merged
-feat/v0.4.0-a5-move-detection complete
-
-main at 6bbb274 (v0.4.0-a4 lineage + Go 1.26.10)
-
+v0.4.0-a5 published / closed
+latest stable v0.3.3
+active release branch: none
 A6 NOT STARTED
 ```
 
-## v0.4.0-a5 freeze checklist
+## v0.4.0-a5 release record
 
-The scope freeze lives on `release/v0.4.0-a5`. Do not create
-`chore/v0.4.0-a5-freeze`.
+v0.4.0-a5 is published and closed. The checklist below is the completed
+ceremony, kept for audit. It is not the current active release state.
+Do not create `chore/v0.4.0-a5-freeze`. The scope freeze lived on
+`release/v0.4.0-a5`.
 
 ```text
-feature → release                  DONE
-release CI                         PASS
-freeze                             ACTIVE
-final release PR → main            PENDING
-tag                                PENDING
-draft prerelease                   PENDING
-publication                        PENDING
-package managers                   MUST STAY v0.3.3
+toolchain go1.26.10 → main       DONE (#50)
+feature → release                DONE
+release CI                       PASS
+freeze                           DONE
+freeze CI                        PASS
+release → main                   DONE
+main CI                          PASS
+tag v0.4.0-a5                    DONE
+draft prerelease                 PUBLISHED BEFORE HUMAN GO
+publication audit                PASS
+publication                      DONE (GO confirmed after audit)
+package managers                 SKIPPED
+branches                         DELETED
+A5                               CLOSED
 ```
 
-Feature branch of record: `feat/v0.4.0-a5-move-detection` at
-`5b309e2877f8023eb2e6b54461ac250321cc732f`, merged by pull request #51 into
-`release/v0.4.0-a5` at `74844b0a067cfa59055dd2c4165ce534ed692f13`. Release
-CI of record before freeze: GitHub Actions run `40940034439` on that merge
-commit.
+Recorded identifiers:
+
+- Toolchain pull request #50 merged to `main` at `6bbb2740c2e6eabf3b214911cf4a8d5949d34d7b` (`go 1.26.10`).
+- Feature branch `feat/v0.4.0-a5-move-detection` at `5b309e2877f8023eb2e6b54461ac250321cc732f`, merged by pull request #51 into `release/v0.4.0-a5` at `74844b0a067cfa59055dd2c4165ce534ed692f13`.
+- Release CI before freeze: https://github.com/dirloom/dirloom/actions/runs/40940034439
+- Freeze commit: `40fce342cb62da9bbf361e7ed49efa2bf63d0a5f`
+- Freeze CI: https://github.com/dirloom/dirloom/actions/runs/40940353068
+- Release pull request #52 merged to `main` at `07338a47af308b7903d515e2ef8b3004d23d705a`
+- Main CI: https://github.com/dirloom/dirloom/actions/runs/40940927637
+- Annotated tag `v0.4.0-a5` (`fa441ce2060fd7b16ca579c014254c5819a16d78`) points at `07338a47af308b7903d515e2ef8b3004d23d705a`
+- Release workflow: https://github.com/dirloom/dirloom/actions/runs/40944277887 (ended 2026-10-29T19:56:24Z on "Leave draft for human GO")
+- Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a5 (`publishedAt` `2026-10-29T20:00:01Z`)
+- Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/40945074507
+- `release/v0.4.0-a5` and `feat/v0.4.0-a5-move-detection` deleted after publication.
+
+Ruleset bypasses used by the repository owner, each authorized explicitly
+for this release:
+
+- Pull request #51 merged without an approving review (`protect-release-branches` requires one; the only collaborator is the author).
+- Freeze commit pushed directly to `release/v0.4.0-a5` (pull request rule), as the freeze procedure prescribes.
+- Tag `v0.4.0-a5` created under `protect-release-tags` (creation restricted).
+
+Publication deviation: the draft was published at 2026-10-29T20:00:01Z,
+3 min 37 s after the release workflow had left it as a draft, and before
+the recorded human GO. The repository event attributes it to
+`github-actions[bot]`, as for `v0.4.0-a4`, so the publisher is not
+identified. No workflow in this repository publishes releases. The 13
+published artefacts were then audited (inventory, 12 SHA-256 checksums,
+`release-artifacts verify`, 13 attestations, licences in all six archives,
+release notes against `CHANGELOG.md`, Windows binary reporting
+`dirloom 0.4.0-a5`), and the owner confirmed the publication.
 
 ## v0.4.0-a4 release record
 
