@@ -18,6 +18,15 @@ const (
 	CodeInvalidFingerprint = "invalid_fingerprint_representation"
 )
 
+// Git Tree Source v1 codes. Each is an observation failure of a Git source.
+const (
+	CodeGitUnavailable        = "git_unavailable"
+	CodeGitRepositoryNotFound = "git_repository_not_found"
+	CodeGitRevisionNotFound   = "git_revision_not_found"
+	CodeGitObjectUnavailable  = "git_object_unavailable"
+	CodeGitTreeInvalid        = "git_tree_invalid"
+)
+
 // Error is a structured diagnostic. Internal marks a broken Dirloom invariant
 // rather than bad caller input or an unreadable source.
 type Error struct {
