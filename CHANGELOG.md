@@ -4,6 +4,10 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Security
+
+- Build Dirloom with Go 1.26.10 instead of Go 1.26.2, picking up the upstream Go security fixes released from Go 1.26.3 through Go 1.26.10.
+
 ## [0.4.0-a4] - 2026-09-30
 
 CHANGE alpha: deterministic structural diff over Canonical Structural

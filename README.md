@@ -62,7 +62,7 @@ Download the archive for Windows, Linux or macOS from [GitHub Releases](https://
 
 ### Install with Go
 
-With Go 1.26.2:
+With Go 1.26.10:
 
 ```bash
 go install github.com/dirloom/dirloom/cmd/dirloom@latest
