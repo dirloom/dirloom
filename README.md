@@ -58,7 +58,60 @@ brew install --cask dirloom/tap/dirloom
 
 ### Release archives
 
-Download the archive for Windows, Linux or macOS from [GitHub Releases](https://github.com/dirloom/dirloom/releases), extract `dirloom` (`dirloom.exe` on Windows), and place it on your `PATH`. Verify `checksums.txt`, SBOMs and attestations as described in [Distribution](docs/distribution.md).
+Every version is on [GitHub Releases](https://github.com/dirloom/dirloom/releases), including GitHub Pre-releases such as `v0.4.0-a5` that Winget, Scoop and Homebrew do not ship. To install or update one version, set the version and the install directory, then paste the block. It downloads the archive for your platform, checks its SHA-256 against `checksums.txt`, keeps the previous binary as `.bak`, and prints the installed version. Do not point it at a directory managed by Winget, Scoop or Homebrew.
+
+PowerShell (Windows x64 or ARM64):
+
+```powershell
+$ErrorActionPreference = "Stop"; $ProgressPreference = "SilentlyContinue"
+$Version = "v0.4.0-a5"                           # release tag to install
+$Dir     = "$env:LOCALAPPDATA\Programs\dirloom"  # install directory, on your PATH
+
+$Arch  = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "x86_64" }
+$Asset = "dirloom_Windows_$Arch.zip"
+$Url   = "https://github.com/dirloom/dirloom/releases/download/$Version"
+$Tmp   = Join-Path $env:TEMP "dirloom-$Version"
+New-Item -ItemType Directory -Force $Tmp, $Dir | Out-Null
+
+Invoke-WebRequest "$Url/$Asset" -OutFile "$Tmp\$Asset"
+Invoke-WebRequest "$Url/checksums.txt" -OutFile "$Tmp\checksums.txt"
+$Expected = ((Get-Content "$Tmp\checksums.txt") -like "*  $Asset" -split " ")[0]
+if ((Get-FileHash "$Tmp\$Asset" -Algorithm SHA256).Hash -ne $Expected) { throw "Checksum mismatch: $Asset" }
+
+Expand-Archive "$Tmp\$Asset" -DestinationPath "$Tmp\x" -Force
+if (Test-Path "$Dir\dirloom.exe") { Copy-Item "$Dir\dirloom.exe" "$Dir\dirloom.exe.bak" -Force }
+Copy-Item "$Tmp\x\dirloom.exe" "$Dir\dirloom.exe" -Force
+& "$Dir\dirloom.exe" --version
+```
+
+bash (Linux or macOS, x86_64 or arm64):
+
+```bash
+(
+set -eu
+VERSION=v0.4.0-a5            # release tag to install
+DIR="$HOME/.local/bin"       # install directory, on your PATH
+
+OS=$(uname -s)               # Linux or Darwin
+ARCH=$(uname -m); [ "$ARCH" = aarch64 ] && ARCH=arm64
+ASSET="dirloom_${OS}_${ARCH}.tar.gz"
+URL="https://github.com/dirloom/dirloom/releases/download/$VERSION"
+TMP=$(mktemp -d); cd "$TMP"
+
+curl -fsSLO "$URL/$ASSET"
+curl -fsSLO "$URL/checksums.txt"
+grep "  $ASSET\$" checksums.txt > expected.txt
+if command -v sha256sum >/dev/null; then sha256sum -c expected.txt; else shasum -a 256 -c expected.txt; fi
+
+tar -xzf "$ASSET" dirloom
+mkdir -p "$DIR"
+[ -f "$DIR/dirloom" ] && cp "$DIR/dirloom" "$DIR/dirloom.bak"
+install -m 0755 dirloom "$DIR/dirloom"
+"$DIR/dirloom" --version
+)
+```
+
+On a first install, add the directory to your `PATH` once. On Windows: `[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$Dir", "User")`, then open a new terminal. SBOMs and attestations can also be verified as described in [Distribution](docs/distribution.md).
 
 ### Install with Go
 
