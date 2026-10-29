@@ -54,6 +54,11 @@ func FuzzCompareGenerated(f *testing.F) {
 		if !reflect.DeepEqual(inverted, backward) {
 			t.Fatal("symmetry broken: invert(diff(A,B)) != diff(B,A)")
 		}
+		moved, err := Compare(context.Background(), source.Memory{Artifact: a}, source.Memory{Artifact: b}, structuralV1)
+		if err != nil {
+			t.Fatalf("structural-v1 on valid generated artifacts: %v", err)
+		}
+		checkMoveProperties(t, a, b, moved)
 	})
 }
 

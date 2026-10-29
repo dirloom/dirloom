@@ -123,6 +123,43 @@ func BenchmarkDetectMoves(b *testing.B) {
 	}
 }
 
+// BenchmarkValidateDeepChain validates a model with 16 MOVED files and a
+// chain of depth ADDED directories (d, d/d, ...), whose canonical paths grow
+// with depth. Input bytes grow as depth², so linear validation grows as
+// depth². More than 8 moves keep the move sets out of Go's small-map path.
+func BenchmarkValidateDeepChain(b *testing.B) {
+	const moves = 16
+	for _, depth := range []int{1000, 2000, 4000} {
+		file := NodeState{Kind: artifact.KindFile}
+		dir := NodeState{Kind: artifact.KindDirectory}
+		var changes []Change
+		for i := 0; i < moves; i++ {
+			name := "u" + itoa(10+i) + ".txt"
+			changes = append(changes, Change{Path: artifact.Path("b/" + name), Op: OpMoved, From: artifact.Path("a/" + name), Before: &file, After: &file, Evidence: EvidenceName, Nodes: 1})
+		}
+		path := "d"
+		for i := 0; i < depth; i++ {
+			changes = append(changes, Change{Path: artifact.Path(path), Op: OpAdded, After: &dir})
+			path += "/d"
+		}
+		diff := StructuralDiff{
+			Metadata: Metadata{ComparisonVersion: Version, IdentityProjectionVersion: IdentityProjectionVersion, MoveDetection: MoveDetectionStructuralV1},
+			SourceA:  SourceRef{Kind: source.KindMemory, NodeCount: moves + 3},
+			SourceB:  SourceRef{Kind: source.KindMemory, NodeCount: depth + moves + 3},
+			Summary:  Summary{Added: depth, Moved: moves, Total: depth + moves},
+			Changes:  changes,
+		}
+		b.Run(fmt.Sprintf("depth-%d", depth), func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				if err := diff.Validate(); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
 // moduleArtifact builds src/m<i>/f<j>.go: size/10 modules of nine files.
 // The first relocatedPercent percent of modules sit under moved/ instead of
 // src/, so each relocated module is one uniquely named subtree.

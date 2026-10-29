@@ -5,6 +5,7 @@
 package comparison
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/dirloom/dirloom/internal/artifact"
@@ -217,15 +218,20 @@ func (d StructuralDiff) Validate() error {
 }
 
 // validateMoves checks the invariants that span several changes: every path
-// and origin appears once, and nothing is reported below a moved subtree on
-// the side that subtree was absorbed from.
+// and origin appears once, and no change path or origin lies strictly below
+// a move's origin or destination, since a move absorbs both subtrees.
+//
+// Paths below p are exactly those with prefix p+"/", and they form one
+// contiguous block in byte order, so a binary search over the sorted changes
+// and the sorted origins finds them. The cost is linear in total path bytes
+// plus O(K log C) path comparisons for K moves among C changes, whatever the
+// depth of the paths.
 func (d StructuralDiff) validateMoves() error {
 	paths := make(map[artifact.Path]struct{}, len(d.Changes))
 	for _, change := range d.Changes {
 		paths[change.Path] = struct{}{}
 	}
-	origins := make(map[artifact.Path]struct{})
-	destinations := make(map[artifact.Path]struct{})
+	var origins []artifact.Path
 	for _, change := range d.Changes {
 		if change.Op != OpMoved {
 			continue
@@ -233,43 +239,29 @@ func (d StructuralDiff) validateMoves() error {
 		if _, ok := paths[change.From]; ok {
 			return artifact.InternalError("move origin %q is also a change path", change.From)
 		}
-		if _, ok := origins[change.From]; ok {
-			return artifact.InternalError("move origin %q appears twice", change.From)
+		origins = append(origins, change.From)
+	}
+	sort.Slice(origins, func(i, j int) bool { return origins[i] < origins[j] })
+	for i := 1; i < len(origins); i++ {
+		if origins[i-1] == origins[i] {
+			return artifact.InternalError("move origin %q appears twice", origins[i])
 		}
-		origins[change.From] = struct{}{}
-		destinations[change.Path] = struct{}{}
 	}
 	for _, change := range d.Changes {
-		var nested bool
-		switch change.Op {
-		case OpRemoved:
-			nested = hasAncestorIn(change.Path, origins)
-		case OpAdded:
-			nested = hasAncestorIn(change.Path, destinations)
-		case OpChanged:
-			nested = hasAncestorIn(change.Path, origins) || hasAncestorIn(change.Path, destinations)
-		case OpMoved:
-			nested = hasAncestorIn(change.From, origins) || hasAncestorIn(change.Path, destinations)
+		if change.Op != OpMoved {
+			continue
 		}
-		if nested {
-			return artifact.InternalError("%s change %q lies inside a moved subtree", change.Op, change.Path)
+		for _, root := range [2]artifact.Path{change.From, change.Path} {
+			prefix := string(root) + "/"
+			i := sort.Search(len(d.Changes), func(i int) bool { return string(d.Changes[i].Path) >= prefix })
+			j := sort.Search(len(origins), func(j int) bool { return string(origins[j]) >= prefix })
+			if (i < len(d.Changes) && strings.HasPrefix(string(d.Changes[i].Path), prefix)) ||
+				(j < len(origins) && strings.HasPrefix(string(origins[j]), prefix)) {
+				return artifact.InternalError("a change lies inside the moved subtree %q", root)
+			}
 		}
 	}
 	return nil
-}
-
-// hasAncestorIn reports whether a proper non-root ancestor of path is in set.
-func hasAncestorIn(path artifact.Path, set map[artifact.Path]struct{}) bool {
-	for {
-		parent, ok := path.Parent()
-		if !ok || parent == artifact.RootPath {
-			return false
-		}
-		if _, hit := set[parent]; hit {
-			return true
-		}
-		path = parent
-	}
 }
 
 // isAncestor reports whether ancestor is a proper ancestor of path.

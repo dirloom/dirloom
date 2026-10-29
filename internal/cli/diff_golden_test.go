@@ -238,6 +238,37 @@ func TestDiffJSONGoldens(t *testing.T) {
 	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV2, "moved-no-moves.json"), false, comparison.MoveDetectionNone)
 }
 
+// TestDiffJSONMovedLinkGolden locks the MOVED shape for target-carrying
+// kinds: "target" is present in before and after, including the empty string.
+func TestDiffJSONMovedLinkGolden(t *testing.T) {
+	link := func(target string) *comparison.NodeState {
+		return goldenNodeState(artifact.KindSymlink, goldenTarget(target))
+	}
+	model := comparison.StructuralDiff{
+		Metadata: comparison.Metadata{
+			ComparisonVersion:         comparison.Version,
+			IdentityProjectionVersion: comparison.IdentityProjectionVersion,
+			MoveDetection:             comparison.MoveDetectionStructuralV1,
+		},
+		SourceA: comparison.SourceRef{Kind: "snapshot", NodeCount: 5},
+		SourceB: comparison.SourceRef{Kind: "filesystem", NodeCount: 5},
+		Summary: comparison.Summary{Moved: 2, Total: 2},
+		Changes: []comparison.Change{
+			{Path: "b/empty-link", Op: comparison.OpMoved, From: "a/empty-link", Before: link(""), After: link(""), Evidence: comparison.EvidenceName, Nodes: 1},
+			{Path: "b/shared-link", Op: comparison.OpMoved, From: "a/shared-link", Before: link("../shared"), After: link("../shared"), Evidence: comparison.EvidenceName, Nodes: 1},
+		},
+	}
+	if err := model.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := writeDiffJSON(&buf, diffSuccessDocument(model)); err != nil {
+		t.Fatal(err)
+	}
+	assertDiffGolden(t, "moved-link.json", buf.String())
+	assertDiffJSONContract(t, buf.String(), false, comparison.MoveDetectionStructuralV1)
+}
+
 // TestDiffNoMovesMatchesFrozenV1JSON replays the input of every frozen v1
 // JSON golden with --no-moves. Apart from the v2 envelope (schemaVersion,
 // metadata.moveDetection, summary.moved), the document must be A4's.

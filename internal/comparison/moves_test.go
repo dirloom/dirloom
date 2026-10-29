@@ -182,6 +182,26 @@ func TestMoveDetectionReferenceOutcomes(t *testing.T) {
 			b:    tree("-new/data.bin", "-new/meta.json"),
 			want: []string{"MOVED -old -> -new subtree 3"},
 		},
+		{
+			// The only B node with key (f, file) is y/f, which also exists in A
+			// as a directory: it is CHANGED, never a move destination.
+			name: "unique relocation target that is a changed path",
+			a:    tree("x/f", "y/f/"),
+			b:    tree("x/", "y/f", "z"),
+			want: []string{"REMOVED x/f", "CHANGED y/f", "ADDED z"},
+		},
+		{
+			// The only B node with the shape of p/a is p/b, a file in A: R2
+			// must refuse it, while the file below still moves by R1.
+			name: "unique rename target that is a changed path",
+			a:    tree("p/a/k.txt", "p/b"),
+			b:    tree("p/b/k.txt"),
+			want: []string{
+				"REMOVED p/a",
+				"CHANGED p/b",
+				"MOVED p/a/k.txt -> p/b/k.txt name 1",
+			},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -546,23 +566,34 @@ func (n *mutNode) placedNodes() []placed {
 }
 
 // nameSource yields globally unique names, plus repeated generic names when
-// generic is set, so ambiguity is exercised too.
+// generic is set, so ambiguity is exercised too. Prefixes and generic names
+// include names that sort before the root "." ("-"), names that interleave
+// with child paths in byte order ("a", "a-b" around "a/x"), and multi-byte
+// UTF-8.
 type nameSource struct {
 	rng     *rand.Rand
 	next    int
 	generic bool
 }
 
+var (
+	uniquePrefixes = []string{"u", "-u", "a-", "é"}
+	genericNames   = []string{"index.ts", "README.md", "gen", "util", "-gen", "a", "a-b", "café"}
+)
+
 func (s *nameSource) name(siblings *mutNode) string {
 	if s.generic && s.rng.IntN(3) == 0 {
-		candidate := []string{"index.ts", "README.md", "gen", "util"}[s.rng.IntN(4)]
+		candidate := genericNames[s.rng.IntN(len(genericNames))]
 		if !siblings.hasChild(candidate) {
 			return candidate
 		}
 	}
 	s.next++
-	return "u" + itoa(s.next)
+	return uniquePrefixes[s.rng.IntN(len(uniquePrefixes))] + itoa(s.next)
 }
+
+// linkTargets includes the empty target, which identity keeps as a value.
+var linkTargets = []string{"target-0", "target-1", "../shared", ""}
 
 func randomMutTree(rng *rand.Rand, names *nameSource, depth int) *mutNode {
 	root := &mutNode{kind: artifact.KindDirectory}
@@ -573,10 +604,13 @@ func randomMutTree(rng *rand.Rand, names *nameSource, depth int) *mutNode {
 func fillRandom(rng *rand.Rand, names *nameSource, dir *mutNode, depth int) {
 	for i := rng.IntN(5); i > 0; i-- {
 		child := &mutNode{name: names.name(dir)}
-		switch rng.IntN(4) {
+		switch rng.IntN(5) {
 		case 0:
 			child.kind = artifact.KindSymlink
-			child.target = "target-" + itoa(rng.IntN(3))
+			child.target = linkTargets[rng.IntN(len(linkTargets))]
+		case 4:
+			child.kind = artifact.KindJunction
+			child.target = linkTargets[rng.IntN(len(linkTargets))]
 		case 1:
 			child.kind = artifact.KindFile
 		default:
@@ -668,9 +702,36 @@ func renameRandomDirectory(rng *rand.Rand, root *mutNode, names *nameSource) (st
 	return renaming.path, to, renaming.node.size()
 }
 
+// retypeRandom changes the kind or target of one node in place, so CHANGED
+// entries mix with moves: a link gets another target, a file becomes a
+// symlink, and a directory becomes a file and loses its subtree.
+func retypeRandom(rng *rand.Rand, nodes []placed) {
+	if len(nodes) == 0 {
+		return
+	}
+	node := nodes[rng.IntN(len(nodes))].node
+	switch node.kind {
+	case artifact.KindSymlink, artifact.KindJunction:
+		for _, target := range linkTargets {
+			if target != node.target {
+				node.target = target
+				return
+			}
+		}
+	case artifact.KindFile:
+		node.kind = artifact.KindSymlink
+		node.target = linkTargets[rng.IntN(len(linkTargets))]
+	default:
+		node.kind = artifact.KindFile
+		node.children = nil
+	}
+}
+
 func mutateRandom(rng *rand.Rand, root *mutNode, names *nameSource) {
 	nodes := root.placedNodes()
-	switch rng.IntN(5) {
+	switch rng.IntN(6) {
+	case 4:
+		retypeRandom(rng, nodes)
 	case 0:
 		relocateRandom(rng, root)
 	case 1:
