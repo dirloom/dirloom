@@ -54,7 +54,7 @@ Shape identifiers come from one intern table shared by A and B, so identifiers a
 
 The interning key is an unambiguous, length-prefixed encoding of the kind code, the target when the kind carries one, and, for each child in order, its name and its already assigned shape identifier. It holds child identifiers, never a child's subtree representation, so it costs O(children + child-name bytes) per node. A hash may bucket keys, but two keys are equal only if their full encodings are equal: a hash collision can never merge two shapes.
 
-Because a parent always sorts before its children, shapes are computed in a single pass over the records in reverse order, without recursion.
+A non-root parent always sorts before its children (`p` < `p/c`), so shapes are computed in a single pass over the records in reverse order, without recursion. The root `.` does not necessarily sort first (`-a` < `.`); it never moves, has no shape, and is skipped by that pass.
 
 ## Pairing rules
 
@@ -94,7 +94,7 @@ Let `(p, q)` be an accepted pair. Since `shape(p) = shape(q)`, for every relativ
 
 The same holds for descendants of `q`. Absorption by the topmost pair is therefore consistent.
 
-**Root pairs.** An accepted pair `(p, q)` is a root pair if and only if no proper ancestor of `p` is the A side of an accepted pair. Processing accepted pairs in A record order (ancestors sort first) and skipping pairs whose `p` is already absorbed computes exactly this set.
+**Root pairs.** An accepted pair `(p, q)` is a root pair if and only if no proper ancestor of `p` is the A side of an accepted pair. Processing accepted pairs in A record order (a non-root ancestor sorts before its descendants, and the root is never paired) and skipping pairs whose `p` is already absorbed computes exactly this set.
 
 For each root pair, emit one change:
 
