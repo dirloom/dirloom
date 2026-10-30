@@ -143,24 +143,27 @@ package repository without making that the default path.
 
 `v0.4.0-a5` is the latest published GitHub Pre-release and is closed. The
 latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. No release branch is active. A6 has not started. `CHANGELOG.md`
-remains the unique source of truth for release notes. Do not open versioned
-feature pull requests against `main`.
+`v0.3.3`. `release/v0.4.0-a6` is the active release branch for the Git
+sources increment. The A6 feature work lives on `feat/v0.4.0-a6-git-sources`,
+which targets `release/v0.4.0-a6` by pull request. `CHANGELOG.md` remains the
+unique source of truth for release notes. Do not open versioned feature pull
+requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a5` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | none |
+| Active release branch | `release/v0.4.0-a6` (from `main` at `e9894ab`, Go 1.26.10) |
+| Active feature branch | `feat/v0.4.0-a6-git-sources` → PR to `release/v0.4.0-a6` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| A6 | NOT STARTED |
+| Not yet delivered | Git sources (A6 in development) |
 
 ```text
 v0.4.0-a5 published / closed
 latest stable v0.3.3
-active release branch: none
-A6 NOT STARTED
+release/v0.4.0-a6 active
+feat/v0.4.0-a6-git-sources active → PR to release/v0.4.0-a6
 ```
 
 ## v0.4.0-a5 release record

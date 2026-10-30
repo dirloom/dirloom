@@ -3,8 +3,9 @@
 Diff answers one question: what structurally changed between two sources?
 
 It lists the added, removed, changed, and moved canonical paths. It does not
-hash file contents and does not read Git refs. Moves are detected from
-structure alone, conservatively; see [Moves](#moves).
+hash file contents. A `git:` source reads a committed Git tree, never the
+working tree or the index; see [Git sources](#git-sources). Moves are
+detected from structure alone, conservatively; see [Moves](#moves).
 
 ## Syntax
 
@@ -18,12 +19,27 @@ dirloom diff live:. snapshot:architecture.dlm.json
 dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json
 dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --no-moves
 dirloom diff snapshot:architecture.dlm.json live:./src --format json
+dirloom diff git:main git:feature
+dirloom diff git:v0.4.0-a4 git:HEAD --format json
+dirloom diff snapshot:architecture.dlm.json git:HEAD
 ```
 
-A source is `snapshot:<path>` or `live:<directory>`. The expression is split
-on the first colon only; the prefixes are lowercase and case-sensitive. At
-least one side must be a snapshot: `live:` against `live:` is a usage error,
-because no Capture Semantics would select the observations.
+A source is `snapshot:<path>`, `live:<directory>`, or `git:<revision>`. The
+expression is split on the first colon only, so a revision may contain colons
+(`git:HEAD:src`); the prefixes are lowercase and case-sensitive.
+
+| Pairing | Observation |
+| --- | --- |
+| `snapshot:` and `snapshot:` | both stored artifacts |
+| `snapshot:` and `live:`, either order | the live side, with the snapshot's Capture Semantics |
+| `snapshot:` and `git:`, either order | the Git side, with the snapshot's Capture Semantics |
+| `git:` and `git:` | both whole committed trees, without filtering |
+| `live:` and `live:` | usage error, exit 2 |
+| `git:` and `live:`, either order | usage error, exit 2 |
+
+`live:` against `live:` and `git:` against `live:` are refused because
+neither side carries Capture Semantics to select the observation. Compare a
+revision with a snapshot of the working tree, or with a second revision.
 
 `--format` is `text` (default) or `json`. `--no-moves` disables move
 detection and lists every changed path, as `v0.4.0-a4` did.
@@ -48,8 +64,8 @@ that scope and does not block the comparison.
 
 ## Capture Semantics
 
-A `live:` side is observed with the Capture Semantics stored in the opposite
-snapshot, exactly like [verify](verify.md):
+A `live:` or `git:` side is observed with the Capture Semantics stored in the
+opposite snapshot, exactly like [verify](verify.md):
 
 | Snapshot field | Live observation |
 | --- | --- |
@@ -63,6 +79,92 @@ snapshot, exactly like [verify](verify.md):
 The opposite snapshot file is omitted from the live scan only when it sits
 inside the live root and that relative path is not already a node in the
 snapshot artifact. This self-exclusion works in both directions.
+
+On a `git:` side, `useGitignore` applies the `.gitignore` blobs of the
+observed tree at their tree paths, and `hidden` means a name that starts with
+`.`. A `git:` side against another `git:` side has no Capture Semantics:
+every entry of both trees is observed.
+
+## Git sources
+
+`git:<revision>` observes the tree a revision names, in the repository of the
+current directory. Git finds the repository as it always does: from a
+subdirectory, a linked worktree, or a bare repository, honoring `GIT_DIR` and
+`GIT_WORK_TREE`.
+
+| Revision | Observed tree | `commit` in JSON |
+| --- | --- | --- |
+| a branch, a tag, `HEAD`, `HEAD~3`, a full or abbreviated commit id | the commit's tree | that commit |
+| a tag pointing to a tree | that tree | absent |
+| `<commit>:<path>`, such as `HEAD:src` | that subtree | absent |
+| a file (`HEAD:README.md`), or a revision that does not resolve | none | exit 5, `git_revision_not_found` |
+
+These revisions are refused before Git runs, with exit 2: an empty revision,
+one that starts with `-`, one that contains a NUL or a newline, and
+an index entry (`:<path>`, `:<stage>:<path>`), because resolving it would
+read the index. `:/<text>`, which searches commit messages, is accepted.
+
+What a Git source reads, and what it does not:
+
+- committed objects only: never the working tree and never the index, so
+  uncommitted and untracked changes do not exist for it;
+- nothing over the network: in a partial clone, a missing object is an error
+  and is never fetched;
+- the recorded objects: `refs/replace/` never substitutes a commit;
+- a submodule is an empty directory, never entered;
+- a link target as recorded in the tree, NFC-normalized, on every platform:
+  no separator and no root rewrite;
+- only the trees of the directories the observation enters: a subtree that
+  depth or ignore rules exclude is never read and cannot fail.
+
+`git` 2.45 or newer must be on `PATH`. Dirloom runs `git version`,
+`git rev-parse` and `git cat-file` only, without a shell. The normative rules
+are in [Git Tree Source v1](../contracts/git-tree-source-v1.md).
+
+### Not `git diff`
+
+A Git source is still structural: paths, kinds and link targets. File
+contents never matter, and neither does the executable bit:
+
+```text
+main:     src/app.go  (contents A)
+feature:  src/app.go  (contents B)
+
+dirloom diff git:main git:feature   ->   No structural differences.  (exit 0)
+```
+
+A `MOVED` between two revisions is a structural correspondence. It is
+neither Git's rename detection nor history.
+
+### A revision against a snapshot of its checkout
+
+Under the same Capture Semantics, `git:<rev>` and a snapshot of a clean
+checkout of `<rev>` are `NO_DIFFERENCES` when the checkout holds the tree
+without loss. These differences are expected and listed in
+[Git Tree Source v1](../contracts/git-tree-source-v1.md#equivalence-with-a-checkout):
+
+| In the checkout | In `git:<rev>` |
+| --- | --- |
+| a link checked out as a file (`core.symlinks=false`, the Windows default) | a link |
+| an absolute link target inside the checkout, rewritten relative to its root | the target as recorded |
+| the files of an initialized submodule | an empty directory |
+| one of two names that differ only by case, on Windows or macOS | both names |
+| a `.gitignore` above 1 MiB, read | `git_tree_invalid` |
+| an entry hidden by the Windows hidden attribute | the entry |
+| untracked or uncommitted files, and `.git` itself without default ignores | absent |
+
+### Git diagnostics
+
+Every Git failure is `OBSERVATION_ERROR`, exit 5, for the side that failed:
+
+| Code | Cause |
+| --- | --- |
+| `git_unavailable` | no `git` on `PATH`, or a version below 2.45 |
+| `git_repository_not_found` | the current directory is not inside a repository, or Git refuses it (`safe.directory`) |
+| `git_revision_not_found` | the revision does not resolve locally, or names a file |
+| `git_object_unavailable` | a needed object is missing (for example in a partial clone) or unreadable |
+| `git_tree_invalid` | a malformed tree, an unsupported mode, an invalid or duplicate name, or an object above its limit: tree 32 MiB, `.gitignore` 1 MiB, link 4096 bytes |
+
 
 ## Operations
 
@@ -162,7 +264,7 @@ Other outcomes leave stdout empty and print one `Error:` line on stderr:
 | invalid arguments or source expressions | `Error:` | 2 |
 | corrupt snapshot | `Error: invalid snapshot:` | 3 |
 | unsupported schema, artifact, or required feature | `Error: unsupported snapshot:` | 4 |
-| unreadable snapshot or live observation failure | `Error:` | 5 |
+| unreadable snapshot, live observation failure, or Git source failure | `Error:` | 5 |
 | internal invariant | `Error: internal error:` | 6 |
 
 Exit 1 is a normal result, not an error: stderr stays empty. A diff that only
@@ -170,8 +272,8 @@ contains `MOVED` entries is exit 1.
 
 ## JSON output
 
-`--format json` writes Diff Result Schema v2 to stdout. See
-[diff-result-v2.md](../contracts/diff-result-v2.md). The document is UTF-8,
+`--format json` writes Diff Result Schema v3 to stdout. See
+[diff-result-v3.md](../contracts/diff-result-v3.md). The document is UTF-8,
 two-space indented, without HTML escaping, and ends with a newline.
 `changes` is `[]` when empty, never `null`. Failure documents carry `status`
 and a `diagnostic` object with `source` (`a` or `b` when the failing side is
@@ -180,6 +282,27 @@ diagnostic even under `--format json`.
 
 A `MOVED` summarizes its subtree: the document lists how many records moved,
 not which. Use `--no-moves` when every changed path is needed.
+
+A Git source object adds `tree`, the observed tree id, and `commit` when the
+revision resolved through a commit. Revision text, repository paths, remotes
+and branch names are never emitted:
+
+```json
+"sources": {
+  "a": { "kind": "git", "nodeCount": 9, "tree": "<40 hex>", "commit": "<40 hex>" },
+  "b": { "kind": "snapshot", "nodeCount": 8 }
+}
+```
+
+### From Diff Result Schema v2
+
+`v0.4.0-a5` wrote [Diff Result Schema v2](../contracts/diff-result-v2.md),
+which is no longer emitted. For `snapshot:` and `live:` sources, a v3
+document is the v2 document with `"schemaVersion": 3`. Version 3 adds the
+`git` source kind with `tree` and `commit`, the five `git_*` diagnostic
+codes, and an evolution policy: from v3 on, consumers ignore unknown fields
+and treat an unknown source kind or diagnostic code as opaque. A consumer
+that checks `schemaVersion` fails on `3` instead of misreading the document.
 
 ### From Diff Result Schema v1
 
@@ -196,7 +319,8 @@ misreading the document. With `--no-moves`, the `changes` array and the
 File content changes do not affect the result: a tree with identical paths,
 kinds, and targets reports `NO_DIFFERENCES` no matter how many bytes were
 rewritten. Renaming the physical root, or comparing a snapshot against a copy
-of the same tree elsewhere, reports no differences. Symlink and junction
+of the same tree elsewhere, reports no differences. Between two revisions,
+a file whose contents changed is no difference either. Symlink and junction
 identity follow the existing scanner: kind and target are compared; targets
 are not followed.
 
@@ -235,6 +359,15 @@ $code = $LASTEXITCODE
 `$LASTEXITCODE` uses the same numbers. GitLab CI, Azure DevOps, and Jenkins
 can use this process contract directly: separate stdout and stderr, UTF-8, no
 TTY, and no ANSI.
+
+To compare the structure of a pull request with its base branch, both
+revisions must already be in the local repository, because Dirloom never
+fetches. With a shallow checkout, fetch the base first (for example
+`fetch-depth: 0` in GitHub Actions):
+
+```bash
+dirloom diff git:origin/main git:HEAD --format json > diff.json
+```
 
 ## Verify and diff
 

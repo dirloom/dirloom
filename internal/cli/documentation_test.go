@@ -271,7 +271,15 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "diff-result-v2.md"))
+	contract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "diff-result-v3.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gitContract, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", "git-tree-source-v1.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gitADR, err := os.ReadFile(filepath.Join("..", "..", "docs", "adr", "0006-git-sources.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -291,27 +299,37 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"dirloom diff", "docs/reference/diff.md", "--no-moves", "Diff Result Schema v2"} {
+	for _, want := range []string{"dirloom diff", "docs/reference/diff.md", "--no-moves", "Diff Result Schema v3", "git:<revision>", "Git 2.45"} {
 		if !strings.Contains(string(readme), want) {
 			t.Errorf("README missing %q", want)
 		}
 	}
-	for _, want := range []string{"snapshot:<path>", "live:<directory>", "Capture Semantics", "ADDED", "REMOVED", "CHANGED", "MOVED", "--no-moves", "structural-v1", "not proof", "No structural differences.", "PowerShell", "GitLab", "diff-result-v2.md"} {
+	for _, want := range []string{"snapshot:<path>", "live:<directory>", "Capture Semantics", "ADDED", "REMOVED", "CHANGED", "MOVED", "--no-moves", "structural-v1", "not proof", "No structural differences.", "PowerShell", "GitLab", "diff-result-v2.md", "diff-result-v3.md",
+		"git:<revision>", "## Git sources", "Not `git diff`", "git_revision_not_found", "git_tree_invalid", "2.45", "index entry", "fetch-depth", "git-tree-source-v1.md"} {
 		if !strings.Contains(string(reference), want) {
 			t.Errorf("diff reference missing %q", want)
 		}
 	}
-	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "SNAPSHOT_READ_ERROR", "OBSERVATION_ERROR", "INTERNAL_ERROR", `"operation"`, "`sources`", "`moveDetection`", "`MOVED`", "--no-moves"} {
+	for _, want := range []string{"schemaVersion", "NO_DIFFERENCES", "DIFFERENCES", "INVALID_SNAPSHOT", "UNSUPPORTED_SNAPSHOT", "SNAPSHOT_READ_ERROR", "OBSERVATION_ERROR", "INTERNAL_ERROR", `"operation"`, "`sources`", "`moveDetection`", "`MOVED`", "--no-moves",
+		"schemaVersion: 3", "`tree`", "`commit`", "git_object_unavailable", "## Evolution policy"} {
 		if !strings.Contains(string(contract), want) {
 			t.Errorf("diff contract missing %q", want)
 		}
+	}
+	for _, want := range []string{"GIT_NO_LAZY_FETCH=1", "GIT_NO_REPLACE_OBJECTS=1", "protocol.allow=never", "index entry", "## Equivalence with a checkout", "## Complexity", "32 MiB", "git_unavailable"} {
+		if !strings.Contains(string(gitContract), want) {
+			t.Errorf("Git Tree Source contract missing %q", want)
+		}
+	}
+	if !strings.Contains(string(gitADR), "Diff Result Schema v3") || !strings.Contains(string(gitADR), "go-git") {
+		t.Error("ADR 0006 missing the schema or the library decision")
 	}
 	for _, want := range []string{"R1", "R2", "not proof of a move", "Not detected", "## Complexity"} {
 		if !strings.Contains(string(moves), want) {
 			t.Errorf("move detection contract missing %q", want)
 		}
 	}
-	golden, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v2", "golden", "snapshot-read-error.json"))
+	golden, err := os.ReadFile(filepath.Join("..", "..", "testdata", "diff", "v3", "golden", "snapshot-read-error.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -323,5 +341,10 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 	}
 	if !strings.Contains(string(architecture), "Comparison Engine") || !strings.Contains(string(architecture), "Move Detector") {
 		t.Fatal("architecture doc missing diff or move detection")
+	}
+	for _, want := range []string{"internal/gitsource", "Git backend", "Git Tree Source v1", "v0.4-a6 benchmarks"} {
+		if !strings.Contains(string(architecture), want) {
+			t.Errorf("architecture doc missing %q", want)
+		}
 	}
 }
