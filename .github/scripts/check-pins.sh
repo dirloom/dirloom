@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Fail when a GitHub Action is not pinned to a full 40-character SHA, or when a
-# downloaded release tool is missing its deterministic version and checksum.
+# downloaded CI or release tool is missing its deterministic version and checksum.
 
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 fail=0
@@ -35,6 +35,12 @@ fi
 
 if ! grep -q 'version: v2.17.1' "${root}/.github/workflows/ci.yml" || ! grep -q 'version: v2.17.1' "${root}/.github/workflows/release.yml"; then
   echo "GoReleaser must stay pinned to v2.17.1 in CI and release workflows"
+  fail=1
+fi
+
+ci="${root}/.github/workflows/ci.yml"
+if ! grep -q 'D2_VERSION: v0.7.1' "$ci" || ! grep -q 'D2_SHA256: eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7' "$ci"; then
+  echo "D2 must stay pinned to v0.7.1 with a verified SHA-256 in ci.yml"
   fail=1
 fi
 

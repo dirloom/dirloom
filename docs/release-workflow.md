@@ -534,6 +534,7 @@ checksum when the file is fetched as a binary):
 | `actions/attest` | `v4.2.1` (SHA `508db95dd578ae2727ebd6217d5ba78e4fbda05d`) |
 | golangci-lint | `v2.12.2` |
 | govulncheck | `v1.6.0` |
+| D2 (diagram syntax job) | `v0.7.1` (linux amd64 archive SHA-256 `eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7`) |
 
 Changes to `.github/workflows/release.yml`, `.github/workflows/update-packages.yml`,
 or packaging automation require **two independent approvals**. Mechanical
