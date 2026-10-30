@@ -12,8 +12,11 @@ cmd/dirloom
        ├─ internal/app
        │    ├─ internal/filter
        │    ├─ internal/tree
+       │    ├─ internal/gitsource
        │    ├─ internal/source
        │    │    ├─ internal/tree
+       │    │    ├─ internal/gitsource
+       │    │    │    └─ internal/artifact
        │    │    └─ internal/artifact
        │    ├─ internal/identity
        │    │    └─ internal/artifact
@@ -40,9 +43,10 @@ cmd/dirloom
 - `internal/config`: strict YAML parsing, the immutable built-in preset catalog, project and user discovery, layered inspection and presentation resolution, provenance and diagnostics.
 - `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint`, `Snapshot`, `Verify`, and `Diff` application services.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
-- `internal/tree`: filesystem traversal, symlink handling, renderer-independent nodes and deterministic sorting.
+- `internal/tree`: one scanner over a read-only `Backend` (the operating-system filesystem, or a Git tree), symlink handling, renderer-independent nodes and deterministic sorting. Capture Semantics, traversal order and error wording live in the scanner; a backend only reads.
 - `internal/artifact`: Canonical Structural Artifact v1, path canonicalization (NFC, `/`) and validation. No presentation or CLI dependency.
-- `internal/source`: `StructuralSource` abstraction and FilesystemSource adapter over the existing scanner.
+- `internal/source`: `StructuralSource` abstraction, the FilesystemSource adapter over the scanner, and the Git source, which runs the same scanner over the Git backend and records the observed tree and commit.
+- `internal/gitsource`: Git Tree Source v1. A hardened runner for the `git` executable (fixed plumbing commands, no shell, no network, no replace objects, Git 2.45 or newer), revision resolution, one bounded `cat-file --batch` reader per observation, a strict tree parser, and the Git `tree.Backend`. Everything Git returns is untrusted input.
 - `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
 - `internal/snapshot`: Snapshot Schema v1, Capture Semantics v1, Artifact Projection v1, deterministic JSON encode/decode and shared self-verifying validator.
 - `internal/comparison`: StructuralDiff model, model validator, the O(N+M) comparison engine over Identity Projection v1, and the Move Detection structural-v1 detector with its shape index. No filesystem, CLI or presentation dependency.
@@ -99,10 +103,10 @@ The destination is exclusive: `--copy`, `--output`, or stdout. `--copy` and `--o
 
 `dirloom verify` loads that snapshot through the shared validator, observes the selected root once with the persisted Capture Semantics, and compares typed Fingerprint v1 values. Mismatch is a normal exit, not an error diagnostic. It does not re-read project or user configuration and it does not emit a structural diff. Contracts: [Verify Result Schema v1](contracts/verify-result-v1.md), [verify command](reference/verify.md), [ADR 0003](adr/0003-snapshot-verification.md). Local performance snapshots: [v0.4-a3 benchmarks](benchmarks/v0.4-a3.md).
 
-`dirloom diff` compares two structural sources (`snapshot:<path>` or `live:<directory>`) through the comparison engine and lists added, removed, changed, and moved canonical paths. The data flow is one-directional:
+`dirloom diff` compares two structural sources (`snapshot:<path>`, `live:<directory>`, or `git:<revision>`) through the comparison engine and lists added, removed, changed, and moved canonical paths. The data flow is one-directional:
 
 ```text
-Source (snapshot adapter or filesystem observation)
+Source (snapshot adapter, filesystem observation, or Git tree observation)
     → Canonical Structural Artifact v1
     → Identity Projection v1 (once per artifact)
     → Comparison Engine (two-way merge over sorted records)
@@ -113,4 +117,16 @@ Source (snapshot adapter or filesystem observation)
 
 The comparison engine is neither the human renderer nor the JSON renderer: it produces the validated `StructuralDiff` model and never formats bytes. A live side is observed once with the opposite snapshot's Capture Semantics through the same shared helper verify uses, with conditional reference-file self-exclusion; current configuration is never consulted.
 
-The Move Detector is a pure post-pass over the two record lists and the merge result. It never observes a source and reads no contents. It interns rename-invariant subtree shapes, counts names and shapes over each whole tree, and relabels a REMOVED and an ADDED node as one MOVED only when the correspondence is unique. CHANGED entries and paths present on both sides are never touched, so expanding every MOVED gives back the merge result. Contracts: [Diff Result Schema v2](contracts/diff-result-v2.md), [Move Detection structural-v1](contracts/move-detection-structural-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md), [ADR 0005](adr/0005-move-detection.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md), [v0.4-a5 benchmarks](benchmarks/v0.4-a5.md).
+A Git side goes through the same scanner with a different backend:
+
+```text
+live:<dir> ──► filesystem backend ─┐
+                                   ├─► tree.Scanner (Capture Semantics) ─► source.FromTree ─► artifact
+git:<rev>  ──► Git backend ────────┘
+                 ▲
+                 └─ internal/gitsource: runner, resolver, batch reader, tree parser
+```
+
+The revision is resolved to a tree with a few `git rev-parse` and `git cat-file -t` calls. One `git cat-file --batch` process then serves the observation: the backend reads a tree object only when the scanner enters that directory, so a subtree excluded by depth or ignore rules is never read. Each response is checked against the requested id, type and per-object size limit, and the process is closed, killed after a grace period if needed, and always waited for. A Git source never reads the working tree, the index or the network, and keeps link targets as recorded so the same revision yields the same artifact on every platform. Against a snapshot it uses the snapshot's Capture Semantics; against another revision it uses none. Contracts: [Git Tree Source v1](contracts/git-tree-source-v1.md), [Diff Result Schema v3](contracts/diff-result-v3.md), [ADR 0006](adr/0006-git-sources.md). Local performance snapshots: [v0.4-a6 benchmarks](benchmarks/v0.4-a6.md).
+
+The Move Detector is a pure post-pass over the two record lists and the merge result. It never observes a source and reads no contents. It interns rename-invariant subtree shapes, counts names and shapes over each whole tree, and relabels a REMOVED and an ADDED node as one MOVED only when the correspondence is unique. CHANGED entries and paths present on both sides are never touched, so expanding every MOVED gives back the merge result. Contracts: [Diff Result Schema v3](contracts/diff-result-v3.md), [Move Detection structural-v1](contracts/move-detection-structural-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md), [ADR 0005](adr/0005-move-detection.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md), [v0.4-a5 benchmarks](benchmarks/v0.4-a5.md).

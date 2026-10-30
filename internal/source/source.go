@@ -16,12 +16,22 @@ const (
 	// KindSnapshot identifies an already-validated snapshot artifact reused as
 	// a structural source.
 	KindSnapshot Kind = "snapshot"
+	// KindGit identifies a committed Git tree (Git Tree Source v1).
+	KindGit Kind = "git"
 )
 
 // Source observes a structure and returns a canonical artifact.
 type Source interface {
 	Kind() Kind
 	Observe(ctx context.Context) (*artifact.Artifact, error)
+}
+
+// GitTree is implemented by a source that observes a committed Git tree. Its
+// ids are set only after a successful Observe; Commit is empty when the
+// revision named a tree.
+type GitTree interface {
+	Tree() string
+	Commit() string
 }
 
 // Memory is a test source that returns a cloned artifact.

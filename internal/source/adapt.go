@@ -39,6 +39,10 @@ func (f Filesystem) Observe(ctx context.Context) (*artifact.Artifact, error) {
 // FromTreeOptions control observation-to-artifact adaptation.
 type FromTreeOptions struct {
 	RootAbs string
+	// PortableTargets keeps link targets as recorded, normalized to NFC only:
+	// no separator rewrite and no rewrite relative to RootAbs, so the same
+	// Git tree yields the same targets on every platform.
+	PortableTargets bool
 }
 
 // FromTree converts the existing observation model into a Canonical Artifact.
@@ -117,7 +121,7 @@ func convertNode(node *tree.Node, parent artifact.Path, options FromTreeOptions,
 	}
 	converted := artifact.Node{Path: path, Name: name, Kind: kind}
 	if kind.HasTarget() {
-		target, targetErr := canonicalizeTarget(node.Target, options.RootAbs)
+		target, targetErr := canonicalizeTarget(node.Target, options)
 		if targetErr != nil {
 			return artifact.Node{}, targetErr
 		}
@@ -156,7 +160,7 @@ func unsupportedObservation(kind tree.NodeType, path string) error {
 	}
 }
 
-func canonicalizeTarget(raw, absRoot string) (string, error) {
+func canonicalizeTarget(raw string, options FromTreeOptions) (string, error) {
 	if raw == "" {
 		return "", nil
 	}
@@ -164,6 +168,10 @@ func canonicalizeTarget(raw, absRoot string) (string, error) {
 		return "", &artifact.Error{Code: artifact.CodeInvalidPath, Message: "symlink target is not valid UTF-8"}
 	}
 	nfc := norm.NFC.String(raw)
+	if options.PortableTargets {
+		return nfc, nil
+	}
+	absRoot := options.RootAbs
 	converted := nfc
 	if os.PathSeparator == '\\' {
 		converted = strings.ReplaceAll(converted, `\`, "/")

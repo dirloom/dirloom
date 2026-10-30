@@ -11,7 +11,8 @@ import (
 	"github.com/dirloom/dirloom/internal/filter"
 )
 
-// ScanOptions controls a single filesystem traversal.
+// ScanOptions controls a single traversal. RootAbs selects the filesystem
+// root; a non-nil Backend replaces the filesystem and starts at RootLocation.
 type ScanOptions struct {
 	RootAbs      string
 	RootName     string
@@ -20,17 +21,25 @@ type ScanOptions struct {
 	UseGitIgnore bool
 	FilterPolicy *filter.Policy
 	GitIgnore    *filter.GitIgnore
+	Backend      Backend
+	RootLocation string
 }
 
 // Scanner builds a complete tree before returning. It never follows links
 // encountered below the explicitly selected root.
 type Scanner struct {
 	options ScanOptions
+	backend Backend
 }
 
 // NewScanner returns a scanner configured for one inspection.
 func NewScanner(options ScanOptions) *Scanner {
-	return &Scanner{options: options}
+	backend := options.Backend
+	if backend == nil {
+		backend = filesystemBackend{}
+		options.RootLocation = options.RootAbs
+	}
+	return &Scanner{options: options, backend: backend}
 }
 
 // Scan traverses the root and returns no partial tree on error.
@@ -48,25 +57,25 @@ func (s *Scanner) Scan(ctx context.Context) (*Node, error) {
 		return root, nil
 	}
 
-	if err := s.scanDirectory(ctx, root, s.options.RootAbs, "", 0); err != nil {
+	if err := s.scanDirectory(ctx, root, s.options.RootLocation, "", 0); err != nil {
 		return nil, err
 	}
 	Sort(root)
 	return root, nil
 }
 
-func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, absoluteDirectory, relativeDirectory string, depth int) error {
+func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, relativeDirectory string, depth int) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 
 	if s.options.UseGitIgnore {
-		if err := s.loadGitIgnore(absoluteDirectory, relativeDirectory); err != nil {
+		if err := s.loadGitIgnore(location, relativeDirectory); err != nil {
 			return err
 		}
 	}
 
-	entries, err := os.ReadDir(absoluteDirectory)
+	entries, err := s.backend.ReadDir(location)
 	if err != nil {
 		return fmt.Errorf("read directory %q: %w", displayPath(relativeDirectory), classifyFilesystemError(err))
 	}
@@ -77,7 +86,7 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, absoluteDirec
 		}
 
 		name := entry.Name()
-		absolutePath := filepath.Join(absoluteDirectory, name)
+		childLocation := s.backend.Child(location, entry)
 		relativePath := name
 		if relativeDirectory != "" {
 			relativePath = relativeDirectory + "/" + name
@@ -87,7 +96,7 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, absoluteDirec
 		if err != nil {
 			return fmt.Errorf("read metadata for %q: %w", relativePath, classifyFilesystemError(err))
 		}
-		if s.options.FilterPolicy != nil && s.options.FilterPolicy.Excludes(absolutePath, relativePath, entry, info) {
+		if s.options.FilterPolicy != nil && s.options.FilterPolicy.Excludes(childLocation, relativePath, entry, info) {
 			continue
 		}
 
@@ -103,15 +112,16 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, absoluteDirec
 			parent.Children = append(parent.Children, node)
 			childDepth := depth + 1
 			if s.options.MaxDepth == nil || childDepth < *s.options.MaxDepth {
-				if err := s.scanDirectory(ctx, node, absolutePath, relativePath, childDepth); err != nil {
+				if err := s.scanDirectory(ctx, node, childLocation, relativePath, childDepth); err != nil {
 					return err
 				}
 			}
 		case NodeSymlink:
-			target, readErr := os.Readlink(absolutePath)
-			if readErr == nil {
-				node.Target = filepath.ToSlash(target)
+			target, err := s.backend.ReadLink(childLocation, relativePath)
+			if err != nil {
+				return err
 			}
+			node.Target = target
 			parent.Children = append(parent.Children, node)
 		case NodeFile:
 			parent.Children = append(parent.Children, node)
@@ -121,25 +131,10 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, absoluteDirec
 	return nil
 }
 
-func (s *Scanner) loadGitIgnore(absoluteDirectory, relativeDirectory string) error {
-	path := filepath.Join(absoluteDirectory, ".gitignore")
-	info, err := os.Lstat(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("inspect gitignore %q: %w", displayGitIgnorePath(relativeDirectory), classifyFilesystemError(err))
-	}
-	// Git does not follow a symlink used as a working-tree .gitignore. Other
-	// non-regular entries are displayable filesystem nodes, not control files.
-	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
-		return nil
-	}
-
-	// #nosec G304 -- path is the fixed .gitignore control file beneath the user-selected directory.
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return fmt.Errorf("read gitignore %q: %w", displayGitIgnorePath(relativeDirectory), classifyFilesystemError(err))
+func (s *Scanner) loadGitIgnore(location, relativeDirectory string) error {
+	data, ok, err := s.backend.ReadGitIgnore(location, relativeDirectory)
+	if err != nil || !ok {
+		return err
 	}
 
 	source := displayGitIgnorePath(relativeDirectory)

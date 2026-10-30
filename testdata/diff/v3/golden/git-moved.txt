@@ -1,0 +1,13 @@
+Structural Diff
+
+Summary: 2 added, 1 removed, 0 changed, 1 moved, 4 total
+
+ADDED
+  + docs
+  + docs/guide.md
+
+REMOVED
+  - src/old
+
+MOVED
+  > src/old/payment -> src/payment (subtree, 4 nodes)

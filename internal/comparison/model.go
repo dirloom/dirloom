@@ -113,10 +113,14 @@ func (s NodeState) Equal(other NodeState) bool {
 }
 
 // SourceRef describes one compared source without environment data: no dates,
-// hosts, users, absolute paths, or source expressions.
+// hosts, users, absolute paths, or source expressions. Tree and Commit are
+// lowercase hex object ids, set for Git sources only; Commit is empty when the
+// revision named a tree.
 type SourceRef struct {
 	Kind      source.Kind
 	NodeCount int
+	Tree      string
+	Commit    string
 }
 
 // Metadata describes the comparison contract versions and the move detection
@@ -276,7 +280,32 @@ func (ref SourceRef) validate(side string) error {
 	if ref.NodeCount < 1 {
 		return artifact.InternalError("source %s has node count %d without a root", side, ref.NodeCount)
 	}
+	if ref.Kind != source.KindGit {
+		if ref.Tree != "" || ref.Commit != "" {
+			return artifact.InternalError("source %s of kind %q carries Git object ids", side, ref.Kind)
+		}
+		return nil
+	}
+	if !isObjectID(ref.Tree) {
+		return artifact.InternalError("git source %s has an invalid tree id %q", side, ref.Tree)
+	}
+	if ref.Commit != "" && (!isObjectID(ref.Commit) || len(ref.Commit) != len(ref.Tree)) {
+		return artifact.InternalError("git source %s has an invalid commit id %q", side, ref.Commit)
+	}
 	return nil
+}
+
+// isObjectID reports whether id is a lowercase hex SHA-1 or SHA-256 id.
+func isObjectID(id string) bool {
+	if len(id) != 40 && len(id) != 64 {
+		return false
+	}
+	for i := 0; i < len(id); i++ {
+		if (id[i] < '0' || id[i] > '9') && (id[i] < 'a' || id[i] > 'f') {
+			return false
+		}
+	}
+	return true
 }
 
 func (c Change) validate() error {

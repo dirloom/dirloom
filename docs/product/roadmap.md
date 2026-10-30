@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a5` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; A6 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a5` ; stable `v0.3.3` ; `v0.4.0-a6` figée sur `release/v0.4.0-a6` (release ready, non publiée) ; A7 non démarrée<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2176,7 +2176,7 @@ Frontière : pas de détection de renommage ou de déplacement (un renommage vau
 
 ### v0.4.0-a5 — Move detection
 
-**Statut : publié (`v0.4.0-a5`), clôturé.** Cinquième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`. A6 n'est pas démarrée.
+**Statut : publié (`v0.4.0-a5`), clôturé.** Cinquième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
 
 Fonctions :
 
@@ -2187,6 +2187,21 @@ Fonctions :
 - Diff Result Schema v2 (`metadata.moveDetection`, `summary.moved`), qui remplace v1 ; statuts et codes de sortie inchangés.
 
 Frontière : un `MOVED` est une correspondance structurelle, pas la preuve d'un déplacement réel. Pas de lecture de contenu, pas de déplacement combiné à un renommage, pas de renommage de fichier, pas d'inférence de parent pour un sous-arbre modifié, pas de détection de copie, pas de source Git.
+
+### v0.4.0-a6 — Git sources
+
+**Statut : figé sur `release/v0.4.0-a6`, release ready, non publié.** Sixième incrément de CHANGE, profil prerelease. La pull request de feature #55 est mergée. Les canaux stables restent `v0.3.3`. Ce n'est pas encore une publication et A7 n'est pas démarrée.
+
+Fonctions :
+
+- source `git:<revision>` dans `dirloom diff` : branche, tag, commit, `HEAD~n`, `<commit>:<chemin>`, dans le dépôt du répertoire courant ;
+- lecture des seuls objets Git commités, à la demande, par le même scanner que pour un dossier : jamais l'arbre de travail, l'index ni le réseau ; un sous-module est un dossier vide ;
+- `git:` contre `git:` compare les arbres complets ; `git:` contre `snapshot:` applique les Capture Semantics du snapshot ; `git:` contre `live:` est refusé ;
+- Git Tree Source v1 (contrat, limites par objet, équivalence avec un checkout et ses exceptions) et cinq diagnostics `git_*` ;
+- Diff Result Schema v3 (`tree` et `commit` pour une source Git, politique d'évolution), qui remplace v2 ; statuts et codes de sortie inchangés ;
+- Git 2.45 ou plus récent requis pour les sources `git:` uniquement.
+
+Frontière : comparaison structurelle, pas `git diff` (un changement de contenu seul n'est pas une différence). Pas d'index ni d'arbre de travail comme source, pas de récupération réseau, pas de récursion dans les sous-modules, pas de LFS ni de `.gitattributes`, pas de source Git pour `fingerprint`, `snapshot` ou `verify`, pas d'historique.
 
 ## v0.5 — Scaffold & Architecture Packs
 

@@ -1,6 +1,6 @@
 # Diff Result Schema v2
 
-> **Status:** normative contract for Dirloom `v0.4.0-a5`; supersedes [Diff Result Schema v1](diff-result-v1.md)
+> **Status:** superseded by [Diff Result Schema v3](diff-result-v3.md) in `v0.4.0-a6`. Emitted by `v0.4.0-a5` only. Kept as the reference for the frozen `testdata/diff/v2/golden/` fixtures. It superseded [Diff Result Schema v1](diff-result-v1.md)
 >
 > **Related:** [Move Detection structural-v1](move-detection-structural-v1.md), [Identity Projection v1](identity-projection-v1.md), [ADR 0005](../adr/0005-move-detection.md)
 
