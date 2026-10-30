@@ -182,7 +182,7 @@ draft prerelease                 DONE
 draft audit                      PASS
 publication                      DONE (after the explicit human GO)
 package managers                 SKIPPED
-branches                         PENDING (deletion by the owner)
+branches                         DELETED
 A6                               CLOSED
 ```
 
@@ -199,7 +199,7 @@ Recorded identifiers:
 - Release workflow: https://github.com/dirloom/dirloom/actions/runs/41126617254 (ended 2026-10-30T20:54:13Z on "Leave draft for human GO")
 - Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a6 (`publishedAt` `2026-10-30T21:13:30Z`)
 - Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/41129407223
-- `release/v0.4.0-a6` and `feat/v0.4.0-a6-git-sources` are fully merged into `main`; their deletion on `origin` is left to the owner.
+- `release/v0.4.0-a6` and `feat/v0.4.0-a6-git-sources` deleted by the owner after publication.
 
 Ruleset bypasses used by the repository owner:
 
