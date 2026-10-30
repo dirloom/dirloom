@@ -51,6 +51,18 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y zsh fish
 
+      # git: sources need Git 2.45 or newer; the Git tests fail instead of
+      # skipping on CI, so an older runner Git must stop the job here.
+      - name: Require Git 2.45 or newer
+        shell: bash
+        run: |
+          version="$(git version)"
+          echo "$version ($(command -v git))"
+          if ! printf '%s\n' "$version" | grep -Eq '^git version ([3-9]|[1-9][0-9]+)\.|^git version 2\.(4[5-9]|[5-9][0-9]|[1-9][0-9]{2,})(\.|$| )'; then
+            echo "::error::Git 2.45 or newer is required for git: sources, found: $version"
+            exit 1
+          fi
+
       - name: Test
         shell: bash
         run: go test -coverprofile=coverage.out ./...
@@ -87,6 +99,15 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Require Git 2.45 or newer
+        shell: bash
+        run: |
+          version="$(git version)"
+          echo "$version ($(command -v git))"
+          if ! printf '%s\n' "$version" | grep -Eq '^git version ([3-9]|[1-9][0-9]+)\.|^git version 2\.(4[5-9]|[5-9][0-9]|[1-9][0-9]{2,})(\.|$| )'; then
+            echo "::error::Git 2.45 or newer is required for git: sources, found: $version"
+            exit 1
+          fi
       - run: go test -race ./...
 
   lint:

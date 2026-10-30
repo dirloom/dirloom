@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 3,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "structural-v1"
+  },
+  "sources": {
+    "a": {
+      "kind": "git",
+      "nodeCount": 9,
+      "tree": "0a25bfa9bf30ead290dbc69705ebe3e482c31790",
+      "commit": "5e4e835e7a1ba5c2c407b1e2fc86b7182971b7d4"
+    },
+    "b": {
+      "kind": "git",
+      "nodeCount": 10,
+      "tree": "313ffacf0fe56001aa65218e4056d8fc43fbc2bb",
+      "commit": "8359198a1211d020e973ced09b94dc1f1d372ca5"
+    }
+  },
+  "summary": {
+    "added": 2,
+    "removed": 1,
+    "changed": 0,
+    "moved": 1,
+    "total": 4
+  },
+  "changes": [
+    {
+      "path": "docs",
+      "operation": "ADDED",
+      "after": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "docs/guide.md",
+      "operation": "ADDED",
+      "after": {
+        "kind": "file"
+      }
+    },
+    {
+      "path": "src/old",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "src/payment",
+      "operation": "MOVED",
+      "from": "src/old/payment",
+      "before": {
+        "kind": "directory"
+      },
+      "after": {
+        "kind": "directory"
+      },
+      "evidence": "subtree",
+      "nodes": 4
+    }
+  ]
+}

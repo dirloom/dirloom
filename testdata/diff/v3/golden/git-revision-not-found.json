@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 3,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "source": "a",
+    "code": "git_revision_not_found",
+    "message": "the revision does not resolve in this repository"
+  }
+}

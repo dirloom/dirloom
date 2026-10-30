@@ -4,6 +4,17 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add Git sources to `dirloom diff`. `git:<revision>` observes the committed tree of a branch, a tag, a commit, `HEAD~n` or `<commit>:<path>` in the repository of the current directory, through the same scanner as a directory. `git:` against `git:` compares the whole trees; `git:` against `snapshot:` applies the snapshot's Capture Semantics; `git:` against `live:` is a usage error. Only committed Git objects are read, never the working tree, the index or the network; a submodule is an empty directory and link targets are kept as recorded on every platform. The comparison stays structural: a change of file contents alone is no difference. Git 2.45 or newer is required for `git:` sources only.
+- Refuse, before Git runs, a `git:` revision that is empty, starts with `-`, contains a NUL or a newline, or names an index entry (`:<path>`): exit 2.
+- Add five Git diagnostics, all `OBSERVATION_ERROR` (exit 5): `git_unavailable`, `git_repository_not_found`, `git_revision_not_found`, `git_object_unavailable` and `git_tree_invalid`.
+- Publish the Git Tree Source v1 contract, ADR 0006, the diff reference update and Git observation benchmarks.
+
+### Changed
+
+- Change `dirloom diff --format json` to Diff Result Schema v3: `schemaVersion: 3`, the `git` source kind with `tree` and `commit`, and an evolution policy for additive changes. For `snapshot:` and `live:` sources a v3 document is the v2 document with `schemaVersion: 3`. Diff Result Schema v2 is no longer emitted; a consumer that checks `schemaVersion` fails instead of misreading the document. Statuses and exit codes are unchanged.
+
 ## [0.4.0-a5] - 2026-10-29
 
 CHANGE alpha: conservative structural move detection in `dirloom diff`

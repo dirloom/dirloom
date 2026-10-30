@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 3,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "source": "a",
+    "code": "git_unavailable",
+    "message": "git was not found on PATH; Dirloom requires git 2.45 or newer"
+  }
+}

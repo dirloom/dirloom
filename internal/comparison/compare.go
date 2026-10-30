@@ -51,8 +51,8 @@ func Compare(ctx context.Context, a, b source.Source, opts Options) (StructuralD
 			IdentityProjectionVersion: identity.ProjectionVersion,
 			MoveDetection:             opts.MoveDetection,
 		},
-		SourceA: SourceRef{Kind: a.Kind(), NodeCount: len(recordsA)},
-		SourceB: SourceRef{Kind: b.Kind(), NodeCount: len(recordsB)},
+		SourceA: sourceRef(a, len(recordsA)),
+		SourceB: sourceRef(b, len(recordsB)),
 		Summary: summarize(changes),
 		Changes: changes,
 	}
@@ -60,6 +60,16 @@ func Compare(ctx context.Context, a, b source.Source, opts Options) (StructuralD
 		return StructuralDiff{}, err
 	}
 	return diff, nil
+}
+
+// sourceRef describes an observed source; a Git source adds the ids of the
+// tree it observed.
+func sourceRef(src source.Source, nodeCount int) SourceRef {
+	ref := SourceRef{Kind: src.Kind(), NodeCount: nodeCount}
+	if git, ok := src.(source.GitTree); ok {
+		ref.Tree, ref.Commit = git.Tree(), git.Commit()
+	}
+	return ref
 }
 
 func observe(ctx context.Context, src source.Source) (*artifact.Artifact, error) {

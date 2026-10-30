@@ -22,9 +22,16 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 		Short: "Compare two structural sources and list what changed",
 		Long: "Compare two structural sources through Identity Projection v1 and list the\n" +
 			"added, removed, changed, and moved canonical paths. A source is\n" +
-			"snapshot:<path> or live:<directory>. A live side is observed with the Capture\n" +
-			"Semantics stored in the opposite snapshot; current project and user\n" +
-			"configuration are not read. File contents are not hashed.\n\n" +
+			"snapshot:<path>, live:<directory>, or git:<revision>. A live side is observed\n" +
+			"with the Capture Semantics stored in the opposite snapshot; current project\n" +
+			"and user configuration are not read. File contents are not hashed.\n\n" +
+			"A git: source is the committed tree a revision names (a branch, a tag, a\n" +
+			"commit, HEAD~n, or <commit>:<path>) in the repository of the current\n" +
+			"directory. Git objects only are read: never the index or the working tree,\n" +
+			"never the network. git: against git: compares the whole trees; git: against\n" +
+			"snapshot: applies the snapshot's Capture Semantics; git: against live: is\n" +
+			"refused. This is a structural comparison, not git diff: a change of file\n" +
+			"contents alone is no difference. git: sources require git 2.45 or newer.\n\n" +
 			"Move detection (structural-v1) reports a removed and an added node as one\n" +
 			"MOVED when their name and structure are unique in each source, or when a\n" +
 			"non-empty directory with a unique structure was renamed in place. A MOVED is a\n" +
@@ -33,12 +40,14 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 			"Structural differences are a normal result, not an error.",
 		Example: `  dirloom diff snapshot:architecture.dlm.json live:.
   dirloom diff live:. snapshot:architecture.dlm.json
+  dirloom diff git:main git:feature
+  dirloom diff snapshot:architecture.dlm.json git:HEAD
   dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json
   dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --no-moves
   dirloom diff snapshot:architecture.dlm.json live:./src --format json`,
 		Args: func(_ *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				return &usageError{err: fmt.Errorf("diff requires exactly two sources (snapshot:<path> or live:<directory>), received %d", len(args))}
+				return &usageError{err: fmt.Errorf("diff requires exactly two sources (snapshot:<path>, live:<directory>, or git:<revision>), received %d", len(args))}
 			}
 			return nil
 		},
@@ -105,7 +114,11 @@ func completeDiffArgs(_ *cobra.Command, args []string, toComplete string) ([]str
 	if strings.HasPrefix(toComplete, "snapshot:") {
 		return nil, cobra.ShellCompDirectiveDefault
 	}
-	return []string{"live:", "snapshot:"}, cobra.ShellCompDirectiveNoSpace
+	if strings.HasPrefix(toComplete, "git:") {
+		// Revisions are not completed in v1.
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+	return []string{"git:", "live:", "snapshot:"}, cobra.ShellCompDirectiveNoSpace
 }
 
 func registerDiffCompletions(command *cobra.Command) {

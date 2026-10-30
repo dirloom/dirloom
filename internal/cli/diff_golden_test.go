@@ -13,12 +13,14 @@ import (
 	"github.com/dirloom/dirloom/internal/comparison"
 )
 
-// Diff Result Schema v2 goldens are the current output. The v1 goldens are
-// frozen A4 references: no code emits v1 any more, and --no-moves must
-// reproduce their change lists.
+// Diff Result Schema v3 goldens are the current output. The v1 and v2
+// goldens are frozen references: no code emits them any more. --no-moves must
+// reproduce the v1 change lists, and every v2 golden must equal its v3
+// counterpart except schemaVersion.
 const (
 	diffGoldenV1 = "v1"
 	diffGoldenV2 = "v2"
+	diffGoldenV3 = "v3"
 )
 
 func readDiffGolden(t *testing.T, version, name string) string {
@@ -32,7 +34,7 @@ func readDiffGolden(t *testing.T, version, name string) string {
 
 func assertDiffGolden(t *testing.T, name, stdout string) {
 	t.Helper()
-	if want := readDiffGolden(t, diffGoldenV2, name); stdout != want {
+	if want := readDiffGolden(t, diffGoldenV3, name); stdout != want {
 		t.Fatalf("%s\n got %q\nwant %q", name, stdout, want)
 	}
 }
@@ -232,10 +234,10 @@ func TestDiffJSONGoldens(t *testing.T) {
 		t.Fatalf("snapshot-read=(%q, %q, %d)", stdout, stderr, code)
 	}
 	assertSnapshotReadErrorGolden(t, stdout)
-	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV2, "no-differences.json"), true, comparison.MoveDetectionStructuralV1)
-	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV2, "differences.json"), false, comparison.MoveDetectionStructuralV1)
-	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV2, "moved.json"), false, comparison.MoveDetectionStructuralV1)
-	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV2, "moved-no-moves.json"), false, comparison.MoveDetectionNone)
+	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV3, "no-differences.json"), true, comparison.MoveDetectionStructuralV1)
+	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV3, "differences.json"), false, comparison.MoveDetectionStructuralV1)
+	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV3, "moved.json"), false, comparison.MoveDetectionStructuralV1)
+	assertDiffJSONContract(t, readDiffGolden(t, diffGoldenV3, "moved-no-moves.json"), false, comparison.MoveDetectionNone)
 }
 
 // TestDiffJSONMovedLinkGolden locks the MOVED shape for target-carrying
@@ -270,7 +272,7 @@ func TestDiffJSONMovedLinkGolden(t *testing.T) {
 }
 
 // TestDiffNoMovesMatchesFrozenV1JSON replays the input of every frozen v1
-// JSON golden with --no-moves. Apart from the v2 envelope (schemaVersion,
+// JSON golden with --no-moves. Apart from the current envelope (schemaVersion,
 // metadata.moveDetection, summary.moved), the document must be A4's.
 func TestDiffNoMovesMatchesFrozenV1JSON(t *testing.T) {
 	valid := func(name string) string { return diffFixture(t, filepath.Join("valid", name)) }
@@ -294,7 +296,7 @@ func TestDiffNoMovesMatchesFrozenV1JSON(t *testing.T) {
 		}
 		live := decodeDiffDocument(t, stdout)
 		frozen := decodeDiffDocument(t, readDiffGolden(t, diffGoldenV1, tc.golden))
-		if live["schemaVersion"] != float64(2) || frozen["schemaVersion"] != float64(1) {
+		if live["schemaVersion"] != float64(diffResultSchemaVersion) || frozen["schemaVersion"] != float64(1) {
 			t.Fatalf("%s schema versions = %v, %v", tc.golden, live["schemaVersion"], frozen["schemaVersion"])
 		}
 		delete(live, "schemaVersion")
@@ -379,7 +381,7 @@ func movedPaymentTree(t *testing.T) (snapshotPath, root string) {
 // rewritten to the golden's message before the byte comparison.
 func assertSnapshotReadErrorGolden(t *testing.T, stdout string) {
 	t.Helper()
-	golden := readDiffGolden(t, diffGoldenV2, "snapshot-read-error.json")
+	golden := readDiffGolden(t, diffGoldenV3, "snapshot-read-error.json")
 	if !strings.Contains(golden, `"status": "SNAPSHOT_READ_ERROR"`) {
 		t.Fatal("golden does not encode SNAPSHOT_READ_ERROR")
 	}
