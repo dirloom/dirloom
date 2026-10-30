@@ -1,6 +1,6 @@
 # ADR 0006 — Git sources
 
-> **Status:** proposed for `v0.4.0-a6`
+> **Status:** accepted for `v0.4.0-a6`
 >
 > **Date:** 2026-10-29
 

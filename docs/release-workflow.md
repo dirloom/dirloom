@@ -141,30 +141,64 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a5` is the latest published GitHub Pre-release and is closed. The
-latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a6` is the active release branch for the Git
-sources increment. The A6 feature work lives on `feat/v0.4.0-a6-git-sources`,
-which targets `release/v0.4.0-a6` by pull request. `CHANGELOG.md` remains the
-unique source of truth for release notes. Do not open versioned feature pull
-requests against `main`.
+`v0.4.0-a5` is published and closed. It is the latest GitHub Pre-release.
+The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. `release/v0.4.0-a6` is frozen and release-ready. Feature pull
+request #55 is merged and feature work on `feat/v0.4.0-a6-git-sources` is
+complete. `main` carries the `v0.4.0-a5` release lineage plus its closure
+(#53) and the README install blocks (#54). A7 has not started.
+`CHANGELOG.md` remains the unique source of truth for release notes. Do not
+open versioned feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a5` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | `release/v0.4.0-a6` (from `main` at `e9894ab`, Go 1.26.10) |
-| Active feature branch | `feat/v0.4.0-a6-git-sources` → PR to `release/v0.4.0-a6` |
+| Active release candidate | `v0.4.0-a6` on `release/v0.4.0-a6` |
+| Candidate state | FROZEN / RELEASE READY |
+| Feature pull request | #55 merged (`feat/v0.4.0-a6-git-sources`) |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Not yet delivered | Git sources (A6 in development) |
+| A7 | NOT STARTED |
 
 ```text
 v0.4.0-a5 published / closed
-latest stable v0.3.3
-release/v0.4.0-a6 active
-feat/v0.4.0-a6-git-sources active → PR to release/v0.4.0-a6
+
+release/v0.4.0-a6
+FROZEN / RELEASE READY
+
+PR #55 merged
+feat/v0.4.0-a6-git-sources complete
+
+main at e9894ab (v0.4.0-a5 lineage + closure #53 + README install #54)
+
+A7 NOT STARTED
 ```
+
+## v0.4.0-a6 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a6`. Do not create
+`chore/v0.4.0-a6-freeze`.
+
+```text
+feature → release                  DONE
+release CI                         PASS
+freeze                             ACTIVE
+final release PR → main            PENDING
+tag                                PENDING
+draft prerelease                   PENDING
+publication                        PENDING
+package managers                   MUST STAY v0.3.3
+```
+
+Feature branch of record: `feat/v0.4.0-a6-git-sources` at
+`199f529c05070365a48e29ae70fcb9babd79a8f7`, merged by pull request #55 into
+`release/v0.4.0-a6` at `31c02e3cb5a3a773ef363b55a12d9bfa39f6f7bd`. Pull
+request #55 was merged by its author without an approving review, through
+the owner bypass of the `protect-release-branches` pull request rule. Its
+CI of record is GitHub Actions run `41116663071` on `199f529` (9 checks
+green, Git 2.56 on every runner). Release CI of record before freeze:
+GitHub Actions run `41117122147` on the merge commit.
 
 ## v0.4.0-a5 release record
 

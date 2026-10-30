@@ -4,6 +4,14 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a6] - 2026-10-30
+
+CHANGE alpha: Git sources in `dirloom diff` (`git:<revision>`), committed
+trees observed through the same scanner as directories, and Diff Result
+Schema v3. This increment does not add working-tree or index sources,
+network fetches, submodule recursion, Git sources for other commands, or
+history.
+
 ### Added
 
 - Add Git sources to `dirloom diff`. `git:<revision>` observes the committed tree of a branch, a tag, a commit, `HEAD~n` or `<commit>:<path>` in the repository of the current directory, through the same scanner as a directory. `git:` against `git:` compares the whole trees; `git:` against `snapshot:` applies the snapshot's Capture Semantics; `git:` against `live:` is a usage error. Only committed Git objects are read, never the working tree, the index or the network; a submodule is an empty directory and link targets are kept as recorded on every platform. The comparison stays structural: a change of file contents alone is no difference. Git 2.45 or newer is required for `git:` sources only.
@@ -256,7 +264,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a6...HEAD
+[0.4.0-a6]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...v0.4.0-a6
 [0.4.0-a5]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...v0.4.0-a5
 [0.4.0-a4]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...v0.4.0-a4
 [0.4.0-a3]: https://github.com/dirloom/dirloom/compare/v0.4.0-a2...v0.4.0-a3
