@@ -23,6 +23,9 @@ func TestParseDiffSource(t *testing.T) {
 		"live:relative:with:colons":    {Kind: DiffSourceLive, Path: "relative:with:colons"},
 		"snapshot::leading-colon-path": {Kind: DiffSourceSnapshot, Path: ":leading-colon-path"},
 		"live:.":                       {Kind: DiffSourceLive, Path: "."},
+		"git:HEAD":                     {Kind: DiffSourceGit, Path: "HEAD"},
+		"git:HEAD:src":                 {Kind: DiffSourceGit, Path: "HEAD:src"},
+		"git::/fix typo":               {Kind: DiffSourceGit, Path: ":/fix typo"},
 	}
 	for expression, want := range valid {
 		got, err := ParseDiffSource(expression)
@@ -41,7 +44,12 @@ func TestParseDiffSource(t *testing.T) {
 		"SNAPSHOT:x",           // prefixes are case-sensitive
 		"Snapshot:x",           // prefixes are case-sensitive
 		"LIVE:dir",             // prefixes are case-sensitive
-		"git:HEAD",             // unsupported prefix
+		"svn:HEAD",             // unsupported prefix
+		"git:",                 // empty revision
+		"git:-x",               // option-shaped revision
+		"git:a\nb",             // newline in revision
+		"git::src/a.go",        // index entry
+		"git::0:src/a.go",      // index entry with a stage
 		" snapshot:a.dlm.json", // leading space is part of the prefix
 	}
 	for _, expression := range invalid {

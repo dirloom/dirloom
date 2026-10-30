@@ -9,8 +9,11 @@ import (
 
 	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/comparison"
+	"github.com/dirloom/dirloom/internal/filter"
+	"github.com/dirloom/dirloom/internal/gitsource"
 	"github.com/dirloom/dirloom/internal/snapshot"
 	"github.com/dirloom/dirloom/internal/source"
+	"github.com/dirloom/dirloom/internal/tree"
 )
 
 // DiffSourceKind identifies the prefix of a diff source expression.
@@ -22,11 +25,21 @@ const (
 	// DiffSourceLive observes a directory with the opposite snapshot's
 	// Capture Semantics v1.
 	DiffSourceLive DiffSourceKind = "live"
+	// DiffSourceGit observes the committed tree a revision names in the
+	// repository of the process working directory (Git Tree Source v1).
+	DiffSourceGit DiffSourceKind = "git"
 )
 
+// diffSourceForms lists the accepted source expressions for diagnostics.
+const diffSourceForms = "snapshot:<path>, live:<directory>, or git:<revision>"
+
+// gitRootName labels the root of a Git tree. Revision text never reaches a
+// result.
+const gitRootName = "git"
+
 // DiffSourceSpec is one parsed source expression: a kind and a path.
-// Path is a snapshot file for DiffSourceSnapshot and a directory for
-// DiffSourceLive.
+// Path is a snapshot file for DiffSourceSnapshot, a directory for
+// DiffSourceLive, and a revision for DiffSourceGit.
 type DiffSourceSpec struct {
 	Kind DiffSourceKind
 	Path string
@@ -61,13 +74,15 @@ func DiffStatusOf(diff comparison.StructuralDiff) DiffStatus {
 	return DiffDifferences
 }
 
-// ParseDiffSource parses "snapshot:<path>" or "live:<directory>". The
-// expression is split on the first colon only; prefixes are lowercase and
-// case-sensitive. The path is not validated here.
+// ParseDiffSource parses "snapshot:<path>", "live:<directory>" or
+// "git:<revision>". The expression is split on the first colon only, so a
+// revision may contain colons; prefixes are lowercase and case-sensitive.
+// Paths are not validated here; a revision that must never reach Git is a
+// usage error.
 func ParseDiffSource(expression string) (DiffSourceSpec, error) {
 	prefix, path, found := strings.Cut(expression, ":")
 	if !found {
-		return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("source %q has no prefix (expected snapshot:<path> or live:<directory>)", expression)}
+		return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("source %q has no prefix (expected %s)", expression, diffSourceForms)}
 	}
 	var kind DiffSourceKind
 	switch prefix {
@@ -75,8 +90,15 @@ func ParseDiffSource(expression string) (DiffSourceSpec, error) {
 		kind = DiffSourceSnapshot
 	case string(DiffSourceLive):
 		kind = DiffSourceLive
+	case string(DiffSourceGit):
+		kind = DiffSourceGit
 	default:
-		return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("unsupported source prefix %q (expected snapshot:<path> or live:<directory>)", prefix)}
+		return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("unsupported source prefix %q (expected %s)", prefix, diffSourceForms)}
+	}
+	if kind == DiffSourceGit {
+		if err := gitsource.ValidateRevision(path); err != nil {
+			return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("source %q: %v", expression, err)}
+		}
 	}
 	if path == "" {
 		return DiffSourceSpec{}, &DiffUsageError{Message: fmt.Sprintf("source %q requires a non-empty path after %q", expression, prefix+":")}
@@ -105,8 +127,10 @@ func (r DiffRequest) options() (comparison.Options, error) {
 
 // Diff resolves both sources and compares them through the comparison engine.
 // Snapshot sides are loaded in user order and the first invalid side is
-// reported. A live side is observed with the opposite snapshot's Capture
-// Semantics v1. live against live is a usage failure.
+// reported. A live or Git side is observed with the opposite snapshot's
+// Capture Semantics v1; git against git applies none. live against live and
+// git against live are usage failures: neither side carries Capture
+// Semantics.
 func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, error) {
 	if err := ctx.Err(); err != nil {
 		return comparison.StructuralDiff{}, err
@@ -124,6 +148,9 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 	if request.A.Kind == DiffSourceLive && request.B.Kind == DiffSourceLive {
 		return comparison.StructuralDiff{}, &DiffUsageError{Message: "diff requires at least one snapshot: source; live against live has no snapshot capture semantics to apply"}
 	}
+	if (request.A.Kind == DiffSourceGit && request.B.Kind == DiffSourceLive) || (request.A.Kind == DiffSourceLive && request.B.Kind == DiffSourceGit) {
+		return comparison.StructuralDiff{}, &DiffUsageError{Message: "git: against live: is not supported: neither side carries capture semantics; compare git:<revision> with a snapshot: of the working tree, or with a second git: revision"}
+	}
 
 	if request.A.Kind == DiffSourceSnapshot {
 		validatedA, srcA, err := diffSnapshotSource(request.A, comparison.SideA)
@@ -137,13 +164,30 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 		return comparison.Compare(ctx, srcA, srcB, opts)
 	}
 
-	// live against snapshot: load the snapshot first, then build the live
-	// source, then compare in user order.
+	if request.A.Kind == DiffSourceGit && request.B.Kind == DiffSourceGit {
+		srcA, err := diffGitSource(request.A, nil, comparison.SideA)
+		if err != nil {
+			return comparison.StructuralDiff{}, err
+		}
+		srcB, err := diffGitSource(request.B, nil, comparison.SideB)
+		if err != nil {
+			return comparison.StructuralDiff{}, err
+		}
+		return comparison.Compare(ctx, srcA, srcB, opts)
+	}
+
+	// live or git against snapshot: load the snapshot first, then build
+	// source A from its capture semantics, then compare in user order.
 	validatedB, srcB, err := diffSnapshotSource(request.B, comparison.SideB)
 	if err != nil {
 		return comparison.StructuralDiff{}, err
 	}
-	srcA, err := diffLiveSource(request.A, validatedB, request.B.Path, comparison.SideA)
+	var srcA source.Source
+	if request.A.Kind == DiffSourceGit {
+		srcA, err = diffGitSource(request.A, &validatedB.Document.Capture, comparison.SideA)
+	} else {
+		srcA, err = diffLiveSource(request.A, validatedB, request.B.Path, comparison.SideA)
+	}
 	if err != nil {
 		return comparison.StructuralDiff{}, err
 	}
@@ -152,9 +196,14 @@ func Diff(ctx context.Context, request DiffRequest) (comparison.StructuralDiff, 
 
 func validateDiffSpec(spec DiffSourceSpec, side string) error {
 	switch spec.Kind {
-	case DiffSourceSnapshot, DiffSourceLive:
+	case DiffSourceSnapshot, DiffSourceLive, DiffSourceGit:
 	default:
-		return &DiffUsageError{Message: fmt.Sprintf("source %s has unsupported kind %q (expected snapshot or live)", side, spec.Kind)}
+		return &DiffUsageError{Message: fmt.Sprintf("source %s has unsupported kind %q (expected snapshot, live, or git)", side, spec.Kind)}
+	}
+	if spec.Kind == DiffSourceGit {
+		if err := gitsource.ValidateRevision(spec.Path); err != nil {
+			return &DiffUsageError{Message: fmt.Sprintf("source %s: %v", side, err)}
+		}
 	}
 	if spec.Path == "" {
 		return &DiffUsageError{Message: fmt.Sprintf("source %s requires a non-empty path", side)}
@@ -163,14 +212,44 @@ func validateDiffSpec(spec DiffSourceSpec, side string) error {
 }
 
 // diffSecondSource resolves source B when source A is an already-loaded
-// snapshot: either a second snapshot or a live view driven by A's capture
-// semantics with A's file self-excluded.
+// snapshot: a second snapshot, a live view driven by A's capture semantics
+// with A's file self-excluded, or a Git tree under A's capture semantics.
 func diffSecondSource(spec DiffSourceSpec, opposite snapshot.Validated, oppositePath string) (source.Source, error) {
-	if spec.Kind == DiffSourceSnapshot {
+	switch spec.Kind {
+	case DiffSourceSnapshot:
 		_, src, err := diffSnapshotSource(spec, comparison.SideB)
 		return src, err
+	case DiffSourceGit:
+		return diffGitSource(spec, &opposite.Document.Capture, comparison.SideB)
+	default:
+		return diffLiveSource(spec, opposite, oppositePath, comparison.SideB)
 	}
-	return diffLiveSource(spec, opposite, oppositePath, comparison.SideB)
+}
+
+// diffGitSource builds a Git source. With a snapshot's capture semantics the
+// tree is filtered exactly as Inspect filters a directory, through the same
+// scanner, with no output path: a committed tree never contains the snapshot
+// file being read. Without capture semantics (git against git) every entry
+// is observed: unlimited depth, hidden entries, no ignore rules.
+func diffGitSource(spec DiffSourceSpec, capture *snapshot.CaptureV1, side comparison.Side) (source.Source, error) {
+	scan := tree.ScanOptions{RootName: gitRootName}
+	if capture != nil {
+		request := inspectRequestFromCapture(*capture, "")
+		explicit, err := filter.NewIgnoreMatcher(request.IgnorePatterns)
+		if err != nil {
+			return nil, &comparison.SideError{Side: side, Err: artifact.SourceReadFailure(err)}
+		}
+		var git *filter.GitIgnore
+		if request.UseGitIgnore {
+			git = filter.NewGitIgnore()
+		}
+		scan.MaxDepth = request.MaxDepth
+		scan.Directories = request.DirectoriesOnly
+		scan.UseGitIgnore = request.UseGitIgnore
+		scan.FilterPolicy = filter.NewPolicy("", request.UseDefaultIgnores, explicit, git, request.IncludeHidden)
+		scan.GitIgnore = git
+	}
+	return &source.Git{Revision: spec.Path, Scan: scan}, nil
 }
 
 // diffSnapshotSource opens the snapshot file, loads it through the shared
