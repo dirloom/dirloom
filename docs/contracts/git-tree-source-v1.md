@@ -13,7 +13,10 @@ A Git source is written `git:<revision>` and is split on the first colon, like `
 | Revision | Result |
 | --- | --- |
 | empty, starts with `-`, contains NUL or a newline | usage error, exit 2; Git is not run |
+| an index entry: starts with `:` but not `:/` (`:<path>`, `:<stage>:<path>`) | usage error, exit 2; Git is not run |
 | anything else | resolved by Git, below |
+
+An index entry is refused because resolving it reads the index, which a Git source never does. `:/<text>`, which searches commit messages, is accepted.
 
 The repository is the one Git discovers from the process working directory, including from a subdirectory, a linked worktree, or a bare repository. `GIT_DIR` and `GIT_WORK_TREE` are honored as Git honors them.
 
@@ -39,7 +42,7 @@ git cat-file -t <oid>
 git cat-file --batch
 ```
 
-None of them reads the index or the working tree, so no fsmonitor, hook, or filter runs.
+With index entries refused before Git runs, none of them reads the index or the working tree, so no fsmonitor, hook, or filter runs.
 
 Git 2.45 or newer is required (`GIT_NO_LAZY_FETCH` and `git --no-lazy-fetch` appear in 2.45). `git version` is read once per process. A missing `git`, an unparsable version, or a version below 2.45 is `git_unavailable`, and the message names the installed and the required versions.
 
@@ -203,7 +206,7 @@ Excluded subtrees cost nothing. There is no step that compares entries pairwise.
 | `<commit>:<path>` | that subtree; no `commit` reported |
 | commit replaced through `refs/replace/` | the recorded tree |
 | linked worktree, bare repository, subdirectory | same results |
-| unknown revision; revision `-x`; empty revision | exit 5 `git_revision_not_found`; exit 2; exit 2 |
+| unknown revision; revision `-x`; empty revision; `:<path>` | exit 5 `git_revision_not_found`; exit 2; exit 2; exit 2 |
 | outside a repository; no `git`; `git` reporting 2.44 | exit 5 `git_repository_not_found`; exit 5 `git_unavailable`; exit 5 `git_unavailable` |
 | partial clone, needed blob missing | exit 5 `git_object_unavailable`; the object is still missing afterwards |
 | subtree object missing but excluded by the snapshot's Capture Semantics | observation succeeds |

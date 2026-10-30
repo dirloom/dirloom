@@ -77,7 +77,9 @@ func formatLimit(limit int64) string {
 }
 
 // ValidateRevision rejects a revision that must never reach Git. Such a
-// revision is a usage error, reported before any Git command runs.
+// revision is a usage error, reported before any Git command runs. An index
+// entry (":<path>", ":<stage>:<path>") is refused because resolving it reads
+// the index; ":/<text>" searches commit messages and stays allowed.
 func ValidateRevision(revision string) error {
 	switch {
 	case revision == "":
@@ -86,6 +88,8 @@ func ValidateRevision(revision string) error {
 		return errors.New("git revision must not start with '-'")
 	case strings.ContainsAny(revision, "\x00\n"):
 		return errors.New("git revision must not contain NUL or a newline")
+	case strings.HasPrefix(revision, ":") && !strings.HasPrefix(revision, ":/"):
+		return errors.New("git revision must not name an index entry (:<path>); name a commit, a tag, or a tree such as HEAD:<path>")
 	default:
 		return nil
 	}

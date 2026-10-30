@@ -46,7 +46,7 @@ Tree entries are parsed strictly (`<mode> <name>\0<raw id>`, with the id length 
 
 ### Source grammar `git:<revision>`
 
-A Git source is `git:<revision>` in `dirloom diff`, split on the first colon like `snapshot:` and `live:`. The revision is anything `git rev-parse --verify` resolves locally: `HEAD`, a branch, a tag, a full or abbreviated commit id, `HEAD~10`, `main^`, `@{upstream}`, or `<commit>:<path>` for a subtree. The prefix removes any ambiguity between a ref and a file name. A revision that is empty, starts with `-`, or contains a NUL or a newline is a usage error. The object is peeled to a tree: a commit or tag yields its tree and records the commit, a tree is used directly, and any other object is an error. The repository is discovered from the current directory, as Git does: subdirectories, linked worktrees and bare repositories work.
+A Git source is `git:<revision>` in `dirloom diff`, split on the first colon like `snapshot:` and `live:`. The revision is anything `git rev-parse --verify` resolves locally: `HEAD`, a branch, a tag, a full or abbreviated commit id, `HEAD~10`, `main^`, `@{upstream}`, or `<commit>:<path>` for a subtree. The prefix removes any ambiguity between a ref and a file name. A revision that is empty, starts with `-`, contains a NUL or a newline, or names an index entry (`:<path>`, which `rev-parse` resolves by reading the index; `:/<text>` stays allowed) is a usage error. The object is peeled to a tree: a commit or tag yields its tree and records the commit, a tree is used directly, and any other object is an error. The repository is discovered from the current directory, as Git does: subdirectories, linked worktrees and bare repositories work.
 
 ### Committed-tree semantics and Capture Semantics
 

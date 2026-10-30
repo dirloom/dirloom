@@ -111,7 +111,7 @@ func TestValidateRevision(t *testing.T) {
 			t.Fatalf("%q: %v", revision, err)
 		}
 	}
-	for _, revision := range []string{"", "-x", "--output=x", "a\nb", "a\x00b"} {
+	for _, revision := range []string{"", "-x", "--output=x", "a\nb", "a\x00b", ":a.txt", ":0:a.txt", ":src", ":"} {
 		if err := ValidateRevision(revision); err == nil {
 			t.Fatalf("%q accepted", revision)
 		}

@@ -117,7 +117,7 @@ With `--no-moves`, `metadata.moveDetection` is `none`. For `snapshot:` and `live
 | `OBSERVATION_ERROR` | 5 | A source could not be read or did not yield a trustworthy artifact, including every Git source failure |
 | `INTERNAL_ERROR` | 6 | Broken Dirloom invariant, including a move detection or Git backend invariant |
 
-Statuses and exit codes are unchanged from v2. Exit `2` is reserved for invalid CLI usage and is not a diff JSON document: the human diagnostic stays on stderr even when `--format json` was requested. These are usage failures: `live:` against `live:`, `git:` against `live:` in either order, and a `git:` source whose revision is empty, starts with `-`, or contains a NUL or a newline. A failed write of the JSON document itself is an operational exit `5` on stderr; that partial stdout is not a successful result.
+Statuses and exit codes are unchanged from v2. Exit `2` is reserved for invalid CLI usage and is not a diff JSON document: the human diagnostic stays on stderr even when `--format json` was requested. These are usage failures: `live:` against `live:`, `git:` against `live:` in either order, and a `git:` source whose revision is empty, starts with `-`, contains a NUL or a newline, or names an index entry (starts with `:` but not `:/`). A failed write of the JSON document itself is an operational exit `5` on stderr; that partial stdout is not a successful result.
 
 `DIFFERENCES` (exit 1) is a normal result, not an error: stderr stays empty.
 
