@@ -141,64 +141,88 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a5` is published and closed. It is the latest GitHub Pre-release.
-The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a6` is frozen and release-ready. Feature pull
-request #55 is merged and feature work on `feat/v0.4.0-a6-git-sources` is
-complete. `main` carries the `v0.4.0-a5` release lineage plus its closure
-(#53) and the README install blocks (#54). A7 has not started.
-`CHANGELOG.md` remains the unique source of truth for release notes. Do not
-open versioned feature pull requests against `main`.
+`v0.4.0-a6` is the latest published GitHub Pre-release and is closed. The
+latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. No release branch is active. A7 has not started. `CHANGELOG.md`
+remains the unique source of truth for release notes. Do not open versioned
+feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
-| Latest published GitHub Pre-release | `v0.4.0-a5` |
+| Latest published GitHub Pre-release | `v0.4.0-a6` |
 | Latest stable release | `v0.3.3` |
-| Active release candidate | `v0.4.0-a6` on `release/v0.4.0-a6` |
-| Candidate state | FROZEN / RELEASE READY |
-| Feature pull request | #55 merged (`feat/v0.4.0-a6-git-sources`) |
+| Active release branch | none |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
 | A7 | NOT STARTED |
 
 ```text
-v0.4.0-a5 published / closed
-
-release/v0.4.0-a6
-FROZEN / RELEASE READY
-
-PR #55 merged
-feat/v0.4.0-a6-git-sources complete
-
-main at e9894ab (v0.4.0-a5 lineage + closure #53 + README install #54)
-
+v0.4.0-a6 published / closed
+latest stable v0.3.3
+active release branch: none
 A7 NOT STARTED
 ```
 
-## v0.4.0-a6 freeze checklist
+## v0.4.0-a6 release record
 
-The scope freeze lives on `release/v0.4.0-a6`. Do not create
-`chore/v0.4.0-a6-freeze`.
+v0.4.0-a6 is published and closed. The checklist below is the completed
+ceremony, kept for audit. It is not the current active release state.
+Do not create `chore/v0.4.0-a6-freeze`. The scope freeze lived on
+`release/v0.4.0-a6`.
 
 ```text
-feature → release                  DONE
-release CI                         PASS
-freeze                             ACTIVE
-final release PR → main            PENDING
-tag                                PENDING
-draft prerelease                   PENDING
-publication                        PENDING
-package managers                   MUST STAY v0.3.3
+feature → release                DONE
+release CI                       PASS
+freeze                           DONE
+freeze CI                        PASS
+release → main                   DONE
+main CI                          PASS
+tag v0.4.0-a6                    DONE
+draft prerelease                 DONE
+draft audit                      PASS
+publication                      DONE (after the explicit human GO)
+package managers                 SKIPPED
+branches                         PENDING (deletion by the owner)
+A6                               CLOSED
 ```
 
-Feature branch of record: `feat/v0.4.0-a6-git-sources` at
-`199f529c05070365a48e29ae70fcb9babd79a8f7`, merged by pull request #55 into
-`release/v0.4.0-a6` at `31c02e3cb5a3a773ef363b55a12d9bfa39f6f7bd`. Pull
-request #55 was merged by its author without an approving review, through
-the owner bypass of the `protect-release-branches` pull request rule. Its
-CI of record is GitHub Actions run `41116663071` on `199f529` (9 checks
-green, Git 2.56 on every runner). Release CI of record before freeze:
-GitHub Actions run `41117122147` on the merge commit.
+Recorded identifiers:
+
+- Feature branch `feat/v0.4.0-a6-git-sources` at `199f529c05070365a48e29ae70fcb9babd79a8f7`, merged by pull request #55 into `release/v0.4.0-a6` at `31c02e3cb5a3a773ef363b55a12d9bfa39f6f7bd` (2026-10-30T19:40:09Z).
+- Feature CI: https://github.com/dirloom/dirloom/actions/runs/41116663071 (9 checks, Git 2.56 on every runner)
+- Release CI before freeze: https://github.com/dirloom/dirloom/actions/runs/41117122147
+- Freeze commit: `d87d03ba927fda826d8d27a458ae2f4ccaf14225`
+- Freeze CI: https://github.com/dirloom/dirloom/actions/runs/41118614670
+- Release pull request #56 merged to `main` at `563a677ad7fd5c14ea5d1d0b5dbca5b6fa65e432` (2026-10-30T20:47:34Z)
+- Main CI: https://github.com/dirloom/dirloom/actions/runs/41126008795
+- Annotated tag `v0.4.0-a6` (`b1e55da62f3d3807ba995840e3b90f895ba39580`) points at `563a677ad7fd5c14ea5d1d0b5dbca5b6fa65e432`
+- Release workflow: https://github.com/dirloom/dirloom/actions/runs/41126617254 (ended 2026-10-30T20:54:13Z on "Leave draft for human GO")
+- Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a6 (`publishedAt` `2026-10-30T21:13:30Z`)
+- Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/41129407223
+- `release/v0.4.0-a6` and `feat/v0.4.0-a6-git-sources` are fully merged into `main`; their deletion on `origin` is left to the owner.
+
+Ruleset bypasses used by the repository owner:
+
+- Pull request #55 merged by its author without an approving review (`protect-release-branches` requires one; the only collaborator is the author).
+- Freeze commit pushed directly to `release/v0.4.0-a6` (pull request rule), as the freeze procedure prescribes.
+- Tag `v0.4.0-a6` created under `protect-release-tags` (creation restricted).
+
+Pull request #56 into `main` needed no bypass.
+
+Draft audit before publication: 13 artefacts (6 archives, 6 SPDX SBOMs,
+`checksums.txt`); the 12 SHA-256 checksums; `release-artifacts verify`;
+13 attestations verified against the `release.yml` workflow and
+`refs/tags/v0.4.0-a6`; the same nine licence files in all six archives;
+release notes identical to the `[0.4.0-a6]` section of `CHANGELOG.md` at
+the tag; the Windows x86_64 binary reporting `dirloom 0.4.0-a6`, comparing
+`git:v0.4.0-a5` with `git:v0.4.0-a6` (exit 1, Diff Result Schema v3) and
+refusing `git:` against `live:` (exit 2).
+
+Publication: the draft stayed a draft until the explicit human GO, then was
+published at 2026-10-30T21:13:30Z with the owner's credentials through
+`gh release edit --draft=false --prerelease --latest=false`. The release API
+still names `github-actions[bot]`, which created the draft. GitHub's latest
+release remains `v0.3.3`.
 
 ## v0.4.0-a5 release record
 
