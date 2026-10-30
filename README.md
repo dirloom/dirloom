@@ -23,12 +23,13 @@ Published status is independent of each package manager. GitHub Releases is alwa
 ```text
 RELEASE STATUS
 Latest stable release: v0.3.3
-Latest GitHub Pre-release: v0.4.0-a5
-v0.4.0-a6: frozen release candidate
+Latest GitHub Pre-release: v0.4.0-a6
+Active release branch: none
+v0.4.0-a6: published / closed
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
-GitHub Preview  ✅ v0.4.0-a5
+GitHub Preview  ✅ v0.4.0-a6
 Scoop           ✅ v0.3.3
 Homebrew        ✅ v0.3.3
 Winget          ✅ v0.3.3
@@ -57,13 +58,13 @@ brew install --cask dirloom/tap/dirloom
 
 ### Release archives
 
-Every version is on [GitHub Releases](https://github.com/dirloom/dirloom/releases), including GitHub Pre-releases such as `v0.4.0-a5` that Winget, Scoop and Homebrew do not ship. To install or update one version, set the version and the install directory, then paste the block. It downloads the archive for your platform, checks its SHA-256 against `checksums.txt`, keeps the previous binary as `.bak`, and prints the installed version. Do not point it at a directory managed by Winget, Scoop or Homebrew.
+Every version is on [GitHub Releases](https://github.com/dirloom/dirloom/releases), including GitHub Pre-releases such as `v0.4.0-a6` that Winget, Scoop and Homebrew do not ship. To install or update one version, set the version and the install directory, then paste the block. It downloads the archive for your platform, checks its SHA-256 against `checksums.txt`, keeps the previous binary as `.bak`, and prints the installed version. Do not point it at a directory managed by Winget, Scoop or Homebrew.
 
 PowerShell (Windows x64 or ARM64):
 
 ```powershell
 $ErrorActionPreference = "Stop"; $ProgressPreference = "SilentlyContinue"
-$Version = "v0.4.0-a5"                           # release tag to install
+$Version = "v0.4.0-a6"                           # release tag to install
 $Dir     = "$env:LOCALAPPDATA\Programs\dirloom"  # install directory, on your PATH
 
 $Arch  = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "x86_64" }
@@ -88,7 +89,7 @@ bash (Linux or macOS, x86_64 or arm64):
 ```bash
 (
 set -eu
-VERSION=v0.4.0-a5            # release tag to install
+VERSION=v0.4.0-a6            # release tag to install
 DIR="$HOME/.local/bin"       # install directory, on your PATH
 
 OS=$(uname -s)               # Linux or Darwin
@@ -511,9 +512,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a5`. The latest stable release is `v0.3.3`. `release/v0.4.0-a6` is
-frozen and release-ready for Git sources. Feature pull request #55 is merged.
-A7 has not started.
+`v0.4.0-a6`. The latest stable release is `v0.3.3`. No release branch is
+active. `v0.4.0-a6` is published and closed. A7 has not started.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -549,7 +549,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a3: published — live structural verification (`dirloom verify`; GitHub Pre-release; no diff);
 - v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a5: published and closed — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a6: frozen release candidate on `release/v0.4.0-a6` — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3); not published; feature pull request #55 merged; A7 not started;
+- v0.4.0-a6: published and closed — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3; GitHub Pre-release; stable package managers remain `v0.3.3`); A7 not started;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification, structural diff, move detection and Git sources;
 - v0.5: scaffold, templates and Architecture Packs.

@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a5` ; stable `v0.3.3` ; `v0.4.0-a6` figée sur `release/v0.4.0-a6` (release ready, non publiée) ; A7 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a6` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; A7 non démarrée<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2190,7 +2190,7 @@ Frontière : un `MOVED` est une correspondance structurelle, pas la preuve d'un 
 
 ### v0.4.0-a6 — Git sources
 
-**Statut : figé sur `release/v0.4.0-a6`, release ready, non publié.** Sixième incrément de CHANGE, profil prerelease. La pull request de feature #55 est mergée. Les canaux stables restent `v0.3.3`. Ce n'est pas encore une publication et A7 n'est pas démarrée.
+**Statut : publié (`v0.4.0-a6`), clôturé.** Sixième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`. A7 n'est pas démarrée.
 
 Fonctions :
 
