@@ -145,8 +145,11 @@ func (b *Batch) Close() error {
 	}
 	b.closed = true
 	b.stopWatch()
-	b.terminate()
+	// Nothing is read any more. Closing the output first makes a process
+	// still writing a response it was refused (an object above its limit)
+	// fail at once, instead of blocking until the grace period ends.
 	_ = b.output.Close()
+	b.terminate()
 	if b.waitErr != nil && b.err == nil {
 		b.closeErr = objectUnavailable("git cat-file did not exit cleanly")
 	}

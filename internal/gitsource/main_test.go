@@ -491,6 +491,31 @@ func TestBatchCloseKillsAfterGrace(t *testing.T) {
 	}
 }
 
+// TestBatchCloseAfterRefusedObjectIsPrompt refuses an object larger than the
+// pipe buffer: git is still writing it when Close runs, and must not hold
+// Close for the grace period.
+func TestBatchCloseAfterRefusedObjectIsPrompt(t *testing.T) {
+	setWaitDelay(t, 10*time.Second)
+	repo := gittest.New(t)
+	large := repo.Blob([]byte(strings.Repeat("#\n", 1<<20)))
+	batch, err := realRunner(t, repo).StartBatch(context.Background(), SHA1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = batch.read(large, gitIgnoreObject)
+	requireCode(t, err, artifact.CodeGitTreeInvalid)
+	start := time.Now()
+	if err := batch.Close(); err != nil {
+		t.Fatalf("close after a refused object: %v", err)
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("close took %v", elapsed)
+	}
+	if batch.cmd.ProcessState == nil {
+		t.Fatal("cat-file was not reaped")
+	}
+}
+
 func setWaitDelay(t *testing.T, delay time.Duration) {
 	t.Helper()
 	previous := waitDelay
