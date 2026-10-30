@@ -17,7 +17,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Exit(gittest.Main(m))
+	code := gittest.Main(m)
+	removeBenchmarkRepositories()
+	os.Exit(code)
 }
 
 // describe lists every node as "path kind" or "path kind -> target".
