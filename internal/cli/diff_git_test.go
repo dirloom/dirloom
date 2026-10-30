@@ -10,7 +10,20 @@ import (
 	"github.com/dirloom/dirloom/internal/gittest"
 )
 
+// fakeGitVersion makes the test binary answer `git version` with its value
+// when it runs as a copied git executable.
+const fakeGitVersion = "DIRLOOM_FAKE_GIT_VERSION"
+
 func TestMain(m *testing.M) {
+	if version := os.Getenv(fakeGitVersion); version != "" {
+		for _, arg := range os.Args[1:] {
+			if arg == "version" {
+				_, _ = os.Stdout.WriteString("git version " + version + "\n")
+				os.Exit(0)
+			}
+		}
+		os.Exit(1)
+	}
 	os.Exit(gittest.Main(m))
 }
 

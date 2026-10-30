@@ -18,6 +18,13 @@ import (
 // system's configuration and from any enclosing repository, then runs the
 // tests. Call it from TestMain.
 func Main(m *testing.M) int {
+	// A fuzz worker is killed by its coordinator, so nothing it creates is
+	// ever removed; fuzz targets do not run git.
+	for _, arg := range os.Args[1:] {
+		if strings.HasPrefix(arg, "-test.fuzzworker") {
+			return m.Run()
+		}
+	}
 	dir, err := os.MkdirTemp("", "dirloom-gittest-")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
