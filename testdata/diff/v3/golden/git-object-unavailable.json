@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 3,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "source": "b",
+    "code": "git_object_unavailable",
+    "message": "read directory \"gone\": git object dddddddddddddddddddddddddddddddddddddddd is not available in this repository"
+  }
+}

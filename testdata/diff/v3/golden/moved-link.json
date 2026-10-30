@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 3,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "structural-v1"
+  },
+  "sources": {
+    "a": {
+      "kind": "snapshot",
+      "nodeCount": 5
+    },
+    "b": {
+      "kind": "filesystem",
+      "nodeCount": 5
+    }
+  },
+  "summary": {
+    "added": 0,
+    "removed": 0,
+    "changed": 0,
+    "moved": 2,
+    "total": 2
+  },
+  "changes": [
+    {
+      "path": "b/empty-link",
+      "operation": "MOVED",
+      "from": "a/empty-link",
+      "before": {
+        "kind": "symlink",
+        "target": ""
+      },
+      "after": {
+        "kind": "symlink",
+        "target": ""
+      },
+      "evidence": "name",
+      "nodes": 1
+    },
+    {
+      "path": "b/shared-link",
+      "operation": "MOVED",
+      "from": "a/shared-link",
+      "before": {
+        "kind": "symlink",
+        "target": "../shared"
+      },
+      "after": {
+        "kind": "symlink",
+        "target": "../shared"
+      },
+      "evidence": "name",
+      "nodes": 1
+    }
+  ]
+}

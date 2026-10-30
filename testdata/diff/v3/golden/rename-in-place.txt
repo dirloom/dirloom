@@ -1,0 +1,6 @@
+Structural Diff
+
+Summary: 0 added, 0 removed, 0 changed, 1 moved, 1 total
+
+MOVED
+  > src/payment -> src/billing (subtree, 3 nodes)

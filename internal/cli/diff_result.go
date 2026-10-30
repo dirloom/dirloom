@@ -10,8 +10,9 @@ import (
 	"github.com/dirloom/dirloom/internal/comparison"
 )
 
-// diffResultSchemaVersion is Diff Result Schema v2. v1 is no longer emitted.
-const diffResultSchemaVersion = 2
+// diffResultSchemaVersion is Diff Result Schema v3. v1 and v2 are no longer
+// emitted.
+const diffResultSchemaVersion = 3
 
 type diffJSONDocument struct {
 	SchemaVersion int             `json:"schemaVersion"`
@@ -34,9 +35,13 @@ type diffSources struct {
 	B diffSourceRef `json:"b"`
 }
 
+// diffSourceRef carries tree and commit for Git sources only; for other
+// kinds it is exactly the v2 source object.
 type diffSourceRef struct {
 	Kind      string `json:"kind"`
 	NodeCount int    `json:"nodeCount"`
+	Tree      string `json:"tree,omitempty"`
+	Commit    string `json:"commit,omitempty"`
 }
 
 type diffSummary struct {
@@ -47,7 +52,7 @@ type diffSummary struct {
 	Total   int `json:"total"`
 }
 
-// diffChange field order is the Diff Result Schema v2 encoder order. From,
+// diffChange field order is the Diff Result Schema v3 encoder order. From,
 // Evidence and Nodes are set on MOVED only, where Nodes is always at least 1.
 type diffChange struct {
 	Path      string         `json:"path"`
@@ -179,8 +184,8 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 			MoveDetection:             string(diff.Metadata.MoveDetection),
 		},
 		Sources: &diffSources{
-			A: diffSourceRef{Kind: string(diff.SourceA.Kind), NodeCount: diff.SourceA.NodeCount},
-			B: diffSourceRef{Kind: string(diff.SourceB.Kind), NodeCount: diff.SourceB.NodeCount},
+			A: diffSourceRefJSON(diff.SourceA),
+			B: diffSourceRefJSON(diff.SourceB),
 		},
 		Summary: &diffSummary{
 			Added:   diff.Summary.Added,
@@ -191,6 +196,10 @@ func diffSuccessDocument(diff comparison.StructuralDiff) diffJSONDocument {
 		},
 		Changes: &changes,
 	}
+}
+
+func diffSourceRefJSON(ref comparison.SourceRef) diffSourceRef {
+	return diffSourceRef{Kind: string(ref.Kind), NodeCount: ref.NodeCount, Tree: ref.Tree, Commit: ref.Commit}
 }
 
 func diffChangeJSON(change comparison.Change) diffChange {

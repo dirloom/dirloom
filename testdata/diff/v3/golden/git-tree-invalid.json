@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 3,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "source": "a",
+    "code": "git_tree_invalid",
+    "message": "read directory \".\": tree has an entry with unsupported mode \"100600\""
+  }
+}

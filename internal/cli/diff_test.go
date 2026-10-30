@@ -291,7 +291,7 @@ type diffJSONBody struct {
 	} `json:"diagnostic"`
 }
 
-// assertDiffJSONContract locks Diff Result Schema v2: top-level sources,
+// assertDiffJSONContract locks Diff Result Schema v3: top-level sources,
 // metadata without a/b but with moveDetection, operation instead of op, a
 // moved count in the summary, and changes as [] when empty.
 func assertDiffJSONContract(t *testing.T, stdout string, empty bool, moveDetection comparison.MoveDetection) {
@@ -300,7 +300,7 @@ func assertDiffJSONContract(t *testing.T, stdout string, empty bool, moveDetecti
 	if err := json.Unmarshal([]byte(stdout), &doc); err != nil {
 		t.Fatal(err)
 	}
-	if doc["schemaVersion"] != float64(2) {
+	if doc["schemaVersion"] != float64(diffResultSchemaVersion) {
 		t.Fatalf("schemaVersion = %#v", doc["schemaVersion"])
 	}
 	summary, ok := doc["summary"].(map[string]any)

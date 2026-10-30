@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 3,
+  "status": "DIFFERENCES",
+  "metadata": {
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "structural-v1"
+  },
+  "sources": {
+    "a": {
+      "kind": "git",
+      "nodeCount": 7,
+      "tree": "b725af0537a8e173eba9685afa3321ddc348e126"
+    },
+    "b": {
+      "kind": "git",
+      "nodeCount": 6,
+      "tree": "d2156cc32ff8b997d300dcbbf9173571e8c1a652"
+    }
+  },
+  "summary": {
+    "added": 0,
+    "removed": 1,
+    "changed": 0,
+    "moved": 1,
+    "total": 2
+  },
+  "changes": [
+    {
+      "path": "old",
+      "operation": "REMOVED",
+      "before": {
+        "kind": "directory"
+      }
+    },
+    {
+      "path": "payment",
+      "operation": "MOVED",
+      "from": "old/payment",
+      "before": {
+        "kind": "directory"
+      },
+      "after": {
+        "kind": "directory"
+      },
+      "evidence": "subtree",
+      "nodes": 4
+    }
+  ]
+}
