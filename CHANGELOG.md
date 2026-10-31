@@ -4,6 +4,10 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Security
+
+- Update `golang.org/x/text` from v0.39.0 to v0.41.0 for GO-2026-6629, which affects versions before v0.41.0. Dirloom imports only `golang.org/x/text/unicode/norm`, which govulncheck reported as not calling the vulnerable code, and that package, its Unicode tables included, is byte-identical between the two versions: NFC canonicalization, Fingerprint v1 and every structural identity are unchanged.
+
 ## [0.4.0-a6] - 2026-10-30
 
 CHANGE alpha: Git sources in `dirloom diff` (`git:<revision>`), committed
