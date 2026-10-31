@@ -114,12 +114,14 @@ A commit object is untrusted input, parsed strictly:
 
 1. the first header is `tree <id>`;
 2. zero or more `parent <id>` headers follow immediately;
-3. other headers follow, up to the first empty line; exactly one of them is `committer <identity> <timestamp> <zone>`;
-4. the message after the empty line is not read.
+3. other headers follow, up to the first empty line or the end of the object; exactly one of them is `committer <identity> <timestamp> <zone>`;
+4. the message after the empty line, if any, is not read.
+
+Every header line, continuation lines included, ends with a line feed. As in Git, headers may run to the end of the object, with no empty line and no message, but a header line cut off by the end of the object is refused (Git's `unterminatedHeader`).
 
 Ids must be full lowercase hex in the repository's object format. The timestamp is an unsigned decimal integer without a leading zero (except `0`) and at most 253402300799 (9999-12-31T23:59:59Z). The zone is `+HHMM` or `-HHMM`, with hours from 00 to 14 and minutes from 00 to 59. The timestamp is reported in UTC; the zone is validated, then dropped.
 
-A second `tree` or `committer` header, a `parent` header after another header, a missing `tree` or `committer`, an invalid id, timestamp or zone, or a commit object above 1 MiB is `git_commit_invalid`. The identity and the message are skipped, never stored and never emitted.
+A second `tree` or `committer` header, a `parent` header after another header, a missing `tree` or `committer`, an unterminated header line, an invalid id, timestamp or zone, or a commit object above 1 MiB is `git_commit_invalid`. The identity and the message are skipped, never stored and never emitted.
 
 ## Entries
 
@@ -203,7 +205,8 @@ There is no persistent cache and no step that compares commits pairwise beyond e
 | `--structural-only` with a `shallow` end | the base-less entry hidden; `end: shallow` kept |
 | failure at the third commit | one failure result, no entries, exit 5 |
 | replace ref on a listed commit; graft file | the recorded parents and trees |
-| crafted commit objects (no `tree`, `parent` after `author`, two `committer`, zone `+1500` or `+0060` or `0000`, timestamp with a sign, a leading zero or above 253402300799, above 1 MiB) | `git_commit_invalid` |
+| crafted commit objects (no `tree`, `parent` after `author`, two `committer`, an unterminated header line, zone `+1500` or `+0060` or `0000`, timestamp with a sign, a leading zero or above 253402300799, above 1 MiB) | `git_commit_invalid` |
+| a commit whose headers run to the end of the object, with no empty line and no message (accepted by `git fsck`) | listed like any commit |
 | partial clone `blob:none` with a link | `git_object_unavailable` at the first commit whose tree needs the blob |
 | SHA-256 repository | 64-character ids |
 | linked worktree, bare repository, subdirectory | the same results |

@@ -61,3 +61,25 @@ func TestWalkPartialCloneIsNeverFetched(t *testing.T) {
 		t.Fatal("the link blob was fetched")
 	}
 }
+
+// Git accepts commit headers that run to the end of the object, with no empty
+// line and no message, and refuses a header line without its line feed.
+// History accepts and refuses exactly the same objects.
+func TestWalkCommitHeaderTermination(t *testing.T) {
+	repo := gittest.New(t)
+	repo.Write("src/a.go", "package src")
+	first := repo.CommitAll("first")
+	tree := repo.Git("rev-parse", "HEAD^{tree}")
+	headers := "tree " + tree + "\nparent " + first + "\nauthor A <a@x> 1767225600 +0000\ncommitter C <c@x> 1767225600 +0000"
+	// Without --literally, git hash-object runs its fsck checks.
+	accepted := repo.GitInput([]byte(headers+"\n"), "hash-object", "-t", "commit", "-w", "--stdin")
+	result := mustWalk(t, Request{Dir: repo.Dir, Revision: accepted})
+	if len(result.Entries) != 2 || result.Entries[0].Commit != accepted || result.Entries[0].Structural || result.End != EndRoot {
+		t.Fatalf("headers to the end of the object: %+v", result)
+	}
+	if _, err := repo.Run([]byte(headers), "hash-object", "-t", "commit", "-w", "--stdin"); err == nil {
+		t.Fatal("git accepted an unterminated header")
+	}
+	unterminated := repo.GitInput([]byte(headers), "hash-object", "-t", "commit", "-w", "--literally", "--stdin")
+	walkError(t, Request{Dir: repo.Dir, Revision: unterminated}, artifact.CodeGitCommitInvalid)
+}

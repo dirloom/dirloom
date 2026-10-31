@@ -93,6 +93,9 @@ func TestParseCommitRejects(t *testing.T) {
 		"hex timestamp":              commitObjectText("tree "+treeID, "committer C <c@x> 1a +0000"),
 		"missing timestamp":          commitObjectText("tree "+treeID, "committer C <c@x> +0000"),
 		"committer without anything": commitObjectText("tree "+treeID, "committer 1767225600 +0000"),
+		"unterminated header":        []byte("tree " + treeID + "\n" + committer),
+		"unterminated continuation":  []byte("tree " + treeID + "\n" + committer + "\ngpgsig a\n b"),
+		"unterminated tree header":   []byte("tree " + treeID),
 	}
 	for name, data := range cases {
 		t.Run(name, func(t *testing.T) {

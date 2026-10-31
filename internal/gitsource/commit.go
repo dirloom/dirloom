@@ -38,12 +38,14 @@ func ParseCommit(id string, data []byte, format ObjectFormat) (Commit, error) {
 	committers := 0
 	previous := ""
 	for rest := data; len(rest) > 0; {
-		var line []byte
-		if end := bytes.IndexByte(rest, '\n'); end >= 0 {
-			line, rest = rest[:end], rest[end+1:]
-		} else {
-			line, rest = rest, nil
+		// Every header line ends with a line feed, as Git requires
+		// (unterminatedHeader). Headers may run to the end of the object.
+		end := bytes.IndexByte(rest, '\n')
+		if end < 0 {
+			return Commit{}, commitInvalid("commit %s has an unterminated header line", id)
 		}
+		var line []byte
+		line, rest = rest[:end], rest[end+1:]
 		if len(line) == 0 {
 			break
 		}
