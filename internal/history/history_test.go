@@ -20,7 +20,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Exit(gittest.Main(m))
+	code := gittest.Main(m)
+	removeBenchmarkRepositories()
+	os.Exit(code)
 }
 
 func mustWalk(t *testing.T, request Request) Result {
