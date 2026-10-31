@@ -40,7 +40,8 @@ Every Git call is hardened exactly as in [Git Tree Source v1](git-tree-source-v1
 ```text
 git version
 git rev-parse --show-object-format
-git rev-parse --verify --quiet <revision>^{commit}
+git rev-parse --verify --quiet <revision>
+git rev-parse --verify --quiet <id>^{commit}
 git rev-parse --git-path shallow
 git cat-file --batch
 ```
@@ -50,7 +51,7 @@ One `cat-file --batch` process serves the whole run: every commit object and eve
 ## Resolution
 
 1. Version gate and object format, as in Git Tree Source v1.
-2. `git rev-parse --verify --quiet <revision>^{commit}` gives the newest commit, `to`. A revision that does not resolve, or names a tree or a blob, is `git_revision_not_found`.
+2. `git rev-parse --verify --quiet <revision>` gives an object id, then `git rev-parse --verify --quiet <id>^{commit}` peels it to the newest commit, `to`. Peeling the resolved id, never the revision text, keeps revisions such as `:/<text>` intact, whose text runs to the end. A revision that does not resolve, or names a tree, a blob or a missing object, is `git_revision_not_found`.
 3. The same for `--from` when present.
 4. The shallow boundary list is read once (below).
 
@@ -173,7 +174,7 @@ Let L be the number of commits examined, E the tree entries of one commit, and P
 
 | Step | Cost |
 | --- | --- |
-| resolution | a constant P: at most six processes per run, whatever L |
+| resolution | a constant P: at most eight processes per run, whatever L |
 | commits | L + 1 commit objects read through the batch |
 | trees | L + 1 tree observations, each linear in E (Git Tree Source v1) |
 | summaries | L comparisons, each linear in the two record lists (Move Detection `structural-v1` included) |

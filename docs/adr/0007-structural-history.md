@@ -86,7 +86,7 @@ Exit codes: `0` for a successful history, whatever it contains; `2` for usage er
 
 ### Git invocation
 
-History adds three command forms to the Git Tree Source v1 list, all hardened the same way: `git rev-parse --verify --quiet <revision>^{commit}`, `git rev-parse --git-path shallow`, and `commit` objects read through the existing `cat-file --batch`. The shallow boundary list is the only file history reads directly: Git metadata, never the index or the working tree; at most 16 MiB of object ids, one per line; an absent file means no boundary.
+History adds three command forms to the Git Tree Source v1 list, all hardened the same way: `git rev-parse --verify --quiet <id>^{commit}` (after the A6 `rev-parse --verify --quiet <revision>`, so that `:/<text>` revisions stay intact), `git rev-parse --git-path shallow`, and `commit` objects read through the existing `cat-file --batch`. The shallow boundary list is the only file history reads directly: Git metadata, never the index or the working tree; at most 16 MiB of object ids, one per line; an absent file means no boundary.
 
 A commit object is parsed strictly and is limited to 1 MiB: a `tree` header, then `parent` headers, then exactly one `committer` header among the others. Its timestamp is an unsigned decimal without leading zeros, at most 253402300799 (9999-12-31T23:59:59Z), and its zone is `+HHMM` or `-HHMM` with hours 00–14 and minutes 00–59. The timestamp is emitted in UTC (RFC 3339); the zone is validated and dropped. Anything else is `git_commit_invalid`, never a panic.
 

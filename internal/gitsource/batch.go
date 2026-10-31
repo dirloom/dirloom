@@ -107,9 +107,29 @@ func (b *Batch) read(id string, kind objectKind) ([]byte, error) {
 	}
 	data, err := readResponse(b.reader, id, kind)
 	if err != nil {
+		if IsMissing(err) && b.ctx.Err() == nil {
+			// The whole `missing` response was read: later reads stay valid.
+			return nil, err
+		}
 		return nil, b.fail(err)
 	}
 	return data, nil
+}
+
+// missingObject is the error for a `<oid> missing` response. Unwrap gives
+// the typed git_object_unavailable diagnostic.
+type missingObject struct {
+	err error
+}
+
+func (m *missingObject) Error() string { return m.err.Error() }
+func (m *missingObject) Unwrap() error { return m.err }
+
+// IsMissing reports whether err says that Git answered an object is absent
+// from the repository, as opposed to a malformed or truncated response.
+func IsMissing(err error) bool {
+	var missing *missingObject
+	return errors.As(err, &missing)
 }
 
 func (b *Batch) fail(err error) error {
@@ -173,7 +193,7 @@ func readResponse(reader *bufio.Reader, id string, kind objectKind) ([]byte, err
 	fields := strings.Split(string(line[:len(line)-1]), " ")
 
 	if len(fields) == 2 && fields[0] == id && fields[1] == "missing" {
-		return nil, objectUnavailable("git object %s is not available in this repository", id)
+		return nil, &missingObject{err: objectUnavailable("git object %s is not available in this repository", id)}
 	}
 	if len(fields) != 3 || fields[0] != id {
 		return nil, treeInvalid("git cat-file returned a malformed header for object %s", id)

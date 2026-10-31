@@ -25,6 +25,15 @@ const (
 	CodeGitRevisionNotFound   = "git_revision_not_found"
 	CodeGitObjectUnavailable  = "git_object_unavailable"
 	CodeGitTreeInvalid        = "git_tree_invalid"
+	// CodeGitCommitInvalid and CodeGitShallowInvalid come from Structural
+	// History v1, which reads commit objects and the shallow boundary list.
+	CodeGitCommitInvalid  = "git_commit_invalid"
+	CodeGitShallowInvalid = "git_shallow_invalid"
+)
+
+// Structural History v1 codes. Each is an observation failure of a history.
+const (
+	CodeHistoryFromNotReached = "history_from_not_reached"
 )
 
 // Error is a structured diagnostic. Internal marks a broken Dirloom invariant
