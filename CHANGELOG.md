@@ -4,6 +4,14 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a7] - 2026-10-31
+
+CHANGE alpha: structural history (`dirloom history`), one Fingerprint v1
+and one structural change summary per commit along the first-parent chain
+of a Git revision, and History Result Schema v1. This increment does not
+add a full commit graph, per-path history, a persistent cache, Time
+Machine views, or Git sources for other commands.
+
 ### Added
 
 - Add `dirloom history [<revision>]`, a structural history of a Git repository. It walks the first-parent chain of a revision (default `HEAD`) and lists one entry per commit, newest first: its tree, its parents, its committer date in UTC, the Fingerprint v1 of its whole committed tree, its node count, and a summary of the added, removed, changed and moved paths against its first parent (the empty tree for a root commit), equal to the summary of `dirloom diff git:<commit>^ git:<commit>`. `structural` is true exactly when that summary is not empty: a commit that changes only file contents is `no structural change`. The walk stops after `--limit` commits (default 20), before `--from` (exclusive), at a root commit or at a shallow boundary, and the output names the end. A merge is listed once and compared with its first parent. `--structural-only` hides the commits without a structural change, and `--no-moves` counts moves as removals plus additions. Only committed Git objects are read, through one Git session per run, never the working tree, the index or the network; commit messages and identities are never shown. There is no exit 1. Git 2.45 or newer is required.
@@ -279,7 +287,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a6...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a7...HEAD
+[0.4.0-a7]: https://github.com/dirloom/dirloom/compare/v0.4.0-a6...v0.4.0-a7
 [0.4.0-a6]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...v0.4.0-a6
 [0.4.0-a5]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...v0.4.0-a5
 [0.4.0-a4]: https://github.com/dirloom/dirloom/compare/v0.4.0-a3...v0.4.0-a4

@@ -24,9 +24,7 @@ Published status is independent of each package manager. GitHub Releases is alwa
 RELEASE STATUS
 Latest stable release: v0.3.3
 Latest GitHub Pre-release: v0.4.0-a6
-Active release branch: release/v0.4.0-a7
-v0.4.0-a6: published / closed
-v0.4.0-a7: in development, not published
+v0.4.0-a7: frozen release candidate
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
@@ -518,9 +516,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a6`. The latest stable release is `v0.3.3`. `v0.4.0-a6` is published
-and closed. `release/v0.4.0-a7` is the active release branch for the
-structural history increment; it is not published.
+`v0.4.0-a6`. The latest stable release is `v0.3.3`. `release/v0.4.0-a7` is
+frozen and release-ready for structural history. Feature pull request #62 is
+merged. A8 has not started.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -557,7 +555,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a5: published and closed — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a6: published and closed — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a7: in development on `release/v0.4.0-a7`, not published — structural history (`dirloom history`, History Result Schema v1);
+- v0.4.0-a7: frozen release candidate on `release/v0.4.0-a7` — structural history (`dirloom history`, History Result Schema v1); not published; feature pull request #62 merged; A8 not started;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification, structural diff, move detection, Git sources and structural history;
 - v0.5: scaffold, templates and Architecture Packs.

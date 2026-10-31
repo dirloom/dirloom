@@ -141,30 +141,65 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a6` is the latest published GitHub Pre-release and is closed. The
-latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a7` is the active release branch for the
-structural history increment. The A7 feature work lives on
-`feat/v0.4.0-a7-history`, which targets `release/v0.4.0-a7` by pull request.
-`CHANGELOG.md` remains the unique source of truth for release notes. Do not
-open versioned feature pull requests against `main`.
+`v0.4.0-a6` is published and closed. It is the latest GitHub Pre-release.
+The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. `release/v0.4.0-a7` is frozen and release-ready. Feature pull
+request #62 is merged and feature work on `feat/v0.4.0-a7-history` is
+complete. `main` carries the `v0.4.0-a6` release lineage plus its closure
+(#57), the branch record fix (#59), the D2 pins (#58, #60) and the
+`golang.org/x/text` update (#61). A8 has not started. `CHANGELOG.md` remains
+the unique source of truth for release notes. Do not open versioned feature
+pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a6` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | `release/v0.4.0-a7` (from `main` at `9e4fcd9`, Go 1.26.10) |
-| Active feature branch | `feat/v0.4.0-a7-history` → PR to `release/v0.4.0-a7` |
+| Active release candidate | `v0.4.0-a7` on `release/v0.4.0-a7` |
+| Candidate state | FROZEN / RELEASE READY |
+| Feature pull request | #62 merged (`feat/v0.4.0-a7-history`) |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| Not yet delivered | structural history (A7 in development) |
+| A8 | NOT STARTED |
 
 ```text
 v0.4.0-a6 published / closed
-latest stable v0.3.3
-release/v0.4.0-a7 active
-feat/v0.4.0-a7-history active → PR to release/v0.4.0-a7
+
+release/v0.4.0-a7
+FROZEN / RELEASE READY
+
+PR #62 merged
+feat/v0.4.0-a7-history complete
+
+main at 9e4fcd9 (v0.4.0-a6 lineage + closure #57 + record fix #59 + D2 pins #58 #60 + x/text #61)
+
+A8 NOT STARTED
 ```
+
+## v0.4.0-a7 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a7`. Do not create
+`chore/v0.4.0-a7-freeze`.
+
+```text
+feature → release                  DONE
+release CI                         PASS
+freeze                             ACTIVE
+final release PR → main            PENDING
+tag                                PENDING
+draft prerelease                   PENDING
+publication                        PENDING
+package managers                   MUST STAY v0.3.3
+```
+
+Feature branch of record: `feat/v0.4.0-a7-history` at
+`03de4badbf377b70f0e66aff69a9b227b5777eff`, merged by pull request #62 into
+`release/v0.4.0-a7` at `2f3124ab6de75945b52a0903a7fa3df29687b3dc`
+(2026-10-31T12:05:11Z). Pull request #62 was merged by its author without an
+approving review, through the owner bypass of the `protect-release-branches`
+pull request rule. Its CI of record is GitHub Actions run `41197808480` on
+`03de4ba` (9 checks green). Release CI of record before freeze: GitHub
+Actions run `41199539224` on the merge commit (9 checks green).
 
 ## v0.4.0-a6 release record
 

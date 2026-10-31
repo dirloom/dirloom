@@ -1,6 +1,6 @@
 # ADR 0007 — Structural history
 
-> **Status:** proposed for `v0.4.0-a7`, revised after the CTO framing review of 2026-10-30
+> **Status:** accepted for `v0.4.0-a7`, revised after the CTO framing review of 2026-10-30
 >
 > **Date:** 2026-10-30
 
