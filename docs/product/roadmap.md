@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a6` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; A7 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a6` publiée et clôturée ; stable `v0.3.3` ; branche de release active `release/v0.4.0-a7` (historique structurel, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2190,7 +2190,7 @@ Frontière : un `MOVED` est une correspondance structurelle, pas la preuve d'un 
 
 ### v0.4.0-a6 — Git sources
 
-**Statut : publié (`v0.4.0-a6`), clôturé.** Sixième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`. A7 n'est pas démarrée.
+**Statut : publié (`v0.4.0-a6`), clôturé.** Sixième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
 
 Fonctions :
 
@@ -2202,6 +2202,22 @@ Fonctions :
 - Git 2.45 ou plus récent requis pour les sources `git:` uniquement.
 
 Frontière : comparaison structurelle, pas `git diff` (un changement de contenu seul n'est pas une différence). Pas d'index ni d'arbre de travail comme source, pas de récupération réseau, pas de récursion dans les sous-modules, pas de LFS ni de `.gitattributes`, pas de source Git pour `fingerprint`, `snapshot` ou `verify`, pas d'historique.
+
+### v0.4.0-a7 — Structural history
+
+**Statut : en développement sur `release/v0.4.0-a7`, non publié.** Septième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
+
+Fonctions :
+
+- commande `dirloom history [<revision>]` : parcours de la chaîne des premiers parents d'une révision (par défaut `HEAD`), une entrée par commit, du plus récent au plus ancien ;
+- pour chaque commit : Fingerprint v1 de l'arbre commité complet, nombre de nœuds, et résumé des chemins ajoutés, supprimés, modifiés et déplacés par rapport au premier parent (l'arbre vide pour un commit racine), identique au résumé de `dirloom diff git:<commit>^ git:<commit>` ;
+- `structural` vrai exactement quand le résumé est non nul, donc quand l'empreinte change : un commit de contenu seul est « no structural change », et `--structural-only` le masque ;
+- arrêt après `--limit` commits (20 par défaut), avant `--from` (borne exclusive), à un commit racine ou à une frontière shallow, toujours nommé ; un commit de fusion est listé une fois, comparé à son premier parent ;
+- une seule session Git par exécution (au plus huit processus, quel que soit le nombre de commits), sortie transactionnelle, analyse stricte des objets commit ;
+- Structural History v1, History Result Schema v1 (avec politique d'évolution dès v1) et trois diagnostics : `git_commit_invalid`, `git_shallow_invalid`, `history_from_not_reached` ;
+- `history` devient un nom de commande : un dossier nommé `history` s'inspecte avec `dirloom ./history`.
+
+Frontière : historique structurel, pas `git log` : ni message, ni identité, ni contenu de fichier. Premier parent uniquement, pas de graphe complet ni de branches fusionnées, pas de récupération réseau, pas d'index ni d'arbre de travail, pas de cache persistant, pas de Time Machine ni de chemins modifiés par commit (ils restent dans `dirloom diff`).
 
 ## v0.5 — Scaffold & Architecture Packs
 

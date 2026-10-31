@@ -348,3 +348,58 @@ func TestDiffDocumentationDiscoverable(t *testing.T) {
 		}
 	}
 }
+
+func TestHistoryDocumentationDiscoverable(t *testing.T) {
+	read := func(parts ...string) string {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(append([]string{"..", ".."}, parts...)...))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return strings.ReplaceAll(string(data), "\r\n", "\n")
+	}
+	readme := read("README.md")
+	reference := read("docs", "reference", "history.md")
+	contract := read("docs", "contracts", "structural-history-v1.md")
+	schema := read("docs", "contracts", "history-result-v1.md")
+	adr := read("docs", "adr", "0007-structural-history.md")
+	architecture := read("docs", "architecture.md")
+	changelog := read("CHANGELOG.md")
+	for _, want := range []string{"dirloom history", "docs/reference/history.md", "History Result Schema v1", "--structural-only", "dirloom ./history"} {
+		if !strings.Contains(readme, want) {
+			t.Errorf("README missing %q", want)
+		}
+	}
+	for _, want := range []string{"## The walk", "first parent", "--from", "--limit", "--structural-only", "--no-moves", "Not `git log`", "### Shallow clones", "end: shallow",
+		"git_commit_invalid", "git_shallow_invalid", "history_from_not_reached", "dirloom ./history", "No commits to show.", "There is no exit 1", "merge-base",
+		"PowerShell", "GitLab", "structural-history-v1.md", "history-result-v1.md", "v0.4-a7.md"} {
+		if !strings.Contains(reference, want) {
+			t.Errorf("history reference missing %q", want)
+		}
+	}
+	// The reference shows the text golden verbatim, so the example cannot drift.
+	if golden := read("testdata", "history", "v1", "golden", "history.txt"); !strings.Contains(reference, golden) {
+		t.Error("history reference does not show the history.txt golden verbatim")
+	}
+	for _, want := range []string{"## Walk", "## Shallow boundary list", "## Commit objects", "## Complexity", "## Reference outcomes", "GIT_NO_REPLACE_OBJECTS=1", "253402300799", "16 MiB"} {
+		if !strings.Contains(contract, want) {
+			t.Errorf("Structural History contract missing %q", want)
+		}
+	}
+	for _, want := range []string{"schemaVersion: 1", "first-parent", "## Transactional output", "## Evolution policy", "history_observation_failure"} {
+		if !strings.Contains(schema, want) {
+			t.Errorf("History Result Schema missing %q", want)
+		}
+	}
+	if !strings.Contains(adr, "History Result Schema v1") || !strings.Contains(adr, "No persistent cache") {
+		t.Error("ADR 0007 missing the schema or the cache decision")
+	}
+	for _, want := range []string{"internal/history", "Structural History v1", "v0.4-a7 benchmarks"} {
+		if !strings.Contains(architecture, want) {
+			t.Errorf("architecture doc missing %q", want)
+		}
+	}
+	if !strings.Contains(changelog, "dirloom history") || !strings.Contains(changelog, "dirloom ./history") {
+		t.Error("CHANGELOG missing the history command or the directory name change")
+	}
+}
