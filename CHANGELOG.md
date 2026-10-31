@@ -4,6 +4,17 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add `dirloom history [<revision>]`, a structural history of a Git repository. It walks the first-parent chain of a revision (default `HEAD`) and lists one entry per commit, newest first: its tree, its parents, its committer date in UTC, the Fingerprint v1 of its whole committed tree, its node count, and a summary of the added, removed, changed and moved paths against its first parent (the empty tree for a root commit), equal to the summary of `dirloom diff git:<commit>^ git:<commit>`. `structural` is true exactly when that summary is not empty: a commit that changes only file contents is `no structural change`. The walk stops after `--limit` commits (default 20), before `--from` (exclusive), at a root commit or at a shallow boundary, and the output names the end. A merge is listed once and compared with its first parent. `--structural-only` hides the commits without a structural change, and `--no-moves` counts moves as removals plus additions. Only committed Git objects are read, through one Git session per run, never the working tree, the index or the network; commit messages and identities are never shown. There is no exit 1. Git 2.45 or newer is required.
+- Add History Result Schema v1 for `dirloom history --format json`, with an evolution policy from its first version: `metadata`, `range` (`to`, `from`, `limit`, `end`) and `entries`; at a shallow end the last entry has no `structural` or `summary`. Output is transactional: a failure at any commit yields one failure document, never a partial history.
+- Add three diagnostics, all `OBSERVATION_ERROR` (exit 5): `git_commit_invalid` (a malformed commit object, or one above 1 MiB), `git_shallow_invalid` (an unreadable, oversized or malformed shallow boundary list) and `history_from_not_reached` (`--from` is not on the first-parent chain).
+- Publish the Structural History v1 and History Result Schema v1 contracts, ADR 0007, the history reference and history benchmarks.
+
+### Changed
+
+- `history` is now a command name: `dirloom history` runs the structural history instead of inspecting a directory named `history`. Use `dirloom ./history` to inspect such a directory.
+
 ### Security
 
 - Update `golang.org/x/text` from v0.39.0 to v0.41.0 for GO-2026-6629, which affects versions before v0.41.0. Dirloom imports only `golang.org/x/text/unicode/norm`, which govulncheck reported as not calling the vulnerable code, and that package, its Unicode tables included, is byte-identical between the two versions: NFC canonicalization, Fingerprint v1 and every structural identity are unchanged.

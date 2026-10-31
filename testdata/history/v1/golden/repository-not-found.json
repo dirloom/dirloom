@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "code": "git_repository_not_found",
+    "message": "not inside a Git repository, or Git refused to open it"
+  }
+}

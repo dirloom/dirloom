@@ -3,6 +3,7 @@ package gitsource
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"strconv"
 	"strings"
 	"testing"
@@ -111,9 +112,7 @@ func FuzzReadResponse(f *testing.F) {
 }
 
 func asArtifactError(err error, target **artifact.Error) bool {
-	typed, ok := err.(*artifact.Error) //nolint:errorlint // readResponse returns unwrapped errors.
-	*target = typed
-	return ok
+	return errors.As(err, target)
 }
 
 func entry(mode, name string, id byte, size int) []byte {

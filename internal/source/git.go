@@ -43,25 +43,19 @@ func (g *Git) Observe(ctx context.Context) (*artifact.Artifact, error) {
 	if g.Scan.FilterPolicy != nil && g.Scan.FilterPolicy.OutputPath != "" {
 		return nil, artifact.InternalError("git source must not exclude a filesystem output path")
 	}
-	runner, err := gitsource.NewRunner(ctx, g.Dir)
+	session, err := gitsource.OpenSession(ctx, g.Dir)
 	if err != nil {
 		return nil, gitObservationError(err)
 	}
-	resolved, err := runner.Resolve(ctx, g.Revision)
+	resolved, err := session.Resolve(ctx, g.Revision)
 	if err != nil {
+		_ = session.Close()
 		return nil, gitObservationError(err)
 	}
-	batch, err := runner.StartBatch(ctx, resolved.Format)
-	if err != nil {
-		return nil, gitObservationError(err)
-	}
-	options := g.Scan
-	options.Backend = gitsource.NewBackend(batch)
-	options.RootLocation = resolved.Tree
-	model, scanErr := tree.NewScanner(options).Scan(ctx)
-	closeErr := batch.Close()
+	model, scanErr := scanGitTree(ctx, session, resolved.Tree, g.Scan)
+	closeErr := session.Close()
 	if scanErr != nil {
-		return nil, gitObservationError(scanErr)
+		return nil, scanErr
 	}
 	if closeErr != nil {
 		return nil, gitObservationError(closeErr)
@@ -72,6 +66,34 @@ func (g *Git) Observe(ctx context.Context) (*artifact.Artifact, error) {
 	}
 	g.tree, g.commit = resolved.Tree, resolved.Commit
 	return art, nil
+}
+
+// ObserveGitTree builds the artifact of one tree through an open session,
+// under the Capture Semantics of scan; it sets the scan's Backend and
+// RootLocation. A history observes many trees through one session this way.
+func ObserveGitTree(ctx context.Context, session *gitsource.Session, treeID string, scan tree.ScanOptions) (*artifact.Artifact, error) {
+	model, err := scanGitTree(ctx, session, treeID, scan)
+	if err != nil {
+		return nil, err
+	}
+	return FromTree(model, FromTreeOptions{PortableTargets: true})
+}
+
+func scanGitTree(ctx context.Context, session *gitsource.Session, treeID string, scan tree.ScanOptions) (*tree.Node, error) {
+	if scan.FilterPolicy != nil && scan.FilterPolicy.OutputPath != "" {
+		return nil, artifact.InternalError("git source must not exclude a filesystem output path")
+	}
+	backend, err := session.Backend()
+	if err != nil {
+		return nil, gitObservationError(err)
+	}
+	scan.Backend = backend
+	scan.RootLocation = treeID
+	model, err := tree.NewScanner(scan).Scan(ctx)
+	if err != nil {
+		return nil, gitObservationError(err)
+	}
+	return model, nil
 }
 
 // gitObservationError keeps the code of a typed error, with the full wrapped

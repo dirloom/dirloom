@@ -166,6 +166,14 @@ func (r *Runner) Resolve(ctx context.Context, revision string) (Resolved, error)
 	if err != nil {
 		return Resolved{}, err
 	}
+	return r.resolveIn(ctx, revision, format)
+}
+
+// resolveIn is Resolve for a repository whose object format is known.
+func (r *Runner) resolveIn(ctx context.Context, revision string, format ObjectFormat) (Resolved, error) {
+	if err := ValidateRevision(revision); err != nil {
+		return Resolved{}, artifact.InternalError("git revision reached resolution unchecked: %v", err)
+	}
 	id, err := r.revParse(ctx, revision, format)
 	if err != nil {
 		return Resolved{}, r.classify(ctx, err, revisionNotFound("the revision does not resolve in this repository"))

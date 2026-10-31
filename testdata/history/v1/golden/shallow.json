@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "OK",
+  "metadata": {
+    "historyVersion": 1,
+    "traversal": "first-parent",
+    "comparisonVersion": 1,
+    "identityProjectionVersion": 1,
+    "moveDetection": "structural-v1"
+  },
+  "range": {
+    "to": "5c260114ef8e3b4810b717d96445dd43fd2a0f7e",
+    "limit": 20,
+    "end": "shallow"
+  },
+  "entries": [
+    {
+      "commit": "5c260114ef8e3b4810b717d96445dd43fd2a0f7e",
+      "tree": "66b4ff58e2b63c631c338b4e1be271e85fbe3caf",
+      "parents": [
+        "f7bdaa24db2a1d5399165f9442f99aab6988a663",
+        "71b41a907b241a23b2888e06f84d4d6b7305cb2c"
+      ],
+      "committedAt": "2026-03-01T12:00:00Z",
+      "fingerprint": "dlm:v1:sha256:d64353a403b4e490fb6f944aeafbc0b75b8ff8f1c9e719a033b42a44fec21ba3",
+      "nodeCount": 10,
+      "structural": true,
+      "summary": {
+        "added": 2,
+        "removed": 0,
+        "changed": 0,
+        "moved": 0,
+        "total": 2
+      }
+    },
+    {
+      "commit": "f7bdaa24db2a1d5399165f9442f99aab6988a663",
+      "tree": "1fe1fd86e58919fe4fa69cbc78e019ecab0e2eeb",
+      "parents": [
+        "7f8faa081febe5b4dfb186e39895e6ae4e543a14"
+      ],
+      "committedAt": "2026-03-01T12:00:00Z",
+      "fingerprint": "dlm:v1:sha256:529776188001291f715a90f7e91cca8c66f1274007cbfb6e3bd50a65e2888f14",
+      "nodeCount": 8
+    }
+  ]
+}
