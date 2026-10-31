@@ -45,6 +45,12 @@ func Compute(art artifact.Artifact) (Fingerprint, error) {
 	if err != nil {
 		return Fingerprint{}, err
 	}
+	return FingerprintRecords(records)
+}
+
+// FingerprintRecords hashes records that are already Identity Projection v1
+// of an artifact, so a caller that keeps the records projects only once.
+func FingerprintRecords(records []Record) (Fingerprint, error) {
 	hash := sha256.New()
 	if err := EncodeV1(hash, records); err != nil {
 		return Fingerprint{}, err
