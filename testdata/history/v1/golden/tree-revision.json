@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "code": "git_revision_not_found",
+    "message": "the revision names object 67348ce3ac8b1e4b6ec0c7cde2098800620a8bc2, which is not a commit or does not exist"
+  }
+}
