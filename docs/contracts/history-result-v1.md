@@ -69,8 +69,8 @@ Ids are lowercase hex: 40 characters for SHA-1, 64 for SHA-256. Revision text, r
 
 Invariants a consumer may rely on:
 
-- the first listed commit is `range.to`, unless `entries` is empty;
-- each entry's first parent is the next entry's `commit`, except for entries hidden by `--structural-only`;
+- without `--structural-only`, the first listed commit is `range.to`, unless `entries` is empty; with it, `range.to` is listed first only when it changes the structure;
+- without `--structural-only`, each entry's first parent is the next entry's `commit`; with it, the entries keep that order, but hidden entries leave gaps;
 - `range.from`, when present, is never an entry's `commit`;
 - the number of commits examined is at most `range.limit`; with `end: limit` it equals `range.limit`.
 
