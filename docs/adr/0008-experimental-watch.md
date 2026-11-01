@@ -1,6 +1,6 @@
 # ADR 0008 — Experimental structural watch
 
-> **Status:** proposed for `v0.4.0-a8`, revised after the CTO framing review of 2026-11-01 and accepted the same day; LOT 0 (platform facts) conditionally authorized, contracts and implementation not yet
+> **Status:** proposed for `v0.4.0-a8`, revised after the CTO framing review of 2026-11-01 and accepted the same day; LOT 0 (platform facts) executed on 2026-11-01 and awaiting its review; contracts and implementation not yet authorized
 >
 > **Date:** 2026-11-01
 
@@ -175,7 +175,7 @@ Watch Event Schema v1 and Structural Watch v1 are excluded from the v0.4 RC cont
 - No new Go module if the native backends are confirmed by LOT 0; `golang.org/x/sys/unix` is then used for the first time, its module already required. If LOT 0 selects `fsnotify` for a platform, adding it follows the dependency review policy and is recorded here.
 - An idle native watch costs one full observation per reconciliation interval.
 - Adding the command means `dirloom watch` no longer inspects a directory named `watch`; `dirloom ./watch` still does. The reference and the CHANGELOG say so, as A7 did for `history`.
-- The backend details above rest on platform facts that have not yet been checked on real systems (implementation plan §2.1). LOT 0 checks them, with evidence, before the contracts are written; a fact that fails can amend this ADR, and the LOT 0 review approves the result before LOT 1.
+- The backend details above rest on platform facts that LOT 0 checked on real systems on 2026-11-01 (implementation plan §2.1, with evidence). Its findings propose amendments (plan §2.2) and a backend choice (plan §2.3): notably, on Windows any open directory handle prevents renaming the root's ancestors, and on macOS a native watch is limited by `kern.maxfilesperproc`. None is applied to this ADR before the LOT 0 review.
 - Real OS tests become part of CI on Linux, Windows and macOS; a successful compilation is not a proof of behavior. Timing-dependent tests wait on conditions, never on fixed sleeps.
 - Known limits are documented rather than hidden: missed notifications reported up to one reconciliation interval late, no operation log, rename pairs split across two cycles, non-atomic stdout, a root given through a link resolved once at startup, ancestor renames detected at the next observation, case-only renames as the platform reports them, an incomplete filesystem classification, and notification limits that depend on system settings (`fs.inotify.max_user_watches`, open-file limits).
 - Framing review decisions (CTO, 2026-11-01): architecture approved; Q2–Q4, Q6, Q8–Q13, Q15–Q17 as recommended; Q1 conditional on the LOT 0 comparison with `fsnotify`; Q5 revised to the explicit detection policy above; Q7 accepted with the control watch set (`--depth 0`); Q14 revised to periodic reconciliation (60 s initially); D0 `go1.26.10` with a check for a newer patch before branching; D1 `x/sys` v0.47.0 if F11 holds on every OS; D2 approved. P1 corrections: convergence, separate equivalence and serialization tests, generations not atomic on stdout, root always watched, blocked consumer. P2 corrections: filesystem policy, best-effort console close, precise privacy. Gate: LOT 0 conditionally authorized once this revision is accepted; LOT 1–10 after the review of the LOT 0 findings (plan §3.2).
