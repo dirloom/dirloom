@@ -31,12 +31,13 @@ A waiting Microsoft Winget merge does **not** reopen the milestone. The v0.2.0 c
 ```text
 RELEASE STATUS
 Latest stable release: v0.3.3
-Latest GitHub Pre-release: v0.4.0-a6
-v0.4.0-a7: frozen release candidate
+Latest GitHub Pre-release: v0.4.0-a7
+Active release branch: none
+v0.4.0-a7: published / closed
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
-GitHub Preview  ✅ v0.4.0-a6
+GitHub Preview  ✅ v0.4.0-a7
 Scoop           ✅ v0.3.3
 Homebrew        ✅ v0.3.3
 Winget          ✅ v0.3.3
