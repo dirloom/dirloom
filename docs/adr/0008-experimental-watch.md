@@ -1,6 +1,6 @@
 # ADR 0008 — Experimental structural watch
 
-> **Status:** proposed for `v0.4.0-a8`, revised after the CTO framing review of 2026-11-01 and accepted the same day; LOT 0 (platform facts) executed on 2026-11-01 and awaiting its review; contracts and implementation not yet authorized
+> **Status:** proposed for `v0.4.0-a8`, revised after the CTO framing review of 2026-11-01 and accepted the same day; revised again after the LOT 0 review of 2026-11-01 (platform facts, backend choice); contracts and implementation awaiting an explicit GO
 >
 > **Date:** 2026-11-01
 
@@ -54,7 +54,7 @@ A backend may drop a notification only when it can prove the notification cannot
 - its parent directory is not in the structural watch set (below); or
 - it reports a content or metadata change of an entry that is not a `.gitignore` (when `.gitignore` files apply) and, on Windows with hidden entries excluded, that does not change the entry's hidden attribute.
 
-Anything uncertain is relevant: an unknown path, an unresolved rename, a Windows short name, an undecodable name, a check that fails. Over-signalling costs one observation; under-signalling would break correctness. **The contract is that content-only edits produce no structural event.** Avoiding the observation itself is an optimization that depends on what the backend reports: kqueue, for instance, gives no entry names, so no backend-independent "zero observation" promise is made.
+Anything uncertain is relevant: an unknown path, an unresolved rename, a Windows short name, an undecodable name, a check that fails. Over-signalling costs one observation; under-signalling would break correctness. **The contract is that content-only edits produce no structural event.** Avoiding the observation itself is an optimization that depends on what the backend reports; LOT 0 showed that all three backends allow it (kqueue gives no entry names, but its directory `NOTE_WRITE` stays silent for content edits), so it is tested as such, not promised by the contract.
 
 ### Debounce and coalescing
 
@@ -63,9 +63,10 @@ Relevant signals set one dirty flag. A cycle starts after `--debounce` of quiet 
 ### Two watch sets
 
 - The **structural watch set** is what Capture Semantics makes observable: the root and every captured directory the last observation entered. It never includes `.git`, `node_modules`, ignored subtrees, links, or directories at or beyond the depth limit; with `--depth 0` it is empty.
-- The **control watch set** is what detecting the loss of the root needs, at every depth, `--depth 0` included: a registration that reports the root's removal, rename or replacement. It produces no structural event, only the fatal root condition. A rename of an ancestor of the root is detected at the next observation (at the latest one reconciliation interval later), when the root's identity is checked.
+- The **control watch set** is what detecting the loss of the root needs, at every depth, `--depth 0` included: a registration that reports the root's removal, rename or replacement. It produces no structural event, only the fatal root condition. A rename of an ancestor of the root is detected at the next observation (at the latest one reconciliation interval later), when the root's identity is checked; on Windows such a rename is refused while a native watch runs (below).
+- The root's identity is captured at startup: on Windows the volume serial number and file id read through a handle, on Unix (device, inode). It is never a stored `FileInfo` compared later with `os.SameFile`, which on Windows reads the id by path at comparison time (LOT 0, F16).
 
-### Native backends, compared with `fsnotify` in LOT 0
+### Native backends on `golang.org/x/sys`
 
 | Platform | Mechanism | Structural registrations | Control registrations |
 | --- | --- | --- | --- |
@@ -73,17 +74,31 @@ Relevant signals set one dirty flag. A cycle starts after `--debounce` of quiet 
 | Linux | inotify | one watch per structural directory: entry creation, deletion and moves, self deletion and move, close-after-write for `.gitignore`; never follows links | the root's watch, with its self events, at every depth |
 | macOS | kqueue | one `O_EVTONLY` descriptor per structural directory (`NOTE_WRITE`, `NOTE_DELETE`, `NOTE_RENAME`, `NOTE_REVOKE`), plus one per `.gitignore` when `.gitignore` files apply | the root's descriptor, at every depth |
 
-Per-directory registrations are reconciled after every observation and are dropped on the backend's own removal notice, not only on an identity mismatch, because file identities can be reused. Any change to the registrations is followed by one verification observation, which closes the window between the creation of a directory and its registration.
+Per-directory registrations are keyed by path and by the (device, inode) they had when registered. A registration is dropped on the backend's own removal notice, because inode numbers can be reused at once (LOT 0: 200 reuses in 200 fast recreations on Linux); and after each observation when its path is no longer a structural directory (a moved directory keeps its inotify watch, with no removal notice) or when the directory now at that path has another (device, inode) (a filesystem mounted over a registered directory hides its changes). Any change to the registrations is followed by one verification observation, which closes the window between the creation of a directory and its registration (LOT 0: a burst below a new directory is not notified before it is registered). Notification names are never trusted: a registration follows its directory when it moves, and the Windows root handle then names entries under the old root path.
 
-The preferred implementation is direct on `golang.org/x/sys/unix` and `golang.org/x/sys/windows`: no new module. This choice is **conditional**: LOT 0 prototypes the same backends with `fsnotify` on the three operating systems and compares descriptor and handle counts, registration time, overflow reporting, root-loss detection, the ability to ignore content writes, and the code to maintain. The LOT 0 review records the final choice, which may differ per platform.
+The backends are written directly on `golang.org/x/sys/unix` and `golang.org/x/sys/windows` v0.47.0: no new module. LOT 0 compared them with `fsnotify` v1.10.1 on the three operating systems and the LOT 0 review chose them on every platform. On Windows, one recursive handle replaces one per directory (2 against 10,114 handles for 10,101 directories), and `fsnotify`'s `Add` blocks while events are undelivered. On macOS, one descriptor per directory replaces one per file (`fsnotify` failed with `EMFILE` after 3,697 of 10,101 directories). On Linux both are equivalent.
+
+Two platform limits of native mode are documented rather than worked around:
+
+- **Windows:** any open directory handle, this backend's or `fsnotify`'s, prevents renaming the root's **parent and ancestors** (`Access is denied`). The root and everything inside it can still be renamed and removed. `--poll` holds no handle.
+- **macOS:** a native watch holds one descriptor per structural directory, within `kern.maxfilesperproc` (10,240 on the CI runner), so about 10,200 structural directories. Beyond, `watch_limit_reached` names the setting and suggests `--poll` or a narrower capture.
 
 `--poll <interval>` replaces notifications by one observation per interval and produces the same structural results. It serves network and virtual filesystems, and is the test oracle for the native backends. It is never selected automatically: a silent fallback would change latency and cost without the user knowing.
 
 ### Filesystem detection: an explicit, testable policy
 
-In native mode, `watch` checks the type of the filesystem that holds the root against a **documented list of recognized network and virtual types** (fixed by LOT 0 from the `statfs` type on Linux, `f_fstypename` on macOS and `GetDriveType` on Windows) and refuses those with `watch_filesystem_unsupported`, suggesting `--poll`. This is a classification of known cases, not an exhaustive one:
+In native mode, `watch` checks the type of the filesystem that holds the root against a **documented list of recognized network and virtual types** and refuses those with `watch_filesystem_unsupported`, suggesting `--poll`:
 
-- an unrecognized type is accepted, and so is FUSE, whose notifications depend on each implementation;
+| Platform | Probe | Recognized |
+| --- | --- | --- |
+| Linux | `statfs` type | NFS, SMB, SMB2, CIFS, 9p, AFS, Ceph, Coda |
+| macOS | `statfs` `f_fstypename` | `nfs`, `smbfs`, `afpfs`, `webdav` |
+| Windows | `GetDriveType` of the root's volume | `DRIVE_REMOTE` |
+
+LOT 0 verified NFS on Linux, where a change made on the server side was never notified while a re-observation listed it, and `DRIVE_REMOTE` on a Windows UNC path; the reference marks the verified entries. This is a classification of known cases, not an exhaustive one:
+
+- an unrecognized type is accepted, and so is FUSE, whose notifications depend on each implementation (virtiofs reports the FUSE type);
+- a probe that fails (for example on a `subst` drive) means "unrecognized": accepted, never fatal;
 - mount points below the root are not checked;
 - `GetDriveType` does not characterize every Windows storage arrangement.
 
@@ -144,7 +159,7 @@ The stream never reveals the absolute path of the observed root, the host, the u
 - **Diff equivalence.** The node events of each generation equal the `changes` of `dirloom diff` between snapshots of the two observed states, with the same Capture Semantics and move detection.
 - **Structural equivalence across backends and platforms.** For the same scenario observed at quiescent checkpoints, every backend and platform reaches the same states (fingerprints, node counts) and the same net changes between checkpoints. Metadata that names the backend, and the grouping of changes into generations, may differ: grouping depends on timing.
 - **Serialization determinism.** The same state and the same generation are serialized to the same bytes on every platform.
-- **Not promised:** exactly-once delivery, a log of filesystem operations, the order of operations within a generation, atomic writes to stdout, a latency below the reconciliation interval when a backend misses a notification, `watch.stopped` after a Windows console close or a blocked stdout, or the classification of every network or virtual filesystem.
+- **Not promised:** exactly-once delivery, a log of filesystem operations, the order of operations within a generation, atomic writes to stdout, a latency below the reconciliation interval when a backend misses a notification, `watch.stopped` after a Windows console close or a blocked stdout, the classification of every network or virtual filesystem, renaming the root's ancestors on Windows while a native watch runs, or native macOS watches beyond the descriptor limit.
 
 ### Experimental policy
 
@@ -152,7 +167,7 @@ Watch Event Schema v1 and Structural Watch v1 are excluded from the v0.4 RC cont
 
 ## Alternatives considered
 
-- **`fsnotify`.** Mature and widely used, but its kqueue backend opens a descriptor for every file of a watched directory, which does not scale for a structural watcher that only needs directory entries; it watches Windows directories one by one; and it adds a module. Three native backends have a lasting maintenance cost too. Not rejected yet: LOT 0 measures both on real systems, and the LOT 0 review decides.
+- **`fsnotify`.** Mature and widely used, and three native backends have a lasting maintenance cost. LOT 0 measured v1.10.1 against the native prototypes: equivalent on Linux; on Windows one handle per directory (10,114 against 2), seconds of registration, and an `Add` that blocks while events are undelivered; on macOS one descriptor per file, failing with `EMFILE` after 3,697 of 10,101 directories. It also adds a module. Rejected at the LOT 0 review.
 - **FSEvents on macOS.** Recursive and efficient, but it needs cgo, while releases are built with `CGO_ENABLED=0` and cross-compiled. Rejected for v1.
 - **fanotify on Linux.** Recursive per filesystem, but it needs privileges or recent kernels depending on the mode. Rejected.
 - **Polling only.** Simple and portable, but latency and CPU cost grow with the tree. Kept as `--poll`, not as the default.
@@ -172,10 +187,11 @@ Watch Event Schema v1 and Structural Watch v1 are excluded from the v0.4 RC cont
 
 - New contracts, both experimental: Structural Watch v1 (observation model, reconciliation, relevance, debounce, watch sets, filesystem policy, rescans, termination, bounds, guarantees, backends, diagnostics) and Watch Event Schema v1 (NDJSON). Unchanged: Capture Semantics v1, Identity Projection v1, Canonical Identity Encoding v1, Fingerprint v1, Snapshot Schema v1, Verify Result Schema v1, Diff Result Schema v3, Move Detection `structural-v1`, Git Tree Source v1, Structural History v1, History Result Schema v1, and every existing command's output and exit codes.
 - New packages: `internal/watch` (engine, generations, rescans, writer, event model, validator) and `internal/watch/backend` (native backends and polling, behind build tags). `internal/app` gains `Watch`; `internal/cli` gains the `watch` command, its NDJSON encoder and its text renderer. Observation, projection, fingerprinting and comparison are reused unchanged.
-- No new Go module if the native backends are confirmed by LOT 0; `golang.org/x/sys/unix` is then used for the first time, its module already required. If LOT 0 selects `fsnotify` for a platform, adding it follows the dependency review policy and is recorded here.
+- No new Go module: `golang.org/x/sys/unix` is used for the first time, its module (v0.47.0) already required; LOT 0 compiled and exercised every call on its OS.
 - An idle native watch costs one full observation per reconciliation interval.
 - Adding the command means `dirloom watch` no longer inspects a directory named `watch`; `dirloom ./watch` still does. The reference and the CHANGELOG say so, as A7 did for `history`.
-- The backend details above rest on platform facts that LOT 0 checked on real systems on 2026-11-01 (implementation plan §2.1, with evidence). Its findings propose amendments (plan §2.2) and a backend choice (plan §2.3): notably, on Windows any open directory handle prevents renaming the root's ancestors, and on macOS a native watch is limited by `kern.maxfilesperproc`. None is applied to this ADR before the LOT 0 review.
+- The backend details above rest on platform facts that LOT 0 checked on real systems on 2026-11-01, on the three CI runners and a local Windows machine (implementation plan §2.1, with evidence). Not verified there, and documented as such: real editors (save sequences were simulated), Windows console close, real SMB, 9p, `\\wsl$` and virtiofs mounts, Windows volume mount points, and the narrowing of Windows hidden-attribute notifications.
 - Real OS tests become part of CI on Linux, Windows and macOS; a successful compilation is not a proof of behavior. Timing-dependent tests wait on conditions, never on fixed sleeps.
-- Known limits are documented rather than hidden: missed notifications reported up to one reconciliation interval late, no operation log, rename pairs split across two cycles, non-atomic stdout, a root given through a link resolved once at startup, ancestor renames detected at the next observation, case-only renames as the platform reports them, an incomplete filesystem classification, and notification limits that depend on system settings (`fs.inotify.max_user_watches`, open-file limits).
+- Known limits are documented rather than hidden: missed notifications reported up to one reconciliation interval late, no operation log, rename pairs split across two cycles, non-atomic stdout, a root given through a link resolved once at startup, ancestor renames detected at the next observation (refused on Windows in native mode), case-only renames as the platform reports them, an incomplete filesystem classification, the macOS descriptor budget, and notification limits that depend on system settings (`fs.inotify.max_user_watches`, `fs.inotify.max_user_instances`, `kern.maxfilesperproc`).
 - Framing review decisions (CTO, 2026-11-01): architecture approved; Q2–Q4, Q6, Q8–Q13, Q15–Q17 as recommended; Q1 conditional on the LOT 0 comparison with `fsnotify`; Q5 revised to the explicit detection policy above; Q7 accepted with the control watch set (`--depth 0`); Q14 revised to periodic reconciliation (60 s initially); D0 `go1.26.10` with a check for a newer patch before branching; D1 `x/sys` v0.47.0 if F11 holds on every OS; D2 approved. P1 corrections: convergence, separate equivalence and serialization tests, generations not atomic on stdout, root always watched, blocked consumer. P2 corrections: filesystem policy, best-effort console close, precise privacy. Gate: LOT 0 conditionally authorized once this revision is accepted; LOT 1–10 after the review of the LOT 0 findings (plan §3.2).
+- LOT 0 review decisions (CTO, 2026-11-01): the F1–F20 conclusions and their evidence validated; Q1 decided for native backends on `golang.org/x/sys` on the three platforms; amendments A1–A10 accepted (plan §3.4): the Windows ancestor lock documented instead of the F1 fallback, registrations reconciled by path and (device, inode), names never trusted, the macOS descriptor budget, the root identity captured at startup, failed filesystem probes accepted and the recognized list above, both Windows overflow forms, 60 s kept as the initial reconciliation interval. LOT 0 closed; its throwaway spike was removed from the branch. LOT 1–10 await an explicit GO.
