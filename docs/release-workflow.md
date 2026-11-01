@@ -182,7 +182,7 @@ draft prerelease                 DONE
 draft audit                      PASS
 publication                      DONE (after the explicit human GO)
 package managers                 SKIPPED
-branches                         PENDING (deletion by the owner)
+branches                         DELETED
 A7                               CLOSED
 ```
 
@@ -199,13 +199,14 @@ Recorded identifiers:
 - Release workflow: https://github.com/dirloom/dirloom/actions/runs/41314643035 (ended 2026-11-01T14:10:09Z on "Leave draft for human GO")
 - Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a7 (`publishedAt` `2026-11-01T14:23:24Z`)
 - Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/41315952437
-- `release/v0.4.0-a7` and `feat/v0.4.0-a7-history` are fully merged into `main`; their deletion on `origin` is left to the owner.
+- `release/v0.4.0-a7`, `feat/v0.4.0-a7-history` and `chore/close-v0.4.0-a7` deleted on `origin` after the closure (#64), at the owner's explicit request; `release/v0.4.0-a7` through the owner bypass of the `protect-release-branches` deletion rule.
 
 Ruleset bypasses used by the repository owner:
 
 - Pull request #62 merged by its author without an approving review (`protect-release-branches` requires one; the only collaborator is the author). The agent did not merge it: its merge policy forbids bypassing a required review.
 - Freeze commit pushed directly to `release/v0.4.0-a7` (pull request rule), as the freeze procedure prescribes.
 - Tag `v0.4.0-a7` created under `protect-release-tags` (creation restricted).
+- Branch `release/v0.4.0-a7` deleted under the `protect-release-branches` deletion rule, after the closure.
 
 Pull request #63 into `main` needed no bypass.
 
