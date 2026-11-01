@@ -30,8 +30,14 @@ func Classify(path string) (string, bool, error) {
 	return name, RemoteTypes[name], nil
 }
 
-// OpenHandles counts the process's open descriptors.
+// OpenHandles counts the process's open descriptors. It lists /dev/fd by
+// name only: stat-ing each entry fails on descriptors closed meanwhile.
 func OpenHandles() (int, error) {
-	entries, err := os.ReadDir("/dev/fd")
-	return len(entries), err
+	f, err := os.Open("/dev/fd")
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	names, err := f.Readdirnames(-1)
+	return len(names) - 1, err // minus the descriptor of /dev/fd itself
 }

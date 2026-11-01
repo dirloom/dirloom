@@ -48,14 +48,37 @@ func TestF1SharedHandle(t *testing.T) {
 	write(t, filepath.Join(moved, "after-rename.txt"), "x")
 	afterRename := drain(t, w)
 	parent2 := filepath.Join(base, "parent-renamed")
-	try("rename parent of root", func() error { return os.Rename(parent, parent2) })
-	final := filepath.Join(parent2, "root-renamed")
-	try("remove root tree", func() error { return os.RemoveAll(final) })
-	_, statOpen := os.Stat(final)
+	parentErr := os.Rename(parent, parent2)
+	if parentErr == nil {
+		parent = parent2
+		moved = filepath.Join(parent, "root-renamed")
+	}
+	try("remove root tree", func() error {
+		if err := os.RemoveAll(moved); err != nil {
+			return err
+		}
+		if _, err := os.Stat(moved); err == nil {
+			return fmt.Errorf("still present after RemoveAll")
+		}
+		return nil
+	})
 	_ = w.Close()
-	_, statClosed := os.Stat(final)
-	evidence(t, "F1", verdict(ok), "%s. Handle follows the moved root: notes after writing into it=[%s]. Stat of removed root while handle open: %v; after close: %v",
-		strings.Join(steps, "; "), summarize(moved, afterRename, 3), statOpen, statClosed)
+
+	// The same with the handle closed, and with fsnotify on a fresh root.
+	mkdirs(t, filepath.Join(parent, "root2", "sub"))
+	parentClosedErr := os.Rename(parent, filepath.Join(base, "parent-closed"))
+	if parentClosedErr == nil {
+		parent = filepath.Join(base, "parent-closed")
+	}
+	fsn, err := notify.NewFsnotify(filepath.Join(parent, "root2"), true)
+	if err != nil {
+		t.Fatalf("fsnotify: %v", err)
+	}
+	_ = fsn.Watch(filepath.Join(parent, "root2", "sub"))
+	parentFsnErr := os.Rename(parent, filepath.Join(base, "parent-fsn"))
+	_ = fsn.Close()
+	evidence(t, "F1", verdict(ok && parentErr == nil), "%s. Rename of the root's parent: with the recursive root handle open err=%v; after closing it err=%v; with fsnotify watching a root below it err=%v. The handle follows the moved root and names its entries under the old root path: notes after writing into the moved root=[%s]",
+		strings.Join(steps, "; "), parentErr, parentClosedErr, parentFsnErr, summarize(parent, afterRename, 3))
 }
 
 // TestF2Overflow provokes a buffer overflow with a small buffer.
@@ -250,6 +273,8 @@ func TestF16DepthZeroControl(t *testing.T) {
 	root := filepath.Join(parent, "root")
 	mkdirs(t, root)
 	info, _ := os.Stat(root)
+	lazy, _ := os.Stat(root)
+	_ = os.SameFile(info, info) // forces the file id to load now; lazy keeps Go's default
 	control, err := notify.NewControl(root)
 	if err != nil {
 		t.Fatalf("control: %v", err)
@@ -262,18 +287,20 @@ func TestF16DepthZeroControl(t *testing.T) {
 	replacedNotes := drain(t, control)
 	now, _ := os.Stat(root)
 	identityChanged := !os.SameFile(info, now)
+	lazyChanged := !os.SameFile(lazy, now)
 	removeErr := os.RemoveAll(root)
 	removed, removeLat, _ := waitFor(control, 3*time.Second, about)
 	mkdirs(t, root)
 	info2, _ := os.Stat(root)
+	_ = os.SameFile(info2, info2)
 	_ = drain(t, control)
 	ancErr := os.Rename(anc, filepath.Join(base, "anc2"))
 	ancNotes := drain(t, control)
 	_, statErr := os.Stat(root)
 	detected := statErr != nil || func() bool { s, _ := os.Stat(root); return !os.SameFile(info2, s) }()
 	ok := renamed && identityChanged && removed && (ancErr != nil || detected)
-	evidence(t, "F16", verdict(ok), "parent handle: root rename (err=%v) reported=%v in %s; replacement → notes [%s], identity changed=%v; removal reported=%v in %s (err=%v); ancestor rename err=%v → notes [%s], identity check detects=%v",
-		renameErr, renamed, ms(renameLat), summarize(parent, replacedNotes, 4), identityChanged, removed, ms(removeLat), removeErr, ancErr, summarize(base, ancNotes, 3), detected)
+	evidence(t, "F16", verdict(ok), "parent handle: root rename (err=%v) reported=%v in %s; replacement → notes [%s], identity changed=%v with the file id loaded at startup, %v with os.SameFile's lazy load (it reads the id by path when compared); removal reported=%v in %s (err=%v); ancestor rename err=%v → notes [%s], identity check detects=%v",
+		renameErr, renamed, ms(renameLat), summarize(parent, replacedNotes, 4), identityChanged, lazyChanged, removed, ms(removeLat), removeErr, ancErr, summarize(base, ancNotes, 3), detected)
 }
 
 // TestF18FastRecreate removes and recreates a directory under the recursive handle.

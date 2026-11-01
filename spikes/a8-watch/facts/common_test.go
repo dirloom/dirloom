@@ -265,11 +265,13 @@ func TestF19Comparison(t *testing.T) {
 		regTime    time.Duration
 		regErr     error
 		handles    int
+		before     int
 		writeNotes int
 	}
 	measure := func(name string, start func(string) (notify.Notifier, error)) result {
 		r := result{name: name}
 		h0, _ := notify.OpenHandles()
+		r.before = h0
 		t0 := time.Now()
 		n, err := start(root)
 		if err != nil {
@@ -307,8 +309,8 @@ func TestF19Comparison(t *testing.T) {
 	native := measure("x/sys", notify.NewNative)
 	fsn := measure("fsnotify v1.10.1", func(root string) (notify.Notifier, error) { return notify.NewFsnotify(root, true) })
 	format := func(r result) string {
-		return fmt.Sprintf("%s: registrations=%d in %s, handles/descriptors held=%d, error=%v, notes for 200 content appends=%d",
-			r.name, r.registered, ms(r.regTime), r.handles, r.regErr, r.writeNotes)
+		return fmt.Sprintf("%s: registrations=%d in %s, handles/descriptors held=%d (process had %d before), error=%v, notes for 200 content appends=%d",
+			r.name, r.registered, ms(r.regTime), r.handles, r.before, r.regErr, r.writeNotes)
 	}
 	evidence(t, "F19", "INFO", "tree %d directories, %d entries (created in %s). %s. %s. Backend code: %s",
 		len(dirs), entries, ms(created), format(native), format(fsn), backendLines(t))
