@@ -18,16 +18,18 @@ const (
 	minimumVersion = "2.45"
 )
 
-// ObjectFormat is a repository's object id format.
+// ObjectFormat is a repository's object id format. EmptyTree is the id of
+// the empty tree, which Git serves in every repository of that format.
 type ObjectFormat struct {
-	Name    string
-	RawSize int
+	Name      string
+	RawSize   int
+	EmptyTree string
 }
 
 // The object formats Git Tree Source v1 reads.
 var (
-	SHA1   = ObjectFormat{Name: "sha1", RawSize: 20}
-	SHA256 = ObjectFormat{Name: "sha256", RawSize: 32}
+	SHA1   = ObjectFormat{Name: "sha1", RawSize: 20, EmptyTree: "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}
+	SHA256 = ObjectFormat{Name: "sha256", RawSize: 32, EmptyTree: "6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321"}
 )
 
 func objectFormatNamed(name string) (ObjectFormat, bool) {
@@ -113,6 +115,14 @@ func objectUnavailable(format string, args ...any) error {
 
 func treeInvalid(format string, args ...any) error {
 	return artifact.New(artifact.CodeGitTreeInvalid, fmt.Sprintf(format, args...), false)
+}
+
+func commitInvalid(format string, args ...any) error {
+	return artifact.New(artifact.CodeGitCommitInvalid, fmt.Sprintf(format, args...), false)
+}
+
+func shallowInvalid(format string, args ...any) error {
+	return artifact.New(artifact.CodeGitShallowInvalid, fmt.Sprintf(format, args...), false)
 }
 
 // quoteToken quotes a short, untrusted token for a diagnostic.

@@ -34,13 +34,13 @@ The dependency is isolated behind `internal/config` and `internal/presentation` 
 
 `golang.org/x/text/unicode/norm` provides Unicode NFC normalization for Canonical Structural Artifact paths and symlink targets. Dirloom does not implement a custom normalizer. Two distinct raw names that NFC to the same canonical path are a hard collision, never a silent merge. The module is maintained by the Go project and licensed under BSD-3-Clause.
 
-## git executable, for `git:` sources only
+## git executable, for `git:` sources and `dirloom history` only
 
-`dirloom diff` reads `git:<revision>` sources by running the `git` executable found on `PATH`, version 2.45 or newer. This is a runtime requirement of that source kind only: every other command, and `dirloom diff` on `snapshot:` and `live:` sources, never runs Git. It adds no Go module.
+`dirloom diff` reads `git:<revision>` sources, and `dirloom history` reads a revision's history, by running the `git` executable found on `PATH`, version 2.45 or newer. This is a runtime requirement of those two uses only: every other command, and `dirloom diff` on `snapshot:` and `live:` sources, never runs Git. It adds no Go module.
 
-Dirloom deliberately does not embed a Go Git library such as `go-git`. Using the installed Git gives exactly Git's repository discovery (subdirectories, linked worktrees, bare repositories, `GIT_DIR`), its object store (packs, alternates, partial clones, SHA-256) and its `safe.directory` policy, without reimplementing or lagging behind any of them, and without a large transitive dependency tree. The cost is a process per Git call, measured in the [v0.4-a6 benchmarks](benchmarks/v0.4-a6.md).
+Dirloom deliberately does not embed a Go Git library such as `go-git`. Using the installed Git gives exactly Git's repository discovery (subdirectories, linked worktrees, bare repositories, `GIT_DIR`), its object store (packs, alternates, partial clones, SHA-256) and its `safe.directory` policy, without reimplementing or lagging behind any of them, and without a large transitive dependency tree. The cost is a process per Git call, measured in the [v0.4-a6 benchmarks](benchmarks/v0.4-a6.md); a history shares one session across all its commits ([v0.4-a7 benchmarks](benchmarks/v0.4-a7.md)).
 
-Every invocation is hardened: an argument list without a shell, `-c protocol.allow=never`, `GIT_NO_LAZY_FETCH=1`, `GIT_NO_REPLACE_OBJECTS=1`, `GIT_TERMINAL_PROMPT=0` and `GIT_OPTIONAL_LOCKS=0`, and only `git version`, `git rev-parse` and `git cat-file`. Version 2.45 is the first with `GIT_NO_LAZY_FETCH`. See [Git Tree Source v1](contracts/git-tree-source-v1.md) and [ADR 0006](adr/0006-git-sources.md).
+Every invocation is hardened: an argument list without a shell, `-c protocol.allow=never`, `GIT_NO_LAZY_FETCH=1`, `GIT_NO_REPLACE_OBJECTS=1`, `GIT_TERMINAL_PROMPT=0` and `GIT_OPTIONAL_LOCKS=0`, and only `git version`, `git rev-parse` and `git cat-file`. Version 2.45 is the first with `GIT_NO_LAZY_FETCH`. See [Git Tree Source v1](contracts/git-tree-source-v1.md), [Structural History v1](contracts/structural-history-v1.md), [ADR 0006](adr/0006-git-sources.md) and [ADR 0007](adr/0007-structural-history.md).
 
 ## Review policy
 

@@ -23,9 +23,14 @@ cmd/dirloom
        │    ├─ internal/snapshot
        │    │    ├─ internal/artifact
        │    │    └─ internal/identity
-       │    └─ internal/comparison
+       │    ├─ internal/comparison
+       │    │    ├─ internal/source
+       │    │    └─ internal/identity
+       │    └─ internal/history
+       │         ├─ internal/gitsource
        │         ├─ internal/source
-       │         └─ internal/identity
+       │         ├─ internal/identity
+       │         └─ internal/comparison
        ├─ internal/render
        │    ├─ internal/diagram
        │    └─ internal/outputformat
@@ -41,12 +46,13 @@ cmd/dirloom
 
 - `internal/cli`: Cobra flags, validation, stable exit-code mapping and stream routing.
 - `internal/config`: strict YAML parsing, the immutable built-in preset catalog, project and user discovery, layered inspection and presentation resolution, provenance and diagnostics.
-- `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint`, `Snapshot`, `Verify`, and `Diff` application services.
+- `internal/app`: root and output resolution plus the reusable `Inspect`, `Fingerprint`, `Snapshot`, `Verify`, `Diff`, and `History` application services.
 - `internal/filter`: ordered filtering policies, explicit glob rules, hidden-file detection and the encapsulated Git-compatible matcher.
 - `internal/tree`: one scanner over a read-only `Backend` (the operating-system filesystem, or a Git tree), symlink handling, renderer-independent nodes and deterministic sorting. Capture Semantics, traversal order and error wording live in the scanner; a backend only reads.
 - `internal/artifact`: Canonical Structural Artifact v1, path canonicalization (NFC, `/`) and validation. No presentation or CLI dependency.
 - `internal/source`: `StructuralSource` abstraction, the FilesystemSource adapter over the scanner, and the Git source, which runs the same scanner over the Git backend and records the observed tree and commit.
-- `internal/gitsource`: Git Tree Source v1. A hardened runner for the `git` executable (fixed plumbing commands, no shell, no network, no replace objects, Git 2.45 or newer), revision resolution, one bounded `cat-file --batch` reader per observation, a strict tree parser, and the Git `tree.Backend`. Everything Git returns is untrusted input.
+- `internal/gitsource`: Git Tree Source v1. A hardened runner for the `git` executable (fixed plumbing commands, no shell, no network, no replace objects, Git 2.45 or newer), revision resolution, a session that owns one bounded `cat-file --batch` reader for the observations it serves (one session per diff side, one per history run), strict tree and commit parsers, the shallow boundary list, and the Git `tree.Backend`. Everything Git returns is untrusted input.
+- `internal/history`: Structural History v1. The first-parent walk over recorded parents, one tree observation per commit through one Git session, a fingerprint and a comparison summary per commit, the walk ends, and the result validator. No CLI or presentation dependency.
 - `internal/identity`: Identity Projection v1, Canonical Identity Encoding v1, SHA-256 fingerprint type, parser and JSON/text formatters.
 - `internal/snapshot`: Snapshot Schema v1, Capture Semantics v1, Artifact Projection v1, deterministic JSON encode/decode and shared self-verifying validator.
 - `internal/comparison`: StructuralDiff model, model validator, the O(N+M) comparison engine over Identity Projection v1, and the Move Detection structural-v1 detector with its shape index. No filesystem, CLI or presentation dependency.
@@ -130,3 +136,18 @@ git:<rev>  ──► Git backend ────────┘
 The revision is resolved to a tree with a few `git rev-parse` and `git cat-file -t` calls. One `git cat-file --batch` process then serves the observation: the backend reads a tree object only when the scanner enters that directory, so a subtree excluded by depth or ignore rules is never read. Each response is checked against the requested id, type and per-object size limit, and the process is closed, killed after a grace period if needed, and always waited for. A Git source never reads the working tree, the index or the network, and keeps link targets as recorded so the same revision yields the same artifact on every platform. Against a snapshot it uses the snapshot's Capture Semantics; against another revision it uses none. Contracts: [Git Tree Source v1](contracts/git-tree-source-v1.md), [Diff Result Schema v3](contracts/diff-result-v3.md), [ADR 0006](adr/0006-git-sources.md). Local performance snapshots: [v0.4-a6 benchmarks](benchmarks/v0.4-a6.md).
 
 The Move Detector is a pure post-pass over the two record lists and the merge result. It never observes a source and reads no contents. It interns rename-invariant subtree shapes, counts names and shapes over each whole tree, and relabels a REMOVED and an ADDED node as one MOVED only when the correspondence is unique. CHANGED entries and paths present on both sides are never touched, so expanding every MOVED gives back the merge result. Contracts: [Diff Result Schema v3](contracts/diff-result-v3.md), [Move Detection structural-v1](contracts/move-detection-structural-v1.md), [diff command](reference/diff.md), [ADR 0004](adr/0004-structural-diff.md), [ADR 0005](adr/0005-move-detection.md). Local performance snapshots: [v0.4-a4 benchmarks](benchmarks/v0.4-a4.md), [v0.4-a5 benchmarks](benchmarks/v0.4-a5.md).
+
+`dirloom history` lists how the structure of a Git repository changed along the first-parent chain of a revision. It reuses the Git source and the comparison engine without the CLI's diff path:
+
+```text
+revision ─► gitsource.Session (resolution, shallow boundary list, one cat-file --batch)
+               │
+               ▼  for each commit, newest first
+            commit object ─► tree ─► source.ObserveGitTree ─► artifact ─► Identity Projection v1
+               │                                                          ├─► Fingerprint v1
+               │                                                          └─► CompareRecords(base, commit) ─► summary
+               ▼
+            history.Result (validated, then rendered as text or History Result Schema v1)
+```
+
+One session serves the whole run, so the number of processes does not grow with the number of commits. Each tree is observed once, whole, without Capture Semantics: the base of one commit is the tree of the next, and only two artifacts are held at a time. Parents are read from the raw commit objects, with replace refs disabled; the shallow boundary list only explains a missing parent. The walk completes and the result is validated before any byte is written. Contracts: [Structural History v1](contracts/structural-history-v1.md), [History Result Schema v1](contracts/history-result-v1.md), [history command](reference/history.md), [ADR 0007](adr/0007-structural-history.md). Local performance snapshots: [v0.4-a7 benchmarks](benchmarks/v0.4-a7.md).

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "code": "history_from_not_reached",
+    "message": "the walk reached a root commit without meeting --from: it is not on the first-parent chain of the revision"
+  }
+}

@@ -1,0 +1,6 @@
+Structural History (first parent, 2 commits examined, end: limit)
+
+5c260114ef8e  2026-03-01T12:00:00Z  +2 -0 ~0 >0  merge (2 parents)
+f7bdaa24db2a  2026-03-01T12:00:00Z  +0 -1 ~0 >1
+
+Changed paths of a commit: dirloom diff git:<commit>^ git:<commit>

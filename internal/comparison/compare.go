@@ -38,21 +38,35 @@ func Compare(ctx context.Context, a, b source.Source, opts Options) (StructuralD
 	if err != nil {
 		return StructuralDiff{}, &SideError{Side: SideB, Err: err}
 	}
+	return CompareRecords(recordsA, recordsB, sourceRef(a, len(recordsA)), sourceRef(b, len(recordsB)), opts)
+}
+
+// CompareRecords compares the Identity Projection v1 records of two
+// already-observed sources: the two-way merge, then the move detection
+// strategy named by opts. refA and refB describe the sources; their node
+// counts are taken from the records. The result is validated before it is
+// returned.
+func CompareRecords(recordsA, recordsB []identity.Record, refA, refB SourceRef, opts Options) (StructuralDiff, error) {
+	if !opts.MoveDetection.Valid() {
+		return StructuralDiff{}, artifact.InternalError("unsupported move detection %q", opts.MoveDetection)
+	}
 	changes := mergeRecords(recordsA, recordsB)
 	if opts.MoveDetection == MoveDetectionStructuralV1 {
+		var err error
 		changes, err = detectMovesStructuralV1(recordsA, recordsB, changes)
 		if err != nil {
 			return StructuralDiff{}, err
 		}
 	}
+	refA.NodeCount, refB.NodeCount = len(recordsA), len(recordsB)
 	diff := StructuralDiff{
 		Metadata: Metadata{
 			ComparisonVersion:         Version,
 			IdentityProjectionVersion: identity.ProjectionVersion,
 			MoveDetection:             opts.MoveDetection,
 		},
-		SourceA: sourceRef(a, len(recordsA)),
-		SourceB: sourceRef(b, len(recordsB)),
+		SourceA: refA,
+		SourceB: refB,
 		Summary: summarize(changes),
 		Changes: changes,
 	}
