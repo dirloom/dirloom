@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/dirloom/dirloom/internal/artifact"
@@ -99,10 +100,11 @@ func TestIdentityTellsARecreatedDirectoryApart(t *testing.T) {
 			reused++
 		}
 		if after == before {
-			if before.Birth == 0 {
-				t.Skipf("this filesystem records no birth time and reused the file id (round %d)", i)
+			if before.Birth == 0 && before.Handle == "" && runtime.GOOS != "windows" {
+				t.Skipf("this filesystem provides neither a birth time nor a file handle, and reused the inode (round %d)", i)
 			}
-			t.Fatalf("round %d: a recreated directory kept the identity %+v", i, before)
+			t.Fatalf("round %d: a recreated directory kept the identity (volume %d, file %d, birth %d, handle %x)",
+				i, before.Volume, before.File, before.Birth, before.Handle)
 		}
 	}
 	t.Logf("file id reused in %d of 50 recreations", reused)

@@ -2,6 +2,7 @@ package watch
 
 import (
 	"os"
+	"strconv"
 
 	"golang.org/x/sys/unix"
 )
@@ -18,6 +19,11 @@ func identityOf(path string) (Identity, error) {
 	id := Identity{Volume: unix.Mkdev(st.Dev_major, st.Dev_minor), File: st.Ino}
 	if st.Mask&unix.STATX_BTIME != 0 {
 		id.Birth = st.Btime.Sec*1e9 + int64(st.Btime.Nsec)
+	}
+	// A filesystem that cannot export handles (EOPNOTSUPP) keeps the other
+	// fields only.
+	if handle, _, err := unix.NameToHandleAt(unix.AT_FDCWD, path, unix.AT_SYMLINK_FOLLOW); err == nil {
+		id.Handle = strconv.Itoa(int(handle.Type())) + ":" + string(handle.Bytes())
 	}
 	return id, nil
 }

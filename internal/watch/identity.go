@@ -10,16 +10,23 @@ import (
 
 // Identity identifies a directory independently of its path, so that a
 // directory removed and recreated under the same path, or another directory
-// moved there, is told apart from the one captured at startup. On Linux and
-// macOS it is the device, the inode and, where the filesystem records one,
-// the birth time: inode numbers are reused at once after a removal (LOT 0,
-// F18), the birth time is not. On Windows it is the volume serial number and
-// the file index, whose NTFS sequence number changes on reuse; the creation
-// time is left out because NTFS tunneling can restore it.
+// moved there, is told apart from the one captured at startup. Inode numbers
+// are reused at once after a removal (LOT 0, F18), so the inode alone is not
+// enough:
+//
+//   - Linux: the device, the inode, the birth time where recorded, and the
+//     file handle of name_to_handle_at where the filesystem provides one. The
+//     handle carries the inode generation, which changes on reuse; the birth
+//     time does not always, because ext4 timestamps are coarse.
+//   - macOS: the device, the inode and the birth time.
+//   - Windows: the volume serial number and the file index, whose NTFS
+//     sequence number changes on reuse; the creation time is left out
+//     because NTFS tunneling can restore it.
 type Identity struct {
 	Volume uint64
 	File   uint64
-	Birth  int64 // nanoseconds since the Unix epoch; 0 when not recorded
+	Birth  int64  // nanoseconds since the Unix epoch; 0 when not recorded
+	Handle string // opaque file handle (Linux); empty when not provided
 }
 
 // ErrNotDirectory reports that a path names something other than a

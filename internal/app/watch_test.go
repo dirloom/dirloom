@@ -440,8 +440,8 @@ func TestWatchRootLossEndsTheWatch(t *testing.T) {
 			root := filepath.Join(t.TempDir(), "root")
 			mkdirAll(t, filepath.Join(root, "a"))
 			if tc.name == "recreated" {
-				if id, _ := watch.IdentityOf(root); id.Birth == 0 && runtime.GOOS != "windows" {
-					t.Skip("no birth time on this filesystem: a recreated root may reuse its inode")
+				if id, _ := watch.IdentityOf(root); id.Birth == 0 && id.Handle == "" && runtime.GOOS != "windows" {
+					t.Skip("neither a birth time nor a file handle on this filesystem: a recreated root may reuse its inode")
 				}
 			}
 			request := pollRequest(root)
