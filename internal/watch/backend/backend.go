@@ -5,7 +5,6 @@
 package backend
 
 import (
-	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/snapshot"
 	"github.com/dirloom/dirloom/internal/watch"
 )
@@ -22,15 +21,3 @@ type Options struct {
 // filesystem policy and registers the control set; every failure surfaces
 // there, as a startup failure of the watch.
 func New(opts Options) watch.Backend { return newNative(opts) }
-
-// unavailable is the backend of a platform without native notifications.
-type unavailable struct{}
-
-func (unavailable) Start(watch.Signals) error {
-	return artifact.New(artifact.CodeWatchBackendFailure,
-		"native filesystem notifications are not available on this platform; use --poll", false)
-}
-
-func (unavailable) Reconcile(watch.Observation) (bool, error) { return false, nil }
-
-func (unavailable) Close() error { return nil }
