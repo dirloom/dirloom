@@ -35,6 +35,8 @@ jobs:
         run: go vet ./...
       - name: Test
         run: go test -count=1 ./...
+      - name: Root identity evidence
+        run: go test -count=1 -v -run 'TestIdentityTellsARecreatedDirectoryApart|TestWatchRootLossEndsTheWatch' ./internal/watch/ ./internal/app/
       - name: Race detector (watch)
         env:
           CGO_ENABLED: "1"

@@ -42,7 +42,7 @@ A notification never stands for a change: the content of a notification (an entr
 ## Startup
 
 1. The request is validated and Capture Semantics v1 resolved.
-2. The absolute root is resolved, following a root link as the scanner does, and its **identity** is captured at once: on Windows the volume serial number and file id read through a handle, on Unix (device, inode). A stored file description compared later by path (as `os.SameFile` does on Windows) is not an identity.
+2. The absolute root is resolved, following a root link as the scanner does, and its **identity** is captured at once: on Windows the volume serial number and file index read through a handle (opened with every share mode and closed at once); on macOS the device, the inode and the birth time; on Linux the device, the inode, the birth time where recorded, and the file handle where the filesystem provides one, which carries the inode generation. An inode number can be reused as soon as a directory is removed, and a coarse birth time may repeat; the generation changes. A stored file description compared later by path (as `os.SameFile` does on Windows) is not an identity. The root is checked against this identity before every observation.
 3. Native mode: the [filesystem policy](#filesystem-policy) is applied to the root.
 4. The backend starts with its [control registrations](#watch-sets). On Windows it also opens the recursive root handle and issues its first read; on Linux and macOS it registers the root.
 5. The first observation is made. A root that is missing, not a directory, or unreadable is fatal at once (`watch_root_unavailable`). Any other failure is retried silently on the [error backoff](#timing) for at most 5 s, then it is fatal with its own code.
