@@ -45,7 +45,7 @@ A notification never stands for a change: the content of a notification (an entr
 2. The absolute root is resolved, following a root link as the scanner does, and its **identity** is captured at once: on Windows the volume serial number and file id read through a handle, on Unix (device, inode). A stored file description compared later by path (as `os.SameFile` does on Windows) is not an identity.
 3. Native mode: the [filesystem policy](#filesystem-policy) is applied to the root.
 4. The backend starts with its [control registrations](#watch-sets). On Windows it also opens the recursive root handle and issues its first read; on Linux and macOS it registers the root.
-5. The first observation is made. A root that is missing, not a directory, or unreadable is fatal at once (`watch_root_unavailable`). Any other failure is retried on the [error backoff](#timing) for at most 5 s, then it is fatal with its own code.
+5. The first observation is made. A root that is missing, not a directory, or unreadable is fatal at once (`watch_root_unavailable`). Any other failure is retried silently on the [error backoff](#timing) for at most 5 s, then it is fatal with its own code.
 6. Linux and macOS: the structural watch set of this state is registered, and one **verification observation** is scheduled.
 7. `watch.started` is published with generation 0, and, in native mode, the reconciliation timer starts.
 
@@ -175,7 +175,7 @@ A fatal condition publishes `watch.error` (`fatal: true`), then `watch.stopped` 
 
 ## Termination
 
-- **Controlled interruption.** Ctrl+C and `CTRL_BREAK_EVENT` (`os.Interrupt`), `SIGINT`, and `SIGTERM` on Unix through a handler installed by `watch` only. An observation in progress is abandoned, the backend is closed (descriptors, kqueue, Windows handles after their reads are cancelled), its goroutines end, `watch.stopped` (`interrupted`) is published, and the process exits 0.
+- **Controlled interruption.** Ctrl+C and `CTRL_BREAK_EVENT` (`os.Interrupt`), `SIGINT`, and `SIGTERM` on Unix through a handler installed by `watch` only. An observation in progress is abandoned, the backend is closed (descriptors, kqueue, Windows handles after their reads are cancelled), its goroutines end, `watch.stopped` (`interrupted`) is published, and the process exits 0. Before the first state, `watch.stopped` is the only line, without generation or fingerprint.
 - **Blocked stdout.** All output goes through one writer. A blocking write to a pipe cannot be interrupted portably: when an interruption or a fatal condition arrives while a write is blocked, `watch` waits at most the output grace period; then it writes a best-effort diagnostic to stderr and exits 5 without `watch.stopped`. The process always ends; the stream it leaves is incomplete.
 - **Closed stdout.** Nothing more is written. On Unix the default `SIGPIPE` behavior applies; elsewhere `watch` exits 5 with a stderr diagnostic.
 - **Windows console close, logoff and shutdown** (delivered as `SIGTERM`): handled like an interruption, on a best-effort basis only; Windows may end the process before `watch.stopped` is written.

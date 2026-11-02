@@ -100,15 +100,16 @@ A node event is one change of [Diff Result Schema v3](diff-result-v3.md#change-v
 
 | Field | Value |
 | --- | --- |
-| `generation` | the last committed generation; absent in a startup failure |
+| `generation` | the last committed generation; absent when the stream ended before its first state |
 | `reason` | `interrupted` or `error` |
-| `fingerprint` | the state's fingerprint; absent in a startup failure |
+| `fingerprint` | the state's fingerprint; absent when the stream ended before its first state |
 
 ## Stream grammar
 
 ```text
 stream     = started { item } [ fatal ] stopped
            | fatal stopped                                 (startup failure)
+           | stopped (reason: interrupted)                 (interrupted before the first state)
 item       = generation | rescan-started | rescan-completed | error
 generation = node-event { node-event } state-changed
 error      = watch.error (fatal: false) [ rescan-started (reason: error) ]
@@ -119,14 +120,14 @@ A stream may also end anywhere without `watch.stopped`: the process was killed, 
 
 ### Startup failure
 
-When the run fails before its first state, the stream is exactly two lines: a fatal `watch.error` and `watch.stopped` (`error`), neither with `generation`, and `watch.stopped` without `fingerprint`.
+When the run fails before its first state, the stream is exactly two lines: a fatal `watch.error` and `watch.stopped` (`error`), neither with `generation`, and `watch.stopped` without `fingerprint`. When it is interrupted before its first state, the stream is exactly one line: `watch.stopped` (`interrupted`), without `generation` or `fingerprint`.
 
 ## Invariants
 
 A complete stream satisfies all of these; Dirloom's stream validator checks them in tests.
 
 1. Every line is one JSON object with `schemaVersion: 1` and a known `event`.
-2. The first line is `watch.started` with generation 0, or the first line of a startup failure.
+2. The first line is `watch.started` with generation 0, or the first line of a stream that ended before its first state ([Startup failure](#startup-failure)).
 3. Generations increase by exactly 1. The node events of a generation are contiguous, carry its number, are sorted by `path` as UTF-8 bytes, obey every Diff Result Schema v3 change rule, and are followed at once by its `state.changed`, whose `summary` counts them; `total` is at least 1.
 4. Each `state.changed` fingerprint differs from the previous state's.
 5. Any other line carries the last committed generation.
