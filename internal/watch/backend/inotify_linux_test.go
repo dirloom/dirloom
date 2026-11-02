@@ -53,9 +53,23 @@ func (r *recorder) update(f func()) {
 	}
 }
 
-func (r *recorder) Notify()        { r.update(func() { r.notifies++ }) }
-func (r *recorder) Overflow()      { r.update(func() { r.overflows++ }) }
-func (r *recorder) Fail(err error) { r.update(func() { r.fail = err }) }
+func (r *recorder) Notify()   { r.update(func() { r.notifies++ }) }
+func (r *recorder) Overflow() { r.update(func() { r.overflows++ }) }
+
+// Fail keeps the first failure, as the engine does.
+func (r *recorder) Fail(err error) {
+	r.update(func() {
+		if r.fail == nil {
+			r.fail = err
+		}
+	})
+}
+
+func (r *recorder) failure() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.fail
+}
 
 func (r *recorder) trace(ev inotifyEvent, relevant bool) {
 	r.update(func() { r.events = append(r.events, traced{ev.name, ev.mask, relevant}) })
@@ -259,8 +273,8 @@ func TestInotifyRootLossFails(t *testing.T) {
 				t.Fatal(err)
 			}
 			rec.waitFor(t, "a root failure", func(r *recorder) bool { return r.fail != nil })
-			if !rootUnavailable(rec.fail) {
-				t.Fatalf("Fail(%v), want watch_root_unavailable", rec.fail)
+			if !rootUnavailable(rec.failure()) {
+				t.Fatalf("Fail(%v), want watch_root_unavailable", rec.failure())
 			}
 			if tc.depth != nil && rec.relevantFor("child") {
 				t.Fatal("a change below --depth 0 was signalled")
