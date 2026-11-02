@@ -104,7 +104,7 @@ On Linux and macOS each member of the structural watch set is registered once, k
 - on the backend's own removal notice (`IN_IGNORED`, `NOTE_DELETE`, `NOTE_RENAME`, `NOTE_REVOKE`). Inode numbers can be reused at once, so an identity check alone cannot see a directory removed and recreated under the same path;
 - after an observation, when its path is no longer in the structural watch set (a moved directory keeps its inotify watch, now at its new path, with no removal notice), or when the directory now at that path has another (device, inode) (a filesystem mounted over a registered directory hides its changes).
 
-The path is then registered again if it is in the structural watch set.
+The path is then registered again if it is in the structural watch set. A directory that disappears or turns into a link before it is registered schedules a verification observation; one the system refuses to register for lack of permission is left to the reconciliation, without a verification loop.
 
 A rename of an ancestor of the root does not reach the control set. On Linux and macOS, the identity check of the next observation, at the latest one reconciliation interval later, makes it fatal. On Windows the rename is refused while a native watch runs ([Backends](#backends)).
 
