@@ -151,6 +151,15 @@ type runningWatch struct {
 
 func startWatch(t *testing.T, request WatchRequest) *runningWatch {
 	t.Helper()
+	return startWatchWith(t, request, nil)
+}
+
+// startWatchWith starts a watch whose engine configuration edit may adjust
+// (a shorter reconciliation interval, a wrapped backend). Once the watch has
+// ended, the test fails if it left a goroutine, a descriptor or a handle.
+func startWatchWith(t *testing.T, request WatchRequest, edit func(*watch.Config)) *runningWatch {
+	t.Helper()
+	checkReleased(t)
 	log := newEventLog()
 	cfg, err := watchConfig(request, log)
 	if err != nil {
@@ -158,6 +167,9 @@ func startWatch(t *testing.T, request WatchRequest) *runningWatch {
 	}
 	rec := &recordingObserver{Observer: cfg.Observer, observed: make(chan struct{}, 1), seen: map[identity.Fingerprint][]identity.Record{}}
 	cfg.Observer = rec
+	if edit != nil {
+		edit(&cfg)
+	}
 	engine, err := watch.New(cfg)
 	if err != nil {
 		t.Fatalf("watch.New: %v", err)
@@ -246,11 +258,12 @@ func checkDiffEquivalence(t *testing.T, events []watch.Event, rec *recordingObse
 	t.Helper()
 	var prev identity.Fingerprint
 	var nodes []comparison.Change
+	moves := comparison.MoveDetectionStructuralV1
 	generations := 0
 	for _, ev := range events {
 		switch {
 		case ev.Kind == watch.KindStarted:
-			prev = ev.Fingerprint
+			prev, moves = ev.Fingerprint, ev.Metadata.MoveDetection
 		case ev.Kind.IsNode():
 			nodes = append(nodes, ev.Change)
 		case ev.Kind == watch.KindStateChanged:
@@ -260,7 +273,7 @@ func checkDiffEquivalence(t *testing.T, events []watch.Event, rec *recordingObse
 				t.Fatalf("generation %d joins states that were not observed", ev.Generation)
 			}
 			ref := comparison.SourceRef{Kind: source.KindFilesystem}
-			diff, err := comparison.CompareRecords(before, after, ref, ref, comparison.Options{MoveDetection: comparison.MoveDetectionStructuralV1})
+			diff, err := comparison.CompareRecords(before, after, ref, ref, comparison.Options{MoveDetection: moves})
 			if err != nil {
 				t.Fatal(err)
 			}
