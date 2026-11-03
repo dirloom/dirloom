@@ -25,7 +25,7 @@ dirloom watch [<directory>] [--root <directory>] [--preset <name>] [--depth <n>]
 | `--poll <interval>` | the polling backend, one observation per interval; Go duration syntax, from 100 ms to 1 h |
 | `--format` | `text` (default, for people, not a contract) or `ndjson` ([Watch Event Schema v1](watch-event-v1.md)) |
 
-Usage errors (exit 2, stderr, before any output, whatever `--format`): two directory operands or an operand with `--root`; a duration outside its range or not in Go duration syntax; `--poll` together with `--debounce`; `--format json` (the message suggests `ndjson`) or any other format; `--color`, `--icons`, `--theme`, `--output`, `--copy`; a `git:`, `snapshot:` or `live:` operand; an invalid configuration, as for `dirloom fingerprint`. No filesystem handle is opened before the request is valid.
+Usage errors (exit 2, stderr, before any output, whatever `--format`): two directory operands or an operand with `--root`; a duration outside its range or not in Go duration syntax; `--poll` together with `--debounce`; `--format json` (the message suggests `ndjson`) or any other format; `--color`, `--icons`, `--theme`, `--output`, `--copy`; a `git:`, `snapshot:` or `live:` operand; an invalid configuration, as for `dirloom fingerprint`, and one that cannot be read (a watch has no exit status 1). No filesystem handle is opened before the request is valid.
 
 Capture Semantics v1 and the configuration are resolved **once, at startup**; a configuration change takes effect at the next start. The `.gitignore` files below the root belong to the observed state: when `.gitignore` files apply, every observation re-reads them. The reconciliation interval is not configurable in v1.
 
