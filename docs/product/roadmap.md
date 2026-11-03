@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a7` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; A8 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a7` publiée et clôturée ; stable `v0.3.3` ; `v0.4.0-a8` figée sur `release/v0.4.0-a8` (release ready, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2205,7 +2205,7 @@ Frontière : comparaison structurelle, pas `git diff` (un changement de contenu 
 
 ### v0.4.0-a7 — Structural history
 
-**Statut : publié (`v0.4.0-a7`), clôturé.** Septième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`. A8 n'est pas démarrée.
+**Statut : publié (`v0.4.0-a7`), clôturé.** Septième incrément de CHANGE, profil prerelease. Les canaux stables restent `v0.3.3`.
 
 Fonctions :
 
@@ -2218,6 +2218,21 @@ Fonctions :
 - `history` devient un nom de commande : un dossier nommé `history` s'inspecte avec `dirloom ./history`.
 
 Frontière : historique structurel, pas `git log` : ni message, ni identité, ni contenu de fichier. Premier parent uniquement, pas de graphe complet ni de branches fusionnées, pas de récupération réseau, pas d'index ni d'arbre de travail, pas de cache persistant, pas de Time Machine ni de chemins modifiés par commit (ils restent dans `dirloom diff`).
+
+### v0.4.0-a8 — Experimental structural watch
+
+**Statut : figé sur `release/v0.4.0-a8`, release ready, non publié.** La pull request de feature #66 est mergée. Huitième et dernier incrément fonctionnel de CHANGE, profil prerelease, **expérimental** : Structural Watch v1 et Watch Event Schema v1 sont exclus du gel des contrats de la RC v0.4.
+
+Fonctions :
+
+- commande `dirloom watch [répertoire]` : à chaque changement de la structure observée, une génération numérotée liste les changements par rapport au dernier état publié, les mêmes que `dirloom diff` entre les deux états ; contenus, horodatages et opérations ne sont pas rapportés ;
+- observation complète à chaque cycle, par le même chemin que `dirloom fingerprint` (filtres, presets, configuration) ; les notifications natives (inotify, `ReadDirectoryChangesW`, kqueue, sur `golang.org/x/sys`) ne décident que du moment d'observer ; réconciliation toutes les 60 s ; `--poll <intervalle>` sans notification ;
+- `--format ndjson` : Watch Event Schema v1, un événement JSON par ligne, une génération validée avant publication et engagée par son `state.changed` ; rescans `overflow`, `reconciliation` et `error` ;
+- `--no-moves`, `--debounce` ; interruption contrôlée (Ctrl+C, `SIGTERM` propre à `watch`) avec sortie 0, erreurs fatales en sortie 5, sortie bloquée bornée par un délai de grâce de 2 s ;
+- systèmes de fichiers réseau reconnus refusés en mode natif ; limites documentées : sous Windows, les parents de la racine ne peuvent pas être renommés pendant un watch natif ; sous macOS, un descripteur par répertoire surveillé ;
+- `watch` devient un nom de commande : un dossier nommé `watch` s'inspecte avec `dirloom ./watch`.
+
+Frontière : transitions structurelles entre états observés, pas journal d'opérations ; pas de contenu, pas de garantie de livraison unique, pas de FSEvents (cgo), pas de ré-observation par sous-arbre. Le `watch` stable reste prévu en v0.7.
 
 ## v0.5 — Scaffold & Architecture Packs
 

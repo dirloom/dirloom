@@ -141,27 +141,61 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a7` is the latest published GitHub Pre-release and is closed. The
-latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. No release branch is active. A8 has not started. `CHANGELOG.md`
-remains the unique source of truth for release notes. Do not open versioned
-feature pull requests against `main`.
+`v0.4.0-a7` is published and closed. It is the latest GitHub Pre-release.
+The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. `release/v0.4.0-a8` is frozen and release-ready. Feature pull
+request #66 is merged and feature work on `feat/v0.4.0-a8-watch` is
+complete. `main` carries the `v0.4.0-a7` release lineage plus its closure
+(#64) and the branch record (#65). `CHANGELOG.md` remains the unique source
+of truth for release notes. Do not open versioned feature pull requests
+against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a7` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | none |
+| Active release candidate | `v0.4.0-a8` on `release/v0.4.0-a8` |
+| Candidate state | FROZEN / RELEASE READY |
+| Feature pull request | #66 merged (`feat/v0.4.0-a8-watch`) |
 | Integration branch | `main` |
-| Profile | prerelease / CLI package |
-| A8 | NOT STARTED |
+| Profile | prerelease / CLI package, experimental watch |
 
 ```text
 v0.4.0-a7 published / closed
-latest stable v0.3.3
-active release branch: none
-A8 NOT STARTED
+
+release/v0.4.0-a8
+FROZEN / RELEASE READY
+
+PR #66 merged
+feat/v0.4.0-a8-watch complete
+
+main at f6ed5b4 (v0.4.0-a7 lineage + closure #64 + branch record #65)
 ```
+
+## v0.4.0-a8 freeze checklist
+
+The scope freeze lives on `release/v0.4.0-a8`. Do not create
+`chore/v0.4.0-a8-freeze`.
+
+```text
+feature → release                  DONE
+release CI                         PASS
+freeze                             ACTIVE
+final release PR → main            PENDING
+tag                                PENDING
+draft prerelease                   PENDING
+publication                        PENDING
+package managers                   MUST STAY v0.3.3
+```
+
+Feature branch of record: `feat/v0.4.0-a8-watch` at
+`36075c4117c2050d9f7babd74730374157db0c95`, merged by pull request #66 into
+`release/v0.4.0-a8` at `50d4c32437122c5b7ddf9ddbc53ba822b7afdebb`
+(2026-11-03T19:02:24Z). Pull request #66 was merged by its author without an
+approving review, through the owner bypass of the `protect-release-branches`
+pull request rule. Its CI of record is GitHub Actions run `41696257435` on
+`36075c4` (9 checks green). Release CI of record before freeze: GitHub
+Actions run `41699495144` on the merge commit (9 checks green).
 
 ## v0.4.0-a7 release record
 

@@ -36,6 +36,17 @@ const (
 	CodeHistoryFromNotReached = "history_from_not_reached"
 )
 
+// Structural Watch v1 codes. The first four end a watch; the last two are
+// fallbacks when no typed code exists.
+const (
+	CodeWatchRootUnavailable       = "watch_root_unavailable"
+	CodeWatchLimitReached          = "watch_limit_reached"
+	CodeWatchBackendFailure        = "watch_backend_failure"
+	CodeWatchFilesystemUnsupported = "watch_filesystem_unsupported"
+	CodeWatchObservationFailure    = "watch_observation_failure"
+	CodeWatchInternalFailure       = "watch_internal_failure"
+)
+
 // Error is a structured diagnostic. Internal marks a broken Dirloom invariant
 // rather than bad caller input or an unreadable source.
 type Error struct {

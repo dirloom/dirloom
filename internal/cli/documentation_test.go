@@ -403,3 +403,62 @@ func TestHistoryDocumentationDiscoverable(t *testing.T) {
 		t.Error("CHANGELOG missing the history command or the directory name change")
 	}
 }
+
+func TestWatchDocumentationDiscoverable(t *testing.T) {
+	read := func(parts ...string) string {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(append([]string{"..", ".."}, parts...)...))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return strings.ReplaceAll(string(data), "\r\n", "\n")
+	}
+	readme := read("README.md")
+	reference := read("docs", "reference", "watch.md")
+	contract := read("docs", "contracts", "structural-watch-v1.md")
+	schema := read("docs", "contracts", "watch-event-v1.md")
+	adr := read("docs", "adr", "0008-experimental-watch.md")
+	architecture := read("docs", "architecture.md")
+	changelog := read("CHANGELOG.md")
+	for _, want := range []string{"dirloom watch", "docs/reference/watch.md", "EXPERIMENTAL", "Watch Event Schema v1", "--poll", "dirloom ./watch"} {
+		if !strings.Contains(readme, want) {
+			t.Errorf("README missing %q", want)
+		}
+	}
+	for _, want := range []string{"EXPERIMENTAL", "## What a watch reports", "### Native notifications and reconciliation", "### Polling",
+		"## NDJSON output", "### Consuming a stream", "state.changed", "jq --unbuffered", "## Filesystems", "Verified on a real system",
+		"## Platform limits", "fs.inotify.max_user_watches", "kern.maxfilesperproc", "### Editor saves", "### Not verified",
+		"## Termination and exit codes", "There is no exit 1", "SIGPIPE", "## Privacy", "dirloom ./watch", "PowerShell",
+		"structural-watch-v1.md", "watch-event-v1.md", "0008-experimental-watch.md", "v0.4-a8.md"} {
+		if !strings.Contains(reference, want) {
+			t.Errorf("watch reference missing %q", want)
+		}
+	}
+	// The reference shows the text golden verbatim, so the example cannot drift.
+	if golden := read("testdata", "watch", "v1", "golden", "generations.txt"); !strings.Contains(reference, golden) {
+		t.Error("watch reference does not show the generations.txt golden verbatim")
+	}
+	for _, want := range []string{"## Startup", "## Reconciliation", "## Watch sets", "## Relevance", "## Rescans", "## Fatal conditions",
+		"## Termination", "## Filesystem policy", "## Guarantees", "## Reference outcomes", "experimental"} {
+		if !strings.Contains(contract, want) {
+			t.Errorf("Structural Watch contract missing %q", want)
+		}
+	}
+	for _, want := range []string{"schemaVersion: 1", "## Stream grammar", "## Invariants", "## Consuming a stream", "## Evolution and experimental policy",
+		"testdata/watch/v1/golden/"} {
+		if !strings.Contains(schema, want) {
+			t.Errorf("Watch Event Schema missing %q", want)
+		}
+	}
+	if !strings.Contains(adr, "Watch Event Schema v1") || !strings.Contains(adr, "accepted for `v0.4.0-a8`") {
+		t.Error("ADR 0008 missing the schema or its status")
+	}
+	for _, want := range []string{"internal/watch", "internal/watch/backend", "Structural Watch v1", "v0.4-a8 benchmarks"} {
+		if !strings.Contains(architecture, want) {
+			t.Errorf("architecture doc missing %q", want)
+		}
+	}
+	if !strings.Contains(changelog, "dirloom watch") || !strings.Contains(changelog, "dirloom ./watch") || !strings.Contains(changelog, "experimental") {
+		t.Error("CHANGELOG missing the watch command, the directory name change or the experimental status")
+	}
+}
