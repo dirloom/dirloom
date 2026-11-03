@@ -37,6 +37,9 @@ jobs:
         run: go test -count=1 ./...
       - name: Root identity evidence
         run: go test -count=1 -v -run 'TestIdentityTellsARecreatedDirectoryApart|TestWatchRootLossEndsTheWatch' ./internal/watch/ ./internal/app/
+      - name: Windows backend evidence
+        if: runner.os == 'Windows'
+        run: go test -count=1 -v -run 'TestRdcwBurstOverflowFrequency|TestRdcwAcceptsAFailedProbe|TestRdcwVolumePolicy|TestRdcwLocksTheRootsAncestorsOnly' ./internal/watch/backend/
       - name: Race detector (watch)
         env:
           CGO_ENABLED: "1"
