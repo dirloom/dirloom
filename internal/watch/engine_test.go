@@ -349,6 +349,21 @@ func TestStartupRootUnavailableIsImmediate(t *testing.T) {
 	}
 }
 
+func TestRootIsCheckedBeforeTheBackendStarts(t *testing.T) {
+	h := newHarness(t, observed(tree("a")))
+	h.obs.root = codedError(artifact.CodeWatchRootUnavailable)
+	h.backend.startErr = codedError(artifact.CodeWatchBackendFailure)
+	h.start(nil)
+	var f *Failure
+	if err := h.finish(); !errors.As(err, &f) || f.Diagnostic.Code != artifact.CodeWatchRootUnavailable {
+		t.Fatalf("Run = %v, want watch_root_unavailable", err)
+	}
+	h.expect(true, "error:watch_root_unavailable!", "stopped:error")
+	if h.backend.signals() != nil {
+		t.Fatal("the backend started on an unusable root")
+	}
+}
+
 func TestBackendStartFailureIsAStartupFailure(t *testing.T) {
 	h := newHarness(t, observed(tree("a")))
 	h.backend.startErr = codedError(artifact.CodeWatchFilesystemUnsupported)

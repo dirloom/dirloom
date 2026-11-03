@@ -200,6 +200,12 @@ func New(cfg Config) (*Engine, error) {
 func (e *Engine) Run(ctx context.Context) error {
 	e.out = startWriter(e.cfg.Sink)
 	defer e.out.close()
+	// The root's identity comes first (Structural Watch v1, startup): a root
+	// that is missing or not a directory is watch_root_unavailable, whatever
+	// a backend would make of it.
+	if err := e.cfg.Observer.CheckRoot(); err != nil {
+		return e.end(failure(err, artifact.CodeWatchRootUnavailable, false))
+	}
 	if e.cfg.Backend != nil {
 		if err := e.cfg.Backend.Start(e.sig); err != nil {
 			return e.end(failure(err, artifact.CodeWatchBackendFailure, false))
