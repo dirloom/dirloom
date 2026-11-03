@@ -43,6 +43,45 @@ jobs:
       - name: macOS backend evidence
         if: runner.os == 'macOS'
         run: go test -count=1 -v -run 'TestKqueue' ./internal/watch/backend/
+      - name: Build dirloom for the shell smoke
+        run: go build -o "$RUNNER_TEMP/dirloom$(go env GOEXE)" ./cmd/dirloom
+      - name: Shell exit-code smoke (bash)
+        run: |
+          d="$RUNNER_TEMP/dirloom$(go env GOEXE)"
+          expect() {
+            want=$1; shift
+            "$@" > /dev/null 2>&1; got=$?
+            if [ "$got" -ne "$want" ]; then echo "dirloom ${*:2} exited $got, want $want"; exit 1; fi
+          }
+          expect 2 "$d" watch --format json
+          expect 2 "$d" watch --poll 0s
+          expect 2 "$d" watch git:HEAD
+          expect 5 "$d" watch "$RUNNER_TEMP/missing" --format ndjson
+          if [ "$RUNNER_OS" != "Windows" ]; then
+            mkdir -p "$RUNNER_TEMP/smoke"
+            "$d" watch "$RUNNER_TEMP/smoke" --format ndjson --poll 100ms > "$RUNNER_TEMP/smoke.ndjson" &
+            pid=$!
+            for _ in $(seq 150); do grep -q watch.started "$RUNNER_TEMP/smoke.ndjson" && break; sleep 0.1; done
+            kill -TERM "$pid"
+            wait "$pid"; got=$?
+            if [ "$got" -ne 0 ]; then echo "SIGTERM: exit $got"; exit 1; fi
+            tail -n 1 "$RUNNER_TEMP/smoke.ndjson" | grep -q '"event":"watch.stopped","generation":0,"reason":"interrupted"'
+          fi
+      - name: Shell exit-code smoke (PowerShell)
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:RUNNER_TEMP ('dirloom' + $(if ($IsWindows) { '.exe' } else { '' }))
+          function Expect([int]$want, [string[]]$arguments) {
+            & $exe @arguments *> $null
+            if ($LASTEXITCODE -ne $want) { throw "dirloom $arguments exited $LASTEXITCODE, want $want" }
+          }
+          Expect 2 @('watch', '--format', 'json')
+          Expect 2 @('watch', '--color', 'always')
+          Expect 5 @('watch', (Join-Path $env:RUNNER_TEMP 'missing'), '--format', 'ndjson')
+          $lines = & $exe watch (Join-Path $env:RUNNER_TEMP 'missing') --format ndjson
+          if ($lines.Count -ne 2 -or $lines[1] -ne '{"schemaVersion":1,"event":"watch.stopped","reason":"error"}') {
+            throw "startup failure stream: $lines"
+          }
       - name: Race detector (watch)
         env:
           CGO_ENABLED: "1"
