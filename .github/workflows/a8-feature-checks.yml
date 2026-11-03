@@ -100,3 +100,36 @@ jobs:
         run: |
           go test -race -count=20 ./internal/watch/...
           go test -race -count=1 -run 'TestWatch' ./internal/app/ ./internal/cli/
+
+  benchmarks:
+    # The plan §16 benchmarks, ten minutes of idle watch included. They run
+    # only when the pushed commit's message mentions benchmarks.
+    name: Watch benchmarks (${{ matrix.os }})
+    if: contains(github.event.head_commit.message, 'benchmarks')
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-26.04, windows-latest, macos-latest]
+    defaults:
+      run:
+        shell: bash
+    env:
+      GOTOOLCHAIN: go1.26.10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Machine
+        run: |
+          uname -a
+          case "$RUNNER_OS" in
+            Linux) grep -m1 'model name' /proc/cpuinfo; nproc ;;
+            macOS) sysctl -n machdep.cpu.brand_string hw.ncpu ;;
+            Windows) powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; [Environment]::ProcessorCount' ;;
+          esac
+      - name: Benchmarks
+        run: go test ./internal/app -run '^$' -bench BenchmarkWatch -benchtime=1x -timeout 55m
