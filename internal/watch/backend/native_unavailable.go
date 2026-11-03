@@ -1,4 +1,4 @@
-//go:build !linux
+//go:build !linux && !windows
 
 package backend
 
@@ -7,8 +7,8 @@ import (
 	"github.com/dirloom/dirloom/internal/watch"
 )
 
-// newNative is the unavailable backend until LOTS 5–6 add the
-// ReadDirectoryChangesW and kqueue backends; Linux has inotify.
+// newNative is the unavailable backend until LOT 6 adds the kqueue
+// backend; Linux has inotify and Windows ReadDirectoryChangesW.
 func newNative(Options) watch.Backend { return unavailable{} }
 
 // unavailable is the backend of a platform without native notifications.

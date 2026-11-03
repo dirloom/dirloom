@@ -3,7 +3,9 @@ package backend
 import (
 	"encoding/binary"
 	"reflect"
+	"strings"
 	"testing"
+	"unicode/utf16"
 )
 
 // record encodes one inotify_event, its name padded to pad bytes.
@@ -76,6 +78,106 @@ func TestClassifyLinux(t *testing.T) {
 	} {
 		if got := classifyLinux(magic); got != want {
 			t.Errorf("classifyLinux(%#x) = %q, want %q", magic, got, want)
+		}
+	}
+}
+
+// notify encodes FILE_NOTIFY_INFORMATION records, chained in order.
+func notify(records ...notifyRecord) []byte {
+	var out []byte
+	for i, r := range records {
+		units := utf16.Encode([]rune(strings.ReplaceAll(r.path, "/", `\`)))
+		rec := make([]byte, notifyHeader+2*len(units))
+		for len(rec)%4 != 0 {
+			rec = append(rec, 0)
+		}
+		if i < len(records)-1 {
+			binary.LittleEndian.PutUint32(rec[0:], uint32(len(rec)))
+		}
+		binary.LittleEndian.PutUint32(rec[4:], r.action)
+		binary.LittleEndian.PutUint32(rec[8:], uint32(2*len(units)))
+		for j, u := range units {
+			binary.LittleEndian.PutUint16(rec[notifyHeader+2*j:], u)
+		}
+		out = append(out, rec...)
+	}
+	return out
+}
+
+func TestParseNotify(t *testing.T) {
+	want := []notifyRecord{
+		{actionAdded, "a/new.txt"},
+		{actionRenamedOld, "Old Name"},
+		{actionRenamedNew, "été/日本"},
+		{actionModified, "a/.gitignore"},
+	}
+	var got []notifyRecord
+	if err := parseNotify(notify(want...), func(r notifyRecord) { got = append(got, r) }); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("records %+v, want %+v", got, want)
+	}
+}
+
+func TestParseNotifyRejectsMalformedBuffers(t *testing.T) {
+	two := notify(notifyRecord{actionAdded, "a"}, notifyRecord{actionRemoved, "b"})
+	odd := notify(notifyRecord{actionAdded, "ab"})
+	binary.LittleEndian.PutUint32(odd[8:], 3)
+	backwards := append([]byte{}, two...)
+	binary.LittleEndian.PutUint32(backwards[0:], 4)
+	beyond := append([]byte{}, two...)
+	binary.LittleEndian.PutUint32(beyond[0:], 4096)
+	for name, buf := range map[string][]byte{
+		"short header":     two[:8],
+		"name beyond":      two[:notifyHeader+1],
+		"odd name length":  odd,
+		"offset too small": backwards,
+		"offset beyond":    beyond,
+		"empty":            nil,
+	} {
+		if err := parseNotify(buf, func(notifyRecord) {}); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
+func FuzzParseNotify(f *testing.F) {
+	f.Add(notify(notifyRecord{actionAdded, "a"}))
+	f.Add(notify(notifyRecord{actionAdded, "a/b"}, notifyRecord{actionModified, "c"}))
+	f.Add([]byte{0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0xd8, 0})
+	f.Fuzz(func(t *testing.T, buf []byte) {
+		count := 0
+		_ = parseNotify(buf, func(notifyRecord) { count++ })
+		if count > len(buf)/notifyHeader+1 {
+			t.Fatalf("%d records from %d bytes", count, len(buf))
+		}
+	})
+}
+
+func TestClassifyWindowsDrive(t *testing.T) {
+	for driveType, want := range map[uint32]string{0: "", 1: "", 2: "", 3: "", 4: "remote drive", 5: "", 6: ""} {
+		if got := classifyWindowsDrive(driveType); got != want {
+			t.Errorf("classifyWindowsDrive(%d) = %q, want %q", driveType, got, want)
+		}
+	}
+}
+
+func TestMayBeShortName(t *testing.T) {
+	for p, want := range map[string]bool{
+		"PROGRA~1":          true,
+		"LONGFI~1.TXT":      true,
+		"a/b/DOCUME~2/x":    true,
+		"~1":                true,
+		"file~":             false,
+		"my~file":           false,
+		"abcdefghi~1":       false, // longer than eight characters
+		"a~1.tar.gz":        false,
+		"README~1.markdown": false,
+		"":                  false,
+	} {
+		if got := mayBeShortName(p); got != want {
+			t.Errorf("mayBeShortName(%q) = %v, want %v", p, got, want)
 		}
 	}
 }

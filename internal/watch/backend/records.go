@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"strings"
+	"unicode/utf16"
 )
 
 // inotifyHeader is the fixed part of a struct inotify_event: wd, mask,
@@ -64,4 +66,83 @@ var linuxRefusedTypes = map[int64]string{
 // the type is accepted. Only the low 32 bits of f_type are significant.
 func classifyLinux(fsType int64) string {
 	return linuxRefusedTypes[fsType&0xffffffff]
+}
+
+// notifyHeader is the fixed part of a FILE_NOTIFY_INFORMATION record:
+// NextEntryOffset, Action and FileNameLength, little-endian 32-bit fields.
+const notifyHeader = 12
+
+// Windows FILE_ACTION_* values.
+const (
+	actionAdded      = 1
+	actionRemoved    = 2
+	actionModified   = 3
+	actionRenamedOld = 4
+	actionRenamedNew = 5
+)
+
+// notifyRecord is one decoded FILE_NOTIFY_INFORMATION record: the action
+// and the path relative to the watched directory, '/'-separated.
+type notifyRecord struct {
+	action uint32
+	path   string
+}
+
+var errBadNotifyRecord = errors.New("malformed FILE_NOTIFY_INFORMATION record")
+
+// parseNotify decodes a buffer filled by ReadDirectoryChangesW. Every
+// offset and length is checked against the buffer, and the chain must move
+// forward; a malformed buffer is an error, never a panic. Names are UTF-16;
+// an unpaired surrogate decodes to U+FFFD, so the path is still placed.
+func parseNotify(buf []byte, each func(notifyRecord)) error {
+	for {
+		if len(buf) < notifyHeader {
+			return errBadNotifyRecord
+		}
+		next := binary.LittleEndian.Uint32(buf[0:])
+		action := binary.LittleEndian.Uint32(buf[4:])
+		size := binary.LittleEndian.Uint32(buf[8:])
+		name := buf[notifyHeader:]
+		if size%2 != 0 || uint64(size) > uint64(len(name)) {
+			return errBadNotifyRecord
+		}
+		units := make([]uint16, size/2)
+		for i := range units {
+			units[i] = binary.LittleEndian.Uint16(name[2*i:])
+		}
+		each(notifyRecord{action: action, path: strings.ReplaceAll(string(utf16.Decode(units)), `\`, "/")})
+		if next == 0 {
+			return nil
+		}
+		if uint64(next) < notifyHeader || uint64(next) > uint64(len(buf)) {
+			return errBadNotifyRecord
+		}
+		buf = buf[next:]
+	}
+}
+
+// driveRemote is GetDriveType's DRIVE_REMOTE.
+const driveRemote = 4
+
+// classifyWindowsDrive returns the name of a refused drive type, or "" when
+// the type is accepted.
+func classifyWindowsDrive(driveType uint32) string {
+	if driveType == driveRemote {
+		return "remote drive"
+	}
+	return ""
+}
+
+// mayBeShortName reports whether a segment of a '/'-separated path may be
+// an 8.3 short name (NAME~N.EXT), which can name an entry of the last state
+// under another spelling.
+func mayBeShortName(p string) bool {
+	for _, seg := range strings.Split(p, "/") {
+		base, ext, _ := strings.Cut(seg, ".")
+		i := strings.IndexByte(base, '~')
+		if i >= 0 && i+1 < len(base) && base[i+1] >= '0' && base[i+1] <= '9' && len(base) <= 8 && len(ext) <= 3 {
+			return true
+		}
+	}
+	return false
 }
