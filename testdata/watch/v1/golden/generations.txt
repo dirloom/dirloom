@@ -1,0 +1,10 @@
+Watching structure (experimental, native): 9 nodes, dlm:v1:sha256:f89b3f9ff72bf58dec9d2e7db07f7334dce0309b230131ee51ceca746c0e0362
+#1  ~ current (target: docs -> src)
+#1  - docs/guide.md
+#1  + notes\tdraft.md
+#1  > shared/auth -> src/auth (subtree, 3 nodes)
+#1  + src/main.go
+#1  = 10 nodes, dlm:v1:sha256:bdc3cbdbeee5198e6ffc825c4b50d324d987d951e17bd42669f18fdbefa4fd78  (+2 -1 ~1 >1)
+#2  - src/main.go
+#2  = 9 nodes, dlm:v1:sha256:d3a101da4c4b19c34a692f433692819e2d3ad9cde2df794ed033d39eea1917d9  (+0 -1 ~0 >0)
+Stopped at #2.

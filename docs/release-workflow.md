@@ -143,24 +143,25 @@ package repository without making that the default path.
 
 `v0.4.0-a7` is the latest published GitHub Pre-release and is closed. The
 latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. No release branch is active. A8 has not started. `CHANGELOG.md`
-remains the unique source of truth for release notes. Do not open versioned
-feature pull requests against `main`.
+`v0.3.3`. A8 (experimental structural watch) is implemented on
+`feat/v0.4.0-a8-watch`, branched from `release/v0.4.0-a8`; its feature pull
+request is not opened. `CHANGELOG.md` remains the unique source of truth for
+release notes. Do not open versioned feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a7` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | none |
+| Active release branch | `release/v0.4.0-a8` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| A8 | NOT STARTED |
+| A8 | IMPLEMENTED ON `feat/v0.4.0-a8-watch` / FEATURE PR NOT OPENED |
 
 ```text
 v0.4.0-a7 published / closed
 latest stable v0.3.3
-active release branch: none
-A8 NOT STARTED
+active release branch: release/v0.4.0-a8
+A8 IMPLEMENTED ON FEATURE BRANCH / FEATURE PR NOT OPENED
 ```
 
 ## v0.4.0-a7 release record

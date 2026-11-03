@@ -1,0 +1,6 @@
+{"schemaVersion":1,"event":"watch.started","generation":0,"metadata":{"watchVersion":1,"stability":"experimental","comparisonVersion":1,"identityProjectionVersion":1,"moveDetection":"structural-v1","backend":"native"},"capture":{"depth":null,"dirsOnly":false,"hidden":false,"useDefaultIgnores":false,"useGitignore":false,"ignore":[]},"fingerprint":"dlm:v1:sha256:ed3235a764d84d4ea48b22585e4360cc5f4bed5e5d9419c3d2871e7fe733cb2f","nodeCount":2}
+{"schemaVersion":1,"event":"rescan.started","generation":0,"reason":"reconciliation"}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"b","after":{"kind":"file"}}
+{"schemaVersion":1,"event":"state.changed","generation":1,"fingerprint":"dlm:v1:sha256:3331799c5ba344ffd9635561ba8afcf2729b18257bd9bf6d3aa0ae7cec930630","nodeCount":3,"summary":{"added":1,"removed":0,"changed":0,"moved":0,"total":1}}
+{"schemaVersion":1,"event":"rescan.completed","generation":1,"fingerprint":"dlm:v1:sha256:3331799c5ba344ffd9635561ba8afcf2729b18257bd9bf6d3aa0ae7cec930630","nodeCount":3}
+{"schemaVersion":1,"event":"watch.stopped","generation":1,"reason":"interrupted","fingerprint":"dlm:v1:sha256:3331799c5ba344ffd9635561ba8afcf2729b18257bd9bf6d3aa0ae7cec930630"}

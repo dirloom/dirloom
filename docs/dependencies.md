@@ -18,6 +18,10 @@ Dirloom creates the matcher with an empty root and feeds only `.gitignore` files
 
 `golang.org/x/sys/windows` provides the typed bindings needed for safe output replacement, temporary `ENABLE_VIRTUAL_TERMINAL_PROCESSING` setup, and native clipboard access (`CF_UNICODETEXT`) on Windows. The standard library cannot guarantee replacement through `os.Rename` there and does not expose the required console-mode or clipboard operations. Using the official Go extended-system package avoids maintaining unsafe local syscall wrappers. `x/sys` is maintained by the Go project and licensed under BSD-3-Clause. Dirloom does not add a third-party clipboard library.
 
+`dirloom watch` uses the same module for its native backends: `golang.org/x/sys/unix` (used for the first time, for inotify on Linux, kqueue on macOS, `statfs` and the root's identity) and `golang.org/x/sys/windows` (`ReadDirectoryChangesW`, overlapped I/O, `GetDriveType`). The module version is unchanged.
+
+`github.com/fsnotify/fsnotify` was measured against these bindings on the three platforms before the backends were written, and not adopted. On Windows it opens one handle per directory instead of one recursive handle (10,114 handles held for 10,101 directories, 1.5 to 4.7 s to register them), reports content writes that a structural watch must then discard (10,298 notifications for 200 appends, against 198), blocks its `Add` while events are undelivered, and reported no rename of the root. On macOS it failed with `EMFILE` after 3,697 of 10,101 directories, holding one descriptor per file. On Linux both were equivalent. A structural watch also needs control over registrations (path and identity keys, the root's parent on Windows, `.gitignore` files on macOS) that the library does not expose. The three backends and their parsers take about 1,400 lines of Dirloom code, against a new third-party module.
+
 ## x/term v0.45.0
 
 `golang.org/x/term` provides cross-platform terminal detection through `IsTerminal`. Dirloom uses it only at the presentation boundary: scanning, canonical Markdown, JSON, diagram sources, theme inspection, diagnostics, help, and errors do not depend on terminal state.

@@ -4,6 +4,17 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Add `dirloom watch [directory]`, an **experimental** structural watch. Each time the observed structure of a directory changes, it reports the changes against the last reported state as one numbered generation: the same added, removed, changed and moved paths as `dirloom diff` between the two states. Every observation scans the whole tree with the capture rules of `dirloom fingerprint` (filters, presets, configuration); file contents, timestamps and the filesystem operations themselves are not reported, so editing a file reports nothing. Native notifications (inotify on Linux, `ReadDirectoryChangesW` on Windows, kqueue on macOS) only decide when to observe, after a debounce (`--debounce`, default 200 ms), and a reconciliation every 60 s reports, inside a rescan, what they missed; `--poll <interval>` observes at a fixed interval instead. `--no-moves` reports moves as removals and additions. Ctrl+C or `SIGTERM` ends the watch with `watch.stopped` and exit 0; a lost root, a backend failure, a resource limit or a refused filesystem exits 5, with the error in the stream; there is no exit 1. Recognized network filesystems are refused in native mode, with a message that suggests `--poll`.
+- Add Watch Event Schema v1 for `dirloom watch --format ndjson`: one compact JSON object per line (`watch.started`, `node.added`, `node.removed`, `node.changed`, `node.moved`, `state.changed`, `rescan.started`, `rescan.completed`, `watch.error`, `watch.stopped`). Each generation is validated before it is written, and a consumer commits it on its `state.changed`. A blocked stdout delays observations instead of queueing events, and an interruption waits for it at most 2 s.
+- Add the watch diagnostics `watch_root_unavailable`, `watch_limit_reached`, `watch_backend_failure`, `watch_filesystem_unsupported`, `watch_observation_failure` and `watch_internal_failure`.
+- Publish the Structural Watch v1 and Watch Event Schema v1 contracts, both experimental and excluded from the v0.4 RC contract freeze, ADR 0008, the watch reference and watch benchmarks.
+
+### Changed
+
+- `watch` is now a command name: `dirloom watch` runs the structural watch instead of inspecting a directory named `watch`. Use `dirloom ./watch` to inspect such a directory.
+
 ## [0.4.0-a7] - 2026-10-31
 
 CHANGE alpha: structural history (`dirloom history`), one Fingerprint v1

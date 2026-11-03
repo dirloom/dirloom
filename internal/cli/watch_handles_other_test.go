@@ -1,0 +1,10 @@
+//go:build !linux && !darwin && !windows
+
+package cli
+
+import "testing"
+
+const handleSlack = 0
+
+// openHandles is not measured on this platform.
+func openHandles(*testing.T) int { return 0 }

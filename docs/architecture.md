@@ -151,3 +151,24 @@ revision ─► gitsource.Session (resolution, shallow boundary list, one cat-fi
 ```
 
 One session serves the whole run, so the number of processes does not grow with the number of commits. Each tree is observed once, whole, without Capture Semantics: the base of one commit is the tree of the next, and only two artifacts are held at a time. Parents are read from the raw commit objects, with replace refs disabled; the shallow boundary list only explains a missing parent. The walk completes and the result is validated before any byte is written. Contracts: [Structural History v1](contracts/structural-history-v1.md), [History Result Schema v1](contracts/history-result-v1.md), [history command](reference/history.md), [ADR 0007](adr/0007-structural-history.md). Local performance snapshots: [v0.4-a7 benchmarks](benchmarks/v0.4-a7.md).
+
+`dirloom watch` (experimental) keeps a directory's observed structure and reports its transitions. It owns no structural model: every observation goes through the filesystem source of `dirloom fingerprint`, and every generation through the comparison engine:
+
+```text
+backend signals ─► internal/watch.Engine (flags, debounce, reconciliation and retry timers)
+                      │
+                      ▼  one cycle at a time
+                   app watch observer ─► filesystem source ─► artifact ─► Identity Projection v1 ─► Fingerprint v1
+                      │                    (root identity checked first)
+                      ▼
+                   CompareRecords(last state, observation) ─► generation, validated
+                      │
+                      ▼
+                   writer goroutine ─► NDJSONSink (Watch Event Schema v1) or TextSink
+```
+
+- `internal/watch`: the engine (an injectable clock, observer, backend and sink), the event model, the stream validator, the strict NDJSON decoder used by tests, the NDJSON encoder and the text renderer. Backend goroutines only set flags and wake the engine; one writer goroutine publishes, so a blocked stdout never blocks an interruption beyond the output grace period.
+- `internal/watch/backend`: the native backends behind build tags, on `golang.org/x/sys`: inotify per structural directory (Linux), one recursive `ReadDirectoryChangesW` handle plus a control handle on the root's parent (Windows), kqueue descriptors per structural directory and per `.gitignore` (macOS). Record parsers and the filesystem classification sit in files without build tags, so they are tested and fuzzed on every platform. Polling is the engine without a backend.
+- `internal/app.Watch` validates the request and builds the observer, which captures the root's identity at startup and checks it before every observation; `internal/cli` adds the `watch` command, its `SIGTERM` handling and the exit-code mapping.
+
+Contracts: [Structural Watch v1](contracts/structural-watch-v1.md), [Watch Event Schema v1](contracts/watch-event-v1.md), [watch command](reference/watch.md), [ADR 0008](adr/0008-experimental-watch.md). Measurements: [v0.4-a8 benchmarks](benchmarks/v0.4-a8.md).
