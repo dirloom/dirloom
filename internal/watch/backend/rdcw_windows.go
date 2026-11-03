@@ -70,6 +70,9 @@ func (b *rdcw) Start(sig watch.Signals) error {
 	}
 	stop, err := windows.CreateEvent(nil, 1, 0, nil)
 	if err != nil {
+		if outOfResources(err) {
+			return limitReached(handleLimit)
+		}
 		return backendFailure("create the stop event", err)
 	}
 	var root, parent *dirWatch
@@ -384,8 +387,11 @@ func refusedVolume(root string) string {
 }
 
 func openFailure(err error) error {
-	if errors.Is(err, windows.ERROR_FILE_NOT_FOUND) || errors.Is(err, windows.ERROR_PATH_NOT_FOUND) {
+	switch {
+	case errors.Is(err, windows.ERROR_FILE_NOT_FOUND), errors.Is(err, windows.ERROR_PATH_NOT_FOUND):
 		return artifact.New(artifact.CodeWatchRootUnavailable, "the watched root does not exist", false)
+	case outOfResources(err):
+		return limitReached(handleLimit)
 	}
 	return backendFailure("open the root for directory changes", err)
 }
@@ -393,12 +399,25 @@ func openFailure(err error) error {
 // rootReadFailure maps a failed read of the root: a directory removed while
 // its handle is open refuses access.
 func rootReadFailure(err error) error {
-	if errors.Is(err, windows.ERROR_ACCESS_DENIED) {
+	switch {
+	case errors.Is(err, windows.ERROR_ACCESS_DENIED):
 		return artifact.New(artifact.CodeWatchRootUnavailable, "the watched root was removed", false)
+	case outOfResources(err):
+		return limitReached(handleLimit)
 	}
 	return backendFailure("read directory changes", err)
 }
 
-func backendFailure(what string, err error) error {
-	return artifact.New(artifact.CodeWatchBackendFailure, what+": "+err.Error(), false)
+const handleLimit = "the system cannot allocate another handle or buffer for directory changes"
+
+// outOfResources reports a handle, memory or quota the system cannot
+// allocate (Structural Watch v1: watch_limit_reached).
+func outOfResources(err error) bool {
+	for _, limit := range []error{windows.ERROR_TOO_MANY_OPEN_FILES, windows.ERROR_NOT_ENOUGH_MEMORY,
+		windows.ERROR_NO_SYSTEM_RESOURCES, windows.ERROR_NOT_ENOUGH_QUOTA} {
+		if errors.Is(err, limit) {
+			return true
+		}
+	}
+	return false
 }

@@ -68,6 +68,18 @@ func classifyLinux(fsType int64) string {
 	return linuxRefusedTypes[fsType&0xffffffff]
 }
 
+// macOS filesystem types refused in native mode, by statfs f_fstypename.
+var darwinRefusedTypes = map[string]bool{"nfs": true, "smbfs": true, "afpfs": true, "webdav": true}
+
+// classifyDarwin returns the name of a refused filesystem type, or "" when
+// the type is accepted.
+func classifyDarwin(fsType string) string {
+	if darwinRefusedTypes[fsType] {
+		return fsType
+	}
+	return ""
+}
+
 // notifyHeader is the fixed part of a FILE_NOTIFY_INFORMATION record:
 // NextEntryOffset, Action and FileNameLength, little-endian 32-bit fields.
 const notifyHeader = 12

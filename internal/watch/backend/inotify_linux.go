@@ -129,6 +129,9 @@ func (b *inotify) Reconcile(obs watch.Observation) (bool, error) {
 			}
 			b.drop(reg) // moved away, replaced, or mounted over
 		}
+		if errors.Is(statErr, unix.EACCES) {
+			continue // not watchable; the reconciliation interval covers it
+		}
 		if statErr != nil {
 			changed = true // gone or replaced since the observation: verify
 			continue
@@ -304,14 +307,6 @@ func addFailure(err error, root bool) error {
 		return artifact.New(artifact.CodeWatchRootUnavailable, "the watched root does not exist", false)
 	}
 	return backendFailure("register a directory with inotify", err)
-}
-
-func limitReached(what string) error {
-	return artifact.New(artifact.CodeWatchLimitReached, what+"; raise it, narrow the capture, or use --poll", false)
-}
-
-func backendFailure(what string, err error) error {
-	return artifact.New(artifact.CodeWatchBackendFailure, what+": "+err.Error(), false)
 }
 
 // wdKey and fdKey convert kernel descriptors, which are non-negative int32

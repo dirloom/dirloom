@@ -82,6 +82,17 @@ func TestClassifyLinux(t *testing.T) {
 	}
 }
 
+func TestClassifyDarwin(t *testing.T) {
+	for fsType, want := range map[string]string{
+		"nfs": "nfs", "smbfs": "smbfs", "afpfs": "afpfs", "webdav": "webdav",
+		"apfs": "", "hfs": "", "devfs": "", "msdos": "", "macfuse": "", "NFS": "", "": "",
+	} {
+		if got := classifyDarwin(fsType); got != want {
+			t.Errorf("classifyDarwin(%q) = %q, want %q", fsType, got, want)
+		}
+	}
+}
+
 // notify encodes FILE_NOTIFY_INFORMATION records, chained in order.
 func notify(records ...notifyRecord) []byte {
 	var out []byte

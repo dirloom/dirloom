@@ -439,3 +439,16 @@ func TestRdcwAcceptsAFailedProbe(t *testing.T) {
 	write(t, filepath.Join(root, "sentinel"), "")
 	rec.sawRelevant(t, "sentinel")
 }
+
+func TestRdcwLimitMessages(t *testing.T) {
+	for _, err := range []error{
+		openFailure(windows.ERROR_NO_SYSTEM_RESOURCES),
+		openFailure(windows.ERROR_TOO_MANY_OPEN_FILES),
+		rootReadFailure(windows.ERROR_NOT_ENOUGH_QUOTA),
+	} {
+		var typed *artifact.Error
+		if !errors.As(err, &typed) || typed.Code != artifact.CodeWatchLimitReached || !strings.Contains(typed.Message, "--poll") {
+			t.Errorf("limit error %v", err)
+		}
+	}
+}

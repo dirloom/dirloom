@@ -1,4 +1,4 @@
-//go:build !linux && !windows
+//go:build !linux && !windows && !darwin
 
 package app
 
@@ -11,11 +11,11 @@ import (
 	"github.com/dirloom/dirloom/internal/watch"
 )
 
-func TestWatchNativeModeWaitsForTheBackends(t *testing.T) {
+func TestWatchNativeModeNeedsABackend(t *testing.T) {
 	log := newEventLog()
 	err := Watch(context.Background(), WatchRequest{Inspect: InspectRequest{Root: t.TempDir()}}, log)
 	var f *watch.Failure
 	if !errors.As(err, &f) || f.Diagnostic.Code != artifact.CodeWatchBackendFailure {
-		t.Fatalf("Watch = %v, want watch_backend_failure until LOT 6", err)
+		t.Fatalf("Watch = %v, want watch_backend_failure without a native backend", err)
 	}
 }
