@@ -79,6 +79,7 @@ func (g *goldenOutput) check(t *testing.T, name string) {
 			t.Errorf("%s\n got %q\nwant %q", file, got, want)
 		}
 	}
+	roundTrip(t, g.ndjson.Bytes())
 }
 
 // state builds an observation from entries: "dir/" is a directory, "link ->

@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("{\"schemaVersion\":1,\"event\":\"watch.started\",\"generation\":0,\"metadata\":{\"watchVersion\":0,\"stability\":\"\",\"comparisonVersion\":0,\"identityProjectionVersion\":0,\"moveDetection\":\"\",\"backend\":\"\"},\"capture\":{\"depth\":null,\"dirsOnly\":false,\"hidden\":false,\"useDefaultIgnores\":false,\"useGitignore\":false,\"ignore\":[]},\"fingerprint\":\"\",\"nodeCount\":0}\n")
