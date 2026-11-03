@@ -48,4 +48,4 @@ jobs:
           CGO_ENABLED: "1"
         run: |
           go test -race -count=20 ./internal/watch/...
-          go test -race -count=1 -run 'TestWatch' ./internal/app/
+          go test -race -count=1 -run 'TestWatch' ./internal/app/ ./internal/cli/
