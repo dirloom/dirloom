@@ -90,6 +90,27 @@ jobs:
         shell: pwsh
         run: go test ./internal/cli -count=1 -run TestDiffShellExitCodes
 
+      - name: Watch shell smoke
+        if: runner.os != 'Windows'
+        shell: bash
+        run: go test ./internal/cli -count=1 -run TestWatchShellExitCodes
+
+      - name: Watch shell smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: go test ./internal/cli -count=1 -run TestWatchShellExitCodes
+
+      # The race job covers Linux. The watch backends differ per platform,
+      # so their tests also run under the race detector on Windows and macOS.
+      - name: Race detector (watch)
+        if: runner.os != 'Linux'
+        shell: bash
+        env:
+          CGO_ENABLED: "1"
+        run: |
+          go test -race -count=1 ./internal/watch/...
+          go test -race -count=1 -run 'TestWatch' ./internal/app/ ./internal/cli/
+
   race:
     name: Race detector
     runs-on: ubuntu-latest
