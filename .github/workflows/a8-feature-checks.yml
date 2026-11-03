@@ -76,7 +76,11 @@ jobs:
           fi
       - name: Shell exit-code smoke (PowerShell)
         shell: pwsh
+        # The runner's pwsh stops on a native command's nonzero exit status
+        # and ends the step with the last one: both are expected here.
         run: |
+          $ErrorActionPreference = 'Continue'
+          $PSNativeCommandUseErrorActionPreference = $false
           $exe = Join-Path $env:RUNNER_TEMP ('dirloom' + $(if ($IsWindows) { '.exe' } else { '' }))
           function Expect([int]$want, [string[]]$arguments) {
             & $exe @arguments *> $null
@@ -89,6 +93,7 @@ jobs:
           if ($lines.Count -ne 2 -or $lines[1] -ne '{"schemaVersion":1,"event":"watch.stopped","reason":"error"}') {
             throw "startup failure stream: $lines"
           }
+          exit 0
       - name: Race detector (watch)
         env:
           CGO_ENABLED: "1"
