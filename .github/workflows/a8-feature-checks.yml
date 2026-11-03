@@ -43,6 +43,11 @@ jobs:
       - name: macOS backend evidence
         if: runner.os == 'macOS'
         run: go test -count=1 -v -run 'TestKqueue' ./internal/watch/backend/
+      - name: Watch matrix evidence
+        run: >-
+          go test -count=1 -v
+          -run 'TestWatchMatrix(MountOver|DescriptorLimit|Unreadable|Windows|AncestorRenamed)|TestWatchProcess(BlockedOutput|SlowConsumer|ClosedOutput)'
+          ./internal/app/ ./internal/cli/
       - name: Build dirloom for the shell smoke
         run: go build -o "$RUNNER_TEMP/dirloom$(go env GOEXE)" ./cmd/dirloom
       - name: Shell exit-code smoke (bash)
@@ -50,7 +55,8 @@ jobs:
           d="$RUNNER_TEMP/dirloom$(go env GOEXE)"
           expect() {
             want=$1; shift
-            "$@" > /dev/null 2>&1; got=$?
+            got=0
+            "$@" > /dev/null 2>&1 || got=$?
             if [ "$got" -ne "$want" ]; then echo "dirloom ${*:2} exited $got, want $want"; exit 1; fi
           }
           expect 2 "$d" watch --format json
@@ -63,7 +69,8 @@ jobs:
             pid=$!
             for _ in $(seq 150); do grep -q watch.started "$RUNNER_TEMP/smoke.ndjson" && break; sleep 0.1; done
             kill -TERM "$pid"
-            wait "$pid"; got=$?
+            got=0
+            wait "$pid" || got=$?
             if [ "$got" -ne 0 ]; then echo "SIGTERM: exit $got"; exit 1; fi
             tail -n 1 "$RUNNER_TEMP/smoke.ndjson" | grep -q '"event":"watch.stopped","generation":0,"reason":"interrupted"'
           fi
