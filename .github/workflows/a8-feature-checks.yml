@@ -40,6 +40,9 @@ jobs:
       - name: Windows backend evidence
         if: runner.os == 'Windows'
         run: go test -count=1 -v -run 'TestRdcwBurstOverflowFrequency|TestRdcwAcceptsAFailedProbe|TestRdcwVolumePolicy|TestRdcwLocksTheRootsAncestorsOnly' ./internal/watch/backend/
+      - name: macOS backend evidence
+        if: runner.os == 'macOS'
+        run: go test -count=1 -v -run 'TestKqueue' ./internal/watch/backend/
       - name: Race detector (watch)
         env:
           CGO_ENABLED: "1"
