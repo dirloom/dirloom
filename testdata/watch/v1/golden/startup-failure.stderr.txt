@@ -1,0 +1,1 @@
+Error: the root is on a network or virtual filesystem (nfs); use --poll (watch_filesystem_unsupported)

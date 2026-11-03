@@ -1,0 +1,1 @@
+Warning: read metadata for "tmp/x": entry no longer exists (source_read_failure)

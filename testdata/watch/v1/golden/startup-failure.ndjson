@@ -1,0 +1,2 @@
+{"schemaVersion":1,"event":"watch.error","fatal":true,"diagnostic":{"code":"watch_filesystem_unsupported","message":"the root is on a network or virtual filesystem (nfs); use --poll"}}
+{"schemaVersion":1,"event":"watch.stopped","reason":"error"}

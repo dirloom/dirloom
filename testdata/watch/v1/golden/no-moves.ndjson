@@ -1,0 +1,15 @@
+{"schemaVersion":1,"event":"watch.started","generation":0,"metadata":{"watchVersion":1,"stability":"experimental","comparisonVersion":1,"identityProjectionVersion":1,"moveDetection":"none","backend":"native"},"capture":{"depth":4,"dirsOnly":false,"hidden":false,"useDefaultIgnores":true,"useGitignore":true,"ignore":["*.log","dist/"]},"fingerprint":"dlm:v1:sha256:f89b3f9ff72bf58dec9d2e7db07f7334dce0309b230131ee51ceca746c0e0362","nodeCount":9}
+{"schemaVersion":1,"event":"node.changed","generation":1,"path":"current","before":{"kind":"symlink","target":"docs"},"after":{"kind":"symlink","target":"src"}}
+{"schemaVersion":1,"event":"node.removed","generation":1,"path":"docs/guide.md","before":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"notes\tdraft.md","after":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.removed","generation":1,"path":"shared/auth","before":{"kind":"directory"}}
+{"schemaVersion":1,"event":"node.removed","generation":1,"path":"shared/auth/login.go","before":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.removed","generation":1,"path":"shared/auth/token.go","before":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"src/auth","after":{"kind":"directory"}}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"src/auth/login.go","after":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"src/auth/token.go","after":{"kind":"file"}}
+{"schemaVersion":1,"event":"node.added","generation":1,"path":"src/main.go","after":{"kind":"file"}}
+{"schemaVersion":1,"event":"state.changed","generation":1,"fingerprint":"dlm:v1:sha256:bdc3cbdbeee5198e6ffc825c4b50d324d987d951e17bd42669f18fdbefa4fd78","nodeCount":10,"summary":{"added":5,"removed":4,"changed":1,"moved":0,"total":10}}
+{"schemaVersion":1,"event":"node.removed","generation":2,"path":"src/main.go","before":{"kind":"file"}}
+{"schemaVersion":1,"event":"state.changed","generation":2,"fingerprint":"dlm:v1:sha256:d3a101da4c4b19c34a692f433692819e2d3ad9cde2df794ed033d39eea1917d9","nodeCount":9,"summary":{"added":0,"removed":1,"changed":0,"moved":0,"total":1}}
+{"schemaVersion":1,"event":"watch.stopped","generation":2,"reason":"interrupted","fingerprint":"dlm:v1:sha256:d3a101da4c4b19c34a692f433692819e2d3ad9cde2df794ed033d39eea1917d9"}

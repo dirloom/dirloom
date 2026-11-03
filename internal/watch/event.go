@@ -3,8 +3,9 @@
 // full observations, compares each with the last reported state, and
 // publishes Watch Event Schema v1 events. It has no structural model of its
 // own: observations come from an Observer, comparisons from the comparison
-// engine, and notifications from a Backend. Encoding the events is the
-// caller's job.
+// engine, and notifications from a Backend. NDJSONSink encodes the events
+// (the contract) and TextSink renders them for a person; the caller picks
+// one.
 package watch
 
 import (
