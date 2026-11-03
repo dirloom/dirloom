@@ -208,7 +208,7 @@ Watch Event Schema v1 is **experimental**: it is excluded from the v0.4 RC contr
 
 ## Examples
 
-Illustrative only; long fingerprints and some fields are abridged here, and the Watch Event Schema v1 golden fixtures are normative for bytes.
+Illustrative only; long fingerprints and some fields are abridged here, and the Watch Event Schema v1 golden fixtures (`testdata/watch/v1/golden/`) are normative for bytes.
 
 A run that observes a directory created and another moved, then is interrupted:
 

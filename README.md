@@ -180,6 +180,9 @@ dirloom diff git:main git:feature
 
 # List which recent commits changed the structure, and by how much
 dirloom history --limit 50 --structural-only
+
+# Report structural changes as they happen (EXPERIMENTAL), one JSON event per line
+dirloom watch --format ndjson
 ```
 
 PowerShell composition still works, but `--copy` is the native clipboard path:
@@ -189,7 +192,7 @@ dirloom --format markdown --copy
 dirloom --style ascii > structure.txt
 ```
 
-See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md), [`dirloom verify`](docs/reference/verify.md), [`dirloom diff`](docs/reference/diff.md) and [`dirloom history`](docs/reference/history.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification, structural diff, structural history and current product limitations.
+See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md), [`dirloom verify`](docs/reference/verify.md), [`dirloom diff`](docs/reference/diff.md), [`dirloom history`](docs/reference/history.md) and [`dirloom watch`](docs/reference/watch.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification, structural diff, structural history, the experimental structural watch and current product limitations.
 
 ## Getting help
 
@@ -340,6 +343,8 @@ dirloom [directory] [flags]
 `dirloom diff <source-a> <source-b>` lists the added, removed, changed and moved canonical paths between two sources (`snapshot:<path>`, `live:<directory>` or `git:<revision>`). A live or Git side is observed with the opposite snapshot's Capture Semantics; two revisions are compared as whole committed trees. A `git:` source reads committed Git objects only, never the working tree, the index or the network, and needs Git 2.45 or newer; it is structural, not `git diff`. File contents are not hashed. Move detection (`structural-v1`) reports one MOVED, such as `src/old/payment -> src/features/payment`, only when the name and structure are unique in each source, or when a non-empty directory with a unique structure is renamed in place; ambiguous cases stay REMOVED plus ADDED, and `--no-moves` lists every path. A MOVED is a structural correspondence, not proof of a move. Structural differences exit 1 with stderr empty. `--format json` writes Diff Result Schema v3. See [diff](docs/reference/diff.md).
 
 `dirloom history [revision]` walks the first-parent history of a revision (default `HEAD`) and lists one entry per commit: the fingerprint of its whole committed tree and the added, removed, changed and moved paths against its first parent. It stops after `--limit` commits (default 20), before `--from` (exclusive), at a root commit or at a shallow boundary, and says which. A commit that changes only file contents is `no structural change`, and `--structural-only` hides it: this is a structural history, not `git log`. It reads committed Git objects only and needs Git 2.45 or newer. Commit messages and identities are never shown. There is no exit 1. `--format json` writes History Result Schema v1. `history` is a command name: to inspect a directory named `history`, run `dirloom ./history`. See [history](docs/reference/history.md).
+
+`dirloom watch [directory]` is **EXPERIMENTAL**. It observes a directory and, each time its structure changes, reports the changes against the last reported state as one numbered generation: the same added, removed, changed and moved paths as `dirloom diff` between the two states. File contents, timestamps and the filesystem operations themselves are not reported. Native filesystem notifications decide when to observe, and a reconciliation every 60 s catches what they miss; `--poll <interval>` observes at a fixed interval instead. The capture flags, presets and configuration are those of `dirloom fingerprint`. `--format ndjson` writes Watch Event Schema v1, one JSON event per line, where a consumer commits a generation on its `state.changed`. Ctrl+C or `SIGTERM` ends it with exit 0; a fatal error exits 5. Recognized network filesystems are refused in native mode, and native mode has platform limits (on Windows the root's parent cannot be renamed while watching). `watch` is a command name: to inspect a directory named `watch`, run `dirloom ./watch`. See [watch](docs/reference/watch.md).
 
 ## Filtering
 
@@ -555,9 +560,10 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a5: published and closed — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a6: published and closed — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a7: published and closed — structural history (`dirloom history`, History Result Schema v1; GitHub Pre-release; stable package managers remain `v0.3.3`); A8 not started;
+- v0.4.0-a7: published and closed — structural history (`dirloom history`, History Result Schema v1; GitHub Pre-release; stable package managers remain `v0.3.3`);
+- v0.4.0-a8: in progress — experimental structural watch (`dirloom watch`, Structural Watch v1 and Watch Event Schema v1, both excluded from the v0.4 RC contract freeze); implemented on its feature branch, not merged or released;
 - after v0.3: interactive explorer (`dirloom browse`);
-- v0.4: fingerprints, snapshots, verification, structural diff, move detection, Git sources and structural history;
+- v0.4: fingerprints, snapshots, verification, structural diff, move detection, Git sources, structural history and an experimental structural watch;
 - v0.5: scaffold, templates and Architecture Packs.
 
 `dirloom browse` is scheduled after the v0.3 presentation increment. See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).
