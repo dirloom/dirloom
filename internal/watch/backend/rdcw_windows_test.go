@@ -379,6 +379,9 @@ func TestRdcwCloseReleasesEverything(t *testing.T) {
 	if err := newNative(Options{Root: root}).Close(); err != nil {
 		t.Fatalf("Close before Start: %v", err)
 	}
+	if n := HeldHandles(); n != 0 {
+		t.Fatalf("%d handles held after every backend closed", n)
+	}
 }
 
 func TestRdcwVolumePolicy(t *testing.T) {

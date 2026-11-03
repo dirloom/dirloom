@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"unicode/utf8"
 
 	"golang.org/x/sys/windows"
@@ -22,6 +23,21 @@ const (
 )
 
 func newNative(opts Options) watch.Backend { return &rdcw{opts: opts} }
+
+// held counts the handles the Windows backends hold. The process handle
+// count cannot tell them apart: Windows also creates handles of its own in
+// the process (thread pool workers), at any time.
+var held atomic.Int64
+
+// HeldHandles returns the number of handles the Windows backends hold now:
+// zero once every backend is closed. Tests check it after each watch.
+func HeldHandles() int64 { return held.Load() }
+
+func closeHandle(h windows.Handle) {
+	if windows.CloseHandle(h) == nil {
+		held.Add(-1)
+	}
+}
 
 // dirWatch is one ReadDirectoryChangesW handle with two buffers: the next
 // read is issued into one before the other is parsed.
@@ -69,6 +85,9 @@ func (b *rdcw) Start(sig watch.Signals) error {
 			fmt.Sprintf("the root is on a network or virtual filesystem (%s); use --poll", name), false)
 	}
 	stop, err := windows.CreateEvent(nil, 1, 0, nil)
+	if err == nil {
+		held.Add(1)
+	}
 	if err != nil {
 		if outOfResources(err) {
 			return limitReached(handleLimit)
@@ -85,7 +104,7 @@ func (b *rdcw) Start(sig watch.Signals) error {
 			filter |= windows.FILE_NOTIFY_CHANGE_ATTRIBUTES
 		}
 		if root, err = openWatch(b.opts.Root, true, filter); err != nil {
-			_ = windows.CloseHandle(stop)
+			closeHandle(stop)
 			return openFailure(err)
 		}
 	}
@@ -115,11 +134,13 @@ func openWatch(dir string, recursive bool, filter uint32) (*dirWatch, error) {
 	if err != nil {
 		return nil, err
 	}
+	held.Add(1)
 	ev, err := windows.CreateEvent(nil, 1, 0, nil)
 	if err != nil {
-		_ = windows.CloseHandle(h)
+		closeHandle(h)
 		return nil, err
 	}
+	held.Add(1)
 	w := &dirWatch{handle: h, event: ev, recursive: recursive, filter: filter,
 		bufs: [2][]byte{make([]byte, notifyBufferLen), make([]byte, notifyBufferLen)}}
 	w.ov.HEvent = ev
@@ -171,8 +192,8 @@ func (w *dirWatch) close() {
 		_ = windows.GetOverlappedResult(w.handle, &w.ov, &n, true)
 		w.pending = false
 	}
-	_ = windows.CloseHandle(w.handle)
-	_ = windows.CloseHandle(w.event)
+	closeHandle(w.handle)
+	closeHandle(w.event)
 }
 
 // Reconcile records the structural set of obs. A recursive handle needs no
@@ -368,7 +389,7 @@ func (b *rdcw) Close() error {
 			w.close()
 		}
 	}
-	_ = windows.CloseHandle(b.stop)
+	closeHandle(b.stop)
 	return nil
 }
 
