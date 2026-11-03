@@ -54,7 +54,7 @@ func (l *eventLog) recorded() []watch.Event {
 }
 
 // waitFor blocks until pred holds for the recorded events.
-func (l *eventLog) waitFor(t *testing.T, what string, pred func([]watch.Event) bool) {
+func (l *eventLog) waitFor(t testing.TB, what string, pred func([]watch.Event) bool) {
 	t.Helper()
 	deadline := time.After(watchWait)
 	for {
@@ -70,7 +70,7 @@ func (l *eventLog) waitFor(t *testing.T, what string, pred func([]watch.Event) b
 }
 
 // waitState blocks until the last committed state has fingerprint fp.
-func (l *eventLog) waitState(t *testing.T, fp identity.Fingerprint) {
+func (l *eventLog) waitState(t testing.TB, fp identity.Fingerprint) {
 	t.Helper()
 	l.waitFor(t, "state "+fp.String(), func(events []watch.Event) bool {
 		state, ok := lastState(events)
@@ -114,7 +114,7 @@ func (r *recordingObserver) Observe(ctx context.Context) (watch.Observation, err
 }
 
 // waitObservations blocks until n more observations have completed.
-func (r *recordingObserver) waitObservations(t *testing.T, n int) {
+func (r *recordingObserver) waitObservations(t testing.TB, n int) {
 	t.Helper()
 	r.mu.Lock()
 	target := r.count + n
@@ -149,7 +149,7 @@ type runningWatch struct {
 	result chan error
 }
 
-func startWatch(t *testing.T, request WatchRequest) *runningWatch {
+func startWatch(t testing.TB, request WatchRequest) *runningWatch {
 	t.Helper()
 	return startWatchWith(t, request, nil)
 }
@@ -157,7 +157,7 @@ func startWatch(t *testing.T, request WatchRequest) *runningWatch {
 // startWatchWith starts a watch whose engine configuration edit may adjust
 // (a shorter reconciliation interval, a wrapped backend). Once the watch has
 // ended, the test fails if it left a goroutine, a descriptor or a handle.
-func startWatchWith(t *testing.T, request WatchRequest, edit func(*watch.Config)) *runningWatch {
+func startWatchWith(t testing.TB, request WatchRequest, edit func(*watch.Config)) *runningWatch {
 	t.Helper()
 	checkReleased(t)
 	log := newEventLog()
@@ -188,7 +188,7 @@ func startWatchWith(t *testing.T, request WatchRequest, edit func(*watch.Config)
 }
 
 // end waits for the engine to stop by itself.
-func (w *runningWatch) end(t *testing.T) error {
+func (w *runningWatch) end(t testing.TB) error {
 	t.Helper()
 	select {
 	case err := <-w.result:
@@ -200,7 +200,7 @@ func (w *runningWatch) end(t *testing.T) error {
 	}
 }
 
-func (w *runningWatch) interrupt(t *testing.T) error {
+func (w *runningWatch) interrupt(t testing.TB) error {
 	t.Helper()
 	w.cancel()
 	return w.end(t)
@@ -213,7 +213,7 @@ func pollRequest(root string) WatchRequest {
 	}
 }
 
-func fingerprintOf(t *testing.T, request InspectRequest) identity.Fingerprint {
+func fingerprintOf(t testing.TB, request InspectRequest) identity.Fingerprint {
 	t.Helper()
 	result, err := Fingerprint(context.Background(), request)
 	if err != nil {
@@ -222,7 +222,7 @@ func fingerprintOf(t *testing.T, request InspectRequest) identity.Fingerprint {
 	return result.Fingerprint
 }
 
-func mkdirAll(t *testing.T, paths ...string) {
+func mkdirAll(t testing.TB, paths ...string) {
 	t.Helper()
 	for _, p := range paths {
 		if err := os.MkdirAll(p, 0o755); err != nil {
@@ -231,7 +231,7 @@ func mkdirAll(t *testing.T, paths ...string) {
 	}
 }
 
-func writeFiles(t *testing.T, paths ...string) {
+func writeFiles(t testing.TB, paths ...string) {
 	t.Helper()
 	for _, p := range paths {
 		if err := os.WriteFile(p, []byte("x"), 0o644); err != nil {

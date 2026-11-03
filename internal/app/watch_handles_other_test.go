@@ -7,4 +7,4 @@ import "testing"
 const handleSlack = 0
 
 // openHandles is not measured on this platform.
-func openHandles(*testing.T) int { return 0 }
+func openHandles(testing.TB) int { return 0 }

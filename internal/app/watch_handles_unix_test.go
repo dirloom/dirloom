@@ -13,7 +13,7 @@ const handleSlack = 0
 
 // openHandles counts this process's descriptors. Listing the descriptor
 // directory works where stat-ing its entries does not (macOS).
-func openHandles(t *testing.T) int {
+func openHandles(t testing.TB) int {
 	t.Helper()
 	dir := "/proc/self/fd"
 	if runtime.GOOS == "darwin" {

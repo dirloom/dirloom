@@ -12,4 +12,4 @@ const handleSlack = 0
 // openHandles counts the handles the Windows backends hold. The process
 // handle count is no measure: Windows creates handles of its own in the
 // process (thread pool workers) at any time.
-func openHandles(*testing.T) int { return int(backend.HeldHandles()) }
+func openHandles(testing.TB) int { return int(backend.HeldHandles()) }

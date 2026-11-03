@@ -10,7 +10,7 @@ import (
 // descriptor or a handle behind once it has ended. Its cleanup runs after
 // the watch's own, which ends the engine; the counts may take a moment to
 // settle, so it waits for them.
-func checkReleased(t *testing.T) {
+func checkReleased(t testing.TB) {
 	t.Helper()
 	goroutines, handles := runtime.NumGoroutine(), openHandles(t)
 	t.Cleanup(func() {
