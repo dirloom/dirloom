@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a7` publiée et clôturée ; stable `v0.3.3` ; branche de release active `release/v0.4.0-a8` ; A8 implémentée sur sa branche de fonctionnalité, non fusionnée<br>
+> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a7` publiée et clôturée ; stable `v0.3.3` ; `v0.4.0-a8` figée sur `release/v0.4.0-a8` (release ready, non publiée)<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -2221,7 +2221,7 @@ Frontière : historique structurel, pas `git log` : ni message, ni identité, ni
 
 ### v0.4.0-a8 — Experimental structural watch
 
-**Statut : implémenté sur `feat/v0.4.0-a8-watch`, non fusionné, non publié.** Huitième et dernier incrément fonctionnel de CHANGE, profil prerelease, **expérimental** : Structural Watch v1 et Watch Event Schema v1 sont exclus du gel des contrats de la RC v0.4.
+**Statut : figé sur `release/v0.4.0-a8`, release ready, non publié.** La pull request de feature #66 est mergée. Huitième et dernier incrément fonctionnel de CHANGE, profil prerelease, **expérimental** : Structural Watch v1 et Watch Event Schema v1 sont exclus du gel des contrats de la RC v0.4.
 
 Fonctions :
 

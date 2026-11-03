@@ -4,6 +4,15 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-a8] - 2026-11-03
+
+CHANGE alpha, experimental: a structural watch (`dirloom watch`), which
+reports the structural changes of a directory as numbered generations while
+they happen, with Structural Watch v1 and Watch Event Schema v1, both
+excluded from the v0.4 RC contract freeze. This increment does not add an
+operation log, content monitoring, FSEvents on macOS, subtree
+re-observation, or a stable watch contract.
+
 ### Added
 
 - Add `dirloom watch [directory]`, an **experimental** structural watch. Each time the observed structure of a directory changes, it reports the changes against the last reported state as one numbered generation: the same added, removed, changed and moved paths as `dirloom diff` between the two states. Every observation scans the whole tree with the capture rules of `dirloom fingerprint` (filters, presets, configuration); file contents, timestamps and the filesystem operations themselves are not reported, so editing a file reports nothing. Native notifications (inotify on Linux, `ReadDirectoryChangesW` on Windows, kqueue on macOS) only decide when to observe, after a debounce (`--debounce`, default 200 ms), and a reconciliation every 60 s reports, inside a rescan, what they missed; `--poll <interval>` observes at a fixed interval instead. `--no-moves` reports moves as removals and additions. Ctrl+C or `SIGTERM` ends the watch with `watch.stopped` and exit 0; a lost root, a backend failure, a resource limit or a refused filesystem exits 5, with the error in the stream; there is no exit 1. Recognized network filesystems are refused in native mode, with a message that suggests `--poll`.
@@ -298,7 +307,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a7...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a8...HEAD
+[0.4.0-a8]: https://github.com/dirloom/dirloom/compare/v0.4.0-a7...v0.4.0-a8
 [0.4.0-a7]: https://github.com/dirloom/dirloom/compare/v0.4.0-a6...v0.4.0-a7
 [0.4.0-a6]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...v0.4.0-a6
 [0.4.0-a5]: https://github.com/dirloom/dirloom/compare/v0.4.0-a4...v0.4.0-a5

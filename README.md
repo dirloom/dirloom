@@ -24,8 +24,7 @@ Published status is independent of each package manager. GitHub Releases is alwa
 RELEASE STATUS
 Latest stable release: v0.3.3
 Latest GitHub Pre-release: v0.4.0-a7
-Active release branch: none
-v0.4.0-a7: published / closed
+v0.4.0-a8: frozen release candidate
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
@@ -522,8 +521,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
 `main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a7`. The latest stable release is `v0.3.3`. No release branch is
-active. `v0.4.0-a7` is published and closed. A8 has not started.
+`v0.4.0-a7`. The latest stable release is `v0.3.3`. `v0.4.0-a7` is
+published and closed. `release/v0.4.0-a8` is frozen and release-ready for
+the experimental structural watch. Feature pull request #66 is merged.
 See [Release workflow](docs/release-workflow.md).
 
 Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
@@ -561,7 +561,7 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.4.0-a5: published and closed — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a6: published and closed — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3; GitHub Pre-release; stable package managers remain `v0.3.3`);
 - v0.4.0-a7: published and closed — structural history (`dirloom history`, History Result Schema v1; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a8: in progress — experimental structural watch (`dirloom watch`, Structural Watch v1 and Watch Event Schema v1, both excluded from the v0.4 RC contract freeze); implemented on its feature branch, not merged or released;
+- v0.4.0-a8: frozen release candidate on `release/v0.4.0-a8` — experimental structural watch (`dirloom watch`, Structural Watch v1 and Watch Event Schema v1, both excluded from the v0.4 RC contract freeze); not published; feature pull request #66 merged;
 - after v0.3: interactive explorer (`dirloom browse`);
 - v0.4: fingerprints, snapshots, verification, structural diff, move detection, Git sources, structural history and an experimental structural watch;
 - v0.5: scaffold, templates and Architecture Packs.
