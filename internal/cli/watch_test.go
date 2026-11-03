@@ -70,6 +70,7 @@ type watchRun struct {
 
 func startWatchCLI(t *testing.T, args ...string) *watchRun {
 	t.Helper()
+	checkReleased(t)
 	loader := configuration.NewLoader(configuration.WithUserConfigDir(func() (string, error) {
 		return "", errors.New("user configuration disabled in tests")
 	}))
