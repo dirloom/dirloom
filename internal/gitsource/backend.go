@@ -114,6 +114,10 @@ func (b *Backend) ReadLink(location, relativePath string) (string, error) {
 	return string(data), nil
 }
 
+// Junction reports false: a Git tree has no junctions, and the location is an
+// object id, never a filesystem path.
+func (*Backend) Junction(string, fs.FileInfo) (bool, error) { return false, nil }
+
 func displayDirectory(relativeDirectory string) string {
 	if relativeDirectory == "" {
 		return "."

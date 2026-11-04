@@ -320,9 +320,11 @@ File content changes do not affect the result: a tree with identical paths,
 kinds, and targets reports `NO_DIFFERENCES` no matter how many bytes were
 rewritten. Renaming the physical root, or comparing a snapshot against a copy
 of the same tree elsewhere, reports no differences. Between two revisions,
-a file whose contents changed is no difference either. Symlink and junction
-identity follow the existing scanner: kind and target are compared; targets
-are not followed.
+a file whose contents changed is no difference either. Symlinks and Windows
+junctions are compared by kind and target; targets are not followed, so a
+retargeted link is `CHANGED`. A snapshot taken with `v0.4.0-a8` or earlier
+recorded a junction as a `file`: against the same tree observed now, that
+junction is `CHANGED` from `file` to `junction`.
 
 ## CI
 

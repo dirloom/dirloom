@@ -49,7 +49,7 @@ func newThemeClassifyCommand(stdout io.Writer, sources *sourceOptions) *cobra.Co
 			if err != nil {
 				return err
 			}
-			nodeType, err := classifyNodeType(info)
+			nodeType, err := classifyNodeType(filepath.Join(resolvedRoot, filepath.FromSlash(relativePath)), info)
 			if err != nil {
 				return err
 			}
@@ -131,7 +131,17 @@ func resolveClassifyTarget(root, raw string) (string, fs.FileInfo, error) {
 	}
 	return filepath.ToSlash(relative), info, nil
 }
-func classifyNodeType(info fs.FileInfo) (tree.NodeType, error) {
+
+// classifyNodeType classifies the entry at path as a tree scan does: a
+// Windows junction is a symlink.
+func classifyNodeType(path string, info fs.FileInfo) (tree.NodeType, error) {
+	junction, err := tree.IsJunction(path, info)
+	if err != nil {
+		return "", fmt.Errorf("inspect classification path %q: %w", info.Name(), err)
+	}
+	if junction {
+		return tree.NodeSymlink, nil
+	}
 	mode := info.Mode()
 	switch {
 	case mode&os.ModeSymlink != 0:

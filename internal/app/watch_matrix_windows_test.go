@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -47,26 +46,63 @@ func TestWatchMatrixWindowsHiddenAttribute(t *testing.T) {
 }
 
 func TestWatchMatrixWindowsJunction(t *testing.T) {
-	outside := t.TempDir()
+	outside, other := t.TempDir(), t.TempDir()
 	runMatrix(t, matrixScenario{name: "junction", steps: []matrixStep{
-		{name: "create", do: func(t *testing.T, root string) {
-			if out, err := exec.Command("cmd", "/c", "mklink", "/J", join(root, "j"), outside).CombinedOutput(); err != nil {
-				t.Fatalf("mklink: %v: %s", err, out)
-			}
-		}, expect: func(t *testing.T, changes []comparison.Change) {
-			t.Helper()
-			// The live scanner reports a junction as dirloom snapshot does:
-			// one node, never a directory it enters (today kind "file", from
-			// Go's irregular file mode).
-			if len(changes) != 1 || changes[0].Path != "j" || changes[0].After.Kind == artifact.KindDirectory {
-				t.Fatalf("changes %v, want the junction added as one node", describeChanges(changes))
-			}
-		}},
+		// The live scanner reports a junction as dirloom snapshot does: one
+		// junction node with its target, never a directory it enters.
+		{name: "create", do: func(t *testing.T, root string) { makeJunction(t, join(root, "j"), outside) },
+			expect: func(t *testing.T, changes []comparison.Change) {
+				t.Helper()
+				expectChanges("ADDED j")(t, changes)
+				if after := changes[0].After; after.Kind != artifact.KindJunction || *after.Target != filepath.ToSlash(outside) {
+					t.Fatalf("added %+v, want a junction to %s", after, outside)
+				}
+			}},
 		// A junction is never entered: neither its target nor a write
 		// through it is part of the structure.
 		{name: "a change in its target", quiet: true, do: func(t *testing.T, root string) { writeFiles(t, filepath.Join(outside, "x")) }},
 		{name: "a change through it", quiet: true, do: func(t *testing.T, root string) { writeFiles(t, join(root, "j", "y")) }},
+		{name: "retarget", do: func(t *testing.T, root string) {
+			must(t, os.Remove(join(root, "j")))
+			makeJunction(t, join(root, "j"), other)
+		}, expect: expectChanges("CHANGED j (junction:" + filepath.ToSlash(outside) + "->junction:" + filepath.ToSlash(other) + ")")},
 	}})
+}
+
+// TestWatchWindowsJunctionRetargetEvents retargets a junction in place, in one
+// atomic step, during an active watch: the next generation is exactly
+// node.changed for the junction, then state.changed.
+func TestWatchWindowsJunctionRetargetEvents(t *testing.T) {
+	for _, mode := range []string{"native", "poll"} {
+		t.Run(mode, func(t *testing.T) {
+			root, outside, other := t.TempDir(), t.TempDir(), t.TempDir()
+			makeJunction(t, join(root, "j"), outside)
+			request := nativeRequest(root)
+			if mode == "poll" {
+				request = pollRequest(root)
+			}
+			w := startWatch(t, request)
+			w.log.waitState(t, fingerprintOf(t, request.Inspect))
+			mark := len(w.log.recorded())
+			setJunctionTarget(t, join(root, "j"), other)
+			w.log.waitState(t, fingerprintOf(t, request.Inspect))
+			if err := w.interrupt(t); err != nil {
+				t.Fatalf("Run = %v", err)
+			}
+			events := w.log.recorded()
+			if got := describeEvents(events[mark:]); got != "changed:j state stopped:interrupted" {
+				t.Fatalf("events after the retarget: %s", got)
+			}
+			change := events[mark].Change
+			if change.Before.Kind != artifact.KindJunction || *change.Before.Target != filepath.ToSlash(outside) ||
+				change.After.Kind != artifact.KindJunction || *change.After.Target != filepath.ToSlash(other) {
+				t.Fatalf("node.changed = %+v -> %+v", change.Before, change.After)
+			}
+			if err := watch.ValidateStream(events, true); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
 }
 
 // TestWatchMatrixWindowsParentRename is A1: a native watch locks the root's

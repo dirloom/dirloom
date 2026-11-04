@@ -42,6 +42,7 @@ Every node is one unordered-list item:
 - files use their exact displayed name;
 - a symlink with a recorded target uses `` `name` -> `target` ``;
 - a symlink without a target uses `` `name` [symlink] ``;
+- a Windows junction is shown as a symlink;
 - labels and targets use Markdown code spans;
 - the document is UTF-8 without a BOM, uses LF on every platform and ends with exactly one LF.
 

@@ -61,8 +61,10 @@ Stdout remains parseable JSON. `nodeCount` is metadata; it is not hashed.
 ## What enters identity
 
 - Canonical relative paths (`/` separators, Unicode NFC, synthetic root `.`)
-- Node kinds: directory, file, symlink (Windows junctions follow the scanner's observation type)
+- Node kinds: directory, file, symlink, junction (a Windows junction or mounted volume folder, recognized by its reparse tag)
 - Symlink/junction target strings, rewritten to root-relative form when they point inside the inspected root
+
+Up to `v0.4.0-a8`, a Windows junction entered identity as a `file` without a target. The fingerprint of a tree that contains a junction therefore changed after `v0.4.0-a8`; trees without junctions, and every tree on Linux and macOS, kept theirs.
 
 ## What does not enter identity
 
