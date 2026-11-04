@@ -141,61 +141,95 @@ package repository without making that the default path.
 
 ## Current release state
 
-`v0.4.0-a7` is published and closed. It is the latest GitHub Pre-release.
-The latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. `release/v0.4.0-a8` is frozen and release-ready. Feature pull
-request #66 is merged and feature work on `feat/v0.4.0-a8-watch` is
-complete. `main` carries the `v0.4.0-a7` release lineage plus its closure
-(#64) and the branch record (#65). `CHANGELOG.md` remains the unique source
-of truth for release notes. Do not open versioned feature pull requests
-against `main`.
+`v0.4.0-a8` is the latest published GitHub Pre-release and is closed. The
+latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
+`v0.3.3`. No release branch is active. The v0.4 release candidate has not
+started. `CHANGELOG.md` remains the unique source of truth for release
+notes. Do not open versioned feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
-| Latest published GitHub Pre-release | `v0.4.0-a7` |
+| Latest published GitHub Pre-release | `v0.4.0-a8` |
 | Latest stable release | `v0.3.3` |
-| Active release candidate | `v0.4.0-a8` on `release/v0.4.0-a8` |
-| Candidate state | FROZEN / RELEASE READY |
-| Feature pull request | #66 merged (`feat/v0.4.0-a8-watch`) |
+| Active release branch | none |
 | Integration branch | `main` |
-| Profile | prerelease / CLI package, experimental watch |
+| Profile | prerelease / CLI package |
+| v0.4 release candidate | NOT STARTED |
 
 ```text
-v0.4.0-a7 published / closed
-
-release/v0.4.0-a8
-FROZEN / RELEASE READY
-
-PR #66 merged
-feat/v0.4.0-a8-watch complete
-
-main at f6ed5b4 (v0.4.0-a7 lineage + closure #64 + branch record #65)
+v0.4.0-a8 published / closed
+latest stable v0.3.3
+active release branch: none
+v0.4 RC NOT STARTED
 ```
 
-## v0.4.0-a8 freeze checklist
+## v0.4.0-a8 release record
 
-The scope freeze lives on `release/v0.4.0-a8`. Do not create
-`chore/v0.4.0-a8-freeze`.
+v0.4.0-a8 is published and closed. The checklist below is the completed
+ceremony, kept for audit. It is not the current active release state.
+Do not create `chore/v0.4.0-a8-freeze`. The scope freeze lived on
+`release/v0.4.0-a8`.
 
 ```text
-feature → release                  DONE
-release CI                         PASS
-freeze                             ACTIVE
-final release PR → main            PENDING
-tag                                PENDING
-draft prerelease                   PENDING
-publication                        PENDING
-package managers                   MUST STAY v0.3.3
+feature → release                DONE
+release CI                       PASS
+freeze                           DONE
+freeze CI                        PASS
+release → main                   DONE
+main CI                          PASS
+tag v0.4.0-a8                    DONE
+draft prerelease                 DONE
+draft audit                      PASS
+publication                      DONE (after the explicit human GO)
+package managers                 SKIPPED
+A8                               CLOSED
 ```
 
-Feature branch of record: `feat/v0.4.0-a8-watch` at
-`36075c4117c2050d9f7babd74730374157db0c95`, merged by pull request #66 into
-`release/v0.4.0-a8` at `50d4c32437122c5b7ddf9ddbc53ba822b7afdebb`
-(2026-11-03T19:02:24Z). Pull request #66 was merged by its author without an
-approving review, through the owner bypass of the `protect-release-branches`
-pull request rule. Its CI of record is GitHub Actions run `41696257435` on
-`36075c4` (9 checks green). Release CI of record before freeze: GitHub
-Actions run `41699495144` on the merge commit (9 checks green).
+Recorded identifiers:
+
+- Feature branch `feat/v0.4.0-a8-watch` at `36075c4117c2050d9f7babd74730374157db0c95`, merged by pull request #66 into `release/v0.4.0-a8` at `50d4c32437122c5b7ddf9ddbc53ba822b7afdebb` (2026-11-03T19:02:24Z).
+- Feature CI: https://github.com/dirloom/dirloom/actions/runs/41696257435 (9 checks, the new watch shell smoke and watch race steps included)
+- Release CI before freeze: https://github.com/dirloom/dirloom/actions/runs/41699495144
+- Freeze commit: `5f222d64e41ae1e890e9ba5dce4ebf037284b295`
+- Freeze CI: https://github.com/dirloom/dirloom/actions/runs/41700927138
+- Release pull request #67 merged to `main` at `7bf04b2423cd45e86a1d751bcfcda1402e6ad142` (2026-11-03T19:48:24Z); its pull request CI: https://github.com/dirloom/dirloom/actions/runs/41705295534
+- Main CI: https://github.com/dirloom/dirloom/actions/runs/41706691406
+- Annotated tag `v0.4.0-a8` (`da742f025e3def360a0e288014e9cf2950063dda`) points at `7bf04b2423cd45e86a1d751bcfcda1402e6ad142`
+- Release workflow: https://github.com/dirloom/dirloom/actions/runs/41708054687 (ended 2026-11-03T19:59:45Z on "Leave draft for human GO")
+- Published pre-release: https://github.com/dirloom/dirloom/releases/tag/v0.4.0-a8 (`publishedAt` `2026-11-03T20:22:30Z`)
+- Package-manager workflow skipped: https://github.com/dirloom/dirloom/actions/runs/41711980876
+- `release/v0.4.0-a8` and `feat/v0.4.0-a8-watch` are fully merged into `main` and still exist on `origin`; their deletion is left to the owner.
+
+Ruleset bypasses used by the repository owner:
+
+- Pull request #66 merged by its author without an approving review (`protect-release-branches` requires one; the only collaborator is the author). The agent did not merge it: its merge policy forbids bypassing a required review.
+- Freeze commit pushed directly to `release/v0.4.0-a8` (pull request rule), as the freeze procedure prescribes.
+- Tag `v0.4.0-a8` created under `protect-release-tags` (creation restricted).
+
+Pull request #67 into `main` needed no bypass; the agent merged it with a
+merge commit, on the owner's explicit GO, after its CI was green.
+
+Draft audit before publication: 13 artefacts (6 archives, 6 SPDX SBOMs,
+`checksums.txt`); the 12 SHA-256 checksums; `release-artifacts verify`;
+13 attestations verified against the `release.yml` workflow and
+`refs/tags/v0.4.0-a8` (a first pass failed on 12 files without an error
+message, as GitHub API calls did several times that day; the repeat verified
+all 13); the same nine licence and notice files in all six archives
+(`LICENSE`, seven `LICENSES/*` and `THIRD_PARTY_NOTICES.md`, which lists
+`golang.org/x/sys` v0.47.0); release notes identical to the `[0.4.0-a8]`
+section of `CHANGELOG.md` at the tag, but for the trailing blank line GitHub
+also adds to the v0.4.0-a7 notes; the Windows x86_64 binary reporting
+`dirloom 0.4.0-a8`, its `watch` help starting with `EXPERIMENTAL`, a missing
+root exiting 5 with the two-line startup-failure stream and an empty
+stderr, `--format json` exiting 2, a polling watch reporting a created
+directory, and `dirloom diff git:v0.4.0-a7 git:v0.4.0-a8` exiting 1 with 95
+additions and no other change.
+
+Publication: the draft stayed a draft until the explicit human GO, then was
+published at 2026-11-03T20:22:30Z with the owner's credentials through
+`gh release edit --draft=false --prerelease --latest=false`. The release API
+still names `github-actions[bot]`, which created the draft. GitHub's latest
+release remains `v0.3.3`.
 
 ## v0.4.0-a7 release record
 
