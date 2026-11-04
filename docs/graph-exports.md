@@ -43,7 +43,7 @@ The `structure` view contains:
 
 Identifiers are `n_root` for the root and `n_<sha256-128>` derived from `type + NUL + relative path`. They are independent from the output dialect and remain stable when a sibling is inserted.
 
-Labels stay readable without color: directories end with `/`, files keep their name, and a symlink uses `name -> target` or `name [symlink]`.
+Labels stay readable without color: directories end with `/`, files keep their name, and a symlink uses `name -> target` or `name [symlink]`. A Windows junction is shown, and identified, as a symlink.
 
 ## Options
 

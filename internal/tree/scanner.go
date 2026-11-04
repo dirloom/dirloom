@@ -100,12 +100,20 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, rel
 			continue
 		}
 
+		// A junction is a terminal link whatever mode Go reports for it.
+		junction, err := s.backend.Junction(childLocation, info)
+		if err != nil {
+			return fmt.Errorf("read metadata for %q: %w", relativePath, classifyFilesystemError(err))
+		}
 		kind := classifyNode(info)
+		if junction {
+			kind = NodeSymlink
+		}
 		if s.options.Directories && kind != NodeDirectory {
 			continue
 		}
 
-		node := &Node{Name: name, Path: relativePath, Type: kind}
+		node := &Node{Name: name, Path: relativePath, Type: kind, Junction: junction}
 		switch kind {
 		case NodeDirectory:
 			node.Children = make([]*Node, 0)

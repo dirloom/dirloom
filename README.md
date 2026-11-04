@@ -465,7 +465,7 @@ See the [graphical export guide](docs/graph-exports.md) for the `structure` cont
 }
 ```
 
-Directories always have `children`, including empty directories. Files never do. Symlinks use `"type": "symlink"` and may expose their recorded target. Absolute paths, timestamps, permissions and other non-deterministic metadata are never included.
+Directories always have `children`, including empty directories. Files never do. Symlinks, and Windows junctions, use `"type": "symlink"` and may expose their recorded target. Absolute paths, timestamps, permissions and other non-deterministic metadata are never included.
 
 ## Safe filesystem behavior
 

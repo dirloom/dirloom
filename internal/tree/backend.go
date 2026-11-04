@@ -27,6 +27,9 @@ type Backend interface {
 	// returns "" with no error (the filesystem keeps the link without a target)
 	// or fails the scan.
 	ReadLink(location, relativePath string) (string, error)
+	// Junction reports whether the entry at location, whose metadata is info,
+	// is a Windows junction. Only the filesystem backend can find one.
+	Junction(location string, info fs.FileInfo) (bool, error)
 }
 
 // filesystemBackend reads the operating-system filesystem. Locations are
@@ -72,4 +75,8 @@ func (filesystemBackend) ReadLink(location, _ string) (string, error) {
 		return "", nil
 	}
 	return filepath.ToSlash(target), nil
+}
+
+func (filesystemBackend) Junction(location string, info fs.FileInfo) (bool, error) {
+	return IsJunction(location, info)
 }

@@ -100,9 +100,11 @@ The closed kind set is:
 | `directory` | Directory |
 | `file` | Regular file |
 | `symlink` | Symbolic link (POSIX or Windows) |
-| `junction` | Windows junction, when represented distinctly |
+| `junction` | Windows junction |
 
-The filesystem scanner reused in a1 currently exposes Windows name-redirection reparse points that Go reports as `os.ModeSymlink` as observation type `symlink`. FilesystemSource therefore maps those nodes to artifact kind `symlink`. Kind `junction` exists so a logical artifact can represent a junction without inventing a second scanner. Non-redirection reparse points are not reclassified as links.
+On Windows, FilesystemSource records an entry whose reparse tag is `IO_REPARSE_TAG_MOUNT_POINT` with kind `junction`: a junction, and a folder where a volume is mounted, which uses the same tag. The tag decides, not the file mode Go derives from it (`os.ModeIrregular` by default since Go 1.23, `os.ModeSymlink` with `GODEBUG=winsymlink=0`). A Windows symbolic link (`IO_REPARSE_TAG_SYMLINK`) is kind `symlink`. Other reparse points are not reclassified as links. A Git source never records a junction.
+
+Up to Dirloom `v0.4.0-a8`, the scanner recorded a junction with kind `file` and no target. A snapshot taken then still validates; compared with the same tree observed now, the junction is a `CHANGED` entry (`file` → `junction`).
 
 Special types that are not in this set MUST NOT be silently stored as `file`. They MUST fail with `unsupported node type`.
 
@@ -127,7 +129,7 @@ The stored target is a deterministic string:
 
 ## Junction
 
-When present as kind `junction`, the node is terminal and uses the same target rules as a symlink. It is never traversed.
+When present as kind `junction`, the node is terminal and uses the same target rules as a symlink. It is never traversed. Its reparse tag is read through a handle opened on the junction itself, never on its target, so a junction whose target is missing is still a junction. Its target is always absolute when recorded (for example `C:/work/shared`, or `//?/Volume{…}/` for a mounted volume), and becomes root-relative when it points inside the source root.
 
 ## Special files
 

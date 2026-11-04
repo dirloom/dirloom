@@ -4,6 +4,11 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Windows junctions observed as files. Since Go 1.23 reports a junction with an irregular file mode, Dirloom recorded it with kind `file` and no target, so retargeting a junction was invisible to `fingerprint`, `snapshot`, `verify`, `diff` and `watch`. A junction, or a folder where a volume is mounted, is now recognized by its reparse tag, whatever `GODEBUG=winsymlink` says, and recorded with kind `junction` and its target, rewritten relative to the root when it points inside it. It is still never entered. Tree outputs (text, Markdown, JSON, Mermaid, Graphviz, D2) show it as a symlink, `name -> target`, instead of a plain file, with no new `type` value; its graph node identifier changes accordingly. `dirloom theme classify` classifies it as a symlink instead of refusing it. Git sources are unchanged: Git never records a junction.
+- Compatibility: no format changes, but the fingerprint of a Windows tree that contains a junction changes. A snapshot taken with `v0.4.0-a8` or earlier still loads and validates; `dirloom verify` against the unchanged tree reports a mismatch (exit 1), and `dirloom diff` shows the junction as `CHANGED`, kind `file` → `junction`. Check such snapshots, then capture them again. Trees without junctions, and every tree on Linux and macOS, keep their fingerprints.
+
 ## [0.4.0-a8] - 2026-11-03
 
 CHANGE alpha, experimental: a structural watch (`dirloom watch`), which

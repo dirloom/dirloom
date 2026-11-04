@@ -133,6 +133,7 @@ With the same Capture Semantics, observing `git:<rev>` and observing a clean che
 | Exception | Filesystem source | Git source |
 | --- | --- | --- |
 | links checked out as files (`core.symlinks=false`, the Windows default) | `file` | `symlink` |
+| a Windows junction created in the checkout (Git never checks one out) | `junction` | what Git staged in its place, never a junction (Git for Windows 2.56 records the target's entries below the junction's path) |
 | absolute link target pointing inside the checkout root | rewritten relative to the root | kept as recorded |
 | initialized submodule | its contents | empty directory |
 | names the platform cannot materialize (case-only collisions on a case-insensitive filesystem, names invalid on Windows) | absent or merged | present |

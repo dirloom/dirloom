@@ -18,11 +18,14 @@ const (
 // Node is a deterministic, renderer-independent representation of an entry.
 // Path is always relative to the inspected root and uses forward slashes. It
 // is internal metadata and is intentionally absent from public renderings.
+// Junction marks a NodeSymlink that is a Windows junction: renderings show it
+// as a symlink, and the canonical artifact records it with kind junction.
 type Node struct {
 	Name     string
 	Path     string
 	Type     NodeType
 	Target   string
+	Junction bool
 	Children []*Node
 }
 

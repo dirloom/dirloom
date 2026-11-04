@@ -115,7 +115,7 @@ func convertNode(node *tree.Node, parent artifact.Path, options FromTreeOptions,
 	if err := collisions.Add(rawPath, path); err != nil {
 		return artifact.Node{}, err
 	}
-	kind, err := observationKind(node.Type, path)
+	kind, err := observationKind(node, path)
 	if err != nil {
 		return artifact.Node{}, err
 	}
@@ -139,16 +139,22 @@ func convertNode(node *tree.Node, parent artifact.Path, options FromTreeOptions,
 	return converted, nil
 }
 
-func observationKind(kind tree.NodeType, path artifact.Path) (artifact.Kind, error) {
-	switch kind {
+func observationKind(node *tree.Node, path artifact.Path) (artifact.Kind, error) {
+	if node.Junction && node.Type != tree.NodeSymlink {
+		return "", artifact.InternalError("observation junction %q has type %q", path, node.Type)
+	}
+	switch node.Type {
 	case tree.NodeDirectory:
 		return artifact.KindDirectory, nil
 	case tree.NodeFile:
 		return artifact.KindFile, nil
 	case tree.NodeSymlink:
+		if node.Junction {
+			return artifact.KindJunction, nil
+		}
 		return artifact.KindSymlink, nil
 	default:
-		return "", unsupportedObservation(kind, path.String())
+		return "", unsupportedObservation(node.Type, path.String())
 	}
 }
 

@@ -89,7 +89,9 @@ An embedded fingerprint that does not match the snapshot artifact is exit 3, not
 
 ## Content and relocation
 
-File content changes do not affect the result. Renaming the physical root, or copying the same relative tree elsewhere, still matches. Adding, removing, renaming, or moving a path mismatches, without saying which of those happened. Symlink and junction identity follow the existing scanner: kind and target are compared; targets are not followed.
+File content changes do not affect the result. Renaming the physical root, or copying the same relative tree elsewhere, still matches. Adding, removing, renaming, or moving a path mismatches, without saying which of those happened. Symlinks and Windows junctions are compared by kind and target; targets are not followed, so retargeting a link mismatches.
+
+A snapshot taken with `v0.4.0-a8` or earlier recorded a Windows junction as a `file`. It still loads, but it mismatches the same unchanged tree (exit 1): check it with `dirloom diff`, which shows the junction as `CHANGED` from `file` to `junction`, then capture the snapshot again.
 
 ## CI
 
