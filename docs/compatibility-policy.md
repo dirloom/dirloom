@@ -65,7 +65,10 @@ Fingerprint v1 is a promise that the same observed tree gives the same fingerpri
 
 After the freeze, **an incompatible change to identity semantics needs a new fingerprint version**, even when no format changes. This includes the observation itself: if a change makes Dirloom record a different canonical artifact for the same tree on disk (another kind, another target, another path, an entry newly included or excluded by default), the fingerprints it produces would no longer be comparable with the old ones, so the change ships with a new identity projection version and a new `dlm:vN` prefix.
 
-The junction correction of `v0.4.0-rc1` (#70) is the last change of this kind made inside v1: it happened before the freeze, and its CHANGELOG entry describes the fingerprints that move.
+Two changes of this kind are made inside v1 in `v0.4.0-rc1`, before the freeze, and each CHANGELOG entry describes its effect:
+
+- the junction correction (#70) moves the fingerprint of a Windows tree that holds a junction;
+- the refusal of named pipes, sockets and devices (LOT 4, D3) leaves a tree that holds such an entry with no fingerprint at all: the observation fails with `unsupported_node_type` instead of recording the entry as a `file`.
 
 ## 5. Diagnostic outputs (D1)
 

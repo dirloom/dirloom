@@ -36,6 +36,7 @@ Illustrative only; whitespace is condensed here, and the golden fixtures are nor
 
 - A `file` or `symlink` node never has `children`.
 - A Windows junction, or a folder where a volume is mounted, is rendered as a `symlink` with its target. There is no `junction` type in this schema; the canonical artifact records kind `junction`.
+- A named pipe, a socket or a device is rendered as a `file`, as in v0.1–v0.3. The structural commands refuse such an entry (`unsupported_node_type`); the tree view does not.
 - The order of `children` is the order of the text renderings: directories first, then other entries, by deterministic Unicode case folding, with bytewise names as tie-breakers.
 - Absolute paths, timestamps, sizes, permissions, owners and every presentation setting (color, icons, theme, style) are never present.
 

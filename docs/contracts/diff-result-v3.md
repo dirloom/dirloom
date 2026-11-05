@@ -141,7 +141,7 @@ snapshot_read_failure
 
 `snapshot_fingerprint_mismatch` is always `INVALID_SNAPSHOT`, never `DIFFERENCES`.
 
-Live observation diagnostics reuse `artifact.Error.Code` when present, including `source_read_failure`, `canonical_path_collision`, and `internal_invariant_failure`.
+Live observation diagnostics reuse `artifact.Error.Code` when present, including `source_read_failure`, `canonical_path_collision`, `unsupported_node_type` (a named pipe, socket or device in the observed view), and `internal_invariant_failure`.
 
 Git source diagnostics, all `OBSERVATION_ERROR` (exit 5), defined by [Git Tree Source v1](git-tree-source-v1.md#diagnostics):
 

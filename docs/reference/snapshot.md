@@ -147,7 +147,7 @@ See [Snapshot Schema v1](../contracts/snapshot-schema-v1.md) and
 ## Exit status
 
 - `0` — success
-- `1` — runtime/data/output error
+- `1` — runtime/data/output error, including an unsupported node: a named pipe, socket or device in the observed view (exclude it with `--ignore`)
 - `2` — invalid arguments
 
 ## Contracts

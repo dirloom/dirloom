@@ -13,6 +13,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 - The v0.4 contracts are marked as candidates for the v0.4 freeze, which takes effect at the release candidate's freeze commit; Structural Watch v1 and Watch Event Schema v1 stay experimental.
 - The JSON outputs of `config explain`, `preset explain`, `theme list`, `theme explain`, `theme validate` and `theme classify` are documented as diagnostic outputs, not contracts: they keep their `schemaVersion`, but may change in any release, with a CHANGELOG entry. Their content is unchanged.
+- Refuse named pipes, sockets and devices in structural observations. A FIFO, a Unix or Windows AF_UNIX socket, or a device in the observed view was recorded as a plain `file`, against the Canonical Structural Artifact contract. It is now refused with `unsupported_node_type`, naming its path and type:
+  - `fingerprint` and `snapshot` exit 1;
+  - `verify` and `diff` report `OBSERVATION_ERROR` (exit 5);
+  - `watch` stops at startup with a fatal error, or, when the entry appears later, reports non-fatal errors and publishes no new state until the entry is gone.
+
+  Exclude such an entry with `--ignore`; `.gitignore`, default ignores, hidden entries, `--dirs-only` and depth exclude it as well. Tree outputs (text, Markdown, JSON, graph exports) still show it as a file, and Windows files behind a reparse point (app execution aliases, cloud placeholders) are still files. A snapshot taken with `v0.4.0-a8` or earlier that recorded such an entry still loads, but observing the same tree now fails instead of matching.
 
 ### Fixed
 
