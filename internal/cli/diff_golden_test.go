@@ -34,6 +34,12 @@ func readDiffGolden(t *testing.T, version, name string) string {
 
 func assertDiffGolden(t *testing.T, name, stdout string) {
 	t.Helper()
+	if os.Getenv("DIRLOOM_UPDATE_GOLDEN") == "1" {
+		path := filepath.Join("..", "..", "testdata", "diff", diffGoldenV3, "golden", name)
+		if err := os.WriteFile(path, []byte(stdout), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if want := readDiffGolden(t, diffGoldenV3, name); stdout != want {
 		t.Fatalf("%s\n got %q\nwant %q", name, stdout, want)
 	}

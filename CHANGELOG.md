@@ -4,6 +4,16 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Publish the v0.4 [compatibility and freeze policy](docs/compatibility-policy.md) and the [contract register](docs/contracts/README.md): every public input and output, with its status, its owning package, what pins it and its change rules. The policy states what stays stable after the v0.4 freeze (fields, enumeration values, machine codes, exit codes, golden bytes, fingerprints) and what does not (diagnostic messages, including localized operating-system text, and stderr), and that an incompatible change to identity semantics, observation included, needs a new fingerprint version.
+- Publish the Tree JSON Schema v1 and Fingerprint JSON Schema v1 contracts, which describe the existing `--format json` outputs of the tree and of `dirloom fingerprint`, and an evolution policy for Verify Result Schema v1.
+
+### Changed
+
+- The v0.4 contracts are marked as candidates for the v0.4 freeze, which takes effect at the release candidate's freeze commit; Structural Watch v1 and Watch Event Schema v1 stay experimental.
+- The JSON outputs of `config explain`, `preset explain`, `theme list`, `theme explain`, `theme validate` and `theme classify` are documented as diagnostic outputs, not contracts: they keep their `schemaVersion`, but may change in any release, with a CHANGELOG entry. Their content is unchanged.
+
 ### Fixed
 
 - Fix Windows junctions observed as files. Since Go 1.23 reports a junction with an irregular file mode, Dirloom recorded it with kind `file` and no target, so retargeting a junction was invisible to `fingerprint`, `snapshot`, `verify`, `diff` and `watch`. A junction, or a folder where a volume is mounted, is now recognized by its reparse tag, whatever `GODEBUG=winsymlink` says, and recorded with kind `junction` and its target, rewritten relative to the root when it points inside it. It is still never entered. Tree outputs (text, Markdown, JSON, Mermaid, Graphviz, D2) show it as a symlink, `name -> target`, instead of a plain file, with no new `type` value; its graph node identifier changes accordingly. `dirloom theme classify` classifies it as a symlink instead of refusing it. Git sources are unchanged: Git never records a junction.

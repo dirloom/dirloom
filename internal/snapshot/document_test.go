@@ -446,17 +446,40 @@ func TestGoldenValidFixtures(t *testing.T) {
 	}
 }
 
+// invalidFixtureCodes pins the exact machine code of every invalid Snapshot
+// Schema v1 fixture. Codes are part of the contract; messages are not.
+var invalidFixtureCodes = map[string]string{
+	"duplicate-json-key.dlm.json":         snapshot.CodeInvalidJSON,
+	"duplicate-node.dlm.json":             snapshot.CodeInvalidArtifact,
+	"duplicate-required-feature.dlm.json": snapshot.CodeInvalidField,
+	"fingerprint-mismatch.dlm.json":       snapshot.CodeFingerprintMismatch,
+	"invalid-hierarchy.dlm.json":          snapshot.CodeInvalidArtifact,
+	"invalid-json.dlm.json":               snapshot.CodeInvalidJSON,
+	"invalid-kind.dlm.json":               snapshot.CodeInvalidArtifact,
+	"malformed-path.dlm.json":             snapshot.CodeInvalidArtifact,
+	"missing-fingerprint.dlm.json":        snapshot.CodeMissingField,
+	"unknown-artifact-version.dlm.json":   snapshot.CodeUnsupportedArtifact,
+	"unknown-required-feature.dlm.json":   snapshot.CodeUnsupportedFeature,
+	"unknown-schema.dlm.json":             snapshot.CodeUnsupportedSchema,
+}
+
 func TestGoldenInvalidFixtures(t *testing.T) {
 	dir := filepath.Join("..", "..", "testdata", "snapshots", "v1", "invalid")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
+	seen := map[string]bool{}
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".dlm.json") {
 			continue
 		}
+		seen[entry.Name()] = true
 		t.Run(entry.Name(), func(t *testing.T) {
+			want, ok := invalidFixtureCodes[entry.Name()]
+			if !ok {
+				t.Fatal("invalid fixture without an expected code in invalidFixtureCodes")
+			}
 			data, err := os.ReadFile(filepath.Join(dir, entry.Name()))
 			if err != nil {
 				t.Fatal(err)
@@ -465,10 +488,15 @@ func TestGoldenInvalidFixtures(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected invalid fixture to fail")
 			}
-			if snapshot.CodeOf(err) == "" {
-				t.Fatalf("unclassified error: %v", err)
+			if got := snapshot.CodeOf(err); got != want {
+				t.Fatalf("code = %q, want %q (%v)", got, want, err)
 			}
 		})
+	}
+	for name := range invalidFixtureCodes {
+		if !seen[name] {
+			t.Errorf("expected invalid fixture %s is missing", name)
+		}
 	}
 }
 

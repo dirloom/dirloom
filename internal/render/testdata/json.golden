@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "root": {
+    "name": "project",
+    "type": "directory",
+    "children": [
+      {
+        "name": "empty",
+        "type": "directory",
+        "children": []
+      },
+      {
+        "name": "src",
+        "type": "directory",
+        "children": [
+          {
+            "name": "link",
+            "type": "symlink",
+            "target": "../shared"
+          },
+          {
+            "name": "index.ts",
+            "type": "file"
+          }
+        ]
+      },
+      {
+        "name": "README.md",
+        "type": "file"
+      }
+    ]
+  }
+}

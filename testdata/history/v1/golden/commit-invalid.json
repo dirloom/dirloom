@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "code": "git_commit_invalid",
+    "message": "commit ecfcfefa826beac2e77dcdff238b0e85b8754d6f has an invalid committer timestamp or zone"
+  }
+}

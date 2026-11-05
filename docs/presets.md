@@ -194,7 +194,7 @@ dirloom preset explain ai
 dirloom preset explain ai --as json
 ```
 
-The text output is optimized for reading. The JSON output is a separate versioned contract:
+The text output is optimized for reading. The JSON output carries its own `schemaVersion`; it is a diagnostic output, not a contract, and may change in any release with a CHANGELOG entry ([policy](compatibility-policy.md#5-diagnostic-outputs-d1)):
 
 <!-- dirloom-preset-json-example:ai -->
 ```json
@@ -335,6 +335,6 @@ The four names and their documented definitions are public v0.2 behavior. Change
 
 The optional YAML `preset` field remains part of configuration `schemaVersion: 1`. Older strict binaries that predate presets reject the field rather than guessing its meaning.
 
-Preset explanation JSON has its own `schemaVersion: 1`. Configuration diagnostic JSON remains version `1` with additive preset and provenance fields. Tree JSON is unchanged.
+Preset explanation JSON has its own `schemaVersion: 1` and is a diagnostic output. Configuration diagnostic JSON remains version `1` with additive preset and provenance fields. Tree JSON is unchanged.
 
 Future custom presets, inheritance, composition, AI statistics, and context compression remain separate capabilities. Terminal themes are available independently and never alter a preset definition or the canonical tree artifact.

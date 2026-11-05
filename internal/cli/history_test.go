@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dirloom/dirloom/internal/app"
+	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/gittest"
 )
 
@@ -154,8 +157,39 @@ func TestHistoryDiagnosticGoldens(t *testing.T) {
 		assertHistoryGolden(t, tc.golden, stdout)
 	}
 
+	// A commit object that Git stored with --literally and whose committer
+	// time zone is out of range: git_commit_invalid. The golden repository is
+	// deterministic, so the object ID is too.
+	tree := repo.Git("rev-parse", ids["A"]+"^{tree}")
+	bad := repo.GitInput([]byte("tree "+tree+"\ncommitter C <c@x> 1 +1500\n\nbad\n"), "hash-object", "-t", "commit", "-w", "--literally", "--stdin")
+	stdout, stderr, code := executeForTest(t, "history", bad, "--format", "json")
+	if code != 5 || stderr != "" {
+		t.Fatalf("commit-invalid=(%q, %q, %d)", stdout, stderr, code)
+	}
+	assertHistoryGolden(t, "commit-invalid.json", stdout)
+
+	// A shallow list whose boundary is written in uppercase:
+	// git_shallow_invalid. Git itself reads that line as the same commit, so
+	// only Dirloom's strict parsing of the list fails.
+	clone := filepath.Join(t.TempDir(), "shallow")
+	repo.Git("clone", "--quiet", "--depth", "2", fileURLForHistory(repo.Dir), clone)
+	list := filepath.Join(clone, ".git", "shallow")
+	boundary, err := os.ReadFile(list) // #nosec G304 -- test repository file.
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(list, []byte(strings.ToUpper(string(boundary))), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(clone)
+	stdout, stderr, code = executeForTest(t, "history", "--format", "json")
+	if code != 5 || stderr != "" {
+		t.Fatalf("shallow-invalid=(%q, %q, %d)", stdout, stderr, code)
+	}
+	assertHistoryGolden(t, "shallow-invalid.json", stdout)
+
 	t.Chdir(t.TempDir())
-	stdout, stderr, code := executeForTest(t, "history", "--format", "json")
+	stdout, stderr, code = executeForTest(t, "history", "--format", "json")
 	if code != 5 || stderr != "" {
 		t.Fatalf("outside a repository=(%q, %q, %d)", stdout, stderr, code)
 	}
@@ -164,6 +198,18 @@ func TestHistoryDiagnosticGoldens(t *testing.T) {
 	if code != 5 || !strings.Contains(stderr, "not inside a Git repository") {
 		t.Fatalf("text failure=(%q, %d)", stderr, code)
 	}
+}
+
+// TestHistoryInternalGolden pins the INTERNAL_ERROR document of History
+// Result v1. It is unreachable from the CLI in production, so it is rendered
+// in-process.
+func TestHistoryInternalGolden(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := renderHistoryFailure(&stdout, "json", app.FailureInternal, artifact.InternalError("broken invariant"))
+	if code := processStatus(err, &stderr); code != 6 || stderr.Len() != 0 {
+		t.Fatalf("internal=(%q, %q, %d)", stdout.String(), stderr.String(), code)
+	}
+	assertHistoryGolden(t, "internal-error.json", stdout.String())
 }
 
 func TestHistoryUsageErrors(t *testing.T) {
