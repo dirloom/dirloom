@@ -5,6 +5,13 @@ import (
 	"strconv"
 )
 
+// Usage strings shared by every command that takes these flags.
+const (
+	depthUsage    = "maximum depth (0 keeps only the root; unlimited removes the limit)"
+	dirsOnlyUsage = "include directories only"
+	noMovesUsage  = "disable move detection: report each move as REMOVED plus ADDED"
+)
+
 type optionalDepth struct {
 	set       bool
 	unlimited bool

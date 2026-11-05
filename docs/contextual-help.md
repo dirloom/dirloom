@@ -34,8 +34,11 @@ dirloom help topics
 | `filters` | Depth, ignore rules and visibility |
 | `formats` | Text, Markdown, JSON and diagram formats |
 | `icons` | ASCII, Unicode, Nerd Font and automatic icons |
+| `moves` | Structural move detection in `diff`, `history` and `watch` |
 | `output` | stdout, clipboard and transactional files |
 | `presets` | Built-in project-tree presets |
+| `sources` | `snapshot:`, `live:` and `git:` operands of `diff` |
+| `structural` | Fingerprints, snapshots, `verify`, `diff`, `history` and `watch` |
 | `themes` | Built-in and custom terminal themes |
 
 ```bash
@@ -82,6 +85,14 @@ Valid values:
   auto
 
 Run 'dirloom help icons' for details.
+```
+
+Every `--format` flag reports an empty or unknown value the same way: `--format requires a non-empty value`, or the valid values of that command and `Run 'dirloom help <command>' for details.`, exit 2.
+
+A command's help lists only the flags it accepts. A flag that other commands take but this one refuses (`verify --depth`, `diff --config`, `watch --color`, `theme list --no-config`, ...) is hidden from its help and completion, and is refused with its reason instead of `unknown flag`:
+
+```text
+Error: --depth is not supported by verify: snapshot capture semantics are authoritative
 ```
 
 Unknown help targets may suggest a nearby command or topic. Usage errors keep exit code `2`. Runtime failures keep exit code `1`.

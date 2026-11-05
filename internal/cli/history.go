@@ -50,11 +50,11 @@ func newHistoryCommand(stdout io.Writer) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := rejectHistoryInheritedFlags(cmd); err != nil {
+			if err := rejectRefusedFlags(cmd, "history", historyRefusedFlags); err != nil {
 				return err
 			}
-			if opts.format != "text" && opts.format != "json" {
-				return &usageError{err: fmt.Errorf("unsupported history format %q (expected text or json)", opts.format)}
+			if err := requireEnumeratedFlag("format", opts.format, []string{"text", "json"}, "history"); err != nil {
+				return err
 			}
 			revision := history.DefaultRevision
 			if len(args) == 1 {
@@ -89,7 +89,8 @@ func newHistoryCommand(stdout io.Writer) *cobra.Command {
 	command.Flags().StringVar(&opts.from, "from", "", "stop before this revision (exclusive bound on the first-parent chain)")
 	command.Flags().IntVar(&opts.limit, "limit", history.DefaultLimit, "number of commits to examine")
 	command.Flags().BoolVar(&opts.structuralOnly, "structural-only", false, "show only commits that change the structure")
-	command.Flags().BoolVar(&opts.noMoves, "no-moves", false, "count moves as REMOVED and ADDED (disable move detection)")
+	command.Flags().BoolVar(&opts.noMoves, "no-moves", false, noMovesUsage)
+	registerRefusedFlags(command, historyRefusedFlags)
 	_ = command.RegisterFlagCompletionFunc("format", cobra.FixedCompletions([]string{"text", "json"}, cobra.ShellCompDirectiveNoFileComp))
 	_ = command.RegisterFlagCompletionFunc("from", cobra.NoFileCompletions)
 	_ = command.RegisterFlagCompletionFunc("limit", cobra.NoFileCompletions)
@@ -99,18 +100,19 @@ func newHistoryCommand(stdout io.Writer) *cobra.Command {
 	return command
 }
 
-func rejectHistoryInheritedFlags(command *cobra.Command) error {
-	for _, name := range []string{"config", "no-user-config", "no-config"} {
-		changed := command.Flags().Changed(name)
-		if command.InheritedFlags() != nil && command.InheritedFlags().Changed(name) {
-			changed = true
-		}
-		if changed {
-			return &usageError{err: fmt.Errorf("--%s is not supported by history; committed trees are observed without configuration", name)}
-		}
-	}
-	return nil
-}
+// reasonWholeCommittedTrees explains why history takes no capture option.
+const reasonWholeCommittedTrees = "committed trees are observed whole, without configuration"
+
+// historyRefusedFlags are the flags history refuses: it observes every
+// committed tree whole, in the repository of the current directory, and its
+// result has no presentation or destination.
+var historyRefusedFlags = joinRefusedFlags(
+	[]refusedFlag{{name: "root", reason: "it reads the repository of the current directory"}},
+	scopeFlags(reasonWholeCommittedTrees),
+	sourceFlags(reasonWholeCommittedTrees),
+	presentationFlags(),
+	destinationFlags(reasonStdoutOnly),
+)
 
 func renderHistorySuccess(stdout io.Writer, format string, result history.Result, structuralOnly bool) error {
 	entries := result.Entries

@@ -34,7 +34,11 @@ Structural overrides are not part of verify. These flags are rejected:
 --output --copy
 ```
 
+Each one is a usage error, exit 2, whose message names the flag and the reason, for example `--depth is not supported by verify: snapshot capture semantics are authoritative`. These flags are not listed in `dirloom verify --help` and are not completed.
+
 `--config`, `--no-user-config`, and `--no-config` are rejected even though other commands inherit them. Snapshot Capture Semantics are the observation scope. A malformed `.dirloom.yaml` in the tree does not change that scope and does not block verification.
+
+An invalid `--format` prints the valid values and `Run 'dirloom help verify' for details.`, exit 2.
 
 ## Capture Semantics
 

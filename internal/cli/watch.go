@@ -30,22 +30,11 @@ type watchOptions struct {
 	noMoves         bool
 	debounce        time.Duration
 	poll            time.Duration
-	color           string
-	icons           string
-	theme           string
-	output          string
-	copy            bool
 }
 
-// watchRejected are the flags other commands take that watch refuses, with
-// the reason.
-var watchRejected = []struct{ flag, reason string }{
-	{"color", "its output has no presentation options"},
-	{"icons", "its output has no presentation options"},
-	{"theme", "its output has no presentation options"},
-	{"output", "it streams to stdout only"},
-	{"copy", "it streams to stdout only"},
-}
+// watchRefusedFlags are the flags other commands take that watch refuses:
+// its stream has no presentation options and no other destination.
+var watchRefusedFlags = joinRefusedFlags(presentationFlags(), destinationFlags("it streams to stdout only"))
 
 // watchSourcePrefixes are the source operands of diff and history: a watch
 // observes one live directory, named as a plain path.
@@ -156,26 +145,19 @@ func newWatchCommand(stdout, stderr io.Writer, loader *configuration.Loader, sou
 	flags.StringVar(&opts.root, "root", "", "directory to watch (default: positional argument or current directory)")
 	flags.StringVar(&opts.format, "format", "text", "output format: text or ndjson (one JSON event per line)")
 	flags.StringVar(&opts.preset, "preset", "", "built-in preset: ai, compact, docs, monorepo, or none")
-	flags.VarP(&opts.depth, "depth", "d", "maximum depth (0 watches only the root; unlimited removes the limit)")
-	flags.BoolVar(&opts.directoriesOnly, "dirs-only", false, "include directories only")
+	flags.VarP(&opts.depth, "depth", "d", depthUsage)
+	flags.BoolVar(&opts.directoriesOnly, "dirs-only", false, dirsOnlyUsage)
 	flags.BoolVar(&opts.includeHidden, "hidden", false, "include hidden entries that survive other filters")
 	flags.StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	flags.BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	flags.BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	flags.BoolVar(&opts.noMoves, "no-moves", false, "report moves as removals and additions (move detection none)")
+	flags.BoolVar(&opts.noMoves, "no-moves", false, noMovesUsage)
 	flags.DurationVar(&opts.debounce, "debounce", 0, fmt.Sprintf("quiet time after a notification before observing, %s to %s (default %s; native mode)",
 		watch.MinDebounce, watch.MaxDebounce, watch.DefaultDebounce))
 	flags.DurationVar(&opts.poll, "poll", 0, fmt.Sprintf("observe every interval, %s to %s, instead of using notifications", watch.MinPoll, watch.MaxPoll))
 	// Refused with a reason rather than left unknown; hidden from help and
 	// completion.
-	flags.StringVar(&opts.color, "color", "", "not supported by watch")
-	flags.StringVar(&opts.icons, "icons", "", "not supported by watch")
-	flags.StringVar(&opts.theme, "theme", "", "not supported by watch")
-	flags.StringVarP(&opts.output, "output", "o", "", "not supported by watch")
-	flags.BoolVar(&opts.copy, "copy", false, "not supported by watch")
-	for _, rejected := range watchRejected {
-		_ = flags.MarkHidden(rejected.flag)
-	}
+	registerRefusedFlags(command, watchRefusedFlags)
 	registerWatchCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}
@@ -187,10 +169,8 @@ func newWatchCommand(stdout, stderr io.Writer, loader *configuration.Loader, sou
 // is read. The ranges of --debounce and --poll, and their combination, are
 // app.Watch's to check.
 func validateWatchFlags(cmd *cobra.Command, args []string, opts watchOptions) error {
-	for _, rejected := range watchRejected {
-		if cmd.Flags().Changed(rejected.flag) {
-			return &usageError{err: fmt.Errorf("--%s is not supported by watch: %s", rejected.flag, rejected.reason)}
-		}
+	if err := rejectRefusedFlags(cmd, "watch", watchRefusedFlags); err != nil {
+		return err
 	}
 	for _, arg := range args {
 		for _, prefix := range watchSourcePrefixes {
@@ -199,15 +179,14 @@ func validateWatchFlags(cmd *cobra.Command, args []string, opts watchOptions) er
 			}
 		}
 	}
-	switch opts.format {
-	case "text", "ndjson":
-	case "json":
-		return &usageError{
-			err:  fmt.Errorf("unsupported watch format %q", opts.format),
-			hint: "A watch streams events: use --format ndjson for one JSON object per line.",
-		}
-	default:
-		return invalidEnumeratedFlag("format", opts.format, []string{"text", "ndjson"}, "watch")
+	formats := []string{"text", "ndjson"}
+	if opts.format == "json" {
+		invalid := invalidEnumeratedFlag("format", opts.format, formats, "watch")
+		invalid.hint = "A watch streams events: use --format ndjson for one JSON object per line."
+		return invalid
+	}
+	if err := requireEnumeratedFlag("format", opts.format, formats, "watch"); err != nil {
+		return err
 	}
 	for _, flag := range []struct {
 		name     string

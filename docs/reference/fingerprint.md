@@ -30,7 +30,7 @@ dirloom fingerprint [directory] [flags]
 
 Structural flags are the same as inspection: `--depth`, `--dirs-only`, `--hidden`, `--ignore`, `--no-default-ignore`, `--no-gitignore`, `--preset`, plus `--config` / `--no-user-config` / `--no-config`.
 
-`--color`, `--icons` and `--theme` are accepted and ignored. They never change the fingerprint and never inject ANSI.
+`--color`, `--icons` and `--theme` are validated, then ignored. An invalid value is a usage error, exit 2, as in the tree output: `--color banana` is refused. A `--theme` path is checked for its `.yaml`/`.yml` form only; the file is not read. A valid value never changes the fingerprint and never injects ANSI.
 
 ## Text
 

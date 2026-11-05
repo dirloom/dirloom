@@ -39,7 +39,7 @@ dirloom watch --preset monorepo --ignore dist --no-gitignore
 | --- | --- |
 | `[directory]`, `--root` | the directory to watch, not both; default the current directory |
 | `--format` | `text` (default) or `ndjson`: one JSON event per line |
-| `--no-moves` | report moves as removals and additions (move detection `none`) |
+| `--no-moves` | disable move detection: report each move as `REMOVED` plus `ADDED` (move detection `none`) |
 | `--debounce <duration>` | quiet time after a notification before observing, 10 ms to 10 s, default 200 ms; native mode only |
 | `--poll <interval>` | observe every interval, 100 ms to 1 h, instead of using notifications |
 | capture flags, `--preset`, configuration | exactly as [`dirloom fingerprint`](fingerprint.md), resolved once at startup |
@@ -52,14 +52,19 @@ is not a flag.
 These are usage errors, with exit 2, before any output and whatever
 `--format`:
 
-- `--format json`: the message suggests `ndjson`, since a watch streams
-  events; any other format;
-- `--color`, `--icons`, `--theme`: a watch has no presentation options;
+- `--format json`: the message lists the valid values and suggests
+  `ndjson`, since a watch streams events; any other format;
+- `--color`, `--icons`, `--theme`, `--style`: a watch has no presentation
+  options;
 - `--output`, `--copy`: a watch streams to stdout only;
 - a `git:`, `snapshot:` or `live:` operand, two directories, or a directory
   with `--root`;
 - a duration out of its range or zero, and `--poll` with `--debounce`;
 - an invalid configuration, or one that cannot be read.
+
+A refused flag is named with its reason, for example `--color is not
+supported by watch: its output has no presentation options`, and is not
+listed in `dirloom watch --help`.
 
 ### A command, not a directory
 

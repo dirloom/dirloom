@@ -65,6 +65,7 @@ func newThemeClassifyCommand(stdout io.Writer, sources *sourceOptions) *cobra.Co
 	_ = command.RegisterFlagCompletionFunc("root", func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveFilterDirs
 	})
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	return command
 }
 
