@@ -95,23 +95,24 @@ func TestCtrlCHelperProcess(t *testing.T) {
 	os.Exit(0)
 }
 
-// childProcess returns the identifier of a running child of parent whose
-// executable is name, or 0.
-func childProcess(t *testing.T, parent uint32, name string) uint32 {
+// childProcesses returns the executable names of the running children of
+// parent, by process identifier.
+func childProcesses(t *testing.T, parent uint32) map[uint32]string {
 	t.Helper()
 	snapshot, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer func() { _ = windows.CloseHandle(snapshot) }()
+	children := make(map[uint32]string)
 	var entry windows.ProcessEntry32
 	entry.Size = uint32(unsafe.Sizeof(entry))
 	for err = windows.Process32First(snapshot, &entry); err == nil; err = windows.Process32Next(snapshot, &entry) {
-		if entry.ParentProcessID == parent && strings.EqualFold(windows.UTF16ToString(entry.ExeFile[:]), name) {
-			return entry.ProcessID
+		if entry.ParentProcessID == parent {
+			children[entry.ProcessID] = windows.UTF16ToString(entry.ExeFile[:])
 		}
 	}
-	return 0
+	return children
 }
 
 // TestWatchPowerShellExampleAfterCtrlC runs the PowerShell example of the
@@ -143,6 +144,7 @@ if ($PSVersionTable.PSVersion -lt [version]'7.4') { Write-Host "skip $($PSVersio
 $console = Add-Type -Name ConsoleCtrl -Namespace DirloomTest -PassThru -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool SetConsoleCtrlHandler(System.IntPtr handler, bool add);'
 [void]$console::SetConsoleCtrlHandler([System.IntPtr]::Zero, $false)
 Set-Location $Work
+Set-Content -LiteralPath ready.txt -Value ready
 try {
     & $Bin watch --no-config tree --format ndjson > events.ndjson
 } finally {
@@ -194,7 +196,10 @@ try {
 		<-exited
 	})
 
-	deadline := time.Now().Add(watchWait)
+	// A cold PowerShell start, with the Add-Type compilation, can take most of
+	// the usual wait on a CI runner.
+	started := time.Now()
+	deadline := started.Add(4 * watchWait)
 	for watcher == 0 {
 		select {
 		case <-exited:
@@ -204,12 +209,20 @@ try {
 			t.Fatalf("the script ended before the watch started:\n%s", readLog())
 		default:
 		}
-		if time.Now().After(deadline) {
-			t.Fatal("the watch did not start")
-		}
 		time.Sleep(50 * time.Millisecond)
-		watcher = childProcess(t, uint32(cmd.Process.Pid), "dirloom.exe") //nolint:gosec // G115: process identifiers are non-negative 32-bit values.
+		children := childProcesses(t, uint32(cmd.Process.Pid)) //nolint:gosec // G115: process identifiers are non-negative 32-bit values.
+		for pid, name := range children {
+			if strings.EqualFold(name, "dirloom.exe") {
+				watcher = pid
+			}
+		}
+		if watcher == 0 && time.Now().After(deadline) {
+			_, readyErr := os.Stat(filepath.Join(work, "ready.txt"))
+			t.Fatalf("the watch did not start in %s; the script reached it: %t; children of pwsh: %v; script output:\n%s",
+				time.Since(started).Round(time.Second), readyErr == nil, children, readLog())
+		}
 	}
+	t.Logf("the watch started %s after the script", time.Since(started).Round(100*time.Millisecond))
 	// Let the watch reach its first state; an earlier Ctrl+C would still
 	// end it, without a generation.
 	time.Sleep(time.Second)
