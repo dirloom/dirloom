@@ -130,8 +130,8 @@ func sampleTree() *tree.Node {
 // TestJSONGoldenV1 pins the bytes of tree JSON v1. The escaping tree locks
 // the encoder settings: no HTML escaping, two-space indentation, one final
 // LF, and a junction rendered as a symlink. It holds only valid UTF-8 names:
-// the U+FFFD replacement of an invalid name is a known defect (A11), not
-// part of the contract, and must never be captured by a golden.
+// an invalid name or target is refused (A11, TestJSONRefusesInvalidUTF8),
+// and no golden may capture a U+FFFD replacement.
 func TestJSONGoldenV1(t *testing.T) {
 	for _, test := range []struct {
 		golden string
