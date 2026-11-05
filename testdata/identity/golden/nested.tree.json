@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "root": {
+    "name": "nested",
+    "type": "directory",
+    "children": [
+      {
+        "name": "docs",
+        "type": "directory",
+        "children": [
+          {
+            "name": "note.md",
+            "type": "file"
+          }
+        ]
+      },
+      {
+        "name": "src",
+        "type": "directory",
+        "children": [
+          {
+            "name": "core",
+            "type": "directory",
+            "children": [
+              {
+                "name": "main.go",
+                "type": "file"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

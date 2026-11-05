@@ -1,6 +1,6 @@
 # Snapshot Schema v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a2`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a2`
 >
 > **Date:** 2026-09-24
 

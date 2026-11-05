@@ -1,6 +1,6 @@
 # History Result Schema v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a7`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a7`
 >
 > **Related:** [Structural History v1](structural-history-v1.md), [Diff Result Schema v3](diff-result-v3.md), [Git Tree Source v1](git-tree-source-v1.md), [ADR 0007](../adr/0007-structural-history.md)
 

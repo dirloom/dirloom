@@ -283,6 +283,57 @@ func TestVerifyJSONEscapeAndGoldens(t *testing.T) {
 	assertGolden(t, "unsupported-snapshot.json", stdout)
 }
 
+// TestVerifyOperationalAndInternalGoldens pins the exit 5 and exit 6
+// documents of Verify Result v1. Diagnostic messages are not contractual: the
+// OS text after the snapshot read prefix is rewritten to the golden's before
+// the byte comparison, as for the diff goldens.
+func TestVerifyOperationalAndInternalGoldens(t *testing.T) {
+	empty := filepath.Join("..", "..", "testdata", "snapshots", "v1", "valid", "empty.dlm.json")
+	stdout, stderr, code := executeForTest(t, "verify", empty, "--root", "definitely-missing-dir", "--format", "json")
+	if code != 5 || stderr != "" {
+		t.Fatalf("observation=(%q, %q, %d)", stdout, stderr, code)
+	}
+	assertGolden(t, "observation-error.json", stdout)
+
+	stdout, stderr, code = executeForTest(t, "verify", "missing.dlm.json", "--root", t.TempDir(), "--format", "json")
+	if code != 5 || stderr != "" {
+		t.Fatalf("snapshot-read=(%q, %q, %d)", stdout, stderr, code)
+	}
+	assertGolden(t, "snapshot-read-error.json", normalizeVerifySnapshotRead(t, stdout))
+
+	// INTERNAL_ERROR is unreachable from the CLI in production; its document
+	// is rendered in-process, as in TestVerifyInternalRendering.
+	var out, errOut bytes.Buffer
+	err := renderVerifyFailure(&out, "json", app.FailureInternal, artifact.InternalError("broken invariant"), app.VerifyResult{})
+	if code := processStatus(err, &errOut); code != 6 || errOut.Len() != 0 {
+		t.Fatalf("internal=(%q, %q, %d)", out.String(), errOut.String(), code)
+	}
+	assertGolden(t, "internal-error.json", out.String())
+}
+
+func normalizeVerifySnapshotRead(t *testing.T, stdout string) string {
+	t.Helper()
+	var doc verifyJSONDocument
+	if err := json.Unmarshal([]byte(stdout), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc.Status != "SNAPSHOT_READ_ERROR" || doc.Diagnostic == nil || doc.Diagnostic.Code != "snapshot_read_failure" {
+		t.Fatalf("snapshot read document = %s", stdout)
+	}
+	if !strings.HasPrefix(doc.Diagnostic.Message, snapshotReadPrefix) {
+		t.Fatalf("message = %q", doc.Diagnostic.Message)
+	}
+	encoded, err := json.Marshal(doc.Diagnostic.Message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	golden, err := json.Marshal(snapshotReadPrefix + "no such file or directory")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Replace(stdout, string(encoded), string(golden), 1)
+}
+
 func TestVerifyCLIOutputSelfExclusion(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o755); err != nil {
@@ -372,6 +423,11 @@ func assertVerifyJSON(t *testing.T, stdout, stderr string, code, wantCode int, s
 func assertGolden(t *testing.T, name, stdout string) {
 	t.Helper()
 	path := filepath.Join("..", "..", "testdata", "verify", "v1", "golden", name)
+	if os.Getenv("DIRLOOM_UPDATE_GOLDEN") == "1" {
+		if err := os.WriteFile(path, []byte(stdout), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)

@@ -1,6 +1,6 @@
 # Git Tree Source v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a6`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a6`
 >
 > **Related:** [Canonical Structural Artifact v1](../canonical-structural-artifact-v1.md), [Identity Projection v1](identity-projection-v1.md), [Diff Result Schema v3](diff-result-v3.md), [ADR 0006](../adr/0006-git-sources.md)
 
