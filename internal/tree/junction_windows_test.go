@@ -124,8 +124,8 @@ func TestScannerWindowsOtherReparsePointIsNotAJunction(t *testing.T) {
 	}
 	model := scanForTest(t, root, nil, false, false, nil)
 	node := childByName(model, "socket")
-	if node == nil || node.Junction || node.Type != classifyNode(info) {
-		t.Fatalf("socket = %#v, want the generic type %q", node, classifyNode(info))
+	if node == nil || node.Junction || node.Type != classifyNode(info) || node.Special != "socket" {
+		t.Fatalf("socket = %#v, want the generic type %q marked as a socket", node, classifyNode(info))
 	}
 	if n := heldHandles.Load(); n != 0 {
 		t.Fatalf("%d handles left open", n)

@@ -83,7 +83,7 @@ Different configuration mechanisms that produce the same view produce the same f
 ## Exit status
 
 - `0` — success
-- `1` — runtime error (missing directory, unreadable tree, canonical collision, unsupported node)
+- `1` — runtime error (missing directory, unreadable tree, canonical collision, unsupported node: a named pipe, socket or device in the observed view; exclude it with `--ignore`)
 - `2` — invalid arguments (unknown `--format`, `--root` combined with a positional path)
 
 A canonical Unicode collision (two raw names that NFC to the same path) is an error, never a silent merge.

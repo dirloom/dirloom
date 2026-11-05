@@ -96,3 +96,44 @@ func TestScannerTakesJunctionsFromTheBackend(t *testing.T) {
 		t.Fatalf("directories only kept %v", childNames(directories))
 	}
 }
+
+// TestScannerMarksSpecialEntries checks that named pipes, sockets and devices
+// stay files for rendering but carry their special type, that ModeIrregular
+// is never special, and that --dirs-only and depth drop them before the mark
+// matters.
+func TestScannerMarksSpecialEntries(t *testing.T) {
+	backend := memoryBackend{infos: []fs.FileInfo{
+		memoryInfo{name: "pipe", mode: fs.ModeNamedPipe},
+		memoryInfo{name: "app.sock", mode: fs.ModeSocket},
+		memoryInfo{name: "disk", mode: fs.ModeDevice},
+		memoryInfo{name: "tty", mode: fs.ModeDevice | fs.ModeCharDevice},
+		memoryInfo{name: "alias.exe", mode: fs.ModeIrregular},
+		memoryInfo{name: "plain.txt"},
+	}}
+	scan := func(options ScanOptions) *Node {
+		t.Helper()
+		options.RootName, options.Backend, options.RootLocation = "root", backend, "root"
+		model, err := NewScanner(options).Scan(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		return model
+	}
+	model := scan(ScanOptions{})
+	for name, want := range map[string]string{
+		"pipe": "named pipe", "app.sock": "socket", "disk": "device", "tty": "character device",
+		"alias.exe": "", "plain.txt": "",
+	} {
+		node := childByName(model, name)
+		if node == nil || node.Type != NodeFile || node.Special != want {
+			t.Fatalf("%s = %#v, want a file with special type %q", name, node, want)
+		}
+	}
+	if directories := scan(ScanOptions{Directories: true}); len(directories.Children) != 0 {
+		t.Fatalf("directories only kept %v", childNames(directories))
+	}
+	depth := 0
+	if shallow := scan(ScanOptions{MaxDepth: &depth}); len(shallow.Children) != 0 {
+		t.Fatalf("depth 0 kept %v", childNames(shallow))
+	}
+}

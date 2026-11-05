@@ -114,6 +114,9 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, rel
 		}
 
 		node := &Node{Name: name, Path: relativePath, Type: kind, Junction: junction}
+		if kind == NodeFile {
+			node.Special = specialType(info.Mode())
+		}
 		switch kind {
 		case NodeDirectory:
 			node.Children = make([]*Node, 0)
@@ -167,6 +170,25 @@ func classifyNode(info os.FileInfo) NodeType {
 		return NodeDirectory
 	}
 	return NodeFile
+}
+
+// specialType names an entry that is a named pipe, a socket or a device, and
+// returns "" otherwise. ModeIrregular is never special: Windows gives it to
+// files behind reparse points (app execution aliases, cloud placeholders,
+// compressed files), and Linux and macOS never set it.
+func specialType(mode os.FileMode) string {
+	switch {
+	case mode&os.ModeNamedPipe != 0:
+		return "named pipe"
+	case mode&os.ModeSocket != 0:
+		return "socket"
+	case mode&os.ModeCharDevice != 0:
+		return "character device"
+	case mode&os.ModeDevice != 0:
+		return "device"
+	default:
+		return ""
+	}
 }
 
 func displayPath(relativePath string) string {

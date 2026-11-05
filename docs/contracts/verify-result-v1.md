@@ -58,7 +58,7 @@ snapshot_read_failure
 
 `snapshot_fingerprint_mismatch` is always `INVALID_SNAPSHOT`, never `MISMATCH`.
 
-Live artifact diagnostics reuse `artifact.Error.Code` when present, including `source_read_failure`, `canonical_path_collision`, and `internal_invariant_failure`.
+Live artifact diagnostics reuse `artifact.Error.Code` when present, including `source_read_failure`, `canonical_path_collision`, `unsupported_node_type` (a named pipe, socket or device in the observed view), and `internal_invariant_failure`.
 
 Fallback codes, used only when no typed snapshot or artifact code exists:
 

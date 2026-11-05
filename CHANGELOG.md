@@ -4,6 +4,15 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Changed
+
+- Refuse named pipes, sockets and devices in structural observations. A FIFO, a Unix or Windows AF_UNIX socket, or a device in the observed view was recorded as a plain `file`, against the Canonical Structural Artifact contract. It is now refused with `unsupported_node_type`, naming its path and type:
+  - `fingerprint` and `snapshot` exit 1;
+  - `verify` and `diff` report `OBSERVATION_ERROR` (exit 5);
+  - `watch` stops at startup with a fatal error, or, when the entry appears later, reports non-fatal errors and publishes no new state until the entry is gone.
+
+  Exclude such an entry with `--ignore`; `.gitignore`, default ignores, hidden entries, `--dirs-only` and depth exclude it as well. Tree outputs (text, Markdown, JSON, graph exports) still show it as a file, and Windows files behind a reparse point (app execution aliases, cloud placeholders) are still files. A snapshot taken with `v0.4.0-a8` or earlier that recorded such an entry still loads, but observing the same tree now fails instead of matching.
+
 ### Fixed
 
 - Fix Windows junctions observed as files. Since Go 1.23 reports a junction with an irregular file mode, Dirloom recorded it with kind `file` and no target, so retargeting a junction was invisible to `fingerprint`, `snapshot`, `verify`, `diff` and `watch`. A junction, or a folder where a volume is mounted, is now recognized by its reparse tag, whatever `GODEBUG=winsymlink` says, and recorded with kind `junction` and its target, rewritten relative to the root when it points inside it. It is still never entered. Tree outputs (text, Markdown, JSON, Mermaid, Graphviz, D2) show it as a symlink, `name -> target`, instead of a plain file, with no new `type` value; its graph node identifier changes accordingly. `dirloom theme classify` classifies it as a symlink instead of refusing it. Git sources are unchanged: Git never records a junction.
