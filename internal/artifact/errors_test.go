@@ -18,7 +18,7 @@ func TestAsInternalMarksOnlyInvariants(t *testing.T) {
 		errors.New("plain"),
 		nil,
 	} {
-		if got := AsInternal(err); got != err {
+		if got := AsInternal(err); !errors.Is(got, err) || IsInternal(got) {
 			t.Fatalf("AsInternal(%v) changed a non-invariant error: %#v", err, got)
 		}
 	}
