@@ -64,15 +64,17 @@ func FromTree(root *tree.Node, options FromTreeOptions) (*artifact.Artifact, err
 	}
 	collisions := artifact.NewCollisionSet()
 	if err := collisions.Add(".", artifact.RootPath); err != nil {
-		return nil, err
+		return nil, artifact.AsInternal(err)
 	}
 	children, err := convertChildren(root.Children, artifact.RootPath, options, collisions)
 	if err != nil {
 		return nil, err
 	}
 	art.Root.Children = children
+	// Dirloom built this artifact from an observation: an invariant
+	// violation here is a Dirloom bug, not bad input.
 	if err := art.Validate(); err != nil {
-		return nil, err
+		return nil, artifact.AsInternal(err)
 	}
 	return &art, nil
 }
@@ -112,8 +114,10 @@ func convertNode(node *tree.Node, parent artifact.Path, options FromTreeOptions,
 	if err != nil {
 		return artifact.Node{}, err
 	}
+	// A collision of distinct names is in the observed data; a repeated
+	// entry is an invariant violation of the observation itself.
 	if err := collisions.Add(rawPath, path); err != nil {
-		return artifact.Node{}, err
+		return artifact.Node{}, artifact.AsInternal(err)
 	}
 	kind, err := observationKind(node, path)
 	if err != nil {
