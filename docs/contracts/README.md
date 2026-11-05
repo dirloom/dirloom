@@ -10,7 +10,7 @@ Every public input and output of Dirloom, with its status, its owner and what pi
 
 | Contract | Version | Owner | Definition | Pinned by | Change rules |
 | --- | --- | --- | --- | --- | --- |
-| Canonical Structural Artifact | 1 | `internal/artifact` | [canonical-structural-artifact-v1.md](../canonical-structural-artifact-v1.md) | artifact validation tests, fuzz targets, junction tests | [Invariants](../canonical-structural-artifact-v1.md#invariants), [policy §4](../compatibility-policy.md#4-identity-and-fingerprints-d13) |
+| Canonical Structural Artifact | 1 | `internal/artifact` | [canonical-structural-artifact-v1.md](../canonical-structural-artifact-v1.md) | artifact validation tests, fuzz targets, junction tests, special-type refusal tests | [Invariants](../canonical-structural-artifact-v1.md#invariants), [policy §4](../compatibility-policy.md#4-identity-and-fingerprints-d13) |
 | Canonical Identity Encoding | 1 | `internal/identity` | [canonical-identity-encoding-v1.md](canonical-identity-encoding-v1.md) | byte-vector golden, fuzz, property tests | [Versioning](canonical-identity-encoding-v1.md#versioning) |
 | Identity Projection / Fingerprint | 1 (`dlm:v1:sha256`) | `internal/identity` | [identity-projection-v1.md](identity-projection-v1.md) | `testdata/identity/golden/*.fingerprint`, fuzz | [Versioning](identity-projection-v1.md#versioning), [policy §4](../compatibility-policy.md#4-identity-and-fingerprints-d13) |
 | Fingerprint JSON | `schemaVersion` 1 | `internal/cli` | [fingerprint-json-v1.md](fingerprint-json-v1.md) | `testdata/identity/golden/*.fingerprint.json` | [policy §3](../compatibility-policy.md#3-changing-a-frozen-contract) |
