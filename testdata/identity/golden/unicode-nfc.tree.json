@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "root": {
+    "name": "unicode-nfc",
+    "type": "directory",
+    "children": [
+      {
+        "name": "café.txt",
+        "type": "file"
+      }
+    ]
+  }
+}

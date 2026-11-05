@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "OBSERVATION_ERROR",
+  "diagnostic": {
+    "code": "git_shallow_invalid",
+    "message": "the shallow boundary list holds a line that is not a full object id"
+  }
+}

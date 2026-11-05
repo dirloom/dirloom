@@ -398,7 +398,7 @@ dirloom theme validate ./.dirloom/themes/team.yaml
 dirloom theme validate ./.dirloom/themes/team.yaml --as json
 ```
 
-`theme list`, `theme explain`, and `theme validate` have independent JSON schema v1 contracts. Theme explanation identifies `themeSchemaVersion: 1` and reports catalog version and counts without dumping all matchers. v0.3 enriches the compiled catalog; the theme file format remains schema v1. Validation returns stable warnings such as `unknown-token`, `unknown-kind-binding`, and `unknown-role-binding`.
+`theme list`, `theme explain`, and `theme validate` each write JSON with an independent `schemaVersion: 1`. Like `theme classify`, they are diagnostic outputs, not contracts: they may change in any release, with a CHANGELOG entry ([policy](compatibility-policy.md#5-diagnostic-outputs-d1)). Theme explanation identifies `themeSchemaVersion: 1` and reports catalog version and counts without dumping all matchers. v0.3 enriches the compiled catalog; the theme file format remains schema v1. Validation returns stable warnings such as `unknown-token`, `unknown-kind-binding`, and `unknown-role-binding`.
 
 Configuration-source flags are rejected because these commands intentionally ignore configuration.
 
@@ -484,7 +484,7 @@ Usage and validation errors write only to stderr.
 
 ## Compatibility and evolution
 
-The theme file, semantic catalog, theme list, theme explanation, theme validation, theme classification, configuration diagnostic, and tree JSON each own an independent version constant. They currently all expose version `1` where applicable; one contract can evolve without silently changing another.
+The theme file, semantic catalog, theme list, theme explanation, theme validation, theme classification, configuration diagnostic, and tree JSON each own an independent version constant. They currently all expose version `1` where applicable; one can evolve without silently changing another. The theme file schema and tree JSON are contracts; the command JSON outputs are diagnostics (see the [contract register](contracts/README.md)).
 
 The public theme schema v1 and catalog v1 ship together in Dirloom v0.2. After release, renaming or removing a kind, changing a catalog matcher, or changing a built-in definition requires a changelog entry and Semantic Versioning review.
 

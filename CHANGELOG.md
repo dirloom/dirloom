@@ -4,8 +4,15 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+### Added
+
+- Publish the v0.4 [compatibility and freeze policy](docs/compatibility-policy.md) and the [contract register](docs/contracts/README.md): every public input and output, with its status, its owning package, what pins it and its change rules. The policy states what stays stable after the v0.4 freeze (fields, enumeration values, machine codes, exit codes, golden bytes, fingerprints) and what does not (diagnostic messages, including localized operating-system text, and stderr), and that an incompatible change to identity semantics, observation included, needs a new fingerprint version.
+- Publish the Tree JSON Schema v1 and Fingerprint JSON Schema v1 contracts, which describe the existing `--format json` outputs of the tree and of `dirloom fingerprint`, and an evolution policy for Verify Result Schema v1.
+
 ### Changed
 
+- The v0.4 contracts are marked as candidates for the v0.4 freeze, which takes effect at the release candidate's freeze commit; Structural Watch v1 and Watch Event Schema v1 stay experimental.
+- The JSON outputs of `config explain`, `preset explain`, `theme list`, `theme explain`, `theme validate` and `theme classify` are documented as diagnostic outputs, not contracts: they keep their `schemaVersion`, but may change in any release, with a CHANGELOG entry. Their content is unchanged.
 - Refuse named pipes, sockets and devices in structural observations. A FIFO, a Unix or Windows AF_UNIX socket, or a device in the observed view was recorded as a plain `file`, against the Canonical Structural Artifact contract. It is now refused with `unsupported_node_type`, naming its path and type:
   - `fingerprint` and `snapshot` exit 1;
   - `verify` and `diff` report `OBSERVATION_ERROR` (exit 5);

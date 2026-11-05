@@ -1,6 +1,6 @@
 # Canonical Structural Artifact v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](contracts/README.md); normative since Dirloom `v0.4.0-a1`
 >
 > **Audience:** engineering
 >

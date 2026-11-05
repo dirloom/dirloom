@@ -1,6 +1,6 @@
 # Diff Result Schema v3
 
-> **Status:** normative contract for Dirloom `v0.4.0-a6`; supersedes [Diff Result Schema v2](diff-result-v2.md)
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a6`; supersedes [Diff Result Schema v2](diff-result-v2.md)
 >
 > **Related:** [Git Tree Source v1](git-tree-source-v1.md), [Move Detection structural-v1](move-detection-structural-v1.md), [Identity Projection v1](identity-projection-v1.md), [ADR 0006](../adr/0006-git-sources.md)
 
