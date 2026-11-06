@@ -137,7 +137,7 @@ func ClassifyVerifyFailure(err error) VerifyFailureKind {
 		return FailureInternal
 	}
 	switch snapshot.CodeOf(err) {
-	case snapshot.CodeInvalidJSON, snapshot.CodeMissingField, snapshot.CodeInvalidField, snapshot.CodeInvalidArtifact, snapshot.CodeFingerprintMismatch:
+	case snapshot.CodeInvalidJSON, snapshot.CodeMissingField, snapshot.CodeInvalidField, snapshot.CodeInvalidArtifact, snapshot.CodeFingerprintMismatch, snapshot.CodeLimitExceeded:
 		return FailureInvalidSnapshot
 	case snapshot.CodeUnsupportedSchema, snapshot.CodeUnsupportedArtifact, snapshot.CodeUnsupportedFeature:
 		return FailureUnsupportedSnapshot
