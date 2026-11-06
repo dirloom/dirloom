@@ -11,6 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// rejectSourceFlags refuses the configuration-source flags in a command that
+// reads no configuration file. The command declares them hidden with
+// registerRefusedFlags(command, sourceFlags(reasonNoConfiguration)), so its
+// help does not list them.
 func rejectSourceFlags(command *cobra.Command, sources *sourceOptions, context string) error {
 	checks := []struct {
 		name    string
@@ -22,7 +26,7 @@ func rejectSourceFlags(command *cobra.Command, sources *sourceOptions, context s
 	}
 	for _, check := range checks {
 		if check.changed {
-			return &usageError{err: fmt.Errorf("--%s cannot be used with %s", check.name, context)}
+			return &usageError{err: fmt.Errorf("--%s is not supported by %s: %s", check.name, context, reasonNoConfiguration)}
 		}
 	}
 	return nil
@@ -101,6 +105,7 @@ func newThemeCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
 	command.AddCommand(newThemeExplainCommand(stdout, sources))
 	command.AddCommand(newThemeValidateCommand(stdout, sources))
 	command.AddCommand(newThemeClassifyCommand(stdout, sources))
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	return command
 }
 
@@ -123,6 +128,7 @@ func newThemeListCommand(stdout io.Writer, sources *sourceOptions) *cobra.Comman
 	}
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
 	registerAsCompletions(command)
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	return command
 }
 
@@ -153,6 +159,7 @@ func newThemeExplainCommand(stdout io.Writer, sources *sourceOptions) *cobra.Com
 	command.Flags().StringVar(&as, "as", "text", "output format: text or json")
 	registerAsCompletions(command)
 	command.ValidArgsFunction = completeTheme
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	return command
 }
 
@@ -192,6 +199,7 @@ func newThemeValidateCommand(stdout io.Writer, sources *sourceOptions) *cobra.Co
 		}
 		return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 	}
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	return command
 }
 

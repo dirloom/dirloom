@@ -96,15 +96,17 @@ func newSnapshotCommand(stdout io.Writer, loader *configuration.Loader, sources 
 	command.Flags().StringVar(&opts.root, "root", "", "directory to snapshot (default: positional argument or current directory)")
 	command.Flags().StringVarP(&opts.output, "output", "o", "", "write the snapshot transactionally to a file instead of stdout")
 	command.Flags().StringVar(&opts.preset, "preset", "", "built-in preset: ai, compact, docs, monorepo, or none")
-	command.Flags().VarP(&opts.depth, "depth", "d", "maximum depth (0 shows only the root; unlimited removes the limit)")
-	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, "include directories only")
+	command.Flags().VarP(&opts.depth, "depth", "d", depthUsage)
+	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, dirsOnlyUsage)
 	command.Flags().BoolVar(&opts.includeHidden, "hidden", false, "include hidden entries that survive other filters")
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	command.Flags().StringVar(&opts.color, "color", "", "accepted and ignored: snapshot identity is presentation-independent")
-	command.Flags().StringVar(&opts.icons, "icons", "", "accepted and ignored: snapshot identity is presentation-independent")
-	command.Flags().StringVar(&opts.theme, "theme", "", "accepted and ignored: snapshot identity is presentation-independent")
+	// Presentation flags are validated like everywhere else, then ignored:
+	// an invalid value is still a usage error (F3).
+	command.Flags().StringVar(&opts.color, "color", "", "validated, then ignored: snapshot identity is presentation-independent")
+	command.Flags().StringVar(&opts.icons, "icons", "", "validated, then ignored: snapshot identity is presentation-independent")
+	command.Flags().StringVar(&opts.theme, "theme", "", "validated, then ignored: snapshot identity is presentation-independent")
 	registerSnapshotCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}

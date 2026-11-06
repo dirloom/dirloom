@@ -52,8 +52,8 @@ func newFingerprintCommand(stdout io.Writer, loader *configuration.Loader, sourc
 			if err != nil {
 				return err
 			}
-			if opts.format != "text" && opts.format != "json" {
-				return &usageError{err: fmt.Errorf("unsupported fingerprint format %q (expected text or json)", opts.format)}
+			if err := requireEnumeratedFlag("format", opts.format, []string{"text", "json"}, "fingerprint"); err != nil {
+				return err
 			}
 			resolved, _, err := resolveStructuralOptions(cmd, loader, root, *sources, structuralFlagState{
 				preset:          opts.preset,
@@ -98,15 +98,17 @@ func newFingerprintCommand(stdout io.Writer, loader *configuration.Loader, sourc
 	command.Flags().StringVar(&opts.root, "root", "", "directory to fingerprint (default: positional argument or current directory)")
 	command.Flags().StringVar(&opts.format, "format", "text", "output format: text or json")
 	command.Flags().StringVar(&opts.preset, "preset", "", "built-in preset: ai, compact, docs, monorepo, or none")
-	command.Flags().VarP(&opts.depth, "depth", "d", "maximum depth (0 shows only the root; unlimited removes the limit)")
-	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, "include directories only")
+	command.Flags().VarP(&opts.depth, "depth", "d", depthUsage)
+	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, dirsOnlyUsage)
 	command.Flags().BoolVar(&opts.includeHidden, "hidden", false, "include hidden entries that survive other filters")
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
 	command.Flags().BoolVar(&opts.noGitIgnore, "no-gitignore", false, "do not apply .gitignore files")
-	command.Flags().StringVar(&opts.color, "color", "", "accepted and ignored: fingerprint identity is presentation-independent")
-	command.Flags().StringVar(&opts.icons, "icons", "", "accepted and ignored: fingerprint identity is presentation-independent")
-	command.Flags().StringVar(&opts.theme, "theme", "", "accepted and ignored: fingerprint identity is presentation-independent")
+	// Presentation flags are validated like everywhere else, then ignored:
+	// an invalid value is still a usage error (F3).
+	command.Flags().StringVar(&opts.color, "color", "", "validated, then ignored: fingerprint identity is presentation-independent")
+	command.Flags().StringVar(&opts.icons, "icons", "", "validated, then ignored: fingerprint identity is presentation-independent")
+	command.Flags().StringVar(&opts.theme, "theme", "", "validated, then ignored: fingerprint identity is presentation-independent")
 	registerFingerprintCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}

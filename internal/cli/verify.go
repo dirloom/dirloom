@@ -44,15 +44,15 @@ func newVerifyCommand(stdout io.Writer) *cobra.Command {
 		},
 		ValidArgsFunction: completeVerifyArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := rejectVerifyInheritedFlags(cmd); err != nil {
+			if err := rejectRefusedFlags(cmd, "verify", verifyRefusedFlags); err != nil {
 				return err
 			}
 			root, err := structuralRoot(cmd, args[1:], opts.root)
 			if err != nil {
 				return err
 			}
-			if opts.format != "text" && opts.format != "json" {
-				return &usageError{err: fmt.Errorf("unsupported verify format %q (expected text or json)", opts.format)}
+			if err := requireEnumeratedFlag("format", opts.format, []string{"text", "json"}, "verify"); err != nil {
+				return err
 			}
 			// #nosec G304 -- the snapshot path is the explicit verify reference selected by the caller.
 			file, err := os.Open(args[0])
@@ -77,6 +77,7 @@ func newVerifyCommand(stdout io.Writer) *cobra.Command {
 	}
 	command.Flags().StringVar(&opts.root, "root", "", "directory to verify (default: positional argument or current directory)")
 	command.Flags().StringVar(&opts.format, "format", "text", "output format: text or json")
+	registerRefusedFlags(command, verifyRefusedFlags)
 	registerVerifyCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}
@@ -84,19 +85,14 @@ func newVerifyCommand(stdout io.Writer) *cobra.Command {
 	return command
 }
 
-func rejectVerifyInheritedFlags(command *cobra.Command) error {
-	names := []string{"config", "no-user-config", "no-config"}
-	for _, name := range names {
-		changed := command.Flags().Changed(name)
-		if command.InheritedFlags() != nil && command.InheritedFlags().Changed(name) {
-			changed = true
-		}
-		if changed {
-			return &usageError{err: fmt.Errorf("--%s is not supported by verify; snapshot capture semantics are authoritative", name)}
-		}
-	}
-	return nil
-}
+// verifyRefusedFlags are the flags verify refuses: the snapshot selects the
+// observation scope, and the result has no presentation or destination.
+var verifyRefusedFlags = joinRefusedFlags(
+	scopeFlags(reasonCaptureSemantics),
+	sourceFlags(reasonCaptureSemantics),
+	presentationFlags(),
+	destinationFlags(reasonStdoutOnly),
+)
 
 func completeVerifyArgs(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 	switch len(args) {

@@ -68,6 +68,11 @@ Output
 Workflows
   examples
 
+Structural version control
+  structural
+  sources
+  moves
+
 Run 'dirloom help <topic>' for details.
 Run 'dirloom help topics' for the alphabetical catalog.
 `)+"\n"),
@@ -156,7 +161,11 @@ Copy Markdown to the clipboard
 
 Explain resolved configuration
   dirloom config explain
-`)+"\n", "icons", "formats", "output", "presets"),
+
+Structural snapshot and check
+  dirloom snapshot --output architecture.dlm.json
+  dirloom verify architecture.dlm.json
+`)+"\n", "icons", "formats", "output", "presets", "structural"),
 	topicEntry("filters", "Depth, ignore rules and visibility", strings.TrimSpace(`
 FILTERS
 
@@ -164,7 +173,7 @@ Controls which entries appear in the inspected tree. The explicit root is
 always retained.
 
 Flags:
-  --depth N|unlimited   Maximum depth (0 prints only the root)
+  --depth N|unlimited   Maximum depth (0 keeps only the root)
   --dirs-only           Include directories only
   --hidden              Include hidden entries that survive other filters
   --ignore PATTERN      Exclude a pattern (repeatable)
@@ -245,6 +254,26 @@ Notes:
   Selecting a theme does not enable icons by itself.
   Canonical and machine-oriented outputs remain undecorated.
 `)+"\n", "themes", "colors", "formats"),
+	topicEntry("moves", "Structural move detection in diff, history and watch", strings.TrimSpace(`
+MOVE DETECTION
+
+diff, history and watch use move detection structural-v1. It reports a
+removed node and an added node as one MOVED when:
+  - their name and structure are unique in each source, or
+  - a non-empty directory with a unique structure was renamed in place.
+
+A MOVED is a structural correspondence, not proof that a file was moved.
+Ambiguous cases stay REMOVED plus ADDED. File contents are never read, and
+link targets are compared as recorded, never resolved.
+
+Flags:
+  --no-moves   Disable move detection: report each move as REMOVED plus ADDED
+
+Examples:
+  dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json
+  dirloom diff snapshot:before.dlm.json snapshot:after.dlm.json --no-moves
+  dirloom history --no-moves
+`)+"\n", "structural", "sources"),
 	topicEntry("output", "stdout, clipboard and transactional files", strings.TrimSpace(`
 OUTPUT
 
@@ -290,6 +319,67 @@ Notes:
   Explicit CLI flags override individual preset values.
   Presets do not change canonical format contracts.
 `)+"\n", "configuration", "filters", "formats"),
+	topicEntry("sources", "snapshot:, live: and git: operands of diff", strings.TrimSpace(`
+DIFF SOURCES
+
+dirloom diff compares two sources, each named with a prefix:
+
+  snapshot:<path>      A Snapshot Schema v1 file
+  live:<directory>     A directory, observed now
+  git:<revision>       The committed tree a revision names (git 2.45+)
+
+Pairings:
+  snapshot: and snapshot:   Both stored artifacts
+  snapshot: and live:       Live side observed with the snapshot's capture
+  snapshot: and git:        Git side observed with the snapshot's capture
+  git: and git:             Both committed trees, whole
+  live: and live:           Refused (exit 2): no capture to apply
+  git: and live:            Refused (exit 2)
+
+Notes:
+  A git: source reads Git objects of the current directory's repository
+  only: never the index, the working tree or the network.
+  verify takes a plain snapshot path; history takes a revision without
+  git:; watch takes a plain directory.
+
+Examples:
+  dirloom diff snapshot:architecture.dlm.json live:.
+  dirloom diff snapshot:architecture.dlm.json git:HEAD
+  dirloom diff git:main git:feature
+`)+"\n", "structural", "moves"),
+	topicEntry("structural", "Fingerprints, snapshots, verify, diff, history and watch", strings.TrimSpace(`
+STRUCTURAL VERSION CONTROL
+
+These commands record and compare the structure Dirloom observes: names,
+kinds, nesting and link targets. File contents are never read.
+
+Commands:
+  fingerprint   Print the Fingerprint v1 of the observed structure
+  snapshot      Save it as a self-verifying Snapshot Schema v1 file
+  verify        Check a directory against a snapshot: match or mismatch
+  diff          List what changed between two sources
+  history       Summarize structural changes along a Git history
+  watch         EXPERIMENTAL: report structural changes as they happen
+
+Capture:
+  fingerprint, snapshot and watch apply filters, presets and configuration.
+  verify and diff take none: a live or git: side is observed with the
+  capture stored in the snapshot it is compared with.
+  history, and git: against git:, observe committed trees whole.
+
+Machine output:
+  fingerprint, verify, diff and history take --format json; snapshot
+  always writes JSON; watch takes --format ndjson. Scripts branch on exit
+  codes and machine codes, never on messages.
+
+Examples:
+  dirloom snapshot --output architecture.dlm.json
+  dirloom verify architecture.dlm.json
+  dirloom diff snapshot:architecture.dlm.json live:.
+  dirloom history --limit 10
+
+Run 'dirloom help <command>' for the details of each command.
+`)+"\n", "sources", "moves", "filters"),
 	topicEntry("themes", "Built-in and custom terminal themes", strings.TrimSpace(`
 THEMES
 

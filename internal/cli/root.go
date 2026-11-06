@@ -172,7 +172,7 @@ func newRootCommandWithRuntime(stdout, stderr io.Writer, version string, deps co
   dirloom --format markdown-tree
   dirloom --format mermaid --diagram-direction left-right
   dirloom --format graphviz --output structure.dot
-	dirloom --format d2 --output structure.d2
+  dirloom --format d2 --output structure.d2
   dirloom fingerprint
   dirloom fingerprint --format json
   dirloom snapshot
@@ -332,8 +332,8 @@ func writeRendered(opts options, clip clipboard.Writer, stdout io.Writer, data [
 
 func bindInspectFlags(command *cobra.Command, opts *options) {
 	command.Flags().StringVar(&opts.preset, "preset", "", "built-in preset: ai, compact, docs, monorepo, or none")
-	command.Flags().VarP(&opts.depth, "depth", "d", "maximum depth (0 shows only the root; unlimited removes the limit)")
-	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, "show directories only")
+	command.Flags().VarP(&opts.depth, "depth", "d", depthUsage)
+	command.Flags().BoolVar(&opts.directoriesOnly, "dirs-only", false, dirsOnlyUsage)
 	command.Flags().BoolVar(&opts.includeHidden, "hidden", false, "include hidden entries that survive other filters")
 	command.Flags().StringArrayVar(&opts.ignorePatterns, "ignore", nil, "exclude a pattern (repeatable)")
 	command.Flags().BoolVar(&opts.noDefaultIgnore, "no-default-ignore", false, "disable built-in directory exclusions")
@@ -585,6 +585,8 @@ func newPresetCommand(stdout io.Writer, sources *sourceOptions) *cobra.Command {
 		}
 		return configuration.PresetNames(), cobra.ShellCompDirectiveNoFileComp
 	}
+	registerRefusedFlags(explain, sourceFlags(reasonNoConfiguration))
+	registerRefusedFlags(command, sourceFlags(reasonNoConfiguration))
 	command.AddCommand(explain)
 	return command
 }
