@@ -349,14 +349,32 @@ case "$code" in
 esac
 ```
 
-PowerShell:
+PowerShell 7.4 or later:
 
 ```powershell
-& dirloom watch --format ndjson | Set-Content -Encoding utf8 events.ndjson
-$code = $LASTEXITCODE
+try {
+    & dirloom watch --format ndjson > events.ndjson
+} finally {
+    switch ($LASTEXITCODE) {
+        0 { Write-Host "interrupted" }
+        2 { Write-Host "usage error" }
+        5 { Write-Host "the watch ended on an error" }
+        6 { Write-Host "internal error" }
+    }
+}
 ```
 
-`$LASTEXITCODE` uses the same numbers.
+`$LASTEXITCODE` uses the same numbers, with two PowerShell rules:
+
+- Ctrl+C also stops the script that runs the watch: only its `finally`
+  blocks still run, and what they write to the pipeline is discarded. Read
+  `$LASTEXITCODE` there, and report with `Write-Host`.
+- Redirect the stream with `>`. PowerShell 7.4 and later write its bytes
+  unchanged, but in blocks of a few kilobytes rather than line by line, so
+  read the file once the watch has ended. A pipeline into a cmdlet, such as
+  `Set-Content`, is stopped by the same Ctrl+C: it can lose the last lines,
+  `watch.stopped` included, and keep the previous `$LASTEXITCODE`;
+  `Set-Content` also writes its own line endings, CRLF on Windows.
 
 ## Privacy
 
