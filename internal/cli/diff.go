@@ -53,11 +53,11 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 		},
 		ValidArgsFunction: completeDiffArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := rejectDiffInheritedFlags(cmd); err != nil {
+			if err := rejectRefusedFlags(cmd, "diff", diffRefusedFlags); err != nil {
 				return err
 			}
-			if opts.format != "text" && opts.format != "json" {
-				return &usageError{err: fmt.Errorf("unsupported diff format %q (expected text or json)", opts.format)}
+			if err := requireEnumeratedFlag("format", opts.format, []string{"text", "json"}, "diff"); err != nil {
+				return err
 			}
 			specA, err := app.ParseDiffSource(args[0])
 			if err != nil {
@@ -82,7 +82,8 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 		},
 	}
 	command.Flags().StringVar(&opts.format, "format", "text", "output format: text or json")
-	command.Flags().BoolVar(&opts.noMoves, "no-moves", false, "report moves as REMOVED and ADDED (disable move detection)")
+	command.Flags().BoolVar(&opts.noMoves, "no-moves", false, noMovesUsage)
+	registerRefusedFlags(command, diffRefusedFlags)
 	registerDiffCompletions(command)
 	command.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return &usageError{err: err}
@@ -90,19 +91,16 @@ func newDiffCommand(stdout io.Writer) *cobra.Command {
 	return command
 }
 
-func rejectDiffInheritedFlags(command *cobra.Command) error {
-	names := []string{"config", "no-user-config", "no-config"}
-	for _, name := range names {
-		changed := command.Flags().Changed(name)
-		if command.InheritedFlags() != nil && command.InheritedFlags().Changed(name) {
-			changed = true
-		}
-		if changed {
-			return &usageError{err: fmt.Errorf("--%s is not supported by diff; snapshot capture semantics are authoritative", name)}
-		}
-	}
-	return nil
-}
+// diffRefusedFlags are the flags diff refuses: its sources name what is
+// observed, a snapshot selects the scope, and the result has no
+// presentation or destination.
+var diffRefusedFlags = joinRefusedFlags(
+	[]refusedFlag{{name: "root", reason: "name the directory as a live:<directory> source"}},
+	scopeFlags(reasonCaptureSemantics),
+	sourceFlags(reasonCaptureSemantics),
+	presentationFlags(),
+	destinationFlags(reasonStdoutOnly),
+)
 
 func completeDiffArgs(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	if len(args) >= 2 {

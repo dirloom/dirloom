@@ -53,9 +53,15 @@ These flags are rejected:
 --preset --depth --dirs-only --hidden --ignore
 --no-default-ignore --no-gitignore --root
 --config --no-user-config --no-config
---color --icons --theme
+--color --icons --theme --style
 --output --copy
 ```
+
+Each one is a usage error, exit 2, whose message names the flag and the
+reason, for example
+`--depth is not supported by diff: snapshot capture semantics are authoritative`.
+These flags are not listed in `dirloom diff --help` and are not completed.
+An invalid `--format` prints the valid values and the help to read, exit 2.
 
 `--config`, `--no-user-config`, and `--no-config` are rejected even though
 other commands inherit them. The snapshot's Capture Semantics are the

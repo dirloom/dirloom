@@ -228,13 +228,16 @@ func TestHistoryUsageErrors(t *testing.T) {
 		{[]string{"history", "--limit", "0"}, "positive integer"},
 		{[]string{"history", "--limit", "-1"}, "positive integer"},
 		{[]string{"history", "--limit", "many"}, "invalid argument"},
-		{[]string{"history", "--format", "yaml"}, "unsupported history format"},
-		{[]string{"history", "--depth", "1"}, "unknown flag"},
-		{[]string{"history", "--hidden"}, "unknown flag"},
-		{[]string{"history", "--color", "always"}, "unknown flag"},
-		{[]string{"history", "--output", "x.json"}, "unknown flag"},
-		{[]string{"history", "--config", "x.yaml"}, "not supported by history"},
-		{[]string{"--no-config", "history"}, "not supported by history"},
+		{[]string{"history", "--format", "yaml"}, `invalid value "yaml" for --format`},
+		{[]string{"history", "--depth", "1"}, "--depth is not supported by history"},
+		{[]string{"history", "-d", "1"}, "--depth is not supported by history"},
+		{[]string{"history", "--hidden"}, "--hidden is not supported by history"},
+		{[]string{"history", "--root", "."}, "--root is not supported by history"},
+		{[]string{"history", "--color", "always"}, "--color is not supported by history"},
+		{[]string{"history", "--style", "ascii"}, "--style is not supported by history"},
+		{[]string{"history", "--output", "x.json"}, "--output is not supported by history"},
+		{[]string{"history", "--config", "x.yaml"}, "--config is not supported by history"},
+		{[]string{"--no-config", "history"}, "--no-config is not supported by history"},
 	}
 	for _, tc := range cases {
 		for _, format := range []string{"text", "json"} {
@@ -242,7 +245,7 @@ func TestHistoryUsageErrors(t *testing.T) {
 			var args []string
 			for _, arg := range tc.args {
 				args = append(args, arg)
-				if arg == "history" && tc.want != "unsupported history format" {
+				if arg == "history" && tc.args[len(tc.args)-1] != "yaml" {
 					args = append(args, "--format", format)
 				}
 			}

@@ -35,8 +35,10 @@ Structural flags match fingerprint / inspection: `--depth`, `--dirs-only`,
 `--hidden`, `--ignore`, `--no-default-ignore`, `--no-gitignore`, `--preset`, plus
 `--config` / `--no-user-config` / `--no-config`.
 
-`--color`, `--icons` and `--theme` are accepted and ignored. They never enter
-Capture Semantics, never change snapshot bytes and never inject ANSI.
+`--color`, `--icons` and `--theme` are validated, then ignored. An invalid value
+is a usage error, exit 2, as in the tree output. A `--theme` path is checked
+for its `.yaml`/`.yml` form only; the file is not read. A valid value never
+enters Capture Semantics, never changes snapshot bytes and never injects ANSI.
 
 There is one public serialization format in A2: JSON. There is no `--format`
 matrix.

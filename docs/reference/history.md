@@ -29,7 +29,7 @@ dirloom history v0.4.0-a6 --no-moves
 | `--from <revision>` | stop before this commit: an exclusive bound on the first-parent chain |
 | `--limit <n>` | number of commits examined, an integer of at least 1; default 20 |
 | `--structural-only` | show only the commits that change the structure |
-| `--no-moves` | count moves as `REMOVED` plus `ADDED` (move detection `none`) |
+| `--no-moves` | disable move detection: report each move as `REMOVED` plus `ADDED` (move detection `none`) |
 | `--format` | `text` (default) or `json` |
 
 The repository is the one Git finds from the current directory: a
@@ -60,9 +60,14 @@ configuration. These flags are rejected with exit 2:
 --preset --depth --dirs-only --hidden --ignore
 --no-default-ignore --no-gitignore --root
 --config --no-user-config --no-config
---color --icons --theme
+--color --icons --theme --style
 --output --copy
 ```
+
+Each one is a usage error, exit 2, whose message names the flag and the
+reason, for example `--depth is not supported by history: committed trees
+are observed whole, without configuration`. These flags are not listed in
+`dirloom history --help` and are not completed.
 
 A `--limit` that is not an integer of at least 1, an empty `--from`, or more
 than one revision is also a usage error.

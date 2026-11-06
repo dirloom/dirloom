@@ -188,7 +188,7 @@ func TestFingerprintDepthHiddenGitignore(t *testing.T) {
 func TestFingerprintRejectsBadUsage(t *testing.T) {
 	root := t.TempDir()
 	stdout, stderr, code := executeForTest(t, "fingerprint", root, "--format", "yaml")
-	if code != 2 || stdout != "" || !strings.Contains(stderr, "unsupported fingerprint format") {
+	if code != 2 || stdout != "" || !strings.Contains(stderr, `invalid value "yaml" for --format`) || !strings.Contains(stderr, "dirloom help fingerprint") {
 		t.Fatalf("format=(%q,%q,%d)", stdout, stderr, code)
 	}
 	stdout, stderr, code = executeForTest(t, "fingerprint", root, "--root", root)
