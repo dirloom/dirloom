@@ -94,7 +94,7 @@ Two families exist, and both are kept for compatibility (D2):
 - tree output, `fingerprint`, `snapshot`: `0` success, `1` runtime error, `2` invalid usage, as since v0.1;
 - `verify`, `diff`, `history` and `watch`: the `0`–`6` family their contracts define.
 
-The same failure may therefore exit `1` in one family and `5` in the other. Dirloom does not renumber them. A consolidated exit-code table is part of the v0.4 documentation (LOT 7).
+The same failure may therefore exit `1` in one family and `5` in the other. Dirloom does not renumber them. The consolidated table, with the category, status and exit code of every machine code, is [Exit codes and machine codes](reference/exit-codes.md) (D4).
 
 ## 8. Freeze procedure
 

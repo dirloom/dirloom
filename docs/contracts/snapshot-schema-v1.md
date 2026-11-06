@@ -145,6 +145,25 @@ fields present with correct types, duplicate keys rejected, canonical path
 rules enforced, and schema/artifact/features validated. It does **not** mean
 `DisallowUnknownFields`.
 
+## Diagnostic codes
+
+A reader reports every rejection with one code:
+
+| Code | Rejection |
+| --- | --- |
+| `invalid_snapshot_json` | empty input, invalid UTF-8, invalid JSON syntax, a duplicate object key, or not exactly one JSON document |
+| `missing_snapshot_field` | a required field is absent |
+| `invalid_snapshot_field` | a field has the wrong JSON type, is `null` where a value is required, is out of range, or has an invalid value, including a malformed `fingerprint` string and capture metadata that the artifact disproves |
+| `invalid_snapshot_artifact` | the artifact breaks a Canonical Structural Artifact rule: a path outside the root or not canonical, a duplicate node, a missing parent, a target on a kind without one |
+| `snapshot_fingerprint_mismatch` | the embedded `fingerprint` is not the Fingerprint v1 of the embedded artifact |
+| `unsupported_snapshot_schema` | `schemaVersion` is not `1` |
+| `unsupported_snapshot_artifact_version` | `artifactVersion` is not `1` |
+| `unsupported_snapshot_feature` | an unknown `requiredFeatures` entry |
+| `snapshot_read_failure` | the snapshot could not be read |
+| `snapshot_internal_failure` | a broken Dirloom invariant, never invalid input |
+
+`snapshot_write_failure` is reserved for writers of this package. The CLI reports a failed write of its output without a machine code. The status and exit code of each code in `verify` and `diff` are in [Exit codes and machine codes](../reference/exit-codes.md).
+
 ## Provenance
 
 Volatile provenance (`capturedAt`, hostname, username, absolutePath, …) is

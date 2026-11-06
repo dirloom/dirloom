@@ -83,7 +83,9 @@ type commandDependencies struct {
 }
 
 // Execute runs the CLI with explicit streams and returns a stable process exit
-// code: 0 success, 1 runtime error, 2 invalid arguments.
+// code. The tree output, fingerprint and snapshot keep 0 success, 1 runtime
+// error, 2 invalid arguments; verify, diff, history and watch use the 0-6
+// codes of their contracts (docs/reference/exit-codes.md).
 func Execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string) int {
 	return execute(ctx, args, stdout, stderr, version, commandDependencies{
 		loader:    configuration.NewLoader(),

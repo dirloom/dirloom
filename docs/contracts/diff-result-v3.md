@@ -141,7 +141,12 @@ snapshot_read_failure
 
 `snapshot_fingerprint_mismatch` is always `INVALID_SNAPSHOT`, never `DIFFERENCES`.
 
-Live observation diagnostics reuse `artifact.Error.Code` when present, including `source_read_failure`, `canonical_path_collision`, `unsupported_node_type` (a named pipe, socket or device in the observed view), and `internal_invariant_failure`.
+Live observation diagnostics reuse `artifact.Error.Code` when present:
+
+- `OBSERVATION_ERROR` (exit 5): `source_read_failure`, `canonical_path_collision`, `invalid_canonical_path` (an entry name that is not a valid canonical name), `unsupported_node_type` (a named pipe, socket or device in the observed view);
+- `INTERNAL_ERROR` (exit 6): `internal_invariant_failure`, `artifact_invariant_violation` (an artifact Dirloom built from an observation breaks an artifact rule), `canonical_encoding_failure`, `snapshot_internal_failure`.
+
+The same artifact rule broken inside a snapshot is `invalid_snapshot_artifact` (`INVALID_SNAPSHOT`, exit 3). Every code, with its category, is listed in [Exit codes and machine codes](../reference/exit-codes.md).
 
 Git source diagnostics, all `OBSERVATION_ERROR` (exit 5), defined by [Git Tree Source v1](git-tree-source-v1.md#diagnostics):
 

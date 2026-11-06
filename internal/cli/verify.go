@@ -113,6 +113,11 @@ func registerVerifyCompletions(command *cobra.Command) {
 }
 
 func renderVerifySuccess(stdout io.Writer, format string, result app.VerifyResult) error {
+	// An unknown status is a broken invariant, checked before any byte is
+	// written: it is never reported as an output failure.
+	if result.Status != app.VerifyMatch && result.Status != app.VerifyMismatch {
+		return &exitError{Code: 6, Err: fmt.Errorf("internal error: unsupported verify status %q", result.Status)}
+	}
 	if format == "json" {
 		if err := writeVerifyJSON(stdout, verifySuccessDocument(result)); err != nil {
 			return verifyWriteError(err)
