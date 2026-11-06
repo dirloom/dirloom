@@ -8,6 +8,7 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 - Publish the v0.4 [compatibility and freeze policy](docs/compatibility-policy.md) and the [contract register](docs/contracts/README.md): every public input and output, with its status, its owning package, what pins it and its change rules. The policy states what stays stable after the v0.4 freeze (fields, enumeration values, machine codes, exit codes, golden bytes, fingerprints) and what does not (diagnostic messages, including localized operating-system text, and stderr), and that an incompatible change to identity semantics, observation included, needs a new fingerprint version.
 - Publish the Tree JSON Schema v1 and Fingerprint JSON Schema v1 contracts, which describe the existing `--format json` outputs of the tree and of `dirloom fingerprint`, and an evolution policy for Verify Result Schema v1.
+- Publish [Exit codes and machine codes](docs/reference/exit-codes.md): the exit codes of every command, in their two compatible families (`0`/`1`/`2` for the tree output, `fingerprint` and `snapshot`; `0`–`6` for `verify`, `diff`, `history` and `watch`), and every machine code with its category (usage, mismatch, validation, corruption, unsupported, source, filesystem, git, internal), status and exit code. Snapshot Schema v1 now lists all of its diagnostic codes, and Verify Result v1, Diff Result v3 and History Result v1 list every artifact code they report.
 
 ### Changed
 
@@ -24,6 +25,13 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 - Fix Windows junctions observed as files. Since Go 1.23 reports a junction with an irregular file mode, Dirloom recorded it with kind `file` and no target, so retargeting a junction was invisible to `fingerprint`, `snapshot`, `verify`, `diff` and `watch`. A junction, or a folder where a volume is mounted, is now recognized by its reparse tag, whatever `GODEBUG=winsymlink` says, and recorded with kind `junction` and its target, rewritten relative to the root when it points inside it. It is still never entered. Tree outputs (text, Markdown, JSON, Mermaid, Graphviz, D2) show it as a symlink, `name -> target`, instead of a plain file, with no new `type` value; its graph node identifier changes accordingly. `dirloom theme classify` classifies it as a symlink instead of refusing it. Git sources are unchanged: Git never records a junction.
 - Compatibility: no format changes, but the fingerprint of a Windows tree that contains a junction changes. A snapshot taken with `v0.4.0-a8` or earlier still loads and validates; `dirloom verify` against the unchanged tree reports a mismatch (exit 1), and `dirloom diff` shows the junction as `CHANGED`, kind `file` → `junction`. Check such snapshots, then capture them again. Trees without junctions, and every tree on Linux and macOS, keep their fingerprints.
+- Report broken Dirloom invariants as internal errors, by context:
+  - an artifact that Dirloom builds from an observation and that breaks an artifact rule (`artifact_invariant_violation`) is now `INTERNAL_ERROR` (exit 6) in `verify`, `diff` and `history`, and fatal in `watch`, instead of `OBSERVATION_ERROR` (exit 5); a snapshot that breaks the same rule is still `INVALID_SNAPSHOT` (exit 3);
+  - a failed canonical encoding (`canonical_encoding_failure`) is now internal too;
+  - a snapshot failure without a cause carries `snapshot_internal_failure` instead of a code documented for invalid input or I/O;
+  - `verify` reports an unknown result status as an internal error (exit 6) before writing anything, instead of a failed write (exit 5).
+
+  None of these cases is known to occur; they are reported correctly if one does.
 
 ## [0.4.0-a8] - 2026-11-03
 

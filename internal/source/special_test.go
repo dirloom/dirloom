@@ -44,6 +44,31 @@ func TestFromTreeRejectsSpecialMarkOnNonFile(t *testing.T) {
 	}
 }
 
+// TestFromTreeInvariantViolationIsInternal checks the call context of Q2:
+// an artifact that Dirloom builds from an observation and that breaks an
+// invariant is a Dirloom bug, while a collision of distinct names is in the
+// observed data.
+func TestFromTreeInvariantViolationIsInternal(t *testing.T) {
+	for name, children := range map[string][]*tree.Node{
+		"orphan":    {{Name: "b", Path: "a/b", Type: tree.NodeFile}},
+		"duplicate": {{Name: "a.txt", Path: "a.txt", Type: tree.NodeFile}, {Name: "a.txt", Path: "a.txt", Type: tree.NodeFile}},
+	} {
+		_, err := FromTree(&tree.Node{Name: "proj", Type: tree.NodeDirectory, Children: children}, FromTreeOptions{})
+		var artErr *artifact.Error
+		if !errors.As(err, &artErr) || artErr.Code != artifact.CodeInvariant || !artifact.IsInternal(err) {
+			t.Fatalf("%s: error = %#v, want an internal %s", name, err, artifact.CodeInvariant)
+		}
+	}
+	_, err := FromTree(&tree.Node{Name: "proj", Type: tree.NodeDirectory, Children: []*tree.Node{
+		{Name: "é", Path: "é", Type: tree.NodeFile},
+		{Name: "é", Path: "é", Type: tree.NodeFile},
+	}}, FromTreeOptions{})
+	var artErr *artifact.Error
+	if !errors.As(err, &artErr) || artErr.Code != artifact.CodeCollision || artifact.IsInternal(err) {
+		t.Fatalf("collision: error = %#v, want a non-internal %s", err, artifact.CodeCollision)
+	}
+}
+
 // listenUnix holds an AF_UNIX socket open at dir/name until the test ends. It
 // skips the test where AF_UNIX is unavailable (Windows before 10 1803).
 func listenUnix(t *testing.T, dir, name string) {

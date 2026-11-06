@@ -110,7 +110,7 @@ git_shallow_invalid
 history_from_not_reached
 ```
 
-Artifact codes reused when they apply, such as `canonical_path_collision`. Fallback codes, used only when no typed code exists:
+Artifact codes reused when they apply: `canonical_path_collision` (`OBSERVATION_ERROR`), and `internal_invariant_failure`, `artifact_invariant_violation` or `canonical_encoding_failure` (`INTERNAL_ERROR`). Every code, with its category, is listed in [Exit codes and machine codes](../reference/exit-codes.md). Fallback codes, used only when no typed code exists:
 
 ```text
 history_observation_failure
