@@ -1,6 +1,6 @@
 # Identity Projection v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a1`
 >
 > **Projection version:** `1`
 >
@@ -109,3 +109,5 @@ dlm:v1:sha256:8e5b2d7f...
 ```
 
 The `v1` token is the identity projection version. A new projection or encoding MUST use a new version token.
+
+Observation is part of identity. After the v0.4 freeze, a change that makes Dirloom record a different canonical artifact for the same tree on disk (another kind, target or path, or an entry newly included or excluded by default) also needs a new version token, even when no format changes. A CHANGELOG entry is required too, but it never replaces the version change. See [rule D13](../compatibility-policy.md#4-identity-and-fingerprints-d13).

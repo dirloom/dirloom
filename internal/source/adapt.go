@@ -52,7 +52,7 @@ func FromTree(root *tree.Node, options FromTreeOptions) (*artifact.Artifact, err
 		return nil, artifact.InternalError("observation root is nil")
 	}
 	if root.Type != tree.NodeDirectory {
-		return nil, unsupportedObservation(root.Type, ".")
+		return nil, unsupportedObservation(string(root.Type), ".")
 	}
 	art := artifact.Artifact{
 		DisplayRootName: root.Name,
@@ -64,15 +64,17 @@ func FromTree(root *tree.Node, options FromTreeOptions) (*artifact.Artifact, err
 	}
 	collisions := artifact.NewCollisionSet()
 	if err := collisions.Add(".", artifact.RootPath); err != nil {
-		return nil, err
+		return nil, artifact.AsInternal(err)
 	}
 	children, err := convertChildren(root.Children, artifact.RootPath, options, collisions)
 	if err != nil {
 		return nil, err
 	}
 	art.Root.Children = children
+	// Dirloom built this artifact from an observation: an invariant
+	// violation here is a Dirloom bug, not bad input.
 	if err := art.Validate(); err != nil {
-		return nil, err
+		return nil, artifact.AsInternal(err)
 	}
 	return &art, nil
 }
@@ -112,8 +114,10 @@ func convertNode(node *tree.Node, parent artifact.Path, options FromTreeOptions,
 	if err != nil {
 		return artifact.Node{}, err
 	}
+	// A collision of distinct names is in the observed data; a repeated
+	// entry is an invariant violation of the observation itself.
 	if err := collisions.Add(rawPath, path); err != nil {
-		return artifact.Node{}, err
+		return artifact.Node{}, artifact.AsInternal(err)
 	}
 	kind, err := observationKind(node, path)
 	if err != nil {
@@ -143,10 +147,19 @@ func observationKind(node *tree.Node, path artifact.Path) (artifact.Kind, error)
 	if node.Junction && node.Type != tree.NodeSymlink {
 		return "", artifact.InternalError("observation junction %q has type %q", path, node.Type)
 	}
+	if node.Special != "" && node.Type != tree.NodeFile {
+		return "", artifact.InternalError("observation %s %q has type %q", node.Special, path, node.Type)
+	}
 	switch node.Type {
 	case tree.NodeDirectory:
 		return artifact.KindDirectory, nil
 	case tree.NodeFile:
+		// A named pipe, socket or device is shown as a file in renderings,
+		// but it is outside the artifact kinds: it is refused, never stored
+		// as a file.
+		if node.Special != "" {
+			return "", unsupportedObservation(node.Special, path.String())
+		}
 		return artifact.KindFile, nil
 	case tree.NodeSymlink:
 		if node.Junction {
@@ -154,11 +167,11 @@ func observationKind(node *tree.Node, path artifact.Path) (artifact.Kind, error)
 		}
 		return artifact.KindSymlink, nil
 	default:
-		return "", unsupportedObservation(node.Type, path.String())
+		return "", unsupportedObservation(string(node.Type), path.String())
 	}
 }
 
-func unsupportedObservation(kind tree.NodeType, path string) error {
+func unsupportedObservation(kind, path string) error {
 	return &artifact.Error{
 		Code:    artifact.CodeUnsupportedKind,
 		Message: fmt.Sprintf("unsupported node type %q at %q", kind, path),

@@ -55,6 +55,38 @@ func TestFilesystemWindowsJunction(t *testing.T) {
 	}
 }
 
+// TestFilesystemWindowsIrregularFileStaysFile observes the app execution
+// aliases of WindowsApps, reparse points that Go reports as ModeIrregular:
+// they are files, never refused as special entries.
+func TestFilesystemWindowsIrregularFileStaysFile(t *testing.T) {
+	apps := filepath.Join(os.Getenv("LOCALAPPDATA"), "Microsoft", "WindowsApps")
+	entries, err := os.ReadDir(apps)
+	if err != nil {
+		t.Skipf("no WindowsApps folder: %v", err)
+	}
+	alias := ""
+	for _, entry := range entries {
+		if info, err := entry.Info(); err == nil && info.Mode()&os.ModeIrregular != 0 && !info.IsDir() {
+			alias = entry.Name()
+			break
+		}
+	}
+	if alias == "" {
+		t.Skip("no app execution alias on this machine")
+	}
+	depth := 1
+	art := observeFS(t, apps, tree.ScanOptions{RootAbs: apps, RootName: "WindowsApps", MaxDepth: &depth})
+	for _, child := range art.Root.Children {
+		if child.Name == alias {
+			if child.Kind != artifact.KindFile {
+				t.Fatalf("alias %s = %#v, want a file", alias, child)
+			}
+			return
+		}
+	}
+	t.Fatalf("alias %s missing: %v", alias, childNames(art.Root))
+}
+
 func TestFilesystemWindowsDriveIndependence(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "a.txt"), []byte("x"), 0o644); err != nil {

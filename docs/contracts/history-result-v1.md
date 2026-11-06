@@ -1,6 +1,6 @@
 # History Result Schema v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a7`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](README.md); normative since Dirloom `v0.4.0-a7`
 >
 > **Related:** [Structural History v1](structural-history-v1.md), [Diff Result Schema v3](diff-result-v3.md), [Git Tree Source v1](git-tree-source-v1.md), [ADR 0007](../adr/0007-structural-history.md)
 
@@ -110,7 +110,7 @@ git_shallow_invalid
 history_from_not_reached
 ```
 
-Artifact codes reused when they apply, such as `canonical_path_collision`. Fallback codes, used only when no typed code exists:
+Artifact codes reused when they apply: `canonical_path_collision` (`OBSERVATION_ERROR`), and `internal_invariant_failure`, `artifact_invariant_violation` or `canonical_encoding_failure` (`INTERNAL_ERROR`). Every code, with its category, is listed in [Exit codes and machine codes](../reference/exit-codes.md). Fallback codes, used only when no typed code exists:
 
 ```text
 history_observation_failure

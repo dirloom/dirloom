@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "SNAPSHOT_READ_ERROR",
+  "diagnostic": {
+    "code": "snapshot_read_failure",
+    "message": "snapshot read failure: open missing.dlm.json: no such file or directory"
+  }
+}

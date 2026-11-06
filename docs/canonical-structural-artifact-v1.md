@@ -1,6 +1,6 @@
 # Canonical Structural Artifact v1
 
-> **Status:** normative contract for Dirloom `v0.4.0-a1`
+> **Status:** candidate for the v0.4 freeze (`v0.4.0-rc1`), see the [contract register](contracts/README.md); normative since Dirloom `v0.4.0-a1`
 >
 > **Audience:** engineering
 >
@@ -133,9 +133,20 @@ When present as kind `junction`, the node is terminal and uses the same target r
 
 ## Special files
 
-Device nodes, sockets, FIFOs and other types outside the kind enumeration are unsupported in the artifact. They produce `unsupported node type` rather than a regular-file approximation.
+Device nodes, sockets, FIFOs and other types outside the kind enumeration are unsupported in the artifact. They produce `unsupported node type` (`unsupported_node_type`) rather than a regular-file approximation.
 
-The v0.1–v0.3 scanner still classifies some non-regular, non-symlink entries as observation type `file` for tree rendering. FilesystemSource inherits that observation. Identity does not add a second classification pass over the filesystem. Logical artifacts (tests, future sources) MUST still reject unknown kinds.
+The filesystem source refuses an entry whose Go file mode is a named pipe (`os.ModeNamedPipe`), a socket (`os.ModeSocket`), a device (`os.ModeDevice`) or a character device (`os.ModeCharDevice`), on every operating system. A Windows AF_UNIX socket is included. The error names the entry's path and its type.
+
+**Not refused:**
+
+- A non-directory `os.ModeIrregular` entry is a `file`. Go gives that mode to Windows files behind a reparse point, such as app execution aliases, cloud placeholders and compressed files, and never sets it on Linux or macOS.
+- An entry excluded before observation (ignore rules, default ignores, hidden entries, `--dirs-only`, depth) is never refused.
+
+The tree views (text, Markdown, JSON, graph exports) keep showing such an entry as a file, as they did in v0.1–v0.3. Only the canonical artifact refuses it.
+
+Up to Dirloom `v0.4.0-a8`, the filesystem source recorded these entries as `file`. A snapshot taken then still validates, but observing the same tree now fails with `unsupported_node_type`.
+
+Logical artifacts (tests, future sources) MUST also reject unknown kinds.
 
 ## Ordering
 

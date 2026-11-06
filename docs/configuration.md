@@ -204,7 +204,7 @@ Use JSON for automation:
 dirloom config explain . --as json
 ```
 
-The diagnostic document has its own `schemaVersion: 1`. It is separate from the tree JSON schema and may contain absolute configuration paths because it is an explicit local diagnostic, not a portable tree artifact.
+The diagnostic document has its own `schemaVersion: 1`. It is a diagnostic output, not a contract: it may change in any release, with a CHANGELOG entry ([policy](compatibility-policy.md#5-diagnostic-outputs-d1)). It is separate from the tree JSON schema and may contain absolute configuration paths because it is an explicit local diagnostic, not a portable tree artifact.
 
 You can apply temporary inspection options to the explanation itself:
 
@@ -396,6 +396,6 @@ Configuration errors are written to stderr before rendering begins. Stdout stays
 
 Configuration is a public Dirloom contract. Schema version `1` keeps the documented meanings and types stable. A future optional field may be introduced with release notes, but an older strict binary will reject a field it does not recognize. A change to an existing field's meaning or type requires a new schema version.
 
-The optional `preset`, `presentation` and `diagram` fields were added before the first v0.2 release and remain part of schema version `1`. Preset explanation JSON, theme command JSON, and configuration diagnostic JSON are separate versioned contracts; the tree JSON schema is unchanged.
+The optional `preset`, `presentation` and `diagram` fields were added before the first v0.2 release and remain part of schema version `1`. Preset explanation JSON, theme command JSON, and configuration diagnostic JSON each carry their own `schemaVersion`, but they are diagnostic outputs, not contracts, and are outside the v0.4 contract freeze: see the [compatibility and freeze policy](compatibility-policy.md#5-diagnostic-outputs-d1). The tree JSON schema is unchanged.
 
 An older Dirloom binary fails clearly when it encounters an unsupported schema version or field. It never guesses how to interpret a newer contract. The CLI, configuration schema, diagnostic JSON, and tree JSON are versioned and tested independently.

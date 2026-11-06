@@ -126,3 +126,55 @@ func sampleTree() *tree.Node {
 		{Name: "README.md", Type: tree.NodeFile},
 	}}
 }
+
+// TestJSONGoldenV1 pins the bytes of tree JSON v1. The escaping tree locks
+// the encoder settings: no HTML escaping, two-space indentation, one final
+// LF, and a junction rendered as a symlink. It holds only valid UTF-8 names:
+// the U+FFFD replacement of an invalid name is a known defect (A11), not
+// part of the contract, and must never be captured by a golden.
+func TestJSONGoldenV1(t *testing.T) {
+	for _, test := range []struct {
+		golden string
+		root   *tree.Node
+	}{
+		{"json.golden", sampleTree()},
+		{"json-escaping.golden", escapingTree()},
+	} {
+		t.Run(test.golden, func(t *testing.T) {
+			renderer, err := New(FormatJSON, StyleUnicode)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var output bytes.Buffer
+			if err := renderer.Render(&output, test.root); err != nil {
+				t.Fatal(err)
+			}
+			path := filepath.Join("testdata", test.golden)
+			if os.Getenv("DIRLOOM_UPDATE_GOLDEN") == "1" {
+				if err := os.WriteFile(path, output.Bytes(), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			want, err := os.ReadFile(path) // #nosec G304 -- fixed test golden path.
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(output.Bytes(), want) {
+				t.Fatalf("tree JSON v1 drift\n--- got ---\n%s--- want ---\n%s", output.Bytes(), want)
+			}
+			assertPortableLineEndings(t, output.Bytes())
+		})
+	}
+}
+
+func escapingTree() *tree.Node {
+	return &tree.Node{Name: "root <&>", Type: tree.NodeDirectory, Children: []*tree.Node{
+		{Name: "café", Type: tree.NodeDirectory, Children: []*tree.Node{
+			{Name: "名前.txt", Type: tree.NodeFile},
+		}},
+		{Name: "junction", Type: tree.NodeSymlink, Target: "C:/work/shared", Junction: true},
+		{Name: "quote\"back\\slash.txt", Type: tree.NodeFile},
+		{Name: "tab\there.txt", Type: tree.NodeFile},
+		{Name: "📄.md", Type: tree.NodeFile},
+	}}
+}

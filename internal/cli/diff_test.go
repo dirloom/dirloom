@@ -235,6 +235,9 @@ func TestDiffInternalRendering(t *testing.T) {
 	err = renderDiffFailure(&stdout, "json", app.FailureInternal, artifact.InternalError("broken invariant"))
 	code = processStatus(err, &stderr)
 	assertDiffJSON(t, stdout.String(), stderr.String(), code, 6, "INTERNAL_ERROR")
+	// INTERNAL_ERROR is unreachable from the CLI in production; its Diff
+	// Result v3 document is pinned here, rendered in-process.
+	assertDiffGolden(t, "internal-error.json", stdout.String())
 }
 
 func TestDiffJSONEscape(t *testing.T) {

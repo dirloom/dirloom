@@ -97,12 +97,13 @@ func InvalidFingerprint(format string, args ...any) error {
 	return &Error{Code: CodeInvalidFingerprint, Message: fmt.Sprintf(format, args...)}
 }
 
-// EncodingFailure reports a writer or encoder failure.
+// EncodingFailure reports a writer or encoder failure. Canonical encoding
+// only writes to a hash, which never fails: a failure is a broken invariant.
 func EncodingFailure(err error) error {
 	if err == nil {
 		return internal("canonical encoding failed without an error")
 	}
-	return &Error{Code: CodeEncoding, Message: "canonical encoding failure: " + err.Error(), Internal: false}
+	return &Error{Code: CodeEncoding, Message: "canonical encoding failure: " + err.Error(), Internal: true}
 }
 
 // SourceReadFailure wraps a structural source I/O error.
@@ -116,6 +117,19 @@ func SourceReadFailure(err error) error {
 // InternalError reports a broken Dirloom invariant.
 func InternalError(format string, args ...any) error {
 	return internal(format, args...)
+}
+
+// AsInternal marks an invariant violation as a broken Dirloom invariant,
+// keeping its code. The same validation fails on bad input when Dirloom reads
+// an artifact, and on a Dirloom bug when it builds one: the caller knows which.
+func AsInternal(err error) error {
+	var typed *Error
+	if !errors.As(err, &typed) || typed.Code != CodeInvariant {
+		return err
+	}
+	marked := *typed
+	marked.Internal = true
+	return &marked
 }
 
 // New reports a diagnostic with an explicit code.

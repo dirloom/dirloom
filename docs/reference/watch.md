@@ -99,6 +99,18 @@ The first state is not reported as additions. `dirloom snapshot` with the
 same options gives it, and the `watch.started` fingerprint tells whether
 they match.
 
+A named pipe, a socket or a device in the observed view cannot be part of
+a state. Dirloom refuses it with `unsupported_node_type`, as `dirloom
+fingerprint` does.
+
+- **Present at startup:** the startup observation fails, and the watch stops
+  with a fatal `watch.error` (exit 5).
+- **Appearing later:** each observation reports a non-fatal `watch.error`,
+  and no new state is published. The last state stays current until the
+  entry is removed or excluded with `--ignore`.
+
+Up to `v0.4.0-a8`, such an entry was observed as a file.
+
 ### Native notifications and reconciliation
 
 By default a watch uses the platform's notifications: inotify on Linux,

@@ -87,9 +87,15 @@ func unsupportedFeature(name string) error {
 	}
 }
 
+// internalFailure reports a broken Dirloom invariant, never invalid input:
+// it keeps the codes of invalid snapshots and I/O failures for those.
+func internalFailure(message string) error {
+	return &Error{Code: CodeInternalFailure, Message: message, Internal: true}
+}
+
 func invalidArtifact(err error) error {
 	if err == nil {
-		return &Error{Code: CodeInvalidArtifact, Message: "invalid snapshot artifact", Internal: true}
+		return internalFailure("invalid snapshot artifact without an error")
 	}
 	return &Error{Code: CodeInvalidArtifact, Message: "invalid snapshot artifact", Cause: err}
 }
@@ -103,14 +109,14 @@ func fingerprintMismatch(embedded, computed string) error {
 
 func readFailure(err error) error {
 	if err == nil {
-		return &Error{Code: CodeReadFailure, Message: "snapshot read failure", Internal: true}
+		return internalFailure("snapshot read failure without an error")
 	}
 	return &Error{Code: CodeReadFailure, Message: "snapshot read failure", Cause: err}
 }
 
 func writeFailure(err error) error {
 	if err == nil {
-		return &Error{Code: CodeWriteFailure, Message: "snapshot write failure", Internal: true}
+		return internalFailure("snapshot write failure without an error")
 	}
 	return &Error{Code: CodeWriteFailure, Message: "snapshot write failure", Cause: err}
 }

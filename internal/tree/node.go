@@ -20,12 +20,16 @@ const (
 // is internal metadata and is intentionally absent from public renderings.
 // Junction marks a NodeSymlink that is a Windows junction: renderings show it
 // as a symlink, and the canonical artifact records it with kind junction.
+// Special names the type of a NodeFile that is not a file: a named pipe, a
+// socket or a device. Renderings show it as a file, as they always have; the
+// canonical artifact refuses it as an unsupported node type.
 type Node struct {
 	Name     string
 	Path     string
 	Type     NodeType
 	Target   string
 	Junction bool
+	Special  string
 	Children []*Node
 }
 

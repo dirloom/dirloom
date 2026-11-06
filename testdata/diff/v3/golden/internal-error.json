@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 3,
+  "status": "INTERNAL_ERROR",
+  "diagnostic": {
+    "code": "internal_invariant_failure",
+    "message": "broken invariant"
+  }
+}
