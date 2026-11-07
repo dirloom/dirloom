@@ -353,10 +353,14 @@ esac
 PowerShell 7.4 or later:
 
 ```powershell
+$watch = Start-Process dirloom -ArgumentList 'watch', '--format', 'ndjson' `
+    -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
+$null = $watch.Handle # keep the process handle, so that the exit code stays readable
 try {
-    & dirloom watch --format ndjson > events.ndjson
+    $watch.WaitForExit()
 } finally {
-    switch ($LASTEXITCODE) {
+    $watch.WaitForExit()
+    switch ($watch.ExitCode) {
         0 { Write-Host "interrupted" }
         2 { Write-Host "usage error" }
         5 { Write-Host "the watch ended on an error" }
@@ -365,17 +369,25 @@ try {
 }
 ```
 
-`$LASTEXITCODE` uses the same numbers, with two PowerShell rules:
+The exit code uses the same numbers. Three PowerShell rules shape this
+script:
 
-- Ctrl+C also stops the script that runs the watch: only its `finally`
-  blocks still run, and what they write to the pipeline is discarded. Read
-  `$LASTEXITCODE` there, and report with `Write-Host`.
-- Redirect the stream with `>`. PowerShell 7.4 and later write its bytes
-  unchanged, but in blocks of a few kilobytes rather than line by line, so
-  read the file once the watch has ended. A pipeline into a cmdlet, such as
-  `Set-Content`, is stopped by the same Ctrl+C: it can lose the last lines,
-  `watch.stopped` included, and keep the previous `$LASTEXITCODE`;
-  `Set-Content` also writes its own line endings, CRLF on Windows.
+- Ctrl+C reaches the watch, and also stops the script: only its `finally`
+  blocks still run, and what they write to the pipeline is discarded. The
+  `finally` block waits for the watch to end, reads its exit code, and
+  reports with `Write-Host`.
+- Start the watch with `Start-Process`, not as a command of the script whose
+  output PowerShell redirects. When Ctrl+C stops the script, PowerShell
+  terminates such a command without waiting for it, whether its output goes
+  to a file (`& dirloom watch … > events.ndjson`) or into a cmdlet such as
+  `Set-Content`: the watch can be killed before it writes `watch.stopped`,
+  and `$LASTEXITCODE` is then `-1`. A process started with `Start-Process`
+  is not part of the pipeline: it ends by itself, with `watch.stopped` and
+  exit status 0.
+- `-RedirectStandardOutput` hands the file to the watch as its stdout: the
+  bytes are the watch's own, written as it publishes them. `-ArgumentList`
+  becomes one command line, without quotes: quote an argument that contains
+  a space yourself, for example `'"my dir"'`.
 
 ## Privacy
 

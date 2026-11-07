@@ -116,11 +116,10 @@ func childProcesses(t *testing.T, parent uint32) map[uint32]string {
 }
 
 // TestWatchPowerShellExampleAfterCtrlC runs the PowerShell example of the
-// watch reference in a console of its own and stops it with CTRL_C_EVENT, as
-// Ctrl+C in a terminal does. Ctrl+C also stops the script, so the finally
-// block must still read exit status 0, and the redirected stream must end
-// with watch.stopped. PowerShell writes the redirected file in blocks, so
-// the test waits for the dirloom process rather than for its first line.
+// watch reference, read from docs/reference/watch.md, in a console of its own
+// and stops it with CTRL_C_EVENT, as Ctrl+C in a terminal does. Ctrl+C also
+// stops the script, so the finally block must still read exit status 0, and
+// the stream must end with watch.stopped.
 func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	shell, err := exec.LookPath("pwsh")
 	if err != nil {
@@ -136,10 +135,11 @@ func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	if err := os.Mkdir(filepath.Join(work, "tree"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// The example of docs/reference/watch.md, on the test binary and without
+	// The example runs on the test binary, on the tree directory and without
 	// the user configuration. A process started in a new process group
 	// ignores Ctrl+C, and its descendants inherit that, so the script first
-	// handles Ctrl+C again, as in a terminal, for itself and the watch.
+	// handles Ctrl+C again, as in a terminal, for itself and the watch. The
+	// outer finally block reports the exit code that the example reads.
 	script := `
 param(
   [Parameter(Mandatory = $true)][string]$Work,
@@ -151,15 +151,8 @@ $console = Add-Type -Name ConsoleCtrl -Namespace DirloomTest -PassThru -MemberDe
 Set-Location $Work
 Set-Content -LiteralPath ready.txt -Value ready
 try {
-    & $Bin watch --no-config tree --format ndjson > events.ndjson
-} finally {
-    switch ($LASTEXITCODE) {
-        0 { Write-Host "interrupted" }
-        2 { Write-Host "usage error" }
-        5 { Write-Host "the watch ended on an error" }
-        6 { Write-Host "internal error" }
-        default { Write-Host "exit status $LASTEXITCODE" }
-    }
+` + powerShellWatchExample(t) + `} finally {
+    Write-Host "exit code $($watch.ExitCode)"
 }
 `
 	scriptPath := filepath.Join(t.TempDir(), "watch-ctrl-c.ps1")
@@ -176,7 +169,7 @@ try {
 	defer func() { _ = logFile.Close() }()
 	readLog := func() string {
 		data, _ := os.ReadFile(logPath)
-		return strings.TrimSpace(string(data))
+		return strings.TrimSpace(strings.ReplaceAll(string(data), "\r\n", "\n"))
 	}
 	cmd := exec.Command(shell, "-NoProfile", "-NonInteractive", "-File", scriptPath, work, bin)
 	cmd.Stdout = logFile
@@ -228,29 +221,18 @@ try {
 		}
 	}
 	t.Logf("the watch process appeared %s after the script", time.Since(started).Round(100*time.Millisecond))
-	// A process that exists may not run yet. The watch is running once it
-	// has published generations: create files in batches until PowerShell,
-	// which writes the redirected stream in blocks of a few kilobytes, has
-	// written some of its events to the file.
+	// A process that exists may not run yet. The watch writes the file
+	// itself: it runs, its Ctrl+C handler installed, once watch.started is
+	// there.
 	events := filepath.Join(work, "events.ndjson")
-	for batch := 0; ; batch++ {
-		for i := range 100 {
-			name := filepath.Join(work, "tree", "f-"+strconv.Itoa(batch)+"-"+strconv.Itoa(i))
-			if err := os.WriteFile(name, nil, 0o644); err != nil {
-				t.Fatal(err)
-			}
-		}
-		written := false
-		for wait := time.Now().Add(2 * time.Second); !written && time.Now().Before(wait); time.Sleep(50 * time.Millisecond) {
-			info, err := os.Stat(events)
-			written = err == nil && info.Size() > 0
-		}
-		if written {
+	for {
+		if info, err := os.Stat(events); err == nil && info.Size() > 0 {
 			break
 		}
 		if time.Now().After(deadline) {
 			t.Fatalf("the watch published nothing in %s; script output:\n%s", time.Since(started).Round(time.Second), readLog())
 		}
+		time.Sleep(50 * time.Millisecond)
 	}
 	t.Logf("the watch was running %s after the script", time.Since(started).Round(100*time.Millisecond))
 
@@ -265,8 +247,8 @@ try {
 		t.Fatal("the script did not end after Ctrl+C")
 	}
 
-	if got := readLog(); got != "interrupted" {
-		t.Fatalf("finally block wrote %q, want %q", got, "interrupted")
+	if got, want := readLog(), "interrupted\nexit code 0"; got != want {
+		t.Fatalf("finally blocks wrote %q, want %q", got, want)
 	}
 	data, err := os.ReadFile(filepath.Join(work, "events.ndjson"))
 	if err != nil {
@@ -279,4 +261,23 @@ try {
 	if last := lines[len(lines)-1]; !strings.HasPrefix(last, `{"schemaVersion":1,"event":"watch.stopped",`) || !strings.Contains(last, `"reason":"interrupted"`) {
 		t.Fatalf("last line %q", last)
 	}
+}
+
+// powerShellWatchExample returns the PowerShell example of the watch
+// reference, starting the test binary on the tree directory without the user
+// configuration.
+func powerShellWatchExample(t *testing.T) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("..", "..", "docs", "reference", "watch.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := strings.ReplaceAll(string(data), "\r\n", "\n")
+	_, rest, found := strings.Cut(doc, "PowerShell 7.4 or later:\n\n```powershell\n")
+	example, _, closed := strings.Cut(rest, "```\n")
+	const call = "Start-Process dirloom -ArgumentList 'watch', '--format', 'ndjson'"
+	if !found || !closed || strings.Count(example, call) != 1 {
+		t.Fatalf("docs/reference/watch.md has no PowerShell example starting the watch with %q", call)
+	}
+	return strings.Replace(example, call, "Start-Process $Bin -ArgumentList 'watch', '--no-config', 'tree', '--format', 'ndjson'", 1)
 }
