@@ -127,6 +127,11 @@ func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 		t.Fatal("pwsh is required to prove the PowerShell example of the watch reference")
 	}
 	bin := buildVerifyBinary(t)
+	// Run the fresh binary once: its first execution can wait seconds on the
+	// system (an antivirus scan), which must not count against the watch.
+	if out, err := exec.Command(bin, "--version").CombinedOutput(); err != nil { // #nosec G204 -- the test binary.
+		t.Fatalf("dirloom --version: %v\n%s", err, out)
+	}
 	work := t.TempDir()
 	if err := os.Mkdir(filepath.Join(work, "tree"), 0o755); err != nil {
 		t.Fatal(err)
@@ -222,10 +227,32 @@ try {
 				time.Since(started).Round(time.Second), readyErr == nil, children, readLog())
 		}
 	}
-	t.Logf("the watch started %s after the script", time.Since(started).Round(100*time.Millisecond))
-	// Let the watch reach its first state; an earlier Ctrl+C would still
-	// end it, without a generation.
-	time.Sleep(time.Second)
+	t.Logf("the watch process appeared %s after the script", time.Since(started).Round(100*time.Millisecond))
+	// A process that exists may not run yet. The watch is running once it
+	// has published generations: create files in batches until PowerShell,
+	// which writes the redirected stream in blocks of a few kilobytes, has
+	// written some of its events to the file.
+	events := filepath.Join(work, "events.ndjson")
+	for batch := 0; ; batch++ {
+		for i := range 100 {
+			name := filepath.Join(work, "tree", "f-"+strconv.Itoa(batch)+"-"+strconv.Itoa(i))
+			if err := os.WriteFile(name, nil, 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		written := false
+		for wait := time.Now().Add(2 * time.Second); !written && time.Now().Before(wait); time.Sleep(50 * time.Millisecond) {
+			info, err := os.Stat(events)
+			written = err == nil && info.Size() > 0
+		}
+		if written {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("the watch published nothing in %s; script output:\n%s", time.Since(started).Round(time.Second), readLog())
+		}
+	}
+	t.Logf("the watch was running %s after the script", time.Since(started).Round(100*time.Millisecond))
 
 	helper := exec.Command(os.Args[0], "-test.run=^TestCtrlCHelperProcess$") // #nosec G204 -- the test binary itself.
 	helper.Env = append(os.Environ(), ctrlCConsole+"="+strconv.Itoa(cmd.Process.Pid))
