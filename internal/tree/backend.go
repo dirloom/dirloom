@@ -36,8 +36,11 @@ type Backend interface {
 // absolute paths.
 type filesystemBackend struct{}
 
+// ReadDir lists the directory as os.ReadDir does. On Windows it also shares
+// delete access, so that a scan neither blocks nor is blocked by a rename or
+// a removal of the directory (anomaly A10, readdir_windows.go).
 func (filesystemBackend) ReadDir(location string) ([]fs.DirEntry, error) {
-	return os.ReadDir(location)
+	return readDir(location)
 }
 
 func (filesystemBackend) Child(location string, entry fs.DirEntry) string {
