@@ -92,6 +92,19 @@ func TestInotifyGitignoreWrites(t *testing.T) {
 	}
 }
 
+// A panic of the reader goroutine ends the watch with a broken invariant
+// instead of crashing the process.
+func TestInotifyReaderPanicFailsTheWatch(t *testing.T) {
+	root := t.TempDir()
+	gate := make(chan struct{})
+	b, rec := startInotify(t, root, snapshot.CaptureV1{}, gate)
+	b.trace = func(inotifyEvent, bool) { panic("reader bug") }
+	close(gate)
+	reconcile(t, b, root)
+	write(t, filepath.Join(root, "f"), "")
+	readerPanics(t, rec, b)
+}
+
 func TestInotifyRootLossFails(t *testing.T) {
 	for _, tc := range []struct {
 		name  string

@@ -119,6 +119,12 @@ func InternalError(format string, args ...any) error {
 	return internal(format, args...)
 }
 
+// Recovered reports a recovered panic as a broken Dirloom invariant. Dirloom
+// returns errors for bad input and failed I/O: a panic is always a bug.
+func Recovered(value any) error {
+	return internal("unexpected panic: %v", value)
+}
+
 // AsInternal marks an invariant violation as a broken Dirloom invariant,
 // keeping its code. The same validation fails on bad input when Dirloom reads
 // an artifact, and on a Dirloom bug when it builds one: the caller knows which.

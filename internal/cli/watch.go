@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dirloom/dirloom/internal/app"
+	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/comparison"
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/watch"
@@ -205,7 +206,8 @@ func validateWatchFlags(cmd *cobra.Command, args []string, opts watchOptions) er
 
 // watchStatus maps the end of a watch to its exit status: 0 interrupted, 2
 // usage, 5 fatal or output failure, 6 internal. A fatal error is already in
-// the stream (and on stderr in text mode), so it is not repeated.
+// the stream (and on stderr in text mode), so it is not repeated. A panic
+// while writing events is internal, but it is not in the stream.
 func watchStatus(err error) error {
 	var failure *watch.Failure
 	var output *watch.OutputError
@@ -218,6 +220,8 @@ func watchStatus(err error) error {
 		return &exitError{Code: 6, Err: err, Silent: true}
 	case errors.As(err, &failure):
 		return &exitError{Code: 5, Err: err, Silent: true}
+	case errors.As(err, &output) && artifact.IsInternal(output.Err):
+		return &exitError{Code: 6, Err: fmt.Errorf("internal error: %w", err)}
 	case errors.As(err, &output), errors.Is(err, watch.ErrOutputBlocked):
 		return &exitError{Code: 5, Err: err}
 	default:

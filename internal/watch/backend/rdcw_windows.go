@@ -230,6 +230,7 @@ func (b *rdcw) Reconcile(obs watch.Observation) (bool, error) {
 // read waits on the handles and turns their records into flags, until Close.
 func (b *rdcw) read() {
 	defer close(b.done)
+	defer failOnPanic(b.sig)
 	if b.gate != nil {
 		<-b.gate
 	}

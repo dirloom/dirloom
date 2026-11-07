@@ -834,10 +834,25 @@ func startWriter(sink Sink) *writer {
 	w := &writer{in: make(chan []Event), done: make(chan error, 1)}
 	go func() {
 		for batch := range w.in {
-			w.done <- sink.Publish(batch)
+			w.done <- publishGuarded(sink, batch)
 		}
 	}()
 	return w
+}
+
+// publishGuarded reports a panic of the sink as a broken invariant: the
+// CLI's guard covers the command's goroutine, not this one. The run then
+// ends as after a failed write, without watch.stopped.
+func publishGuarded(sink Sink, batch []Event) (err error) {
+	completed := false
+	defer func() {
+		if !completed {
+			err = artifact.Recovered(recover())
+		}
+	}()
+	err = sink.Publish(batch)
+	completed = true
+	return err
 }
 
 // close lets the goroutine end once its current batch, if any, returns.

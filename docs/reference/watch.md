@@ -313,7 +313,8 @@ the same way when Windows leaves the time to.
 | fatal error (root lost, backend, limit, filesystem refused); startup failure | a complete stream ending with a fatal `watch.error` and `watch.stopped` (`error`) | empty | 5 |
 | interruption or fatal error while stdout is blocked beyond 2 s | an incomplete stream, without `watch.stopped` | best-effort `Error: …` | 5 |
 | stdout write failure | an incomplete stream | `Error: …` | 5, or `SIGPIPE` on Unix |
-| broken internal invariant | a complete stream ending with a fatal `watch.error` and `watch.stopped` | empty | 6 |
+| broken internal invariant, a panic of a native backend included | a complete stream ending with a fatal `watch.error` and `watch.stopped` | empty | 6 |
+| panic while writing events, or in the engine | an incomplete stream, without `watch.stopped` | `Error: internal error: …` | 6 |
 
 A root that is missing, not a directory or unreadable at startup is a
 startup failure: two lines, `watch.error` then `watch.stopped`, without

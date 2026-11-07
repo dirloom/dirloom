@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dirloom/dirloom/internal/app"
+	"github.com/dirloom/dirloom/internal/artifact"
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/watch"
 )
@@ -255,6 +256,7 @@ func TestWatchStatusMapsTheEndOfAWatch(t *testing.T) {
 		{"fatal", &watch.Failure{Diagnostic: watch.Diagnostic{Code: "watch_root_unavailable", Message: "gone"}}, 5, ""},
 		{"internal", &watch.Failure{Diagnostic: watch.Diagnostic{Code: "internal_invariant_failure", Message: "x"}, Internal: true}, 6, ""},
 		{"output", &watch.OutputError{Err: errors.New("broken pipe")}, 5, "Error: write watch events: broken pipe\n"},
+		{"output panic", &watch.OutputError{Err: artifact.Recovered("sink bug")}, 6, "Error: internal error: write watch events: unexpected panic: sink bug\n"},
 		{"blocked", watch.ErrOutputBlocked, 5, "Error: " + watch.ErrOutputBlocked.Error() + "\n"},
 		{"usage", &app.WatchUsageError{Message: "bad request"}, 2, "Error: bad request\n"},
 		{"unexpected", errors.New("boom"), 6, "Error: internal error: boom\n"},
