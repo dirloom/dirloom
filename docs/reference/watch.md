@@ -350,13 +350,15 @@ case "$code" in
 esac
 ```
 
-PowerShell 7.4 or later:
+PowerShell 7:
 
 ```powershell
+$watch = Start-Process dirloom -ArgumentList 'watch --format ndjson' -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
 try {
-    & dirloom watch --format ndjson > events.ndjson
+    $watch.WaitForExit()
 } finally {
-    switch ($LASTEXITCODE) {
+    $watch.WaitForExit()
+    switch ($watch.ExitCode) {
         0 { Write-Host "interrupted" }
         2 { Write-Host "usage error" }
         5 { Write-Host "the watch ended on an error" }
@@ -365,17 +367,18 @@ try {
 }
 ```
 
-`$LASTEXITCODE` uses the same numbers, with two PowerShell rules:
+`$watch.ExitCode` uses the same numbers, with two PowerShell rules:
 
+- Let the watch write the stream itself, through `Start-Process
+  -RedirectStandardOutput`. When PowerShell carries the stream, through `>`
+  or a pipeline, Ctrl+C makes PowerShell terminate the watch: the exit
+  status it reports (`-1`, or the previous `$LASTEXITCODE`) is not the
+  watch's, and the stream can end without `watch.stopped`. Written by the
+  watch, the file can also be read while the watch runs.
 - Ctrl+C also stops the script that runs the watch: only its `finally`
-  blocks still run, and what they write to the pipeline is discarded. Read
-  `$LASTEXITCODE` there, and report with `Write-Host`.
-- Redirect the stream with `>`. PowerShell 7.4 and later write its bytes
-  unchanged, but in blocks of a few kilobytes rather than line by line, so
-  read the file once the watch has ended. A pipeline into a cmdlet, such as
-  `Set-Content`, is stopped by the same Ctrl+C: it can lose the last lines,
-  `watch.stopped` included, and keep the previous `$LASTEXITCODE`;
-  `Set-Content` also writes its own line endings, CRLF on Windows.
+  blocks still run, and what they write to the pipeline is discarded. Wait
+  for the watch to end there, read `$watch.ExitCode`, and report with
+  `Write-Host`.
 
 ## Privacy
 
