@@ -117,10 +117,11 @@ func childProcesses(t *testing.T, parent uint32) map[uint32]string {
 
 // TestWatchPowerShellExampleAfterCtrlC runs the PowerShell example of the
 // watch reference in a console of its own and stops it with CTRL_C_EVENT, as
-// Ctrl+C in a terminal does. Ctrl+C also stops the script, so the finally
-// block must still read exit status 0, and the redirected stream must end
-// with watch.stopped. PowerShell writes the redirected file in blocks, so
-// the test waits for the dirloom process rather than for its first line.
+// Ctrl+C in a terminal does. On Ctrl+C, PowerShell terminates a native
+// command whose output it carries; started with Start-Process, the watch
+// writes its stream itself and ends by itself. Ctrl+C also stops the script,
+// so the finally block must still read exit status 0, and the stream must
+// end with watch.stopped.
 func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	shell, err := exec.LookPath("pwsh")
 	if err != nil {
@@ -145,20 +146,21 @@ param(
   [Parameter(Mandatory = $true)][string]$Work,
   [Parameter(Mandatory = $true)][string]$Bin
 )
-if ($PSVersionTable.PSVersion -lt [version]'7.4') { Write-Host "skip $($PSVersionTable.PSVersion)"; exit 0 }
 $console = Add-Type -Name ConsoleCtrl -Namespace DirloomTest -PassThru -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool SetConsoleCtrlHandler(System.IntPtr handler, bool add);'
 [void]$console::SetConsoleCtrlHandler([System.IntPtr]::Zero, $false)
 Set-Location $Work
 Set-Content -LiteralPath ready.txt -Value ready
+$watch = Start-Process $Bin -ArgumentList 'watch --no-config tree --format ndjson' -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
 try {
-    & $Bin watch --no-config tree --format ndjson > events.ndjson
+    $watch.WaitForExit()
 } finally {
-    switch ($LASTEXITCODE) {
+    $watch.WaitForExit()
+    switch ($watch.ExitCode) {
         0 { Write-Host "interrupted" }
         2 { Write-Host "usage error" }
         5 { Write-Host "the watch ended on an error" }
         6 { Write-Host "internal error" }
-        default { Write-Host "exit status $LASTEXITCODE" }
+        default { Write-Host "exit status $($watch.ExitCode)" }
     }
 }
 `
@@ -201,16 +203,15 @@ try {
 		<-exited
 	})
 
-	// A cold PowerShell start, with the Add-Type compilation, can take most of
-	// the usual wait on a CI runner.
+	// The watch writes its stream itself, so its first line proves that it
+	// runs. A cold PowerShell start, with the Add-Type compilation, can take
+	// most of the usual wait on a CI runner.
+	events := filepath.Join(work, "events.ndjson")
 	started := time.Now()
 	deadline := started.Add(4 * watchWait)
-	for watcher == 0 {
+	for {
 		select {
 		case <-exited:
-			if version, ok := strings.CutPrefix(readLog(), "skip "); ok {
-				t.Skipf("PowerShell %s: the example needs 7.4 or later", version)
-			}
 			t.Fatalf("the script ended before the watch started:\n%s", readLog())
 		default:
 		}
@@ -221,35 +222,13 @@ try {
 				watcher = pid
 			}
 		}
-		if watcher == 0 && time.Now().After(deadline) {
-			_, readyErr := os.Stat(filepath.Join(work, "ready.txt"))
-			t.Fatalf("the watch did not start in %s; the script reached it: %t; children of pwsh: %v; script output:\n%s",
-				time.Since(started).Round(time.Second), readyErr == nil, children, readLog())
-		}
-	}
-	t.Logf("the watch process appeared %s after the script", time.Since(started).Round(100*time.Millisecond))
-	// A process that exists may not run yet. The watch is running once it
-	// has published generations: create files in batches until PowerShell,
-	// which writes the redirected stream in blocks of a few kilobytes, has
-	// written some of its events to the file.
-	events := filepath.Join(work, "events.ndjson")
-	for batch := 0; ; batch++ {
-		for i := range 100 {
-			name := filepath.Join(work, "tree", "f-"+strconv.Itoa(batch)+"-"+strconv.Itoa(i))
-			if err := os.WriteFile(name, nil, 0o644); err != nil {
-				t.Fatal(err)
-			}
-		}
-		written := false
-		for wait := time.Now().Add(2 * time.Second); !written && time.Now().Before(wait); time.Sleep(50 * time.Millisecond) {
-			info, err := os.Stat(events)
-			written = err == nil && info.Size() > 0
-		}
-		if written {
+		if data, _ := os.ReadFile(events); bytes.Contains(data, []byte(`"event":"watch.started"`)) {
 			break
 		}
 		if time.Now().After(deadline) {
-			t.Fatalf("the watch published nothing in %s; script output:\n%s", time.Since(started).Round(time.Second), readLog())
+			_, readyErr := os.Stat(filepath.Join(work, "ready.txt"))
+			t.Fatalf("the watch did not start in %s; the script reached it: %t; children of pwsh: %v; script output:\n%s",
+				time.Since(started).Round(time.Second), readyErr == nil, children, readLog())
 		}
 	}
 	t.Logf("the watch was running %s after the script", time.Since(started).Round(100*time.Millisecond))
@@ -268,12 +247,12 @@ try {
 	if got := readLog(); got != "interrupted" {
 		t.Fatalf("finally block wrote %q, want %q", got, "interrupted")
 	}
-	data, err := os.ReadFile(filepath.Join(work, "events.ndjson"))
+	data, err := os.ReadFile(events)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if bytes.ContainsRune(data, '\r') || !bytes.HasSuffix(data, []byte("\n")) {
-		t.Fatalf("the redirected stream is not the watch's bytes: %q", data)
+		t.Fatalf("the stream file is not the watch's bytes: %q", data)
 	}
 	lines := strings.Split(strings.TrimSuffix(string(data), "\n"), "\n")
 	if last := lines[len(lines)-1]; !strings.HasPrefix(last, `{"schemaVersion":1,"event":"watch.stopped",`) || !strings.Contains(last, `"reason":"interrupted"`) {
