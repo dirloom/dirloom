@@ -155,21 +155,25 @@ func TestPanicLeavesAPartialOutputAsAFailure(t *testing.T) {
 	}
 }
 
+// The value of a runtime panic is the Go runtime's text, which changes
+// between Go releases: only a fragment of it is checked.
 func TestPanicValues(t *testing.T) {
+	const prefix = "Error: internal error: unexpected panic: "
 	root := t.TempDir()
 	for _, tc := range []struct {
-		name   string
-		stdout io.Writer
-		prefix string
+		name     string
+		stdout   io.Writer
+		fragment string
 	}{
-		{"error", &panickingWriter{value: errors.New("broken invariant")}, "Error: internal error: unexpected panic: broken invariant\n"},
-		{"runtime error", indexWriter{}, "Error: internal error: unexpected panic: runtime error: index out of range ["},
-		{"nil", &panickingWriter{value: nil}, "Error: internal error: unexpected panic: runtime error: panic called with nil argument"},
+		{"error", &panickingWriter{value: errors.New("broken invariant")}, "broken invariant"},
+		{"runtime error", indexWriter{}, "index out of range"},
+		{"nil", &panickingWriter{value: nil}, "panic called with nil argument"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			stderr, code := executeWithStdout(t, tc.stdout, root)
-			if code != 1 || !strings.HasPrefix(stderr, tc.prefix) || strings.Count(stderr, "\n") != 1 {
-				t.Fatalf("exit %d, stderr %q; want exit 1 and one line starting with %q", code, stderr, tc.prefix)
+			if code != 1 || !strings.HasPrefix(stderr, prefix) || !strings.Contains(stderr, tc.fragment) ||
+				strings.Count(stderr, "\n") != 1 || !strings.HasSuffix(stderr, "\n") {
+				t.Fatalf("exit %d, stderr %q; want exit 1 and one line %q…%q…", code, stderr, prefix, tc.fragment)
 			}
 		})
 	}
