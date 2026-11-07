@@ -116,7 +116,8 @@ func childProcesses(t *testing.T, parent uint32) map[uint32]string {
 }
 
 // TestWatchPowerShellExampleAfterCtrlC runs the PowerShell example of the
-// watch reference in a console of its own and stops it with CTRL_C_EVENT, as
+// watch reference, read from docs/reference/watch.md so that the two cannot
+// drift apart, in a console of its own and stops it with CTRL_C_EVENT, as
 // Ctrl+C in a terminal does. On Ctrl+C, PowerShell terminates a native
 // command whose output it carries; started with Start-Process, the watch
 // writes its stream itself and ends by itself. Ctrl+C also stops the script,
@@ -137,10 +138,11 @@ func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	if err := os.Mkdir(filepath.Join(work, "tree"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// The example of docs/reference/watch.md, on the test binary and without
-	// the user configuration. A process started in a new process group
-	// ignores Ctrl+C, and its descendants inherit that, so the script first
-	// handles Ctrl+C again, as in a terminal, for itself and the watch.
+	// The example runs as written, on the test binary, on the tree directory
+	// and without the user configuration. A process started in a new process
+	// group ignores Ctrl+C, and its descendants inherit that, so the script
+	// first handles Ctrl+C again, as in a terminal, for itself and the watch.
+	// The outer finally block reports the exit code that the example reads.
 	script := `
 param(
   [Parameter(Mandatory = $true)][string]$Work,
@@ -150,18 +152,9 @@ $console = Add-Type -Name ConsoleCtrl -Namespace DirloomTest -PassThru -MemberDe
 [void]$console::SetConsoleCtrlHandler([System.IntPtr]::Zero, $false)
 Set-Location $Work
 Set-Content -LiteralPath ready.txt -Value ready
-$watch = Start-Process $Bin -ArgumentList 'watch --no-config tree --format ndjson' -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
 try {
-    $watch.WaitForExit()
-} finally {
-    $watch.WaitForExit()
-    switch ($watch.ExitCode) {
-        0 { Write-Host "interrupted" }
-        2 { Write-Host "usage error" }
-        5 { Write-Host "the watch ended on an error" }
-        6 { Write-Host "internal error" }
-        default { Write-Host "exit status $($watch.ExitCode)" }
-    }
+` + powerShellWatchExample(t) + `} finally {
+    Write-Host "exit code $($watch.ExitCode)"
 }
 `
 	scriptPath := filepath.Join(t.TempDir(), "watch-ctrl-c.ps1")
@@ -178,7 +171,7 @@ try {
 	defer func() { _ = logFile.Close() }()
 	readLog := func() string {
 		data, _ := os.ReadFile(logPath)
-		return strings.TrimSpace(string(data))
+		return strings.TrimSpace(strings.ReplaceAll(string(data), "\r\n", "\n"))
 	}
 	cmd := exec.Command(shell, "-NoProfile", "-NonInteractive", "-File", scriptPath, work, bin)
 	cmd.Stdout = logFile
@@ -244,8 +237,8 @@ try {
 		t.Fatal("the script did not end after Ctrl+C")
 	}
 
-	if got := readLog(); got != "interrupted" {
-		t.Fatalf("finally block wrote %q, want %q", got, "interrupted")
+	if got, want := readLog(), "interrupted\nexit code 0"; got != want {
+		t.Fatalf("finally blocks wrote %q, want %q", got, want)
 	}
 	data, err := os.ReadFile(events)
 	if err != nil {
@@ -258,4 +251,23 @@ try {
 	if last := lines[len(lines)-1]; !strings.HasPrefix(last, `{"schemaVersion":1,"event":"watch.stopped",`) || !strings.Contains(last, `"reason":"interrupted"`) {
 		t.Fatalf("last line %q", last)
 	}
+}
+
+// powerShellWatchExample returns the PowerShell example of the watch
+// reference, starting the test binary on the tree directory without the user
+// configuration.
+func powerShellWatchExample(t *testing.T) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("..", "..", "docs", "reference", "watch.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := strings.ReplaceAll(string(data), "\r\n", "\n")
+	_, rest, found := strings.Cut(doc, "PowerShell 7:\n\n```powershell\n")
+	example, _, closed := strings.Cut(rest, "```\n")
+	const call = "Start-Process dirloom -ArgumentList 'watch --format ndjson'"
+	if !found || !closed || strings.Count(example, call) != 1 {
+		t.Fatalf("docs/reference/watch.md has no PowerShell example starting the watch with %q", call)
+	}
+	return strings.Replace(example, call, "Start-Process $Bin -ArgumentList 'watch --no-config tree --format ndjson'", 1)
 }

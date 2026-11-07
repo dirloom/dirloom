@@ -367,7 +367,7 @@ try {
 }
 ```
 
-`$watch.ExitCode` uses the same numbers, with two PowerShell rules:
+`$watch.ExitCode` uses the same numbers, with three PowerShell rules:
 
 - Let the watch write the stream itself, through `Start-Process
   -RedirectStandardOutput`. When PowerShell carries the stream, through `>`
@@ -379,6 +379,9 @@ try {
   blocks still run, and what they write to the pipeline is discarded. Wait
   for the watch to end there, read `$watch.ExitCode`, and report with
   `Write-Host`.
+- `-ArgumentList` is the command line of the watch, as written: quote a
+  directory whose name contains a space, for example
+  `-ArgumentList 'watch --format ndjson "my dir"'`.
 
 ## Privacy
 
