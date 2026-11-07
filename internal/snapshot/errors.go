@@ -17,6 +17,7 @@ const (
 	CodeUnsupportedFeature  = "unsupported_snapshot_feature"
 	CodeInvalidArtifact     = "invalid_snapshot_artifact"
 	CodeFingerprintMismatch = "snapshot_fingerprint_mismatch"
+	CodeLimitExceeded       = "snapshot_limit_exceeded"
 	CodeReadFailure         = "snapshot_read_failure"
 	CodeWriteFailure        = "snapshot_write_failure"
 	CodeInternalFailure     = "snapshot_internal_failure" // reserved for broken Dirloom invariants

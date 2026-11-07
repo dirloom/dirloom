@@ -65,10 +65,19 @@ func Encode(w io.Writer, doc Document) error {
 		return err
 	}
 	wire := toWire(doc)
-	encoder := json.NewEncoder(w)
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
 	encoder.SetEscapeHTML(false)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(wire); err != nil {
+		return writeFailure(err)
+	}
+	// A writer honors the reader limits: Dirloom never writes a snapshot that
+	// it would refuse to read.
+	if buf.Len() > limits.bytes {
+		return limitExceeded("the snapshot would be larger than %d bytes", limits.bytes)
+	}
+	if _, err := w.Write(buf.Bytes()); err != nil {
 		return writeFailure(err)
 	}
 	return nil

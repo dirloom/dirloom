@@ -13,9 +13,10 @@ import (
 // Future mandatory features are listed here when implemented.
 var knownRequiredFeatures = map[string]struct{}{}
 
-// Decode reads exactly one Snapshot Schema v1 JSON document.
+// Decode reads exactly one Snapshot Schema v1 JSON document. It never reads
+// more than the byte limit: a longer input is refused without reading it all.
 func Decode(r io.Reader) (Document, error) {
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(io.LimitReader(r, int64(limits.bytes)+1))
 	if err != nil {
 		return Document{}, readFailure(err)
 	}
@@ -24,6 +25,9 @@ func Decode(r io.Reader) (Document, error) {
 
 // DecodeBytes decodes snapshot JSON from a byte slice.
 func DecodeBytes(data []byte) (Document, error) {
+	if len(data) > limits.bytes {
+		return Document{}, limitExceeded("snapshot is larger than %d bytes", limits.bytes)
+	}
 	if len(trimJSONWhitespace(data)) == 0 {
 		return Document{}, invalidJSON("empty snapshot document")
 	}
@@ -127,6 +131,9 @@ func decodeCapture(raw json.RawMessage) (CaptureV1, error) {
 	if err != nil {
 		return CaptureV1{}, err
 	}
+	if len(ignore) > limits.ignore {
+		return CaptureV1{}, limitExceeded("capture.ignore has more than %d patterns", limits.ignore)
+	}
 	return CaptureV1{
 		Depth:             depth,
 		DirsOnly:          dirsOnly,
@@ -195,6 +202,9 @@ func decodeNode(raw json.RawMessage, index int) (NodeV1, error) {
 }
 
 func validateFeatureList(features []string) error {
+	if len(features) > limits.features {
+		return limitExceeded("requiredFeatures has more than %d entries", limits.features)
+	}
 	seen := make(map[string]struct{}, len(features))
 	for _, feature := range features {
 		if feature == "" {
@@ -357,16 +367,21 @@ func rejectTrailingTokens(data []byte) error {
 
 func rejectDuplicateKeys(data []byte) error {
 	dec := json.NewDecoder(bytes.NewReader(data))
-	return walkJSON(dec, true)
+	return walkJSON(dec, true, 1)
 }
 
-func walkJSON(dec *json.Decoder, requireValue bool) error {
+// walkJSON checks one value: duplicate keys, nesting depth and array
+// lengths, before any value is decoded into Go structures.
+func walkJSON(dec *json.Decoder, requireValue bool, depth int) error {
 	tok, err := dec.Token()
 	if err != nil {
 		return invalidJSON("invalid snapshot JSON: %v", err)
 	}
 	switch typed := tok.(type) {
 	case json.Delim:
+		if depth > limits.depth {
+			return limitExceeded("snapshot JSON nests deeper than %d levels", limits.depth)
+		}
 		switch typed {
 		case '{':
 			seen := map[string]struct{}{}
@@ -383,7 +398,7 @@ func walkJSON(dec *json.Decoder, requireValue bool) error {
 					return invalidJSON("duplicate JSON object key %q", key)
 				}
 				seen[key] = struct{}{}
-				if err := walkJSON(dec, true); err != nil {
+				if err := walkJSON(dec, true, depth+1); err != nil {
 					return err
 				}
 			}
@@ -396,8 +411,11 @@ func walkJSON(dec *json.Decoder, requireValue bool) error {
 			}
 			return nil
 		case '[':
-			for dec.More() {
-				if err := walkJSON(dec, true); err != nil {
+			for elements := 0; dec.More(); elements++ {
+				if elements == limits.nodes {
+					return limitExceeded("snapshot JSON array has more than %d elements", limits.nodes)
+				}
+				if err := walkJSON(dec, true, depth+1); err != nil {
 					return err
 				}
 			}

@@ -149,7 +149,7 @@ See [Snapshot Schema v1](../contracts/snapshot-schema-v1.md) and
 ## Exit status
 
 - `0` — success
-- `1` — runtime/data/output error, including an unsupported node: a named pipe, socket or device in the observed view (exclude it with `--ignore`)
+- `1` — runtime/data/output error, including an unsupported node (a named pipe, socket or device in the observed view; exclude it with `--ignore`) and a snapshot beyond the [reader limits](../contracts/snapshot-schema-v1.md#reader-limits): more than 2 000 000 nodes, more than 256 MiB, or more than 4 096 `--ignore` patterns
 - `2` — invalid arguments
 
 ## Contracts

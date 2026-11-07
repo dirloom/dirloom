@@ -15,6 +15,12 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 - The v0.4 contracts are marked as candidates for the v0.4 freeze, which takes effect at the release candidate's freeze commit; Structural Watch v1 and Watch Event Schema v1 stay experimental.
 - The JSON outputs of `config explain`, `preset explain`, `theme list`, `theme explain`, `theme validate` and `theme classify` are documented as diagnostic outputs, not contracts: they keep their `schemaVersion`, but may change in any release, with a CHANGELOG entry. Their content is unchanged.
+- Bound the resources spent on a snapshot, which is untrusted input:
+  - `verify` and `diff` refuse a snapshot larger than 256 MiB without reading past that size;
+  - they also refuse a snapshot with more than 2 000 000 nodes (or elements in any JSON array), JSON nested deeper than 64 levels, more than 4 096 `capture.ignore` patterns or more than 64 `requiredFeatures` entries;
+  - the new code `snapshot_limit_exceeded` reports it as `INVALID_SNAPSHOT` (exit 3), distinct from a read failure.
+
+  `dirloom snapshot` honors the same limits: it refuses to write a snapshot beyond them (exit 1), so every snapshot Dirloom writes can be read back. Loading a valid snapshot at the node limit was measured at 1.5 to 2.1 GiB of peak heap (see [docs/benchmarks/v0.4-rc1-snapshot-limits.md](docs/benchmarks/v0.4-rc1-snapshot-limits.md)).
 - Refuse named pipes, sockets and devices in structural observations. A FIFO, a Unix or Windows AF_UNIX socket, or a device in the observed view was recorded as a plain `file`, against the Canonical Structural Artifact contract. It is now refused with `unsupported_node_type`, naming its path and type:
   - `fingerprint` and `snapshot` exit 1;
   - `verify` and `diff` report `OBSERVATION_ERROR` (exit 5);

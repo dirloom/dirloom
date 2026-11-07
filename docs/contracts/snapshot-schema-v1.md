@@ -145,6 +145,20 @@ fields present with correct types, duplicate keys rejected, canonical path
 rules enforced, and schema/artifact/features validated. It does **not** mean
 `DisallowUnknownFields`.
 
+## Reader limits
+
+A snapshot is untrusted input. A reader refuses a document beyond any of these limits with `snapshot_limit_exceeded`, before reading it all or building its structures:
+
+| Limit | Value |
+| --- | ---: |
+| Document size | 256 MiB (268 435 456 bytes) |
+| Elements of any JSON array, `artifact.nodes` included | 2 000 000 |
+| JSON nesting, the document object being level 1 | 64 levels |
+| `capture.ignore` patterns | 4 096 |
+| `requiredFeatures` entries | 64 |
+
+A document at a limit is accepted. Writers honor the same limits: `dirloom snapshot` refuses to write a document beyond them, so every snapshot Dirloom writes can be read back. Raising a limit is a compatible change; lowering one is not. The measurements behind these values are in [the v0.4.0-rc1 snapshot limit benchmarks](../benchmarks/v0.4-rc1-snapshot-limits.md).
+
 ## Diagnostic codes
 
 A reader reports every rejection with one code:
@@ -156,6 +170,7 @@ A reader reports every rejection with one code:
 | `invalid_snapshot_field` | a field has the wrong JSON type, is `null` where a value is required, is out of range, or has an invalid value, including a malformed `fingerprint` string and capture metadata that the artifact disproves |
 | `invalid_snapshot_artifact` | the artifact breaks a Canonical Structural Artifact rule: a path outside the root or not canonical, a duplicate node, a missing parent, a target on a kind without one |
 | `snapshot_fingerprint_mismatch` | the embedded `fingerprint` is not the Fingerprint v1 of the embedded artifact |
+| `snapshot_limit_exceeded` | the document exceeds a reader limit (see [Reader limits](#reader-limits)) |
 | `unsupported_snapshot_schema` | `schemaVersion` is not `1` |
 | `unsupported_snapshot_artifact_version` | `artifactVersion` is not `1` |
 | `unsupported_snapshot_feature` | an unknown `requiredFeatures` entry |

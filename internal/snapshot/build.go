@@ -17,6 +17,14 @@ func Build(art artifact.Artifact, capture CaptureV1) (Document, error) {
 	if err != nil {
 		return Document{}, err
 	}
+	// A writer honors the reader limits: Dirloom never writes a snapshot that
+	// it would refuse to read.
+	if len(proj.Nodes) > limits.nodes {
+		return Document{}, limitExceeded("the snapshot would have more than %d nodes", limits.nodes)
+	}
+	if len(capture.Ignore) > limits.ignore {
+		return Document{}, limitExceeded("capture.ignore has more than %d patterns", limits.ignore)
+	}
 	fp, err := identity.Compute(art)
 	if err != nil {
 		return Document{}, invalidArtifact(err)
