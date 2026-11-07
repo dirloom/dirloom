@@ -570,6 +570,40 @@ func TestOutputFailureEndsWithoutMoreOutput(t *testing.T) {
 	}
 }
 
+// A panic of the sink runs on the writer's goroutine, which the CLI's guard
+// does not cover: the writer reports it as a broken invariant, and the run
+// ends as after a failed write, without more output.
+func TestSinkPanicEndsLikeAnOutputFailure(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		run  func(h *harness) error
+	}{
+		{"generation", func(h *harness) error {
+			h.backend.signals().Notify()
+			h.until("debounce")
+			h.clock.Advance(debounce)
+			return h.finish()
+		}},
+		{"watch.stopped", func(h *harness) error { return h.interrupt() }},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := newHarness(t, observed(tree("a")), observed(tree("a", "b")))
+			h.sink.panicAt = 2
+			h.start(nil)
+			h.idle()
+			err := tc.run(h)
+			var out *OutputError
+			if !errors.As(err, &out) || !artifact.IsInternal(err) || out.Err.Error() != "unexpected panic: sink bug" {
+				t.Fatalf("Run = %v, want an OutputError carrying an internal failure", err)
+			}
+			h.expect(false, "started")
+			if _, closes := h.backend.counts(); closes != 1 {
+				t.Fatalf("backend closed %d times", closes)
+			}
+		})
+	}
+}
+
 func TestPollingObservesEveryInterval(t *testing.T) {
 	h := newHarness(t, observed(tree("a")), observed(tree("a")), failing(readFailure("busy")), observed(tree("a", "b")))
 	h.start(func(c *Config) { c.Poll = time.Second })

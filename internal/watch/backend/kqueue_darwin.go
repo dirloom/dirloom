@@ -294,6 +294,7 @@ func register(kq, fd int, notes uint32) error {
 // read waits for events and turns each into flags, until Close.
 func (b *kqueue) read() {
 	defer close(b.done)
+	defer failOnPanic(b.sig)
 	if b.gate != nil {
 		<-b.gate
 	}

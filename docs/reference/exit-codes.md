@@ -30,6 +30,23 @@ Diagnostic messages, including localized operating-system text, are not stable (
 
 See [Q4](../compatibility-policy.md#2-what-is-stable-and-what-is-not).
 
+## Unexpected internal failures
+
+A panic is always a Dirloom bug: bad input and failed I/O are reported as errors. A panic does not crash the process; it is an internal error of the command:
+
+- the exit code is the command's internal-error code: `1` in the first family, `6` in `verify`, `diff`, `history` and `watch`;
+- stderr gets one line, `Error: internal error: unexpected panic: <value>`, without a stack trace;
+- stdout keeps what the command wrote before the panic, and nothing is added. It can be empty, or hold a truncated document that is not valid JSON. With `--format json`, `verify`, `diff` and `history` write no failure document in this case. Programs check the exit code before they parse stdout.
+
+In `watch`:
+
+- a panic while events are encoded or written, or in the engine, ends the stream without `watch.stopped`. The stderr line is the one above; while writing, it reads `Error: internal error: write watch events: unexpected panic: <value>`;
+- a panic in a native backend ends the run as a fatal condition: `watch.error` (`fatal: true`, `internal_invariant_failure`), then `watch.stopped` (`error`).
+
+Both exit `6`.
+
+Go *fatal errors* are not panics and cannot be recovered: out of memory, an exhausted goroutine stack (for example a recursion that is too deep), concurrent map writes, or a deadlock. The process then ends with Go's exit status `2` and a goroutine trace on stderr. In that case alone, `2` does not mean invalid usage.
+
 ## Categories
 
 Every failure belongs to one category. The status and the exit code follow from the category, and the machine code names the cause.

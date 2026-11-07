@@ -29,6 +29,22 @@ func TestAsInternalMarksOnlyInvariants(t *testing.T) {
 	}
 }
 
+func TestRecoveredIsInternal(t *testing.T) {
+	for _, tc := range []struct {
+		value   any
+		message string
+	}{
+		{"bug", "unexpected panic: bug"},
+		{errors.New("broken"), "unexpected panic: broken"},
+		{nil, "unexpected panic: <nil>"},
+	} {
+		var typed *Error
+		if err := Recovered(tc.value); !errors.As(err, &typed) || typed.Code != CodeInternal || !typed.Internal || typed.Message != tc.message {
+			t.Fatalf("Recovered(%v) = %#v, want an internal %s %q", tc.value, err, CodeInternal, tc.message)
+		}
+	}
+}
+
 func TestEncodingFailureIsInternal(t *testing.T) {
 	err := EncodingFailure(errors.New("hash refused a write"))
 	var typed *Error

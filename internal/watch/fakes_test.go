@@ -201,11 +201,12 @@ func (b *fakeBackend) counts() (reconciles, closes int) {
 }
 
 // fakeSink records published events. Batches from blockFrom on wait for
-// gate; batch failAt fails.
+// gate; batch failAt fails; batch panicAt panics.
 type fakeSink struct {
 	gate      chan struct{}
 	blockFrom int
 	failAt    int
+	panicAt   int
 
 	mu      sync.Mutex
 	batches int
@@ -222,6 +223,9 @@ func (s *fakeSink) Publish(events []Event) error {
 	}
 	if n == s.failAt {
 		return errors.New("broken pipe")
+	}
+	if n == s.panicAt {
+		panic("sink bug")
 	}
 	s.mu.Lock()
 	s.events = append(s.events, events...)

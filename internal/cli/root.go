@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/dirloom/dirloom/internal/app"
+	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/clipboard"
 	configuration "github.com/dirloom/dirloom/internal/config"
 	"github.com/dirloom/dirloom/internal/diagram"
@@ -110,10 +111,56 @@ func executeWithDependencies(ctx context.Context, args []string, stdout, stderr 
 	})
 }
 
-func execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string, deps commandDependencies) int {
+// execute is the CLI boundary. A panic that reaches it is reported as an
+// internal error of the command (decision D7, level 2): see recoveredStatus.
+// It covers the command's goroutine only; the goroutines that Dirloom starts
+// guard themselves or cannot panic by design.
+func execute(ctx context.Context, args []string, stdout, stderr io.Writer, version string, deps commandDependencies) (status int) {
+	internalStatus := 1 // until the command is known
+	completed := false
+	defer func() {
+		// The flag, not the recovered value, tells a panic from a return:
+		// panic(nil) recovers nil under GODEBUG=panicnil=1.
+		if !completed {
+			status = recoveredStatus(recover(), internalStatus, stderr)
+		}
+	}()
+	args = normalizeOptionalAutoFlags(args)
 	command := newRootCommandWithRuntime(stdout, stderr, version, deps)
-	command.SetArgs(normalizeOptionalAutoFlags(args))
-	return processStatus(command.ExecuteContext(ctx), stderr)
+	internalStatus = internalExitStatus(command, args)
+	command.SetArgs(args)
+	status = processStatus(command.ExecuteContext(ctx), stderr)
+	completed = true
+	return status
+}
+
+// recoveredStatus reports a panic that reached the CLI boundary: one
+// diagnostic line on stderr, without a stack trace, and the internal-error
+// exit status of the command. What the command already wrote stays as it is:
+// the guard cannot complete a truncated output, and the exit status says it
+// is not a success.
+func recoveredStatus(value any, code int, stderr io.Writer) int {
+	return processStatus(&exitError{Code: code, Err: fmt.Errorf("internal error: %w", artifact.Recovered(value))}, stderr)
+}
+
+// contractCommands follow the 0-6 exit codes of their contracts, where a
+// broken invariant exits 6. Every other command exits 1
+// (docs/reference/exit-codes.md).
+var contractCommands = map[string]bool{"verify": true, "diff": true, "history": true, "watch": true}
+
+// internalExitStatus is the exit status of a broken invariant in the command
+// that args select, found the way Cobra finds it.
+func internalExitStatus(root *cobra.Command, args []string) int {
+	target, _, err := root.Find(args)
+	if err != nil {
+		return 1
+	}
+	for ; target != nil && target.HasParent(); target = target.Parent() {
+		if target.Parent() == root && contractCommands[target.Name()] {
+			return 6
+		}
+	}
+	return 1
 }
 
 func processStatus(err error, stderr io.Writer) int {

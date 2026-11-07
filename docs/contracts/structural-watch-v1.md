@@ -169,7 +169,7 @@ After the first state, an observation failure (an entry vanished during the scan
 | `watch_backend_failure` | any other backend failure (a handle invalidated, a read error) |
 | `watch_filesystem_unsupported` | native mode on a recognized network or virtual filesystem ([Filesystem policy](#filesystem-policy)); the message suggests `--poll` |
 | an observation code | the startup observation still fails after its retries |
-| `internal_invariant_failure` | a generation fails validation, or the engine breaks one of its invariants (`watch_internal_failure` when no typed code exists) |
+| `internal_invariant_failure` | a generation fails validation, the engine breaks one of its invariants (`watch_internal_failure` when no typed code exists), or a native backend's reader panics |
 
 A fatal condition publishes `watch.error` (`fatal: true`), then `watch.stopped` (`error`), releases every handle and ends the process with exit 5, or 6 for an internal failure, within the output grace period ([Termination](#termination)). There is no automatic fallback to another backend.
 
@@ -178,6 +178,7 @@ A fatal condition publishes `watch.error` (`fatal: true`), then `watch.stopped` 
 - **Controlled interruption.** Ctrl+C and `CTRL_BREAK_EVENT` (`os.Interrupt`), `SIGINT`, and `SIGTERM` on Unix through a handler installed by `watch` only. An observation in progress is abandoned, the backend is closed (descriptors, kqueue, Windows handles after their reads are cancelled), its goroutines end, `watch.stopped` (`interrupted`) is published, and the process exits 0. Before the first state, `watch.stopped` is the only line, without generation or fingerprint.
 - **Blocked stdout.** All output goes through one writer. A blocking write to a pipe cannot be interrupted portably: when an interruption or a fatal condition arrives while a write is blocked, `watch` waits at most the output grace period; then it writes a best-effort diagnostic to stderr and exits 5 without `watch.stopped`. The process always ends; the stream it leaves is incomplete.
 - **Closed stdout.** Nothing more is written. On Unix the default `SIGPIPE` behavior applies; elsewhere `watch` exits 5 with a stderr diagnostic.
+- **Panic while writing, or in the engine.** A panic while a batch is encoded or written ends the run as a failed write does: nothing more is written and there is no `watch.stopped`. A panic of the engine itself ends the run the same way. Both write a stderr diagnostic `internal error: …` and exit 6 ([exit codes](../reference/exit-codes.md#unexpected-internal-failures)).
 - **Windows console close, logoff and shutdown** (delivered as `SIGTERM`): handled like an interruption, on a best-effort basis only; Windows may end the process before `watch.stopped` is written.
 - Stdin is never read.
 

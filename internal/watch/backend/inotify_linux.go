@@ -185,6 +185,7 @@ func directoryID(path string) (dev, ino uint64, err error) {
 // read waits for notifications and turns each into flags, until Close.
 func (b *inotify) read() {
 	defer close(b.done)
+	defer failOnPanic(b.sig)
 	if b.gate != nil {
 		<-b.gate
 	}

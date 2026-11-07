@@ -171,6 +171,29 @@ func (r *recorder) record(name string, detail uint32, relevant bool) {
 	r.update(func() { r.events = append(r.events, traced{name, detail, relevant}) })
 }
 
+// readerPanics waits for the failure that a panic of the reader reports, a
+// broken invariant, then checks that Close still returns: the reader has
+// ended and released its done channel.
+func readerPanics(t *testing.T, r *recorder, b watch.Backend) {
+	t.Helper()
+	r.waitFor(t, "failure", func(r *recorder) bool { return r.fail != nil })
+	var typed *artifact.Error
+	if err := r.failure(); !errors.As(err, &typed) || typed.Code != artifact.CodeInternal || !typed.Internal ||
+		typed.Message != "unexpected panic: reader bug" {
+		t.Fatalf("failure = %v, want an internal invariant failure", err)
+	}
+	closed := make(chan struct{})
+	go func() {
+		_ = b.Close()
+		close(closed)
+	}()
+	select {
+	case <-closed:
+	case <-time.After(guard):
+		t.Fatal("Close blocked after the reader panicked")
+	}
+}
+
 func rootUnavailable(err error) bool {
 	var typed *artifact.Error
 	return errors.As(err, &typed) && typed.Code == artifact.CodeWatchRootUnavailable

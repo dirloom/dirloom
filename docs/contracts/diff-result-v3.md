@@ -174,7 +174,7 @@ When `--format json` is accepted:
 - no ANSI sequence is emitted;
 - no human sentence is appended.
 
-Usage errors and a stdout write failure are stderr diagnostics instead.
+Usage errors and a stdout write failure are stderr diagnostics instead. So is an unexpected panic, with exit 6: stdout then keeps what was written before it, possibly nothing or a truncated document, and gets no failure document ([exit codes](../reference/exit-codes.md#unexpected-internal-failures)).
 
 ## Evolution policy
 
