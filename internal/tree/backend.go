@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -38,9 +39,15 @@ type filesystemBackend struct{}
 
 // ReadDir lists the directory as os.ReadDir does. On Windows it also shares
 // delete access, so that a scan neither blocks nor is blocked by a rename or
-// a removal of the directory (anomaly A10, readdir_windows.go).
-func (filesystemBackend) ReadDir(location string) ([]fs.DirEntry, error) {
-	return readDir(location)
+// a removal of the directory, and it retries an open that another process
+// blocks for an instant (anomaly A10, readdir_windows.go).
+func (b filesystemBackend) ReadDir(location string) ([]fs.DirEntry, error) {
+	return b.ReadDirContext(context.Background(), location)
+}
+
+// ReadDirContext is ReadDir whose retry ends on cancellation.
+func (filesystemBackend) ReadDirContext(ctx context.Context, location string) ([]fs.DirEntry, error) {
+	return readDirContext(ctx, location)
 }
 
 func (filesystemBackend) Child(location string, entry fs.DirEntry) string {
@@ -62,8 +69,9 @@ func (filesystemBackend) ReadGitIgnore(location, relativeDirectory string) ([]by
 		return nil, false, nil
 	}
 
-	// #nosec G304 -- path is the fixed .gitignore control file beneath the user-selected directory.
-	data, err := os.ReadFile(path)
+	// The fixed .gitignore control file beneath the user-selected directory,
+	// read without blocking its removal on Windows (A10).
+	data, err := readFile(path)
 	if err != nil {
 		return nil, false, fmt.Errorf("read gitignore %q: %w", displayGitIgnorePath(relativeDirectory), classifyFilesystemError(err))
 	}

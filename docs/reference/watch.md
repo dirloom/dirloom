@@ -257,7 +257,15 @@ Native mode has two limits that are documented rather than worked around:
 - **Windows:** while a native watch runs, the root's **parent and
   ancestors cannot be renamed** (`Access is denied`): any open directory
   handle locks them. The root and everything inside it can still be renamed
-  and removed. `--poll` holds no handle.
+  and removed. `--poll` holds no handle between observations.
+- **Windows, during an observation**, in both modes and in every command
+  that reads a tree: for the instant Dirloom lists a directory or reads a
+  `.gitignore`, Windows refuses to rename any directory above it
+  (`Access is denied`), whatever the sharing; renaming again succeeds.
+  Dirloom shares delete access on every handle it opens, so the entry it
+  reads can always be renamed or removed. An observation that meets a
+  directory held by another program retries for up to 50 ms, and one that
+  meets a directory being deleted reports it as no longer existing.
 - **macOS:** a native watch holds one descriptor per watched directory
   (and per `.gitignore` when `.gitignore` files apply), within the
   process's descriptor limit: about 10,200 directories under a
