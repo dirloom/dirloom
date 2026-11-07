@@ -74,6 +74,7 @@ Every machine code that Dirloom reports, with its category.
 | `invalid_snapshot_field` | validation | a snapshot field has the wrong type or an invalid value, including a malformed fingerprint string |
 | `invalid_snapshot_artifact` | validation | the snapshot artifact breaks an artifact rule: a path outside the root, a duplicate node, a missing parent… |
 | `snapshot_fingerprint_mismatch` | corruption | the embedded fingerprint is not the fingerprint of the embedded artifact |
+| `snapshot_limit_exceeded` | validation | the snapshot exceeds a [reader limit](../contracts/snapshot-schema-v1.md#reader-limits): size, node count, nesting, ignore patterns or required features |
 | `unsupported_snapshot_schema` | unsupported | `schemaVersion` is not `1` |
 | `unsupported_snapshot_artifact_version` | unsupported | `artifactVersion` is not `1` |
 | `unsupported_snapshot_feature` | unsupported | `requiredFeatures` names a feature this release does not know |

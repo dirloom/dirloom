@@ -21,6 +21,7 @@ func TestFailureClassificationByContext(t *testing.T) {
 		{"invariant in an observed artifact", artifact.AsInternal(artifact.New(artifact.CodeInvariant, "node has no parent", false)), FailureInternal, artifact.CodeInvariant},
 		{"invariant read from a snapshot", &snapshot.Error{Code: snapshot.CodeInvalidArtifact, Message: "invalid snapshot artifact", Cause: artifact.New(artifact.CodeInvariant, "node has no parent", false)}, FailureInvalidSnapshot, snapshot.CodeInvalidArtifact},
 		{"snapshot internal failure", &snapshot.Error{Code: snapshot.CodeInternalFailure, Message: "read failure without an error", Internal: true}, FailureInternal, snapshot.CodeInternalFailure},
+		{"snapshot beyond a reader limit", &snapshot.Error{Code: snapshot.CodeLimitExceeded, Message: "snapshot is larger than 268435456 bytes"}, FailureInvalidSnapshot, snapshot.CodeLimitExceeded},
 		{"canonical encoding failure", artifact.EncodingFailure(errors.New("hash refused a write")), FailureInternal, artifact.CodeEncoding},
 		{"collision in observed data", artifact.New(artifact.CodeCollision, "collision", false), FailureObservation, artifact.CodeCollision},
 	} {

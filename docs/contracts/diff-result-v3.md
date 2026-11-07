@@ -133,13 +133,14 @@ missing_snapshot_field
 invalid_snapshot_field
 invalid_snapshot_artifact
 snapshot_fingerprint_mismatch
+snapshot_limit_exceeded
 unsupported_snapshot_schema
 unsupported_snapshot_artifact_version
 unsupported_snapshot_feature
 snapshot_read_failure
 ```
 
-`snapshot_fingerprint_mismatch` is always `INVALID_SNAPSHOT`, never `DIFFERENCES`.
+`snapshot_fingerprint_mismatch` is always `INVALID_SNAPSHOT`, never `DIFFERENCES`. `snapshot_limit_exceeded`, a document beyond a [reader limit](snapshot-schema-v1.md#reader-limits), is `INVALID_SNAPSHOT` (exit 3), never a read error.
 
 Live observation diagnostics reuse `artifact.Error.Code` when present:
 
