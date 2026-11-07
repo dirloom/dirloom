@@ -350,12 +350,10 @@ case "$code" in
 esac
 ```
 
-PowerShell 7.4 or later:
+PowerShell 7:
 
 ```powershell
-$watch = Start-Process dirloom -ArgumentList 'watch', '--format', 'ndjson' `
-    -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
-$null = $watch.Handle # keep the process handle, so that the exit code stays readable
+$watch = Start-Process dirloom -ArgumentList 'watch --format ndjson' -NoNewWindow -PassThru -RedirectStandardOutput events.ndjson
 try {
     $watch.WaitForExit()
 } finally {
@@ -369,25 +367,21 @@ try {
 }
 ```
 
-The exit code uses the same numbers. Three PowerShell rules shape this
-script:
+`$watch.ExitCode` uses the same numbers, with three PowerShell rules:
 
-- Ctrl+C reaches the watch, and also stops the script: only its `finally`
-  blocks still run, and what they write to the pipeline is discarded. The
-  `finally` block waits for the watch to end, reads its exit code, and
-  reports with `Write-Host`.
-- Start the watch with `Start-Process`, not as a command of the script whose
-  output PowerShell redirects. When Ctrl+C stops the script, PowerShell
-  terminates such a command without waiting for it, whether its output goes
-  to a file (`& dirloom watch … > events.ndjson`) or into a cmdlet such as
-  `Set-Content`: the watch can be killed before it writes `watch.stopped`,
-  and `$LASTEXITCODE` is then `-1`. A process started with `Start-Process`
-  is not part of the pipeline: it ends by itself, with `watch.stopped` and
-  exit status 0.
-- `-RedirectStandardOutput` hands the file to the watch as its stdout: the
-  bytes are the watch's own, written as it publishes them. `-ArgumentList`
-  becomes one command line, without quotes: quote an argument that contains
-  a space yourself, for example `'"my dir"'`.
+- Let the watch write the stream itself, through `Start-Process
+  -RedirectStandardOutput`. When PowerShell carries the stream, through `>`
+  or a pipeline, Ctrl+C makes PowerShell terminate the watch: the exit
+  status it reports (`-1`, or the previous `$LASTEXITCODE`) is not the
+  watch's, and the stream can end without `watch.stopped`. Written by the
+  watch, the file can also be read while the watch runs.
+- Ctrl+C also stops the script that runs the watch: only its `finally`
+  blocks still run, and what they write to the pipeline is discarded. Wait
+  for the watch to end there, read `$watch.ExitCode`, and report with
+  `Write-Host`.
+- `-ArgumentList` is the command line of the watch, as written: quote a
+  directory whose name contains a space, for example
+  `-ArgumentList 'watch --format ndjson "my dir"'`.
 
 ## Privacy
 

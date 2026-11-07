@@ -116,10 +116,13 @@ func childProcesses(t *testing.T, parent uint32) map[uint32]string {
 }
 
 // TestWatchPowerShellExampleAfterCtrlC runs the PowerShell example of the
-// watch reference, read from docs/reference/watch.md, in a console of its own
-// and stops it with CTRL_C_EVENT, as Ctrl+C in a terminal does. Ctrl+C also
-// stops the script, so the finally block must still read exit status 0, and
-// the stream must end with watch.stopped.
+// watch reference, read from docs/reference/watch.md so that the two cannot
+// drift apart, in a console of its own and stops it with CTRL_C_EVENT, as
+// Ctrl+C in a terminal does. On Ctrl+C, PowerShell terminates a native
+// command whose output it carries; started with Start-Process, the watch
+// writes its stream itself and ends by itself. Ctrl+C also stops the script,
+// so the finally block must still read exit status 0, and the stream must
+// end with watch.stopped.
 func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	shell, err := exec.LookPath("pwsh")
 	if err != nil {
@@ -135,17 +138,16 @@ func TestWatchPowerShellExampleAfterCtrlC(t *testing.T) {
 	if err := os.Mkdir(filepath.Join(work, "tree"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// The example runs on the test binary, on the tree directory and without
-	// the user configuration. A process started in a new process group
-	// ignores Ctrl+C, and its descendants inherit that, so the script first
-	// handles Ctrl+C again, as in a terminal, for itself and the watch. The
-	// outer finally block reports the exit code that the example reads.
+	// The example runs as written, on the test binary, on the tree directory
+	// and without the user configuration. A process started in a new process
+	// group ignores Ctrl+C, and its descendants inherit that, so the script
+	// first handles Ctrl+C again, as in a terminal, for itself and the watch.
+	// The outer finally block reports the exit code that the example reads.
 	script := `
 param(
   [Parameter(Mandatory = $true)][string]$Work,
   [Parameter(Mandatory = $true)][string]$Bin
 )
-if ($PSVersionTable.PSVersion -lt [version]'7.4') { Write-Host "skip $($PSVersionTable.PSVersion)"; exit 0 }
 $console = Add-Type -Name ConsoleCtrl -Namespace DirloomTest -PassThru -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool SetConsoleCtrlHandler(System.IntPtr handler, bool add);'
 [void]$console::SetConsoleCtrlHandler([System.IntPtr]::Zero, $false)
 Set-Location $Work
@@ -194,16 +196,15 @@ try {
 		<-exited
 	})
 
-	// A cold PowerShell start, with the Add-Type compilation, can take most of
-	// the usual wait on a CI runner.
+	// The watch writes its stream itself, so its first line proves that it
+	// runs. A cold PowerShell start, with the Add-Type compilation, can take
+	// most of the usual wait on a CI runner.
+	events := filepath.Join(work, "events.ndjson")
 	started := time.Now()
 	deadline := started.Add(4 * watchWait)
-	for watcher == 0 {
+	for {
 		select {
 		case <-exited:
-			if version, ok := strings.CutPrefix(readLog(), "skip "); ok {
-				t.Skipf("PowerShell %s: the example needs 7.4 or later", version)
-			}
 			t.Fatalf("the script ended before the watch started:\n%s", readLog())
 		default:
 		}
@@ -214,25 +215,14 @@ try {
 				watcher = pid
 			}
 		}
-		if watcher == 0 && time.Now().After(deadline) {
+		if data, _ := os.ReadFile(events); bytes.Contains(data, []byte(`"event":"watch.started"`)) {
+			break
+		}
+		if time.Now().After(deadline) {
 			_, readyErr := os.Stat(filepath.Join(work, "ready.txt"))
 			t.Fatalf("the watch did not start in %s; the script reached it: %t; children of pwsh: %v; script output:\n%s",
 				time.Since(started).Round(time.Second), readyErr == nil, children, readLog())
 		}
-	}
-	t.Logf("the watch process appeared %s after the script", time.Since(started).Round(100*time.Millisecond))
-	// A process that exists may not run yet. The watch writes the file
-	// itself: it runs, its Ctrl+C handler installed, once watch.started is
-	// there.
-	events := filepath.Join(work, "events.ndjson")
-	for {
-		if info, err := os.Stat(events); err == nil && info.Size() > 0 {
-			break
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("the watch published nothing in %s; script output:\n%s", time.Since(started).Round(time.Second), readLog())
-		}
-		time.Sleep(50 * time.Millisecond)
 	}
 	t.Logf("the watch was running %s after the script", time.Since(started).Round(100*time.Millisecond))
 
@@ -250,12 +240,12 @@ try {
 	if got, want := readLog(), "interrupted\nexit code 0"; got != want {
 		t.Fatalf("finally blocks wrote %q, want %q", got, want)
 	}
-	data, err := os.ReadFile(filepath.Join(work, "events.ndjson"))
+	data, err := os.ReadFile(events)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if bytes.ContainsRune(data, '\r') || !bytes.HasSuffix(data, []byte("\n")) {
-		t.Fatalf("the redirected stream is not the watch's bytes: %q", data)
+		t.Fatalf("the stream file is not the watch's bytes: %q", data)
 	}
 	lines := strings.Split(strings.TrimSuffix(string(data), "\n"), "\n")
 	if last := lines[len(lines)-1]; !strings.HasPrefix(last, `{"schemaVersion":1,"event":"watch.stopped",`) || !strings.Contains(last, `"reason":"interrupted"`) {
@@ -273,11 +263,11 @@ func powerShellWatchExample(t *testing.T) string {
 		t.Fatal(err)
 	}
 	doc := strings.ReplaceAll(string(data), "\r\n", "\n")
-	_, rest, found := strings.Cut(doc, "PowerShell 7.4 or later:\n\n```powershell\n")
+	_, rest, found := strings.Cut(doc, "PowerShell 7:\n\n```powershell\n")
 	example, _, closed := strings.Cut(rest, "```\n")
-	const call = "Start-Process dirloom -ArgumentList 'watch', '--format', 'ndjson'"
+	const call = "Start-Process dirloom -ArgumentList 'watch --format ndjson'"
 	if !found || !closed || strings.Count(example, call) != 1 {
 		t.Fatalf("docs/reference/watch.md has no PowerShell example starting the watch with %q", call)
 	}
-	return strings.Replace(example, call, "Start-Process $Bin -ArgumentList 'watch', '--no-config', 'tree', '--format', 'ndjson'", 1)
+	return strings.Replace(example, call, "Start-Process $Bin -ArgumentList 'watch --no-config tree --format ndjson'", 1)
 }
