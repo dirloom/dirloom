@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,7 +76,7 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, rel
 		}
 	}
 
-	entries, err := s.backend.ReadDir(location)
+	entries, err := listDirectory(ctx, s.backend, location)
 	if err != nil {
 		return fmt.Errorf("read directory %q: %w", displayPath(relativeDirectory), classifyFilesystemError(err))
 	}
@@ -196,6 +197,19 @@ func displayPath(relativePath string) string {
 		return "."
 	}
 	return relativePath
+}
+
+// contextLister is a backend whose listing honors cancellation while it
+// waits, as the filesystem backend does when it retries on Windows.
+type contextLister interface {
+	ReadDirContext(ctx context.Context, location string) ([]fs.DirEntry, error)
+}
+
+func listDirectory(ctx context.Context, backend Backend, location string) ([]fs.DirEntry, error) {
+	if lister, ok := backend.(contextLister); ok {
+		return lister.ReadDirContext(ctx, location)
+	}
+	return backend.ReadDir(location)
 }
 
 func classifyFilesystemError(err error) error {

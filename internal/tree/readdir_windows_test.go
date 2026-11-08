@@ -10,8 +10,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
+	"time"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -380,5 +382,234 @@ func TestScanOfADirectoryBeingRenamed(t *testing.T) {
 	if src.Name != "src" || len(src.Children) != 1 || src.Children[0].Name != "lib" ||
 		len(src.Children[0].Children) != 1 || src.Children[0].Children[0].Name != "a.go" {
 		t.Fatalf("scanned tree %+v", src)
+	}
+}
+
+// setRetryDelays replaces the waits of readDirContext for one test.
+func setRetryDelays(t *testing.T, delays ...time.Duration) {
+	t.Helper()
+	old := retryDelays
+	retryDelays = delays
+	t.Cleanup(func() { retryDelays = old })
+}
+
+// markDeletePending deletes the empty directory dir through a handle it
+// keeps open: until the handle closes, dir is being deleted, and Windows
+// refuses to open it with ERROR_ACCESS_DENIED (STATUS_DELETE_PENDING).
+func markDeletePending(t *testing.T, dir string) func() {
+	t.Helper()
+	p, err := windows.UTF16PtrFromString(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := windows.CreateFile(p, windows.DELETE|windows.SYNCHRONIZE,
+		windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE|windows.FILE_SHARE_DELETE, nil,
+		windows.OPEN_EXISTING, windows.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleteFile := byte(1) // FILE_DISPOSITION_INFO.DeleteFile
+	if err := windows.SetFileInformationByHandle(h, windows.FileDispositionInfo, &deleteFile, 1); err != nil {
+		_ = windows.CloseHandle(h)
+		t.Fatal(err)
+	}
+	var once sync.Once
+	release := func() { once.Do(func() { _ = windows.CloseHandle(h) }) }
+	t.Cleanup(release)
+	return release
+}
+
+// holdExclusively opens dir without sharing anything: no other process can
+// read it until release.
+func holdExclusively(t *testing.T, dir string) func() {
+	t.Helper()
+	p, err := windows.UTF16PtrFromString(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := windows.CreateFile(p, windows.GENERIC_READ, 0, nil, windows.OPEN_EXISTING, windows.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var once sync.Once
+	release := func() { once.Do(func() { _ = windows.CloseHandle(h) }) }
+	t.Cleanup(release)
+	return release
+}
+
+// TestReadDirReportsADirectoryBeingDeletedAsGone: os.ReadDir reports a
+// directory being deleted as a denied access; readDir reports it as no
+// longer existing, at once and after its retry.
+func TestReadDirReportsADirectoryBeingDeletedAsGone(t *testing.T) {
+	setRetryDelays(t, time.Millisecond, time.Millisecond)
+	dir := filepath.Join(t.TempDir(), "doomed")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	markDeletePending(t, dir)
+	if _, err := os.ReadDir(dir); !errors.Is(err, os.ErrPermission) {
+		t.Fatalf("os.ReadDir of a directory being deleted: %v, want a denied access", err)
+	}
+	for name, list := range map[string]func() error{
+		"readDir":        func() error { _, err := readDir(dir); return err },
+		"readDirContext": func() error { _, err := readDirContext(context.Background(), dir); return err },
+	} {
+		err := list()
+		var path *os.PathError
+		if !errors.As(err, &path) || path.Op != "open" || path.Path != dir ||
+			!errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) {
+			t.Fatalf("%s of a directory being deleted: %#v, want a missing entry", name, err)
+		}
+	}
+}
+
+// TestReadDirRetriesUntilTheDeletionEnds: once the deleting handle closes
+// during the retry, the directory is gone and the error is the system's.
+func TestReadDirRetriesUntilTheDeletionEnds(t *testing.T) {
+	setRetryDelays(t, 20*time.Millisecond, 20*time.Millisecond, 20*time.Millisecond, 20*time.Millisecond)
+	dir := filepath.Join(t.TempDir(), "doomed")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	release := markDeletePending(t, dir)
+	time.AfterFunc(10*time.Millisecond, release)
+	_, err := readDirContext(context.Background(), dir)
+	if !errors.Is(err, windows.ERROR_FILE_NOT_FOUND) {
+		t.Fatalf("readDirContext after the deletion: %v, want ERROR_FILE_NOT_FOUND", err)
+	}
+}
+
+// TestScanReportsADirectoryBeingDeletedAsGone: the scan names a directory
+// removed during it as no longer existing, never as a denied permission.
+func TestScanReportsADirectoryBeingDeletedAsGone(t *testing.T) {
+	setRetryDelays(t, time.Millisecond)
+	root := t.TempDir()
+	dir := filepath.Join(root, "doomed")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	markDeletePending(t, dir)
+	_, err := NewScanner(ScanOptions{RootAbs: root, RootName: "root"}).Scan(context.Background())
+	if err == nil || err.Error() != `read directory "doomed": entry no longer exists` {
+		t.Fatalf("scan with a directory being deleted: %v", err)
+	}
+}
+
+// TestReadDirRetriesASharingViolation: a directory held without sharing is
+// listed once the holder lets go within the retry; held longer, the
+// violation is reported, not hidden.
+func TestReadDirRetriesASharingViolation(t *testing.T) {
+	setRetryDelays(t, 20*time.Millisecond, 20*time.Millisecond, 20*time.Millisecond, 20*time.Millisecond)
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "a.txt"), 0)
+
+	release := holdExclusively(t, dir)
+	if _, err := readDir(dir); !errors.Is(err, windows.ERROR_SHARING_VIOLATION) {
+		t.Fatalf("readDir of an exclusively held directory: %v", err)
+	}
+	time.AfterFunc(10*time.Millisecond, release)
+	entries, err := readDirContext(context.Background(), dir)
+	if err != nil || len(entries) != 1 {
+		t.Fatalf("readDirContext once released: %v, %v", entries, err)
+	}
+
+	holdExclusively(t, dir)
+	if _, err := readDirContext(context.Background(), dir); !errors.Is(err, windows.ERROR_SHARING_VIOLATION) {
+		t.Fatalf("readDirContext of a directory held beyond the retry: %v, want the sharing violation", err)
+	}
+}
+
+// TestReadDirNeverRetriesADeniedAccess: with a ten-second wait, a denied
+// directory still fails at once, as a denied permission.
+func TestReadDirNeverRetriesADeniedAccess(t *testing.T) {
+	setRetryDelays(t, 10*time.Second)
+	denied := filepath.Join(t.TempDir(), "denied")
+	if err := os.Mkdir(denied, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sid := currentUserSID(t)
+	if output, err := exec.Command("icacls", denied, "/deny", "*"+sid+":(RD)").CombinedOutput(); err != nil {
+		t.Fatalf("icacls /deny: %v\n%s", err, output)
+	}
+	t.Cleanup(func() { _ = exec.Command("icacls", denied, "/remove:d", "*"+sid).Run() })
+	if _, err := os.ReadDir(denied); !errors.Is(err, os.ErrPermission) {
+		t.Skipf("the denied directory is still listable here (%v): this token bypasses the ACL", err)
+	}
+	start := time.Now()
+	_, err := readDirContext(context.Background(), denied)
+	if !errors.Is(err, os.ErrPermission) || errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("readDirContext of a denied directory: %v, want a denied permission", err)
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("a denied access was retried: %s", elapsed)
+	}
+}
+
+// TestReadDirRetryHonorsCancellation: cancellation ends a retry wait.
+func TestReadDirRetryHonorsCancellation(t *testing.T) {
+	setRetryDelays(t, 10*time.Second)
+	dir := t.TempDir()
+	holdExclusively(t, dir)
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(20*time.Millisecond, cancel)
+	start := time.Now()
+	if _, err := readDirContext(ctx, dir); !errors.Is(err, context.Canceled) {
+		t.Fatalf("readDirContext cancelled: %v", err)
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("cancellation did not end the wait: %s", elapsed)
+	}
+}
+
+// TestGitIgnoreReadDuringARename: the filesystem backend reads a .gitignore
+// that a rename holds, which os.ReadFile cannot, as it reads a directory
+// that a rename holds (A10).
+func TestGitIgnoreReadDuringARename(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".gitignore")
+	if err := os.WriteFile(path, []byte("*.log\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	holdForRename(t, path)
+	if _, err := os.ReadFile(path); !errors.Is(err, windows.ERROR_SHARING_VIOLATION) {
+		t.Fatalf("os.ReadFile during a rename: %v, want the sharing violation of A10", err)
+	}
+	data, ok, err := filesystemBackend{}.ReadGitIgnore(dir, "")
+	if err != nil || !ok || string(data) != "*.log\n" {
+		t.Fatalf("ReadGitIgnore during a rename: %q, %t, %v", data, ok, err)
+	}
+}
+
+// TestReadFileReadsLikeOSReadFile and does not block the file's removal.
+func TestReadFileReadsLikeOSReadFile(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, ".gitignore")
+	if err := os.WriteFile(file, []byte("*.log\n!keep.log\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{file, dir, filepath.Join(dir, "missing"), ""} {
+		got, gotErr := readFile(path)
+		want, wantErr := os.ReadFile(path)
+		sameError(t, "read "+path, gotErr, wantErr)
+		if string(got) != string(want) {
+			t.Fatalf("readFile(%q) = %q, os.ReadFile = %q", path, got, want)
+		}
+	}
+	old, err := os.Open(file) // the handle os.ReadFile reads through
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(file); !errors.Is(err, windows.ERROR_SHARING_VIOLATION) {
+		_ = old.Close()
+		t.Fatalf("remove under os.ReadFile's handle: %v, want a sharing violation", err)
+	}
+	_ = old.Close()
+	h, err := openShared(file, windows.FILE_ATTRIBUTE_READONLY|windows.FILE_FLAG_BACKUP_SEMANTICS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = windows.CloseHandle(h) }()
+	if err := os.Remove(file); err != nil {
+		t.Fatalf("remove under readFile's handle: %v", err)
 	}
 }
