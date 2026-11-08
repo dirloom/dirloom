@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -20,8 +21,8 @@ func TestLiveGitIgnoreIsLimitedToOneMiB(t *testing.T) {
 		if err := os.MkdirAll(filepath.Join(root, "nested"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		// Short comment lines, then one rule, padded to size bytes. (The
-		// parser stops at a line longer than 64 KiB.)
+		// Short comment lines, then one rule, padded to size bytes. (A line
+		// of 64 KiB or more is refused on its own.)
 		rule := "*.log\n"
 		line := "# " + strings.Repeat("x", 61) + "\n" // 64 bytes
 		body := size - len(rule)
@@ -54,6 +55,45 @@ func TestLiveGitIgnoreIsLimitedToOneMiB(t *testing.T) {
 		}
 		if err == nil || err.Error() != `read gitignore "nested/.gitignore": file exceeds the 1 MiB limit` {
 			t.Fatalf("a .gitignore of 1 MiB + 1 byte: %v", err)
+		}
+	}
+}
+
+// TestLiveGitIgnoreLineLimit: a nested .gitignore whose longest line the
+// matcher reads applies, rules after that line included; one byte more
+// fails the scan, naming the file and the line, instead of silently
+// dropping the rules after it.
+func TestLiveGitIgnoreLineLimit(t *testing.T) {
+	// Line 2 ends with "\r\n": its carriage return counts toward the limit.
+	for _, length := range []int{filter.MaxGitIgnoreLine, filter.MaxGitIgnoreLine + 1} {
+		root := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(root, "nested"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		content := "*.tmp\n" + strings.Repeat("#", length-1) + "\r\n*.log\n"
+		if err := os.WriteFile(filepath.Join(root, "nested", ".gitignore"), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		for _, name := range []string{"a.log", "b.tmp", "c.txt"} {
+			if err := os.WriteFile(filepath.Join(root, "nested", name), nil, 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		git := filter.NewGitIgnore()
+		scan := NewScanner(ScanOptions{RootAbs: root, RootName: "root", UseGitIgnore: true,
+			GitIgnore: git, FilterPolicy: filter.NewPolicy("", true, nil, git, false)})
+		model, err := scan.Scan(context.Background())
+		if length == filter.MaxGitIgnoreLine {
+			if err != nil {
+				t.Fatalf("a line of %d bytes: %v", length, err)
+			}
+			if names := childNames(model.Children[0]); !slices.Equal(names, []string{"c.txt"}) {
+				t.Fatalf("the rules around a line of %d bytes did not all apply: %q", length, names)
+			}
+			continue
+		}
+		if err == nil || err.Error() != `read gitignore "nested/.gitignore": line 2 is 64 KiB or longer, above the line limit` {
+			t.Fatalf("a line of %d bytes: %v", length, err)
 		}
 	}
 }

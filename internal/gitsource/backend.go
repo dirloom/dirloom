@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"time"
 	"unicode/utf8"
+
+	"github.com/dirloom/dirloom/internal/filter"
 )
 
 // Locations of the Git backend are object ids: a tree id for a directory and
@@ -95,6 +97,9 @@ func (b *Backend) ReadGitIgnore(location, relativeDirectory string) ([]byte, boo
 		data, err := b.batch.read(entry.ID, gitIgnoreObject)
 		if err != nil {
 			return nil, false, fmt.Errorf("read gitignore %q: %w", displayGitIgnore(relativeDirectory), err)
+		}
+		if line := filter.LongGitIgnoreLine(data); line != 0 {
+			return nil, false, fmt.Errorf("read gitignore %q: %w", displayGitIgnore(relativeDirectory), treeInvalid("line %d is 64 KiB or longer, above the line limit", line))
 		}
 		return data, true, nil
 	}

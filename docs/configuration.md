@@ -134,7 +134,7 @@ The file must contain exactly one YAML document and declare `schemaVersion: 1`.
 | `defaults.format` | `text`, `markdown`, `markdown-tree`, `json`, `mermaid`, `graphviz`, `d2`, or `dot` | `text` | Select the public output contract. `dot` is stored as canonical `graphviz`. |
 | `defaults.style` | `unicode` or `ascii` | `unicode` | Select the drawing style for text and fenced Markdown. It is inactive for semantic Markdown, JSON and diagram sources. |
 | `filters.useDefaultIgnores` | Boolean | `true` | Apply Dirloom's built-in directory exclusions. |
-| `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. A `.gitignore` above 1 MiB fails the scan, as it does in a Git source. |
+| `filters.useGitignore` | Boolean | `true` | Apply scoped `.gitignore` files encountered during traversal. A `.gitignore` above 1 MiB, or with a line of 64 KiB or more, fails the scan, as it does in a Git source. |
 | `ignore` | sequence of strings | empty | Add explicit exclusions relative to the inspected root. |
 | `presentation.color` | `never`, `always`, or `auto` | `auto` | Select the requested text color mode. Runtime TTY and environment resolution happens at output time. |
 | `presentation.icons` | `never`, `unicode`, `nerd`, or `auto` | `never` | Select the requested text icon mode. Icons remain opt-in; `auto` uses Unicode only on an eligible TTY. |
