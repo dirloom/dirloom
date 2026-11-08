@@ -68,10 +68,24 @@ func compileIgnorePattern(value string) (ignorePattern, error) {
 
 	return ignorePattern{
 		original:  value,
-		segments:  segments,
+		segments:  collapseDoubleStars(segments),
 		basename:  len(segments) == 1,
 		directory: directoryOnly,
 	}, nil
+}
+
+// collapseDoubleStars keeps one "**" of each run: "**/**" matches what "**"
+// matches, and a pattern of millions of "**" would otherwise be walked again
+// for every entry (D7 of the v0.4.0-rc1 plan).
+func collapseDoubleStars(segments []string) []string {
+	out := segments[:0:0]
+	for _, segment := range segments {
+		if segment == "**" && len(out) > 0 && out[len(out)-1] == "**" {
+			continue
+		}
+		out = append(out, segment)
+	}
+	return out
 }
 
 func hasWindowsDrivePrefix(value string) bool {
