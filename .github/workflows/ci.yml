@@ -111,6 +111,20 @@ jobs:
           go test -race -count=1 ./internal/watch/...
           go test -race -count=1 -run 'TestWatch' ./internal/app/ ./internal/cli/
 
+      # The Git source drives git processes that a cancellation stops from
+      # another goroutine, and the transactional output replaces files with
+      # each platform's primitive: they run under the race detector on
+      # Windows and macOS too, with the observations and walks that cancel
+      # while Git reads.
+      - name: Race detector (Git source and output)
+        if: runner.os != 'Linux'
+        shell: bash
+        env:
+          CGO_ENABLED: "1"
+        run: |
+          go test -race -count=1 ./internal/gitsource/... ./internal/output/...
+          go test -race -count=1 -run '^(TestGitSourceCancellationDuringObservation|TestWalkCancellation)$' ./internal/source/ ./internal/history/
+
   race:
     name: Race detector
     runs-on: ubuntu-latest
