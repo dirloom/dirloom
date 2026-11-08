@@ -24,13 +24,35 @@ type ScanOptions struct {
 	GitIgnore    *filter.GitIgnore
 	Backend      Backend
 	RootLocation string
+	// NodeLimit and PathBytesLimit, when positive, bound the nodes the scan
+	// keeps, root included, and the total length of their paths. A Git
+	// source sets them: shared subtrees let a small repository describe a
+	// tree of billions of nodes (D7 of the v0.4.0-rc1 plan).
+	NodeLimit      int
+	PathBytesLimit int
+}
+
+// LimitError reports a scan stopped by NodeLimit or PathBytesLimit.
+type LimitError struct {
+	// Nodes is true for NodeLimit, false for PathBytesLimit.
+	Nodes bool
+	Limit int
+}
+
+func (e *LimitError) Error() string {
+	if e.Nodes {
+		return fmt.Sprintf("the tree holds more than %d nodes", e.Limit)
+	}
+	return fmt.Sprintf("the paths of the tree exceed %d bytes", e.Limit)
 }
 
 // Scanner builds a complete tree before returning. It never follows links
 // encountered below the explicitly selected root.
 type Scanner struct {
-	options ScanOptions
-	backend Backend
+	options   ScanOptions
+	backend   Backend
+	nodes     int
+	pathBytes int
 }
 
 // NewScanner returns a scanner configured for one inspection.
@@ -54,6 +76,7 @@ func (s *Scanner) Scan(ctx context.Context) (*Node, error) {
 		Type:     NodeDirectory,
 		Children: make([]*Node, 0),
 	}
+	s.nodes, s.pathBytes = 1, 0
 	if s.options.MaxDepth != nil && *s.options.MaxDepth == 0 {
 		return root, nil
 	}
@@ -113,6 +136,9 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, rel
 		if s.options.Directories && kind != NodeDirectory {
 			continue
 		}
+		if err := s.count(relativePath); err != nil {
+			return err
+		}
 
 		node := &Node{Name: name, Path: relativePath, Type: kind, Junction: junction}
 		if kind == NodeFile {
@@ -140,6 +166,19 @@ func (s *Scanner) scanDirectory(ctx context.Context, parent *Node, location, rel
 		}
 	}
 
+	return nil
+}
+
+// count accounts for one more node at relativePath, before it is kept.
+func (s *Scanner) count(relativePath string) error {
+	s.nodes++
+	s.pathBytes += len(relativePath)
+	if limit := s.options.NodeLimit; limit > 0 && s.nodes > limit {
+		return &LimitError{Nodes: true, Limit: limit}
+	}
+	if limit := s.options.PathBytesLimit; limit > 0 && s.pathBytes > limit {
+		return &LimitError{Limit: limit}
+	}
 	return nil
 }
 

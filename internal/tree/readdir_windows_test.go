@@ -588,7 +588,7 @@ func TestReadFileReadsLikeOSReadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, path := range []string{file, dir, filepath.Join(dir, "missing"), ""} {
-		got, gotErr := readFile(path)
+		got, gotErr := readFile(path, MaxGitIgnoreBytes)
 		want, wantErr := os.ReadFile(path)
 		sameError(t, "read "+path, gotErr, wantErr)
 		if string(got) != string(want) {

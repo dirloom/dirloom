@@ -155,9 +155,10 @@ without loss. These differences are expected and listed in
 | an absolute link target inside the checkout, rewritten relative to its root | the target as recorded |
 | the files of an initialized submodule | an empty directory |
 | one of two names that differ only by case, on Windows or macOS | both names |
-| a `.gitignore` above 1 MiB, read | `git_tree_invalid` |
 | an entry hidden by the Windows hidden attribute | the entry |
 | untracked or uncommitted files, and `.git` itself without default ignores | absent |
+
+A `.gitignore` above 1 MiB fails both sides when `.gitignore` files apply.
 
 ### Git diagnostics
 
@@ -170,6 +171,7 @@ Every Git failure is `OBSERVATION_ERROR`, exit 5, for the side that failed:
 | `git_revision_not_found` | the revision does not resolve locally, or names a file |
 | `git_object_unavailable` | a needed object is missing (for example in a partial clone) or unreadable |
 | `git_tree_invalid` | a malformed tree, an unsupported mode, an invalid or duplicate name, or an object above its limit: tree 32 MiB, `.gitignore` 1 MiB, link 4096 bytes |
+| `git_tree_too_large` | the observed tree has more than 2,000,000 nodes, or paths longer than 256 MiB in total: shared subtrees can make a small repository describe a huge tree |
 
 
 ## Operations

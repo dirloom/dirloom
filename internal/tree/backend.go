@@ -69,14 +69,28 @@ func (filesystemBackend) ReadGitIgnore(location, relativeDirectory string) ([]by
 		return nil, false, nil
 	}
 
+	tooLarge := fmt.Errorf("read gitignore %q: file exceeds the 1 MiB limit", displayGitIgnorePath(relativeDirectory))
+	if info.Size() > MaxGitIgnoreBytes {
+		return nil, false, tooLarge
+	}
 	// The fixed .gitignore control file beneath the user-selected directory,
-	// read without blocking its removal on Windows (A10).
-	data, err := readFile(path)
+	// read without blocking its removal on Windows (A10), and never beyond
+	// its limit, whatever Lstat said.
+	data, err := readFile(path, MaxGitIgnoreBytes)
 	if err != nil {
 		return nil, false, fmt.Errorf("read gitignore %q: %w", displayGitIgnorePath(relativeDirectory), classifyFilesystemError(err))
 	}
+	if len(data) > MaxGitIgnoreBytes {
+		return nil, false, tooLarge
+	}
 	return data, true, nil
 }
+
+// MaxGitIgnoreBytes bounds a .gitignore, live as in Git (D7 of the
+// v0.4.0-rc1 plan): its patterns accumulate across directories, and every
+// entry is tested against all of them. It equals the limit of a .gitignore
+// blob in a Git source.
+const MaxGitIgnoreBytes = 1 << 20
 
 // ReadLink keeps an unreadable link with an empty target, as scanning always
 // has.

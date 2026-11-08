@@ -242,7 +242,8 @@ they do not know and treat an unknown diagnostic code as opaque.
 Every failure is `OBSERVATION_ERROR`, exit 5, unless it is an internal
 invariant (exit 6). The [Git diagnostics](diff.md#git-diagnostics) of
 `git:` sources apply (`git_unavailable`, `git_repository_not_found`,
-`git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid`),
+`git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid`,
+`git_tree_too_large`),
 plus:
 
 | Code | Cause |

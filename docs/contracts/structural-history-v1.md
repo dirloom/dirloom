@@ -152,7 +152,7 @@ A history fingerprint is the Fingerprint v1 of the whole committed tree. It equa
 
 ## Diagnostics
 
-A failure is `OBSERVATION_ERROR` (exit 5) unless stated otherwise. The Git Tree Source v1 codes apply: `git_unavailable`, `git_repository_not_found`, `git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid`, and `canonical_path_collision`. History adds:
+A failure is `OBSERVATION_ERROR` (exit 5) unless stated otherwise. The Git Tree Source v1 codes apply: `git_unavailable`, `git_repository_not_found`, `git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid`, `git_tree_too_large` (each tree observed is limited to 2,000,000 nodes and 256 MiB of paths), and `canonical_path_collision`. History adds:
 
 | Code | When |
 | --- | --- |

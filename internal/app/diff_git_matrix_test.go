@@ -385,12 +385,21 @@ func TestDiffGitEquivalenceExceptions(t *testing.T) {
 		}
 	})
 
-	t.Run(".gitignore above 1 MiB", func(t *testing.T) {
+	// No longer an exception (D7 of the v0.4.0-rc1 plan): a .gitignore above
+	// 1 MiB fails the checkout as it fails the Git source.
+	t.Run(".gitignore above 1 MiB fails both sources", func(t *testing.T) {
 		repo := gittest.New(t)
 		repo.Write(".gitignore", strings.Repeat("#\n", 1<<19)+"#")
 		repo.Write("a.txt", "a")
 		repo.CommitAll("large gitignore")
-		snap := checkoutSnapshot(t, repo, defaultCapture)
+		request := defaultCapture
+		request.Root = repo.Dir
+		if _, err := Snapshot(context.Background(), request); err == nil || !strings.Contains(err.Error(), "file exceeds the 1 MiB limit") {
+			t.Fatalf("snapshot of the checkout: %v", err)
+		}
+		// The Git side, under the same capture, taken from another tree.
+		other := mustFilesystemSnapshotWith(t, t.TempDir(), defaultCapture)
+		snap := DiffSourceSpec{Kind: DiffSourceSnapshot, Path: mustDiffSnapshotFile(t, t.TempDir(), "other.dlm.json", other)}
 		t.Chdir(repo.Dir)
 		_, err := Diff(context.Background(), DiffRequest{A: snap, B: gitSpec("HEAD")})
 		if code, message := DiffDiagnostic(err); code != artifact.CodeGitTreeInvalid || !strings.Contains(message, "1 MiB limit") {

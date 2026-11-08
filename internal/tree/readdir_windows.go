@@ -116,14 +116,14 @@ func openDirectory(location string) (*os.File, error) {
 // shares delete access: reading a .gitignore never blocks its removal or
 // its renaming (A10). The open is os.Open's (syscall.Open with O_RDONLY);
 // the reading and its errors are Go's, through (*os.File).Read.
-func readFile(path string) ([]byte, error) {
+func readFile(path string, limit int64) ([]byte, error) {
 	h, err := openShared(path, windows.FILE_ATTRIBUTE_READONLY|windows.FILE_FLAG_BACKUP_SEMANTICS)
 	if err != nil {
 		return nil, err
 	}
 	f := os.NewFile(uintptr(h), path)
 	defer func() { _ = f.Close() }()
-	return io.ReadAll(f)
+	return io.ReadAll(io.LimitReader(f, limit+1))
 }
 
 // openShared calls CreateFile as syscall.Open does for O_RDONLY, with

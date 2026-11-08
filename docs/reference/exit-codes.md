@@ -79,11 +79,11 @@ Every machine code that Dirloom reports, with its category.
 | `unsupported_snapshot_artifact_version` | unsupported | `artifactVersion` is not `1` |
 | `unsupported_snapshot_feature` | unsupported | `requiredFeatures` names a feature this release does not know |
 | `snapshot_read_failure` | source | the snapshot file could not be read |
-| `source_read_failure` | filesystem | a directory or an entry could not be read: a missing root, a denied permission, an entry removed during the scan |
+| `source_read_failure` | filesystem | a directory or an entry could not be read: a missing root, a denied permission, an entry removed during the scan, a `.gitignore` above 1 MiB |
 | `canonical_path_collision` | filesystem | two entries map to the same canonical path, for example NFC and NFD forms of one name |
 | `invalid_canonical_path` | filesystem | an entry name is not a valid canonical name, for example a Windows name that is not valid UTF-16 |
 | `unsupported_node_type` | filesystem | a named pipe, socket or device is in the observed view |
-| `git_unavailable`, `git_repository_not_found`, `git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid` | git | see [Git Tree Source v1](../contracts/git-tree-source-v1.md#diagnostics) |
+| `git_unavailable`, `git_repository_not_found`, `git_revision_not_found`, `git_object_unavailable`, `git_tree_invalid`, `git_tree_too_large` | git | see [Git Tree Source v1](../contracts/git-tree-source-v1.md#diagnostics) |
 | `git_commit_invalid`, `git_shallow_invalid`, `history_from_not_reached` | git | see [Structural History v1](../contracts/structural-history-v1.md) |
 | `watch_root_unavailable`, `watch_limit_reached`, `watch_backend_failure`, `watch_filesystem_unsupported` | filesystem | fatal `watch` conditions, see [Structural Watch v1](../contracts/structural-watch-v1.md#fatal-conditions) |
 | `internal_invariant_failure` | internal | a broken invariant without a more specific code |
