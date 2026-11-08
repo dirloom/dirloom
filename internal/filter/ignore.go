@@ -68,10 +68,24 @@ func compileIgnorePattern(value string) (ignorePattern, error) {
 
 	return ignorePattern{
 		original:  value,
-		segments:  segments,
+		segments:  collapseDoubleStars(segments),
 		basename:  len(segments) == 1,
 		directory: directoryOnly,
 	}, nil
+}
+
+// collapseDoubleStars keeps one "**" of each run: "**/**" matches what "**"
+// matches, and a pattern of millions of "**" would otherwise be walked again
+// for every entry (D7 of the v0.4.0-rc1 plan).
+func collapseDoubleStars(segments []string) []string {
+	out := segments[:0:0]
+	for _, segment := range segments {
+		if segment == "**" && len(out) > 0 && out[len(out)-1] == "**" {
+			continue
+		}
+		out = append(out, segment)
+	}
+	return out
 }
 
 func hasWindowsDrivePrefix(value string) bool {
@@ -118,19 +132,45 @@ func splitRelativePath(value string) []string {
 	return strings.Split(value, "/")
 }
 
+// matchSegments reports whether value matches pattern, where "**" matches
+// any number of segments, none included, and every other segment matches
+// exactly one segment through path.Match.
+//
+// It is iterative, with one backtrack point, as wildcard matching usually
+// is: consecutive "**" act as one, and the last "**" seen is the only one
+// that may absorb more segments, because every segment pattern matches
+// exactly one segment. The cost is at most len(pattern) × len(value)
+// segment matches, and the stack does not grow with the input (D7 of the
+// v0.4.0-rc1 plan: a pattern of millions of "**" from a snapshot capture
+// overflowed the stack of the former recursion, and a few thousand made it
+// backtrack exponentially).
 func matchSegments(pattern, value []string) bool {
-	if len(pattern) == 0 {
-		return len(value) == 0
-	}
-	if pattern[0] == "**" {
-		if matchSegments(pattern[1:], value) {
-			return true
+	p, v := 0, 0
+	star, starValue := -1, 0 // the pattern index after the last "**", and the value index it was tried at
+	for v < len(value) {
+		switch {
+		case p < len(pattern) && pattern[p] == "**":
+			for p < len(pattern) && pattern[p] == "**" {
+				p++
+			}
+			star, starValue = p, v
+		case p < len(pattern) && segmentMatches(pattern[p], value[v]):
+			p++
+			v++
+		case star >= 0:
+			starValue++
+			p, v = star, starValue
+		default:
+			return false
 		}
-		return len(value) > 0 && matchSegments(pattern, value[1:])
 	}
-	if len(value) == 0 {
-		return false
+	for p < len(pattern) && pattern[p] == "**" {
+		p++
 	}
-	matched, err := path.Match(pattern[0], value[0])
-	return err == nil && matched && matchSegments(pattern[1:], value[1:])
+	return p == len(pattern)
+}
+
+func segmentMatches(pattern, value string) bool {
+	matched, err := path.Match(pattern, value)
+	return err == nil && matched
 }

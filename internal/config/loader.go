@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -21,9 +22,17 @@ type fileSystem interface {
 
 type osFileSystem struct{}
 
+// ReadFile reads at most one byte beyond the 1 MiB limit, so that a file
+// that grows after its Stat, or that Stat misreports, is refused instead of
+// read whole (D7 of the v0.4.0-rc1 plan).
 func (osFileSystem) ReadFile(path string) ([]byte, error) {
 	// #nosec G304 -- reading the discovered or explicitly selected config path is this package's purpose.
-	return os.ReadFile(path)
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+	return io.ReadAll(io.LimitReader(f, maxConfigSize+1))
 }
 func (osFileSystem) Stat(path string) (fs.FileInfo, error) { return os.Stat(path) }
 
@@ -227,6 +236,11 @@ func (loader *Loader) loadOptional(kind SourceKind, path string, required bool) 
 	}
 	if info.IsDir() {
 		return Source{}, partial{}, fmt.Errorf("read config %q: path is a directory", path)
+	}
+	// A device, a named pipe or a socket, reached directly or through a
+	// link: reading one could never end, and a size of 0 says nothing (D7).
+	if !info.Mode().IsRegular() {
+		return Source{}, partial{}, fmt.Errorf("read config %q: not a regular file", path)
 	}
 	if info.Size() > maxConfigSize {
 		return Source{}, partial{}, invalidf("invalid config %q: file exceeds the 1 MiB limit", path)

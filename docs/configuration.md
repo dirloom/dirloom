@@ -176,7 +176,7 @@ presentation:
   theme: midnight
 ```
 
-Configuration files are limited to 1 MiB. Unknown fields, duplicate keys, multiple YAML documents, aliases, anchors, merge keys, and custom tags are rejected. Dirloom does not expand environment variables and does not support includes or templates.
+Configuration files are regular files, reached directly or through a link, and are limited to 1 MiB: a device, a named pipe or a socket is refused before it is read. Unknown fields, duplicate keys, multiple YAML documents, aliases, anchors, merge keys, and custom tags are rejected. Dirloom does not expand environment variables and does not support includes or templates.
 
 ## Inspect effective configuration
 
