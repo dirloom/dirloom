@@ -158,7 +158,7 @@ without loss. These differences are expected and listed in
 | an entry hidden by the Windows hidden attribute | the entry |
 | untracked or uncommitted files, and `.git` itself without default ignores | absent |
 
-A `.gitignore` above 1 MiB fails both sides when `.gitignore` files apply.
+A `.gitignore` above 1 MiB, or with a line of 64 KiB or more, fails both sides when `.gitignore` files apply.
 
 ### Git diagnostics
 
@@ -170,7 +170,7 @@ Every Git failure is `OBSERVATION_ERROR`, exit 5, for the side that failed:
 | `git_repository_not_found` | the current directory is not inside a repository, or Git refuses it (`safe.directory`) |
 | `git_revision_not_found` | the revision does not resolve locally, or names a file |
 | `git_object_unavailable` | a needed object is missing (for example in a partial clone) or unreadable |
-| `git_tree_invalid` | a malformed tree, an unsupported mode, an invalid or duplicate name, or an object above its limit: tree 32 MiB, `.gitignore` 1 MiB, link 4096 bytes |
+| `git_tree_invalid` | a malformed tree, an unsupported mode, an invalid or duplicate name, or an object above its limit: tree 32 MiB, `.gitignore` 1 MiB or a line of 64 KiB, link 4096 bytes |
 | `git_tree_too_large` | the observed tree has more than 2,000,000 nodes, or paths longer than 256 MiB in total: shared subtrees can make a small repository describe a huge tree |
 
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dirloom/dirloom/internal/filter"
 	"github.com/dirloom/dirloom/internal/gittest"
 )
 
@@ -38,6 +39,44 @@ func TestOversizedLiveGitIgnoreFailsTheScan(t *testing.T) {
 	doc := assertDiffJSON(t, stdout, stderr, code, 5, "OBSERVATION_ERROR")
 	if doc.Diagnostic == nil || doc.Diagnostic.Source != "b" || doc.Diagnostic.Code != "source_read_failure" {
 		t.Fatalf("diff diagnostic = %+v", doc.Diagnostic)
+	}
+}
+
+// TestLongGitIgnoreLineFailsBothSources: a .gitignore line of 64 KiB or
+// more, which the matcher would silently stop at, dropping the rules after
+// it, fails the live scan and the Git source alike (D7 of the v0.4.0-rc1
+// plan).
+func TestLongGitIgnoreLineFailsBothSources(t *testing.T) {
+	repo := gittest.New(t)
+	repo.Write(".gitignore", strings.Repeat("#", filter.MaxGitIgnoreLine+1)+"\n*.log\n")
+	repo.Write("a.txt", "a")
+	repo.Write("b.log", "b")
+	repo.CommitAll("long .gitignore line")
+	const refused = "read gitignore \".gitignore\": line 1 is 64 KiB or longer, above the line limit"
+
+	stdout, stderr, code := executeForTest(t, "fingerprint", repo.Dir, "--no-config")
+	if code != 1 || stdout != "" || stderr != "Error: "+refused+"\n" {
+		t.Fatalf("fingerprint = (%q, %q, %d), want exit 1 and %q", stdout, stderr, code, refused)
+	}
+	empty := filepath.Join(t.TempDir(), "empty")
+	if err := os.Mkdir(empty, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	snap := filepath.Join(t.TempDir(), "ref.dlm.json")
+	if _, stderr, code := executeForTest(t, "snapshot", empty, "--no-config", "--output", snap); code != 0 {
+		t.Fatalf("snapshot = %d: %s", code, stderr)
+	}
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+snap, "live:"+repo.Dir, "--format", "json")
+	doc := assertDiffJSON(t, stdout, stderr, code, 5, "OBSERVATION_ERROR")
+	if doc.Diagnostic == nil || doc.Diagnostic.Source != "b" || doc.Diagnostic.Code != "source_read_failure" {
+		t.Fatalf("diff against the checkout: diagnostic = %+v", doc.Diagnostic)
+	}
+	t.Chdir(repo.Dir)
+	stdout, stderr, code = executeForTest(t, "diff", "snapshot:"+snap, "git:HEAD", "--format", "json")
+	doc = assertDiffJSON(t, stdout, stderr, code, 5, "OBSERVATION_ERROR")
+	if doc.Diagnostic == nil || doc.Diagnostic.Source != "b" || doc.Diagnostic.Code != "git_tree_invalid" ||
+		!strings.Contains(doc.Diagnostic.Message, "line 1 is 64 KiB or longer") {
+		t.Fatalf("diff against the revision: diagnostic = %+v", doc.Diagnostic)
 	}
 }
 

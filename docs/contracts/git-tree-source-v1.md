@@ -133,7 +133,7 @@ With a snapshot's Capture Semantics:
 - depth, dirs-only, default ignores and explicit patterns behave as for a filesystem source, through the same scanner code;
 - hidden means a name that starts with `.`; Git trees carry no Windows hidden attribute;
 - with `useGitignore`, each `.gitignore` blob found in an entered tree applies at its tree path. A `.gitignore` entry that is a link or a submodule is not read, as for a working tree;
-- a `.gitignore` blob above 1 MiB is `git_tree_invalid`.
+- a `.gitignore` blob above 1 MiB is `git_tree_invalid`, and so is one with a line of 64 KiB or more: 65,536 bytes or more before its newline, a carriage return included. The pattern matcher cannot read such a line, and would drop the rules after it.
 
 ## Equivalence with a checkout
 
@@ -149,7 +149,7 @@ With the same Capture Semantics, observing `git:<rev>` and observing a clean che
 | Windows hidden attribute | can hide an entry | no effect |
 | files present in the checkout but not committed | present | absent |
 
-A `.gitignore` above 1 MiB is not an exception: when `useGitignore` applies, both sources refuse it, the checkout with `source_read_failure`, the Git source with `git_tree_invalid`.
+A `.gitignore` above 1 MiB, or with a line of 64 KiB or more, is not an exception: when `useGitignore` applies, both sources refuse it, the checkout with `source_read_failure`, the Git source with `git_tree_invalid`.
 
 ## A structural source
 
@@ -223,7 +223,7 @@ Excluded subtrees cost nothing. There is no step that compares entries pairwise.
 | partial clone, needed blob missing | exit 5 `git_object_unavailable`; the object is still missing afterwards |
 | subtree object missing but excluded by the snapshot's Capture Semantics | observation succeeds |
 | same subtree not excluded | exit 5 `git_object_unavailable` |
-| `.gitignore` above 1 MiB, link above 4096 bytes, tree above 32 MiB | exit 5 `git_tree_invalid` naming the limit |
+| `.gitignore` above 1 MiB or with a line of 64 KiB or more, link above 4096 bytes, tree above 32 MiB | exit 5 `git_tree_invalid` naming the limit |
 | shared subtrees describing more than 2,000,000 nodes; a chain whose paths exceed 256 MiB in total | exit 5 `git_tree_too_large` naming the limit, within the limit's memory |
 | truncated or mismatched batch response | controlled error, no hang |
 | cancellation during observation | prompt return; `cat-file` reaped |

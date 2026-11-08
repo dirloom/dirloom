@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/dirloom/dirloom/internal/filter"
 )
 
 // Backend is the read-only storage a Scanner traverses. A location is an
@@ -82,6 +84,9 @@ func (filesystemBackend) ReadGitIgnore(location, relativeDirectory string) ([]by
 	}
 	if len(data) > MaxGitIgnoreBytes {
 		return nil, false, tooLarge
+	}
+	if line := filter.LongGitIgnoreLine(data); line != 0 {
+		return nil, false, fmt.Errorf("read gitignore %q: line %d is 64 KiB or longer, above the line limit", displayGitIgnorePath(relativeDirectory), line)
 	}
 	return data, true, nil
 }

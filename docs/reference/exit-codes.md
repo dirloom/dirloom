@@ -79,7 +79,7 @@ Every machine code that Dirloom reports, with its category.
 | `unsupported_snapshot_artifact_version` | unsupported | `artifactVersion` is not `1` |
 | `unsupported_snapshot_feature` | unsupported | `requiredFeatures` names a feature this release does not know |
 | `snapshot_read_failure` | source | the snapshot file could not be read |
-| `source_read_failure` | filesystem | a directory or an entry could not be read: a missing root, a denied permission, an entry removed during the scan, a `.gitignore` above 1 MiB |
+| `source_read_failure` | filesystem | a directory or an entry could not be read: a missing root, a denied permission, an entry removed during the scan, a `.gitignore` above 1 MiB or with a line of 64 KiB or more |
 | `canonical_path_collision` | filesystem | two entries map to the same canonical path, for example NFC and NFD forms of one name |
 | `invalid_canonical_path` | filesystem | an entry name is not a valid canonical name, for example a Windows name that is not valid UTF-16 |
 | `unsupported_node_type` | filesystem | a named pipe, socket or device is in the observed view |

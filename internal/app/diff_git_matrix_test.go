@@ -12,6 +12,7 @@ import (
 
 	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/comparison"
+	"github.com/dirloom/dirloom/internal/filter"
 	"github.com/dirloom/dirloom/internal/gittest"
 )
 
@@ -404,6 +405,46 @@ func TestDiffGitEquivalenceExceptions(t *testing.T) {
 		_, err := Diff(context.Background(), DiffRequest{A: snap, B: gitSpec("HEAD")})
 		if code, message := DiffDiagnostic(err); code != artifact.CodeGitTreeInvalid || !strings.Contains(message, "1 MiB limit") {
 			t.Fatalf("%s %s", code, message)
+		}
+	})
+
+	// Not an exception either (D7): the matcher reads lines up to 64 KiB
+	// minus one byte, and silently dropped every rule after a longer one.
+	// Both sources apply the rules after the longest line it reads, and both
+	// refuse a longer one.
+	t.Run(".gitignore line of 64 KiB fails both sources", func(t *testing.T) {
+		for _, length := range []int{filter.MaxGitIgnoreLine, filter.MaxGitIgnoreLine + 1} {
+			gitignore := "# first\n" + strings.Repeat("#", length) + "\n*.log\n"
+			repo := gittest.New(t)
+			repo.Write(".gitignore", gitignore)
+			repo.Write("a.txt", "a")
+			repo.Write("b.log", "b")
+			repo.CommitAll("long .gitignore line")
+			// The structure the capture keeps: .gitignore is hidden, and
+			// b.log ignored.
+			expected := writeTree(t, t.TempDir(), [][2]string{{"a.txt", "a"}})
+			request := defaultCapture
+			request.Root = expected
+			reference := DiffSourceSpec{Kind: DiffSourceSnapshot, Path: mustDiffSnapshotFile(t, t.TempDir(), "expected.dlm.json", mustFilesystemSnapshotWith(t, expected, request))}
+
+			if length == filter.MaxGitIgnoreLine {
+				snap := checkoutSnapshot(t, repo, defaultCapture)
+				t.Chdir(repo.Dir)
+				// The Git source ignores b.log, and the checkout matches it.
+				requireChanges(t, mustDiff(t, DiffRequest{A: reference, B: gitSpec("HEAD")}))
+				requireChanges(t, mustDiff(t, DiffRequest{A: snap, B: gitSpec("HEAD")}))
+				continue
+			}
+			request.Root = repo.Dir
+			const refused = `read gitignore ".gitignore": line 2 is 64 KiB or longer, above the line limit`
+			if _, err := Snapshot(context.Background(), request); err == nil || !strings.Contains(err.Error(), refused) {
+				t.Fatalf("snapshot of the checkout: %v", err)
+			}
+			t.Chdir(repo.Dir)
+			_, err := Diff(context.Background(), DiffRequest{A: reference, B: gitSpec("HEAD")})
+			if code, message := DiffDiagnostic(err); code != artifact.CodeGitTreeInvalid || !strings.Contains(message, "line 2 is 64 KiB or longer") {
+				t.Fatalf("%s %s", code, message)
+			}
 		}
 	})
 
