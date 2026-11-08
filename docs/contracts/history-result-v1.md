@@ -100,6 +100,7 @@ git_repository_not_found
 git_revision_not_found
 git_object_unavailable
 git_tree_invalid
+git_tree_too_large
 ```
 
 Structural History v1 codes, all `OBSERVATION_ERROR`:

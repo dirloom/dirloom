@@ -64,10 +64,14 @@ type objectKind struct {
 	label string
 }
 
+// MaxGitIgnoreBytes bounds a .gitignore blob; a live .gitignore has the same
+// limit (tree.MaxGitIgnoreBytes).
+const MaxGitIgnoreBytes = 1 << 20
+
 // Per-object limits of Git Tree Source v1.
 var (
 	treeObject      = objectKind{typ: "tree", limit: 32 << 20, label: "tree object"}
-	gitIgnoreObject = objectKind{typ: "blob", limit: 1 << 20, label: ".gitignore blob"}
+	gitIgnoreObject = objectKind{typ: "blob", limit: MaxGitIgnoreBytes, label: ".gitignore blob"}
 	linkObject      = objectKind{typ: "blob", limit: 4096, label: "link target blob"}
 )
 

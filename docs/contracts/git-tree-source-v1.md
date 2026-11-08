@@ -83,6 +83,15 @@ A request is one object id followed by a newline. Each response is checked in or
 | `.gitignore` blob | 1 MiB |
 | link target blob | 4096 bytes |
 
+An observation also has limits of its own, a snapshot's. Git shares subtrees, so a repository of a few kilobytes can describe billions of nodes, or paths that grow with the square of their depth.
+
+| Observation | Limit |
+| --- | --- |
+| nodes kept, root included | 2,000,000 |
+| total length of their paths | 256 MiB |
+
+Beyond either limit the observation stops with `git_tree_too_large`, naming the limit. It never holds more than the limit allows: with 2,000,000 nodes, measured at under 1 GiB of memory. Entries excluded by the Capture Semantics do not count.
+
 ### Process lifecycle
 
 The batch process is bound to the request context. When the observation ends, fails, or is cancelled, Dirloom closes its input, kills it if it has not exited after a short grace period, and always waits for it. No process or goroutine outlives the observation.
@@ -137,9 +146,10 @@ With the same Capture Semantics, observing `git:<rev>` and observing a clean che
 | absolute link target pointing inside the checkout root | rewritten relative to the root | kept as recorded |
 | initialized submodule | its contents | empty directory |
 | names the platform cannot materialize (case-only collisions on a case-insensitive filesystem, names invalid on Windows) | absent or merged | present |
-| `.gitignore` above 1 MiB | read | `git_tree_invalid` |
 | Windows hidden attribute | can hide an entry | no effect |
 | files present in the checkout but not committed | present | absent |
+
+A `.gitignore` above 1 MiB is not an exception: when `useGitignore` applies, both sources refuse it, the checkout with `source_read_failure`, the Git source with `git_tree_invalid`.
 
 ## A structural source
 
@@ -165,6 +175,7 @@ All Git failures are `OBSERVATION_ERROR` (exit 5) for the side that failed. Code
 | `git_revision_not_found` | the revision does not resolve locally, or resolves to a blob |
 | `git_object_unavailable` | a needed object is missing (including objects a partial clone does not have), unreadable, or its batch response is truncated |
 | `git_tree_invalid` | malformed entry, unsupported mode, duplicate name, invalid name, unexpected object type, malformed header, size above a limit, or invalid link target |
+| `git_tree_too_large` | the observed tree has more than 2,000,000 nodes, or paths longer than 256 MiB in total ([Batch protocol](#batch-protocol)) |
 
 `canonical_path_collision` keeps its existing meaning. A broken internal invariant is `INTERNAL_ERROR` (exit 6).
 
@@ -175,7 +186,7 @@ All Git failures are `OBSERVATION_ERROR` (exit 5) for the side that failed. Code
 - No substitution: `GIT_NO_REPLACE_OBJECTS=1`.
 - No code execution: only the commands listed above; no index read, hook, fsmonitor or filter; no shell; the executable is never taken from the current directory.
 - No option injection: a revision starting with `-` is refused before Git runs.
-- Bounded: per-object limits, on-demand reads, cancellation that stops and reaps the child process.
+- Bounded: per-object limits, an observation limited to 2,000,000 nodes and 256 MiB of paths, on-demand reads, and cancellation that stops and reaps the child process. Shared subtrees cannot make a small repository expand without end.
 - Output carries object ids only, never revision text, repository paths, remotes or branch names.
 
 ## Complexity
@@ -213,6 +224,7 @@ Excluded subtrees cost nothing. There is no step that compares entries pairwise.
 | subtree object missing but excluded by the snapshot's Capture Semantics | observation succeeds |
 | same subtree not excluded | exit 5 `git_object_unavailable` |
 | `.gitignore` above 1 MiB, link above 4096 bytes, tree above 32 MiB | exit 5 `git_tree_invalid` naming the limit |
+| shared subtrees describing more than 2,000,000 nodes; a chain whose paths exceed 256 MiB in total | exit 5 `git_tree_too_large` naming the limit, within the limit's memory |
 | truncated or mismatched batch response | controlled error, no hang |
 | cancellation during observation | prompt return; `cat-file` reaped |
 | crafted tree with `..`, unknown mode, duplicate name; NFC collision | exit 5 `git_tree_invalid`; `canonical_path_collision` |

@@ -3,6 +3,7 @@ package source
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/dirloom/dirloom/internal/artifact"
 	"github.com/dirloom/dirloom/internal/gitsource"
@@ -89,12 +90,32 @@ func scanGitTree(ctx context.Context, session *gitsource.Session, treeID string,
 	}
 	scan.Backend = backend
 	scan.RootLocation = treeID
+	scan.NodeLimit, scan.PathBytesLimit = gitLimits.nodes, gitLimits.pathBytes
 	model, err := tree.NewScanner(scan).Scan(ctx)
+	var limit *tree.LimitError
+	if errors.As(err, &limit) {
+		return nil, artifact.New(artifact.CodeGitTreeTooLarge,
+			fmt.Sprintf("git tree %s is too large: %s, the limit of a Git observation", treeID, limit), false)
+	}
 	if err != nil {
 		return nil, gitObservationError(err)
 	}
 	return model, nil
 }
+
+// The limits of a Git observation are a snapshot's (D7 of the v0.4.0-rc1
+// plan): Git shares subtrees, so a repository of a few kilobytes can
+// describe billions of nodes, or paths that grow with the square of their
+// depth. A snapshot can hold no more nodes, and no longer paths in total.
+const (
+	// GitMaxNodes equals snapshot.MaxNodes.
+	GitMaxNodes = 2_000_000
+	// GitMaxPathBytes equals snapshot.MaxBytes.
+	GitMaxPathBytes = 256 << 20
+)
+
+// gitLimits are the limits in force; tests lower them to stay small.
+var gitLimits = struct{ nodes, pathBytes int }{GitMaxNodes, GitMaxPathBytes}
 
 // gitObservationError keeps the code of a typed error, with the full wrapped
 // message. Any other error is a source read failure, as for a filesystem

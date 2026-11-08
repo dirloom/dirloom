@@ -4,6 +4,7 @@ package tree
 
 import (
 	"context"
+	"io"
 	"io/fs"
 	"os"
 )
@@ -18,4 +19,13 @@ func readDirContext(_ context.Context, location string) ([]fs.DirEntry, error) {
 	return readDir(location)
 }
 
-func readFile(path string) ([]byte, error) { return os.ReadFile(path) } // #nosec G304 -- a .gitignore beneath the user-selected root.
+// readFile reads at most limit+1 bytes of path, so that a caller can refuse
+// a file beyond its limit without reading it whole.
+func readFile(path string, limit int64) ([]byte, error) {
+	f, err := os.Open(path) // #nosec G304 -- a .gitignore beneath the user-selected root.
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+	return io.ReadAll(io.LimitReader(f, limit+1))
+}

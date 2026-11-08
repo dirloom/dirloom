@@ -25,6 +25,9 @@ const (
 	CodeGitRevisionNotFound   = "git_revision_not_found"
 	CodeGitObjectUnavailable  = "git_object_unavailable"
 	CodeGitTreeInvalid        = "git_tree_invalid"
+	// CodeGitTreeTooLarge is a tree beyond the limits of a Git observation:
+	// more nodes, or longer paths in total, than a snapshot may hold.
+	CodeGitTreeTooLarge = "git_tree_too_large"
 	// CodeGitCommitInvalid and CodeGitShallowInvalid come from Structural
 	// History v1, which reads commit objects and the shallow boundary list.
 	CodeGitCommitInvalid  = "git_commit_invalid"
