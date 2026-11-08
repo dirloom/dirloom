@@ -276,7 +276,7 @@ Theme YAML and `.dirloom.yaml` both use a `schemaVersion`, but they are independ
 | `rules` | no | Up to 512 ordered path/name/glob/extension/type rules. |
 | `icons.spacing` | no | Integer `0` through `4`; default `1`. |
 
-Files are UTF-8, contain exactly one YAML document, and are limited to 1 MiB.
+Files are regular files, UTF-8, contain exactly one YAML document, and are limited to 1 MiB; a device, a named pipe or a socket is refused before it is read.
 
 ### Colors, styles, and icons
 

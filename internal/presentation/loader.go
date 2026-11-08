@@ -195,11 +195,15 @@ func loadFile(path string) (Theme, error) {
 	if info.IsDir() {
 		return Theme{}, invalidf("theme path %q is a directory", path)
 	}
+	// A device, a named pipe or a socket: reading one could never end, and a
+	// size of 0 says nothing (D7 of the v0.4.0-rc1 plan).
+	if !info.Mode().IsRegular() {
+		return Theme{}, invalidf("theme path %q is not a regular file", path)
+	}
 	if info.Size() > maxThemeSize {
 		return Theme{}, invalidf("invalid theme %q: file exceeds the 1 MiB limit", path)
 	}
-	// #nosec G304 -- the explicitly selected path is confined for config-backed themes.
-	data, err := os.ReadFile(path)
+	data, err := readBounded(path, maxThemeSize)
 	if err != nil {
 		return Theme{}, fmt.Errorf("read theme %q: %w", path, err)
 	}
@@ -207,6 +211,18 @@ func loadFile(path string) (Theme, error) {
 		return Theme{}, invalidf("invalid theme %q: file exceeds the 1 MiB limit", path)
 	}
 	return parseTheme(data, path)
+}
+
+// readBounded reads at most one byte beyond limit, so that a file that grows
+// after its Stat is refused instead of read whole.
+func readBounded(path string, limit int64) ([]byte, error) {
+	// #nosec G304 -- the explicitly selected path is confined for config-backed themes.
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+	return io.ReadAll(io.LimitReader(f, limit+1))
 }
 
 func parseTheme(data []byte, path string) (Theme, error) {
