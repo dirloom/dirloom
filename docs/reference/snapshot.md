@@ -63,6 +63,10 @@ Writes the snapshot transactionally via Dirloom's existing output writer:
 - symlink destinations, directories and other non-regular destinations are refused;
 - a missing parent directory is refused;
 - no partial file survives a failed write;
+- on Windows, the replacement fails while another process has the destination
+  open, whatever its sharing mode (a reader, an indexer, an antivirus scan): exit
+  1 with an access-denied error, the existing file unchanged; the same command
+  succeeds once the file is closed;
 - there is no `--force` in A2.
 
 When the destination lies inside the inspected root, Dirloom excludes it from

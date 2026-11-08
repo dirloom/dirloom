@@ -476,6 +476,8 @@ Directories always have `children`, including empty directories. Files never do.
 - `--output` renders to a temporary file in the same directory, syncs it, then uses the platform's atomic replacement primitive.
 - `--copy` is an exclusive destination: it never writes a file and never prints the tree on stdout.
 - Existing output remains intact if safe replacement fails. Missing parent directories are never created.
+- On Windows, the replacement fails while another process has the destination open, whatever its sharing mode: for example a program reading it, an indexer or an antivirus scan. The command exits 1 with an access-denied error and leaves the existing file unchanged; once the file is closed, the same command succeeds. Linux and macOS replace the file even while it is open, and a process that had it open keeps reading the previous content.
+- Runs that write the same destination at the same time leave the complete output of one of them, never a mix; on Windows, the others can fail as above.
 - A symlink output destination is refused.
 
 ## Determinism
