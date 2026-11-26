@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 // readRepositoryDocument reads a file of the repository with LF line endings.
@@ -123,7 +122,7 @@ func TestCIIntegrationWorkflowShowsEveryDocumentedStep(t *testing.T) {
 }
 
 var (
-	codeBlockPattern  = regexp.MustCompile("(?ms)^(```+|````+)[a-z]*\n(.*?)^```+$")
+	codeBlockPattern  = regexp.MustCompile("(?ms)^[ \t]*(`{3,})[a-z]*\n(.*?)^[ \t]*`{3,}[ \t]*$")
 	inlineCodePattern = regexp.MustCompile("`(dirloom [^`]+)`")
 	commandPattern    = regexp.MustCompile(`(?:^|[\s;(|&]|\$ )dirloom\s+(.*)$`)
 )
@@ -165,35 +164,52 @@ func checkDirloomCommandLine(root *cobra.Command, line string) string {
 	command.InitDefaultHelpFlag()
 	command.InitDefaultVersionFlag()
 	for _, arg := range args {
-		var flag *pflag.Flag
+		var name string
+		var found, hidden bool
 		switch {
 		case strings.HasPrefix(arg, "--"):
-			name, _, _ := strings.Cut(arg[2:], "=")
-			flag = lookupFlag(command, name)
-			if flag == nil {
-				return "unknown flag --" + name + " for " + command.CommandPath()
-			}
+			name, _, _ = strings.Cut(arg[2:], "=")
+			found, hidden = lookupFlag(command, name, false)
 		case len(arg) == 2 && arg[0] == '-' && arg[1] != '-':
-			flag = command.Flags().ShorthandLookup(arg[1:])
-			if flag == nil {
-				flag = command.InheritedFlags().ShorthandLookup(arg[1:])
-			}
-			if flag == nil {
-				return "unknown shorthand " + arg + " for " + command.CommandPath()
-			}
+			name = arg[1:]
+			found, hidden = lookupFlag(command, name, true)
 		default:
 			continue
 		}
-		if flag.Hidden {
-			return "--" + flag.Name + " is refused by " + command.CommandPath()
+		if !found {
+			return "unknown flag " + arg + " for " + command.CommandPath()
+		}
+		if hidden {
+			return arg + " is refused by " + command.CommandPath()
 		}
 	}
 	return ""
 }
 
-func lookupFlag(command *cobra.Command, name string) *pflag.Flag {
-	if flag := command.Flags().Lookup(name); flag != nil {
-		return flag
+// lookupFlag reports whether command accepts the flag, locally or inherited,
+// and whether it hides it: a hidden flag is one the command refuses.
+func lookupFlag(command *cobra.Command, name string, shorthand bool) (found, hidden bool) {
+	for _, flags := range []func() (bool, bool){
+		func() (bool, bool) {
+			if shorthand {
+				flag := command.Flags().ShorthandLookup(name)
+				return flag != nil, flag != nil && flag.Hidden
+			}
+			flag := command.Flags().Lookup(name)
+			return flag != nil, flag != nil && flag.Hidden
+		},
+		func() (bool, bool) {
+			if shorthand {
+				flag := command.InheritedFlags().ShorthandLookup(name)
+				return flag != nil, flag != nil && flag.Hidden
+			}
+			flag := command.InheritedFlags().Lookup(name)
+			return flag != nil, flag != nil && flag.Hidden
+		},
+	} {
+		if found, hidden := flags(); found {
+			return true, hidden
+		}
 	}
-	return command.InheritedFlags().Lookup(name)
+	return false, false
 }
