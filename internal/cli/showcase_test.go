@@ -518,13 +518,21 @@ func checkShowcaseNamesItsDirectoryOnFailure(t *testing.T, shell showcaseShell, 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	err = cmd.Run()
+	// The shell's runtime may keep files there too, such as .dotnet for
+	// PowerShell on macOS.
 	entries, readErr := os.ReadDir(tmp)
-	if err == nil || readErr != nil || len(entries) != 1 || !strings.HasPrefix(entries[0].Name(), "dirloom-showcase.") {
+	var created []string
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), "dirloom-showcase.") {
+			created = append(created, entry.Name())
+		}
+	}
+	if err == nil || readErr != nil || len(created) != 1 {
 		t.Fatalf("failure without a work directory: %v; %s holds %v (%v); stderr %q", err, tmp, entries, readErr, stderr.String())
 	}
-	announce := regexp.MustCompile(`(?m)^showcase: the project is in .*` + regexp.QuoteMeta(entries[0].Name()) + `[/\\]shop\r?$`)
+	announce := regexp.MustCompile(`(?m)^showcase: the project is in .*` + regexp.QuoteMeta(created[0]) + `[/\\]shop\r?$`)
 	if !announce.MatchString(stderr.String()) {
-		t.Fatalf("the script did not name %s on a failure; stderr %q", entries[0].Name(), stderr.String())
+		t.Fatalf("the script did not name %s on a failure; stderr %q", created[0], stderr.String())
 	}
 }
 
