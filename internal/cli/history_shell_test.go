@@ -97,12 +97,11 @@ grep -q '^Error: ' "$out/outside-text.err"
 
 func runPowerShellHistorySmoke(t *testing.T, bin, work, outside, out string) {
 	t.Helper()
+	// Windows PowerShell 5.1 would write UTF-16 files and wrap stderr lines:
+	// this script needs PowerShell 7.
 	shell, err := exec.LookPath("pwsh")
 	if err != nil {
-		shell, err = exec.LookPath("powershell")
-	}
-	if err != nil {
-		t.Fatal("pwsh or powershell is required to prove $LASTEXITCODE for history")
+		t.Fatal("pwsh is required to prove $LASTEXITCODE for history")
 	}
 	// Usage errors and failures write stderr: never let that stop the script.
 	script := `
