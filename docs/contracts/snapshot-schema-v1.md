@@ -12,7 +12,8 @@ Semantics that produced that artifact.
 
 A snapshot is a **reference**, not a live comparison. Loading a snapshot that
 fails self-verification is **corruption / invalid snapshot**. Comparing a valid
-snapshot to a live structure is reserved for future `verify` (A3).
+snapshot to a live structure is the job of `dirloom verify` and `dirloom diff`,
+which read this schema.
 
 ## Top-level document
 
@@ -47,7 +48,7 @@ snapshot to a live structure is reserved for future `verify` (A3).
 | --- | --- | --- |
 | `schemaVersion` | number (integer) | Must be `1` for this contract |
 | `artifactVersion` | number (integer) | Must be `1` for Artifact Projection v1 |
-| `fingerprint` | string | Exact A1 fingerprint of the reconstructed artifact |
+| `fingerprint` | string | Exact Fingerprint v1 of the reconstructed artifact |
 | `requiredFeatures` | array of strings | Empty for initial v1 writers |
 | `capture` | object | Capture Semantics v1 |
 | `artifact` | object | Snapshot Artifact Projection v1 |
@@ -184,8 +185,8 @@ A reader reports every rejection with one code:
 Volatile provenance (`capturedAt`, hostname, username, absolutePath, …) is
 intentionally omitted from canonical Snapshot v1 output.
 
-## Non-goals (A2)
+## Non-goals
 
-Live structure comparison, `verify`, structural `diff`, content hashing,
-signatures, compression, binary formats, and snapshot migration engines are
-out of scope.
+Content hashing, signatures, compression, binary formats, and snapshot
+migration engines are out of scope of Snapshot Schema v1. Comparisons belong to
+the readers of the schema, `verify` and `diff`, not to the document.

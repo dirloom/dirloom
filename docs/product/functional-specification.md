@@ -260,6 +260,14 @@ Si la police ne rend pas une icône correctement, l'utilisateur DOIT pouvoir cho
 
 ## 6. Structural Version Control
 
+> **État en v0.4 :** `dirloom fingerprint`, `snapshot`, `verify`, `diff`, `history` et `watch` (expérimental) sont livrés. Leur comportement normatif est défini par les contrats du [registre](../contracts/README.md) et présenté dans la [vue d'ensemble Structural Version Control](../structural-version-control.md) (en anglais). Écarts entre la v0.4 et l'expérience cible ci-dessous :
+>
+> - `diff` nomme ses sources : `dirloom diff snapshot:architecture.dlm.json live:.`, ou `git:<révision>` pour un arbre commité ;
+> - la détection de déplacements v1 (`structural-v1`) n'est pas heuristique : elle ne rapporte un `MOVED` que pour une correspondance exacte et unique, avec sa preuve (`subtree` ou `name`), sans niveau de confiance ; sinon le changement reste un ajout plus une suppression ;
+> - seul le fingerprint structurel existe ;
+> - `verify` distingue correspondance (`0`), différence (`1`), snapshot invalide (`3`), snapshot non pris en charge (`4`) et observation impossible (`5`). La portée n'est jamais incomparable : `verify` observe toujours avec les Capture Semantics du snapshot ;
+> - `history` calcule l'historique structurel des arbres Git commités ; il ne lit pas de snapshots conservés.
+
 ### 6.1 Fingerprint
 
 Expérience cible :

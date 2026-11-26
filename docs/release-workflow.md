@@ -33,7 +33,8 @@ Examples:
 - `v0.3.2` — PRESENTATION refinement / Icon Capability Contract & Portable ASCII Icons
 - `v0.3.3` — PRESENTATION refinement / Nerd Catalog Fidelity, Provenance & Classification Refinement
 - `v0.4.0-a1` — CHANGE alpha / Artifact Identity & Fingerprint
-- `v0.4.0` — CHANGE / Fingerprint, Snapshot, Verify, Diff
+- `v0.4.0-rc1` — CHANGE release candidate / no new feature: consistency, hardening, documentation and the contract freeze
+- `v0.4.0` — CHANGE / Structural Version Control: Fingerprint, Snapshot, Verify, Diff, moves, Git sources, History, experimental Watch
 
 `v0.4.0` stays reserved for the CHANGE milestone. Contextual help and the icon
 capability contract belong to the PRESENTATION refinement line and must not be
@@ -143,24 +144,27 @@ package repository without making that the default path.
 
 `v0.4.0-a8` is the latest published GitHub Pre-release and is closed. The
 latest stable release is `v0.3.3`. Scoop, Homebrew and Winget remain on
-`v0.3.3`. No release branch is active. The v0.4 release candidate has not
-started. `CHANGELOG.md` remains the unique source of truth for release
+`v0.3.3`. The first v0.4 release candidate, `v0.4.0-rc1`, is in preparation
+on `release/v0.4.0-rc1`: its work lands there by pull request, and its
+contracts are candidates for the v0.4 freeze, not yet frozen. The freeze,
+the merge into `main`, the tag and the publication each need their own
+explicit GO. `CHANGELOG.md` remains the unique source of truth for release
 notes. Do not open versioned feature pull requests against `main`.
 
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a8` |
 | Latest stable release | `v0.3.3` |
-| Active release branch | none |
+| Active release branch | `release/v0.4.0-rc1` |
 | Integration branch | `main` |
 | Profile | prerelease / CLI package |
-| v0.4 release candidate | NOT STARTED |
+| v0.4 release candidate | IN PREPARATION, not frozen |
 
 ```text
 v0.4.0-a8 published / closed
 latest stable v0.3.3
-active release branch: none
-v0.4 RC NOT STARTED
+active release branch: release/v0.4.0-rc1
+v0.4.0-rc1 IN PREPARATION, not frozen
 ```
 
 ## v0.4.0-a8 release record
