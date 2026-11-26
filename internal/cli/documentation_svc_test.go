@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -68,13 +69,15 @@ func TestStructuralVersionControlDocumentationDiscoverable(t *testing.T) {
 	}
 }
 
-// The commands that the Structural Version Control guides show must exist,
-// with every flag they pass, so that the examples cannot drift from the CLI.
-// The guides' examples were also run by hand; this test keeps them honest
-// when a command or a flag changes.
-func TestStructuralVersionControlGuidesUseExistingCommandsAndFlags(t *testing.T) {
+// The commands that the README and the user guides show must exist, with
+// every flag they pass and every help topic they name, so that the examples
+// cannot drift from the CLI. The guides' examples were also run by hand; this
+// test keeps them honest when a command, a flag or a topic changes.
+func TestDocumentedDirloomCommandsExist(t *testing.T) {
 	root := NewRootCommand(io.Discard, io.Discard, "test")
 	for _, document := range [][]string{
+		{"README.md"},
+		{"docs", "use-cases.md"},
 		{"docs", "structural-version-control.md"},
 		{"docs", "ci-integration.md"},
 		{"docs", "upgrading-to-v0.4.md"},
@@ -90,6 +93,63 @@ func TestStructuralVersionControlGuidesUseExistingCommandsAndFlags(t *testing.T)
 				t.Errorf("%s: %q: %s", name, line, err)
 			}
 		}
+	}
+}
+
+// The checker must catch each kind of mistake it is meant to catch, and
+// accept the forms the documentation legitimately uses.
+func TestDocumentedCommandCheckerCatchesMistakes(t *testing.T) {
+	root := NewRootCommand(io.Discard, io.Discard, "test")
+	for _, line := range []string{
+		"dirloom verfy architecture.dlm.json --format json", // misspelled command
+		"dirloom snapshott --output architecture.dlm.json",  // misspelled command, valid root flag
+		"dirloom help structurel",                           //nolint:misspell // an unknown help topic, misspelled on purpose
+		"dirloom help structural sources",                   // help takes one topic
+		"dirloom verify architecture.dlm.json --depth 3",    // refused flag
+		"dirloom diff snapshot:a.json live:. --nope",        // unknown flag
+		"dirloom fingerprint -q",                            // unknown shorthand
+		"dirloom snapshot -z2",                              // unknown joined shorthand
+	} {
+		if checkDirloomCommandLine(root, line) == "" {
+			t.Errorf("%q passed the documentation check", line)
+		}
+	}
+	for _, line := range []string{
+		"dirloom snapshot -d2 --output architecture.dlm.json",
+		"dirloom --depth 3 ./src",
+		"dirloom --icons unicode --theme midnight testdata/showcase/infra-terraform-k8s",
+		"dirloom --theme vivid --icons",
+		"dirloom --version",
+		"dirloom help structural",
+		"dirloom help topics",
+		"dirloom help verify",
+		"dirloom ./diff",
+		"dirloom . --format json --output structure.json",
+		"dirloom node_modules",
+		"dirloom [directory] [flags]",
+		`dirloom diff "git:origin/$BASE_REF" git:HEAD > "$RUNNER_TEMP/structure-diff.txt" || status=$?`,
+	} {
+		if problem := checkDirloomCommandLine(root, line); problem != "" {
+			t.Errorf("%q: %s", line, problem)
+		}
+	}
+	// Prose inside a code block is not a command.
+	block := "```bash\necho \"Update it with dirloom snapshot if the change is intended.\"\n  dirloom verify a.json || status=$?\n```\n"
+	if lines := dirloomCommandLines(block); len(lines) != 1 || lines[0] != "dirloom verify a.json || status=$?" {
+		t.Errorf("command lines of a block with an echo = %q", lines)
+	}
+	// Continued lines are one command, and a comment ends it.
+	block = "```powershell\ndirloom `\n  --ignore dist `\n  --depth 2   # shallow\n```\n"
+	lines := dirloomCommandLines(block)
+	if len(lines) != 1 || lines[0] != "dirloom --ignore dist --depth 2   # shallow" {
+		t.Fatalf("command lines of a continued block = %q", lines)
+	}
+	if problem := checkDirloomCommandLine(root, lines[0]); problem != "" {
+		t.Errorf("%q: %s", lines[0], problem)
+	}
+	lines = dirloomCommandLines("```powershell\ndirloom `\n  --ignor dist\n```\n")
+	if len(lines) != 1 || checkDirloomCommandLine(root, lines[0]) == "" {
+		t.Errorf("a misspelled flag on a continued line passed the documentation check: %q", lines)
 	}
 }
 
@@ -124,7 +184,10 @@ func TestCIIntegrationWorkflowShowsEveryDocumentedStep(t *testing.T) {
 var (
 	codeBlockPattern  = regexp.MustCompile("(?ms)^[ \t]*(`{3,})[a-z]*\n(.*?)^[ \t]*`{3,}[ \t]*$")
 	inlineCodePattern = regexp.MustCompile("`(dirloom [^`]+)`")
-	commandPattern    = regexp.MustCompile(`(?:^|[\s;(|&]|\$ )dirloom\s+(.*)$`)
+	// A code-block line runs dirloom only when "dirloom" is in command
+	// position: at the start of the line, after a "$ " prompt, or after a
+	// shell separator. "echo ... dirloom snapshot ..." is prose, not a run.
+	commandPattern = regexp.MustCompile(`(?:^\s*(?:\$\s+)?|[;|&({]\s*|\b(?:then|do)\s+)dirloom\s+(.*)$`)
 )
 
 // dirloomCommandLines returns the dirloom invocations of a Markdown document:
@@ -132,7 +195,23 @@ var (
 func dirloomCommandLines(text string) []string {
 	var lines []string
 	for _, block := range codeBlockPattern.FindAllStringSubmatch(text, -1) {
+		// Join continued lines: a trailing "\" in a POSIX shell, "`" in PowerShell.
+		var joined []string
+		continued := false
 		for _, line := range strings.Split(block[2], "\n") {
+			if continued {
+				joined[len(joined)-1] += " " + strings.TrimSpace(line)
+			} else {
+				joined = append(joined, line)
+			}
+			last := &joined[len(joined)-1]
+			trimmed := strings.TrimRight(*last, " \t")
+			continued = strings.HasSuffix(trimmed, " \\") || strings.HasSuffix(trimmed, " `") || trimmed == "\\" || trimmed == "`"
+			if continued {
+				*last = strings.TrimRight(trimmed[:len(trimmed)-1], " \t")
+			}
+		}
+		for _, line := range joined {
 			if match := commandPattern.FindStringSubmatch(line); match != nil {
 				lines = append(lines, "dirloom "+match[1])
 			}
@@ -145,71 +224,151 @@ func dirloomCommandLines(text string) []string {
 	return lines
 }
 
+// documentedRootOperands are the bare words that the documentation puts
+// where a command name could stand, on purpose; any other bare word there is
+// taken for a misspelled command.
+var documentedRootOperands = map[string]bool{
+	"node_modules": true, // README: an explicitly selected root is never excluded
+	"packages":     true, // use cases: the packages directory of a monorepo
+	"browse":       true, // README roadmap: a future command, named as such
+}
+
 // checkDirloomCommandLine resolves the command of a "dirloom ..." line and
-// reports the first flag that the command does not accept, or accepts only
-// to refuse it.
+// reports the first problem: a word that names no command, an unknown help
+// topic, or a flag that the command does not accept, or accepts only to
+// refuse it.
 func checkDirloomCommandLine(root *cobra.Command, line string) string {
 	var args []string
 	for _, field := range strings.Fields(strings.TrimPrefix(line, "dirloom ")) {
 		if field == "|" || field == "||" || field == "&&" || field == ";" || field == "\\" ||
-			strings.HasPrefix(field, ">") || strings.HasPrefix(field, "2>") || strings.HasPrefix(field, ")") {
+			strings.HasPrefix(field, ">") || strings.HasPrefix(field, "2>") || strings.HasPrefix(field, ")") ||
+			strings.HasPrefix(field, "#") {
 			break
 		}
 		args = append(args, strings.Trim(field, `"'`))
 	}
+	// The CLI rewrites a bare --icons or --color before parsing; so does this check.
+	args = normalizeOptionalAutoFlags(args)
+	// Cobra adds the help command only when it executes.
+	root.InitDefaultHelpCmd()
 	command, _, err := root.Find(args)
 	if err != nil {
 		return err.Error()
 	}
 	command.InitDefaultHelpFlag()
 	command.InitDefaultVersionFlag()
-	for _, arg := range args {
-		var name string
-		var found, hidden bool
+	// Words of the command path come first; the rest are operands and flags.
+	depth := 0
+	for c := command; c != root; c = c.Parent() {
+		depth++
+	}
+	var operands []string
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
 		switch {
 		case strings.HasPrefix(arg, "--"):
-			name, _, _ = strings.Cut(arg[2:], "=")
-			found, hidden = lookupFlag(command, name, false)
-		case len(arg) == 2 && arg[0] == '-' && arg[1] != '-':
-			name = arg[1:]
-			found, hidden = lookupFlag(command, name, true)
+			name, _, hasValue := strings.Cut(arg[2:], "=")
+			found, hidden, takesValue := lookupFlag(command, name, false)
+			if problem := flagProblem(command, "--"+name, found, hidden); problem != "" {
+				return problem
+			}
+			if takesValue && !hasValue {
+				i++
+			}
+		case len(arg) > 1 && arg[0] == '-' && arg[1] != '-':
+			// Short flags may be joined: "-d2" is -d with the value 2.
+			for j := 1; j < len(arg); j++ {
+				found, hidden, takesValue := lookupFlag(command, arg[j:j+1], true)
+				if problem := flagProblem(command, "-"+arg[j:j+1], found, hidden); problem != "" {
+					return problem
+				}
+				if takesValue {
+					if j == len(arg)-1 {
+						i++
+					}
+					break
+				}
+			}
+		case depth > 0:
+			depth--
 		default:
-			continue
+			operands = append(operands, arg)
 		}
-		if !found {
-			return "unknown flag " + arg + " for " + command.CommandPath()
+	}
+	if len(operands) == 0 || isPlaceholder(operands[0]) {
+		return ""
+	}
+	switch {
+	case command == root:
+		if !isPathOperand(operands[0]) && !documentedRootOperands[operands[0]] {
+			return fmt.Sprintf("%q is neither a command nor a path", operands[0])
 		}
-		if hidden {
-			return arg + " is refused by " + command.CommandPath()
+	case command.Name() == "help":
+		// The resolution of runHelp: a command, the topic list, or a topic.
+		if target, _, err := root.Find(operands); err == nil && target != root {
+			return ""
+		}
+		if len(operands) == 1 && operands[0] == helpTopicsMetaName {
+			return ""
+		}
+		if _, ok := lookupHelpTopic(operands[0]); len(operands) != 1 || !ok {
+			return fmt.Sprintf("unknown help topic or command %q", strings.Join(operands, " "))
 		}
 	}
 	return ""
 }
 
+func flagProblem(command *cobra.Command, flag string, found, hidden bool) string {
+	switch {
+	case !found:
+		return "unknown flag " + flag + " for " + command.CommandPath()
+	case hidden:
+		return flag + " is refused by " + command.CommandPath()
+	}
+	return ""
+}
+
+// isPlaceholder reports a documentation placeholder such as [directory],
+// <snapshot>, … or a shell variable.
+func isPlaceholder(word string) bool {
+	return strings.HasPrefix(word, "[") || strings.HasPrefix(word, "<") || strings.HasPrefix(word, "$") || word == "…"
+}
+
+// isPathOperand reports a word written as a path: ".", "./src", "a/b",
+// "C:\x", "~/x", or a file name with an extension such as "README.md".
+func isPathOperand(word string) bool {
+	return strings.HasPrefix(word, "~") || strings.ContainsAny(word, `./\`)
+}
+
 // lookupFlag reports whether command accepts the flag, locally or inherited,
-// and whether it hides it: a hidden flag is one the command refuses.
-func lookupFlag(command *cobra.Command, name string, shorthand bool) (found, hidden bool) {
-	for _, flags := range []func() (bool, bool){
-		func() (bool, bool) {
-			if shorthand {
-				flag := command.Flags().ShorthandLookup(name)
-				return flag != nil, flag != nil && flag.Hidden
-			}
+// whether it hides it (a hidden flag is one the command refuses), and whether
+// it takes a value from the next word.
+func lookupFlag(command *cobra.Command, name string, shorthand bool) (found, hidden, takesValue bool) {
+	for _, flags := range []func() (bool, bool, bool){
+		func() (bool, bool, bool) {
 			flag := command.Flags().Lookup(name)
-			return flag != nil, flag != nil && flag.Hidden
-		},
-		func() (bool, bool) {
 			if shorthand {
-				flag := command.InheritedFlags().ShorthandLookup(name)
-				return flag != nil, flag != nil && flag.Hidden
+				flag = command.Flags().ShorthandLookup(name)
 			}
+			if flag == nil {
+				return false, false, false
+			}
+			return true, flag.Hidden, flag.NoOptDefVal == ""
+		},
+		func() (bool, bool, bool) {
 			flag := command.InheritedFlags().Lookup(name)
-			return flag != nil, flag != nil && flag.Hidden
+			if shorthand {
+				flag = command.InheritedFlags().ShorthandLookup(name)
+			}
+			if flag == nil {
+				return false, false, false
+			}
+			return true, flag.Hidden, flag.NoOptDefVal == ""
 		},
 	} {
-		if found, hidden := flags(); found {
-			return true, hidden
+		if found, hidden, takesValue := flags(); found {
+			return true, hidden, takesValue
 		}
 	}
-	return false, false
+	return false, false, false
 }
