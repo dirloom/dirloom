@@ -62,10 +62,13 @@ func TestWatchMatrixWindowsJunction(t *testing.T) {
 		// through it is part of the structure.
 		{name: "a change in its target", quiet: true, do: func(t *testing.T, root string) { writeFiles(t, filepath.Join(outside, "x")) }},
 		{name: "a change through it", quiet: true, do: func(t *testing.T, root string) { writeFiles(t, join(root, "j", "y")) }},
-		{name: "retarget", do: func(t *testing.T, root string) {
-			must(t, os.Remove(join(root, "j")))
-			makeJunction(t, join(root, "j"), other)
-		}, expect: expectChanges("CHANGED j (junction:" + filepath.ToSlash(outside) + "->junction:" + filepath.ToSlash(other) + ")")},
+		// Retargeted in place. Removing and recreating it would leave an
+		// instant where an observation lists j, then finds it gone when it
+		// reads its reparse data. The contract reports that as a non-fatal
+		// watch.error (an entry vanished during the scan), and this matrix
+		// allows no error.
+		{name: "retarget", do: func(t *testing.T, root string) { setJunctionTarget(t, join(root, "j"), other) },
+			expect: expectChanges("CHANGED j (junction:" + filepath.ToSlash(outside) + "->junction:" + filepath.ToSlash(other) + ")")},
 	}})
 }
 
