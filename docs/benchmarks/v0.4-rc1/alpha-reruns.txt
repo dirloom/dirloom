@@ -1,0 +1,286 @@
+== alpha benchmarks, in process 2026-11-26T23:23:15Z
+goos: windows
+goarch: amd64
+pkg: github.com/dirloom/dirloom/internal/snapshot
+cpu: Intel(R) Core(TM) Ultra 9 275HX
+BenchmarkLoadPeakMemory/nodes=100000-24         	       1	 626409500 ns/op	  13.09 MB/s	        86.25 peak-MiB	        11.03 peak/bytes
+BenchmarkLoadPeakMemory/nodes=100000-24         	       1	 640876000 ns/op	  12.79 MB/s	        95.86 peak-MiB	        12.26 peak/bytes
+BenchmarkLoadPeakMemory/nodes=100000-24         	       1	 639585300 ns/op	  12.82 MB/s	        83.38 peak-MiB	        10.66 peak/bytes
+BenchmarkLoadPeakMemory/nodes=100000-24         	       1	 813120800 ns/op	  10.08 MB/s	        94.79 peak-MiB	        12.12 peak/bytes
+BenchmarkLoadPeakMemory/nodes=100000-24         	       1	 777021700 ns/op	  10.55 MB/s	        84.23 peak-MiB	        10.77 peak/bytes
+BenchmarkLoadPeakMemory/nodes=1000000-24        	       1	9888866600 ns/op	   8.29 MB/s	       879.8 peak-MiB	        11.25 peak/bytes
+BenchmarkLoadPeakMemory/nodes=1000000-24        	       1	9168344400 ns/op	   8.94 MB/s	       880.1 peak-MiB	        11.26 peak/bytes
+BenchmarkLoadPeakMemory/nodes=1000000-24        	       1	9675670700 ns/op	   8.47 MB/s	       870.2 peak-MiB	        11.13 peak/bytes
+BenchmarkLoadPeakMemory/nodes=1000000-24        	       1	9632413900 ns/op	   8.51 MB/s	       880.3 peak-MiB	        11.26 peak/bytes
+BenchmarkLoadPeakMemory/nodes=1000000-24        	       1	10137794400 ns/op	   8.09 MB/s	       880.9 peak-MiB	        11.27 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24        	       1	20939092800 ns/op	   7.83 MB/s	      1786 peak-MiB	        11.42 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24        	       1	19593286600 ns/op	   8.37 MB/s	      1783 peak-MiB	        11.40 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24        	       1	19726895400 ns/op	   8.31 MB/s	      1753 peak-MiB	        11.21 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24        	       1	21103098300 ns/op	   7.77 MB/s	      1773 peak-MiB	        11.34 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24        	       1	19749222800 ns/op	   8.30 MB/s	      1751 peak-MiB	        11.20 peak/bytes
+PASS
+ok  	github.com/dirloom/dirloom/internal/snapshot	244.829s
+goos: windows
+goarch: amd64
+pkg: github.com/dirloom/dirloom/internal/comparison
+cpu: Intel(R) Core(TM) Ultra 9 275HX
+BenchmarkCompareMoves/1000/unchanged/none-24         	      10	    898490 ns/op	  676015 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/none-24         	      10	    911300 ns/op	  676015 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/none-24         	      10	    859180 ns/op	  676016 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/none-24         	      10	    794750 ns/op	  675504 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/none-24         	      10	    825940 ns/op	  675515 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/structural-v1-24         	      10	    855790 ns/op	  675505 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/structural-v1-24         	      10	    856360 ns/op	  675507 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/structural-v1-24         	      10	    834330 ns/op	  675508 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/structural-v1-24         	      10	   1085930 ns/op	  675518 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/unchanged/structural-v1-24         	      10	    792080 ns/op	  675529 B/op	    6870 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/none-24               	      10	    857400 ns/op	  682201 B/op	    6900 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/none-24               	      10	    835110 ns/op	  682214 B/op	    6900 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/none-24               	      10	    869160 ns/op	  682214 B/op	    6900 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/none-24               	      10	    822260 ns/op	  682201 B/op	    6900 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/none-24               	      10	    858120 ns/op	  682203 B/op	    6900 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/structural-v1-24      	      10	   1190380 ns/op	 1214994 B/op	    6983 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/structural-v1-24      	      10	   1112590 ns/op	 1214486 B/op	    6983 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/structural-v1-24      	      10	   2302000 ns/op	 1214486 B/op	    6983 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/structural-v1-24      	      10	   1053230 ns/op	 1214486 B/op	    6983 allocs/op
+BenchmarkCompareMoves/1000/relocated-1%/structural-v1-24      	      10	   1967880 ns/op	 1214486 B/op	    6983 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/none-24              	      10	    809090 ns/op	 1003328 B/op	    7889 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/none-24              	      10	   1812030 ns/op	 1003339 B/op	    7889 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/none-24              	      10	   1446140 ns/op	 1003352 B/op	    7889 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/none-24              	      10	    809930 ns/op	 1003331 B/op	    7889 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/none-24              	      10	    839680 ns/op	 1003331 B/op	    7889 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/structural-v1-24     	      10	   1110040 ns/op	 1646465 B/op	    8177 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/structural-v1-24     	      10	   1186980 ns/op	 1646449 B/op	    8177 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/structural-v1-24     	      10	   1173400 ns/op	 1646457 B/op	    8177 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/structural-v1-24     	      10	   2164640 ns/op	 1646468 B/op	    8177 allocs/op
+BenchmarkCompareMoves/1000/relocated-50%/structural-v1-24     	      10	   1247710 ns/op	 1646446 B/op	    8177 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/none-24                  	      10	    951590 ns/op	 1212966 B/op	    9577 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/none-24                  	      10	    996200 ns/op	 1212945 B/op	    9577 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/none-24                  	      10	    881820 ns/op	 1212955 B/op	    9577 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/none-24                  	      10	   2617170 ns/op	 1212956 B/op	    9577 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/none-24                  	      10	   1744860 ns/op	 1212966 B/op	    9577 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/structural-v1-24         	      10	   3201340 ns/op	 1766571 B/op	    9637 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/structural-v1-24         	      10	   2744970 ns/op	 1766571 B/op	    9637 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/structural-v1-24         	      10	   1896650 ns/op	 1766572 B/op	    9637 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/structural-v1-24         	      10	   1266940 ns/op	 1766571 B/op	    9637 allocs/op
+BenchmarkCompareMoves/1000/ambiguous/structural-v1-24         	      10	   1794680 ns/op	 1766580 B/op	    9637 allocs/op
+BenchmarkCompareMoves/10000/unchanged/none-24                 	      10	   8204330 ns/op	 6332100 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/none-24                 	      10	   8615450 ns/op	 6332114 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/none-24                 	      10	   8759360 ns/op	 6331606 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/none-24                 	      10	   8648880 ns/op	 6332117 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/none-24                 	      10	   9622690 ns/op	 6331606 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/structural-v1-24        	      10	   9029730 ns/op	 6332117 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/structural-v1-24        	      10	   8924070 ns/op	 6331640 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/structural-v1-24        	      10	   9140840 ns/op	 6331606 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/structural-v1-24        	      10	   8170200 ns/op	 6331604 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/unchanged/structural-v1-24        	      10	   8254060 ns/op	 6331593 B/op	   68192 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/none-24              	      10	   9414850 ns/op	 6386884 B/op	   68408 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/none-24              	      10	   8491200 ns/op	 6386899 B/op	   68408 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/none-24              	      10	  10054010 ns/op	 6386915 B/op	   68408 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/none-24              	      10	  10022310 ns/op	 6386896 B/op	   68408 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/none-24              	      10	   8527280 ns/op	 6386888 B/op	   68408 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/structural-v1-24     	      10	  11346080 ns/op	10903110 B/op	   68717 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/structural-v1-24     	      10	  12214810 ns/op	10903156 B/op	   68717 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/structural-v1-24     	      10	  11252830 ns/op	10903118 B/op	   68717 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/structural-v1-24     	      10	  11216140 ns/op	10903134 B/op	   68717 allocs/op
+BenchmarkCompareMoves/10000/relocated-1%/structural-v1-24     	      10	  12525490 ns/op	10903144 B/op	   68717 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/none-24             	      10	  13186550 ns/op	10163598 B/op	   78216 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/none-24             	      10	  13427640 ns/op	10163587 B/op	   78216 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/none-24             	      10	  11718670 ns/op	10163611 B/op	   78216 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/none-24             	      10	  11672920 ns/op	10163584 B/op	   78216 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/none-24             	      10	  13281240 ns/op	10163641 B/op	   78216 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/structural-v1-24    	      10	  16480040 ns/op	15767782 B/op	   80487 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/structural-v1-24    	      10	  16951500 ns/op	15767758 B/op	   80487 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/structural-v1-24    	      10	  19238280 ns/op	15767787 B/op	   80487 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/structural-v1-24    	      10	  18247220 ns/op	15767779 B/op	   80487 allocs/op
+BenchmarkCompareMoves/10000/relocated-50%/structural-v1-24    	      10	  16231620 ns/op	15767756 B/op	   80487 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/none-24                 	      10	  16128160 ns/op	13708017 B/op	   95290 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/none-24                 	      10	  17326130 ns/op	13697099 B/op	   95290 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/none-24                 	      10	  14876610 ns/op	13713476 B/op	   95291 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/none-24                 	      10	  15007900 ns/op	13691652 B/op	   95289 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/none-24                 	      10	  16366360 ns/op	13708019 B/op	   95290 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/structural-v1-24        	      10	  21647130 ns/op	20080379 B/op	   95616 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/structural-v1-24        	      10	  17148180 ns/op	20085804 B/op	   95616 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/structural-v1-24        	      10	  19578180 ns/op	20096732 B/op	   95617 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/structural-v1-24        	      10	  22760120 ns/op	20096768 B/op	   95617 allocs/op
+BenchmarkCompareMoves/10000/ambiguous/structural-v1-24        	      10	  21186630 ns/op	20074878 B/op	   95615 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24                	      10	 130330840 ns/op	59650216 B/op	  681152 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24                	      10	 141956420 ns/op	59648696 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24                	      10	 133517880 ns/op	59648172 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24                	      10	 152433530 ns/op	59648182 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24                	      10	 149454770 ns/op	59653884 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24       	      10	 143430360 ns/op	59648208 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24       	      10	 151932600 ns/op	59648188 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24       	      10	 150568110 ns/op	59648188 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24       	      10	 154243620 ns/op	59648206 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24       	      10	 146526360 ns/op	59648200 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24             	      10	 148457360 ns/op	60420048 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24             	      10	 138153550 ns/op	60414348 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24             	      10	 144250450 ns/op	60414368 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24             	      10	 136410050 ns/op	60414358 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24             	      10	 133046760 ns/op	60414363 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24    	      10	 186951470 ns/op	98814652 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24    	      10	 188778770 ns/op	98814660 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24    	      10	 192908170 ns/op	98814672 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24    	      10	 176214110 ns/op	98814641 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24    	      10	 184731910 ns/op	98814624 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24            	      10	 130281360 ns/op	105720721 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24            	      10	 153541720 ns/op	105726420 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24            	      10	 139560540 ns/op	105720748 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24            	      10	 145176330 ns/op	105720708 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24            	      10	 159272490 ns/op	105720748 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24   	      10	 198378340 ns/op	154918068 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24   	      10	 209787500 ns/op	154918113 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24   	      10	 200664870 ns/op	154918110 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24   	      10	 189317200 ns/op	154918075 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24   	      10	 206472590 ns/op	154918064 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                	      10	 201564930 ns/op	138885179 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                	      10	 204341580 ns/op	138885155 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                	      10	 209865550 ns/op	138885180 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                	      10	 201794000 ns/op	138885184 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                	      10	 202936830 ns/op	138885163 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24       	      10	 279209850 ns/op	192254865 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24       	      10	 277733710 ns/op	192254856 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24       	      10	 283620880 ns/op	192254838 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24       	      10	 297093220 ns/op	192254867 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24       	      10	 250169200 ns/op	192254852 B/op	  954220 allocs/op
+BenchmarkDetectMoves/1000/relocated-50%-24                    	      10	   1615170 ns/op	  639067 B/op	     276 allocs/op
+BenchmarkDetectMoves/1000/relocated-50%-24                    	      10	    386880 ns/op	  639075 B/op	     276 allocs/op
+BenchmarkDetectMoves/1000/relocated-50%-24                    	      10	   1019760 ns/op	  639075 B/op	     276 allocs/op
+BenchmarkDetectMoves/1000/relocated-50%-24                    	      10	    368130 ns/op	  639076 B/op	     276 allocs/op
+BenchmarkDetectMoves/1000/relocated-50%-24                    	      10	    335920 ns/op	  639065 B/op	     276 allocs/op
+BenchmarkDetectMoves/1000/ambiguous-24                        	      10	    344660 ns/op	  553620 B/op	      60 allocs/op
+BenchmarkDetectMoves/1000/ambiguous-24                        	      10	    376900 ns/op	  553619 B/op	      60 allocs/op
+BenchmarkDetectMoves/1000/ambiguous-24                        	      10	    355470 ns/op	  553617 B/op	      60 allocs/op
+BenchmarkDetectMoves/1000/ambiguous-24                        	      10	    322530 ns/op	  553617 B/op	      60 allocs/op
+BenchmarkDetectMoves/1000/ambiguous-24                        	      10	    329780 ns/op	  553617 B/op	      60 allocs/op
+BenchmarkDetectMoves/10000/relocated-50%-24                   	      10	   4369450 ns/op	 5558016 B/op	    2256 allocs/op
+BenchmarkDetectMoves/10000/relocated-50%-24                   	      10	   4938240 ns/op	 5558027 B/op	    2256 allocs/op
+BenchmarkDetectMoves/10000/relocated-50%-24                   	      10	   3280630 ns/op	 5558016 B/op	    2256 allocs/op
+BenchmarkDetectMoves/10000/relocated-50%-24                   	      10	   4329990 ns/op	 5558016 B/op	    2256 allocs/op
+BenchmarkDetectMoves/10000/relocated-50%-24                   	      10	   3569280 ns/op	 5558016 B/op	    2256 allocs/op
+BenchmarkDetectMoves/10000/ambiguous-24                       	      10	   3947350 ns/op	 6361404 B/op	     324 allocs/op
+BenchmarkDetectMoves/10000/ambiguous-24                       	      10	   3845030 ns/op	 6361416 B/op	     324 allocs/op
+BenchmarkDetectMoves/10000/ambiguous-24                       	      10	   4909440 ns/op	 6361406 B/op	     324 allocs/op
+BenchmarkDetectMoves/10000/ambiguous-24                       	      10	   4033690 ns/op	 6361404 B/op	     324 allocs/op
+BenchmarkDetectMoves/10000/ambiguous-24                       	      10	   3417250 ns/op	 6361416 B/op	     324 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24                  	      10	  55164340 ns/op	48738891 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24                  	      10	  52282030 ns/op	48738880 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24                  	      10	  59197740 ns/op	48738880 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24                  	      10	  51194530 ns/op	48738902 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24                  	      10	  60013550 ns/op	48738880 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24                      	      10	  67264090 ns/op	53369662 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24                      	      10	  64745620 ns/op	53369673 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24                      	      10	  73213920 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24                      	      10	  68480870 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24                      	      10	  74075570 ns/op	53369660 B/op	    2340 allocs/op
+PASS
+ok  	github.com/dirloom/dirloom/internal/comparison	94.844s
+goos: windows
+goarch: amd64
+pkg: github.com/dirloom/dirloom/internal/source
+cpu: Intel(R) Core(TM) Ultra 9 275HX
+BenchmarkObserveGitTree/1000/resolve-24         	       5	 184126740 ns/op	  333017 B/op	    2048 allocs/op
+BenchmarkObserveGitTree/1000/resolve-24         	       5	 209885920 ns/op	  332800 B/op	    2047 allocs/op
+BenchmarkObserveGitTree/1000/resolve-24         	       5	 193481440 ns/op	  332638 B/op	    2047 allocs/op
+BenchmarkObserveGitTree/1000/resolve-24         	       5	 192251220 ns/op	  332822 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/1000/resolve-24         	       5	 188024620 ns/op	  332822 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/1000/git-24             	       5	 242649780 ns/op	 1341883 B/op	   14074 allocs/op
+BenchmarkObserveGitTree/1000/git-24             	       5	 237794940 ns/op	 1341822 B/op	   14071 allocs/op
+BenchmarkObserveGitTree/1000/git-24             	       5	 238554720 ns/op	 1341355 B/op	   14068 allocs/op
+BenchmarkObserveGitTree/1000/git-24             	       5	 236769940 ns/op	 1341342 B/op	   14068 allocs/op
+BenchmarkObserveGitTree/1000/git-24             	       5	 236855540 ns/op	 1342428 B/op	   14071 allocs/op
+BenchmarkObserveGitTree/1000/filesystem-24      	       5	   6786660 ns/op	 1100067 B/op	   13997 allocs/op
+BenchmarkObserveGitTree/1000/filesystem-24      	       5	   8803960 ns/op	 1073843 B/op	   13996 allocs/op
+BenchmarkObserveGitTree/1000/filesystem-24      	       5	   6290780 ns/op	 1100067 B/op	   13997 allocs/op
+BenchmarkObserveGitTree/1000/filesystem-24      	       5	  10915020 ns/op	 1086955 B/op	   13996 allocs/op
+BenchmarkObserveGitTree/1000/filesystem-24      	       5	   9618820 ns/op	 1086955 B/op	   13996 allocs/op
+BenchmarkObserveGitTree/1000/git-depth-1-24     	       5	 237956720 ns/op	  476801 B/op	    2552 allocs/op
+BenchmarkObserveGitTree/1000/git-depth-1-24     	       5	 233421380 ns/op	  477580 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/1000/git-depth-1-24     	       5	 242460460 ns/op	  476929 B/op	    2553 allocs/op
+BenchmarkObserveGitTree/1000/git-depth-1-24     	       5	 237517120 ns/op	  477680 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/1000/git-depth-1-24     	       5	 236762000 ns/op	  477817 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/10000/resolve-24        	       5	 183524760 ns/op	  332534 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/10000/resolve-24        	       5	 188975500 ns/op	  332467 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/10000/resolve-24        	       5	 193518980 ns/op	  332457 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/10000/resolve-24        	       5	 187261520 ns/op	  332492 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/10000/resolve-24        	       5	 193351880 ns/op	  332390 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/10000/git-24            	       5	 258202640 ns/op	 8605028 B/op	  116812 allocs/op
+BenchmarkObserveGitTree/10000/git-24            	       5	 243671280 ns/op	 8605366 B/op	  116812 allocs/op
+BenchmarkObserveGitTree/10000/git-24            	       5	 240333920 ns/op	 8603080 B/op	  116810 allocs/op
+BenchmarkObserveGitTree/10000/git-24            	       5	 254053300 ns/op	 8604956 B/op	  116810 allocs/op
+BenchmarkObserveGitTree/10000/git-24            	       5	 245387540 ns/op	 8605744 B/op	  116812 allocs/op
+BenchmarkObserveGitTree/10000/filesystem-24     	       5	  97170120 ns/op	10340926 B/op	  139235 allocs/op
+BenchmarkObserveGitTree/10000/filesystem-24     	       5	  89403300 ns/op	10367724 B/op	  139236 allocs/op
+BenchmarkObserveGitTree/10000/filesystem-24     	       5	  90050840 ns/op	10274760 B/op	  139233 allocs/op
+BenchmarkObserveGitTree/10000/filesystem-24     	       5	  93153120 ns/op	10340964 B/op	  139236 allocs/op
+BenchmarkObserveGitTree/10000/filesystem-24     	       5	  89242360 ns/op	10275321 B/op	  139233 allocs/op
+BenchmarkObserveGitTree/10000/git-depth-1-24    	       5	 236928920 ns/op	  476884 B/op	    2553 allocs/op
+BenchmarkObserveGitTree/10000/git-depth-1-24    	       5	 235296580 ns/op	  477564 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/10000/git-depth-1-24    	       5	 233607480 ns/op	  476840 B/op	    2552 allocs/op
+BenchmarkObserveGitTree/10000/git-depth-1-24    	       5	 235165340 ns/op	  477801 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/10000/git-depth-1-24    	       5	 231913700 ns/op	  476859 B/op	    2553 allocs/op
+BenchmarkObserveGitTree/100000/resolve-24       	       5	 187219760 ns/op	  332454 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/100000/resolve-24       	       5	 185958700 ns/op	  332428 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/100000/resolve-24       	       5	 185430680 ns/op	  332400 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/100000/resolve-24       	       5	 185726160 ns/op	  332428 B/op	    2045 allocs/op
+BenchmarkObserveGitTree/100000/resolve-24       	       5	 189277540 ns/op	  332473 B/op	    2046 allocs/op
+BenchmarkObserveGitTree/100000/git-24           	       5	 346868540 ns/op	78014907 B/op	 1143816 allocs/op
+BenchmarkObserveGitTree/100000/git-24           	       5	 332902360 ns/op	78015750 B/op	 1143818 allocs/op
+BenchmarkObserveGitTree/100000/git-24           	       5	 338158880 ns/op	78016091 B/op	 1143816 allocs/op
+BenchmarkObserveGitTree/100000/git-24           	       5	 338681220 ns/op	78014441 B/op	 1143816 allocs/op
+BenchmarkObserveGitTree/100000/git-24           	       5	 331458320 ns/op	78014558 B/op	 1143816 allocs/op
+BenchmarkObserveGitTree/100000/filesystem-24    	       5	 798912260 ns/op	97424284 B/op	 1391214 allocs/op
+BenchmarkObserveGitTree/100000/filesystem-24    	       5	 773937680 ns/op	97447118 B/op	 1391214 allocs/op
+BenchmarkObserveGitTree/100000/filesystem-24    	       5	 910953140 ns/op	97538880 B/op	 1391217 allocs/op
+BenchmarkObserveGitTree/100000/filesystem-24    	       5	 853050000 ns/op	97530323 B/op	 1391220 allocs/op
+BenchmarkObserveGitTree/100000/filesystem-24    	       5	 764509660 ns/op	97369584 B/op	 1391214 allocs/op
+BenchmarkObserveGitTree/100000/git-depth-1-24   	       5	 242279680 ns/op	  477673 B/op	    2555 allocs/op
+BenchmarkObserveGitTree/100000/git-depth-1-24   	       5	 234968100 ns/op	  476916 B/op	    2553 allocs/op
+BenchmarkObserveGitTree/100000/git-depth-1-24   	       5	 231969420 ns/op	  477041 B/op	    2553 allocs/op
+BenchmarkObserveGitTree/100000/git-depth-1-24   	       5	 237539040 ns/op	  477564 B/op	    2554 allocs/op
+BenchmarkObserveGitTree/100000/git-depth-1-24   	       5	 242360300 ns/op	  476849 B/op	    2553 allocs/op
+PASS
+ok  	github.com/dirloom/dirloom/internal/source	168.830s
+goos: windows
+goarch: amd64
+pkg: github.com/dirloom/dirloom/internal/history
+cpu: Intel(R) Core(TM) Ultra 9 275HX
+BenchmarkHistoryWalk/1000-entries/20-commits-24         	       1	 344269400 ns/op	41171008 B/op	  456110 allocs/op
+BenchmarkHistoryWalk/1000-entries/20-commits-24         	       1	 311509600 ns/op	41082352 B/op	  455614 allocs/op
+BenchmarkHistoryWalk/1000-entries/20-commits-24         	       1	 317047900 ns/op	41081376 B/op	  455608 allocs/op
+BenchmarkHistoryWalk/1000-entries/20-commits-24         	       1	 293674300 ns/op	41082096 B/op	  455612 allocs/op
+BenchmarkHistoryWalk/1000-entries/20-commits-24         	       1	 298341300 ns/op	41086472 B/op	  455614 allocs/op
+BenchmarkHistoryWalk/1000-entries/100-commits-24        	       1	 570856700 ns/op	183163528 B/op	 2019014 allocs/op
+BenchmarkHistoryWalk/1000-entries/100-commits-24        	       1	 537748600 ns/op	183167840 B/op	 2019028 allocs/op
+BenchmarkHistoryWalk/1000-entries/100-commits-24        	       1	 575406800 ns/op	183178184 B/op	 2019037 allocs/op
+BenchmarkHistoryWalk/1000-entries/100-commits-24        	       1	 589892800 ns/op	183173264 B/op	 2019020 allocs/op
+BenchmarkHistoryWalk/1000-entries/100-commits-24        	       1	 571721800 ns/op	183167552 B/op	 2019023 allocs/op
+BenchmarkHistoryWalk/10000-entries/20-commits-24        	       1	 682988300 ns/op	317251272 B/op	 3803926 allocs/op
+BenchmarkHistoryWalk/10000-entries/20-commits-24        	       1	 658558200 ns/op	317256224 B/op	 3803930 allocs/op
+BenchmarkHistoryWalk/10000-entries/20-commits-24        	       1	 682467100 ns/op	317234672 B/op	 3803907 allocs/op
+BenchmarkHistoryWalk/10000-entries/20-commits-24        	       1	 647329000 ns/op	317259880 B/op	 3803935 allocs/op
+BenchmarkHistoryWalk/10000-entries/20-commits-24        	       1	 722838300 ns/op	317257392 B/op	 3803941 allocs/op
+BenchmarkHistoryWalk/10000-entries/100-commits-24       	       1	2211823100 ns/op	1531789440 B/op	18141011 allocs/op
+BenchmarkHistoryWalk/10000-entries/100-commits-24       	       1	2215154100 ns/op	1531797520 B/op	18141026 allocs/op
+BenchmarkHistoryWalk/10000-entries/100-commits-24       	       1	2165288200 ns/op	1531772760 B/op	18140990 allocs/op
+BenchmarkHistoryWalk/10000-entries/100-commits-24       	       1	2155822200 ns/op	1531769448 B/op	18140997 allocs/op
+BenchmarkHistoryWalk/10000-entries/100-commits-24       	       1	2155725100 ns/op	1531811896 B/op	18141020 allocs/op
+BenchmarkHistoryWalk/100000-entries/20-commits-24       	       1	4146898900 ns/op	2872937816 B/op	37315299 allocs/op
+BenchmarkHistoryWalk/100000-entries/20-commits-24       	       1	4128672500 ns/op	2872936864 B/op	37315305 allocs/op
+BenchmarkHistoryWalk/100000-entries/20-commits-24       	       1	4264524800 ns/op	2872935504 B/op	37315288 allocs/op
+BenchmarkHistoryWalk/100000-entries/20-commits-24       	       1	4079635500 ns/op	2872948448 B/op	37315301 allocs/op
+BenchmarkHistoryWalk/100000-entries/20-commits-24       	       1	4116876300 ns/op	2872922608 B/op	37315288 allocs/op
+BenchmarkHistoryRetainedEntries/1000-entries/limit-100-24         	       1	 616119400 ns/op	       479.6 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-100-24         	       1	 644549600 ns/op	       453.0 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-100-24         	       1	 616736600 ns/op	       449.3 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-100-24         	       1	 639515600 ns/op	       456.2 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-100-24         	       1	 611398600 ns/op	       417.4 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-1000-24        	       1	4282348100 ns/op	       317.2 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-1000-24        	       1	4276622800 ns/op	       308.2 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-1000-24        	       1	4292374500 ns/op	       311.9 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-1000-24        	       1	4297177400 ns/op	       311.2 retained-B/entry
+BenchmarkHistoryRetainedEntries/1000-entries/limit-1000-24        	       1	4303294000 ns/op	       315.4 retained-B/entry
+PASS
+ok  	github.com/dirloom/dirloom/internal/history	68.747s
+== done 2026-11-26T23:33:06Z

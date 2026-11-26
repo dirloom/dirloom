@@ -1,0 +1,105 @@
+== load 139e2a3/go1.27.2 2026-11-26T23:34:03Z
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	14118155600 ns/op	  11.61 MB/s	      1947 peak-MiB	        12.45 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	13723154000 ns/op	  11.95 MB/s	      1951 peak-MiB	        12.48 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	14400565900 ns/op	  11.39 MB/s	      1486 peak-MiB	         9.504 peak/bytes
+ok  	github.com/dirloom/dirloom/internal/snapshot	79.396s
+== load new/go1.26.10 2026-11-26T23:35:35Z
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	21025267700 ns/op	   7.80 MB/s	      1753 peak-MiB	        11.21 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	21828040700 ns/op	   7.51 MB/s	      1447 peak-MiB	         9.256 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	21690873200 ns/op	   7.56 MB/s	      1768 peak-MiB	        11.31 peak/bytes
+ok  	github.com/dirloom/dirloom/internal/snapshot	104.037s
+== load 139e2a3/go1.26.10 2026-11-26T23:37:21Z
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	20973073800 ns/op	   7.82 MB/s	      1757 peak-MiB	        11.24 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	21220598800 ns/op	   7.73 MB/s	      1770 peak-MiB	        11.32 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	20162729200 ns/op	   8.13 MB/s	      1764 peak-MiB	        11.28 peak/bytes
+ok  	github.com/dirloom/dirloom/internal/snapshot	100.282s
+== load new/go1.27.2 2026-11-26T23:39:03Z
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	14200949200 ns/op	  11.55 MB/s	      2106 peak-MiB	        13.47 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	14385330300 ns/op	  11.40 MB/s	      1486 peak-MiB	         9.503 peak/bytes
+BenchmarkLoadPeakMemory/nodes=2000000-24         	       1	14528155000 ns/op	  11.29 MB/s	      2099 peak-MiB	        13.42 peak/bytes
+ok  	github.com/dirloom/dirloom/internal/snapshot	79.538s
+== compare 21ee29a 2026-11-26T23:40:24Z
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	  85934410 ns/op	59649220 B/op	  681152 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	  88675400 ns/op	59648212 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	  92543970 ns/op	59648206 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	 119342780 ns/op	59648677 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	 135240800 ns/op	59648244 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 135829240 ns/op	59648236 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 131295450 ns/op	59648211 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 139110430 ns/op	59653915 B/op	  681151 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 128353150 ns/op	59653888 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 144524660 ns/op	59648201 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 141197910 ns/op	60414353 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 155625340 ns/op	60414380 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 152004010 ns/op	60414371 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 141912320 ns/op	60414377 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 131816200 ns/op	60414360 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 190112250 ns/op	98823483 B/op	  685211 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 189577010 ns/op	98823513 B/op	  685211 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 176500570 ns/op	98823494 B/op	  685211 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 170878910 ns/op	98823523 B/op	  685211 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 200003790 ns/op	98823508 B/op	  685211 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 145725110 ns/op	105720728 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 132524440 ns/op	105720787 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 132177670 ns/op	105720769 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 146288650 ns/op	105720726 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 142769130 ns/op	105726427 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 211709490 ns/op	155550851 B/op	  802910 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 202586300 ns/op	155550840 B/op	  802910 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 199274880 ns/op	155550843 B/op	  802910 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 200844790 ns/op	155550888 B/op	  802910 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 199007490 ns/op	155550862 B/op	  802910 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 177817910 ns/op	138885166 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 187836010 ns/op	138885193 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 209961540 ns/op	138885156 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 205141680 ns/op	138885201 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 178276850 ns/op	138890860 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 269130880 ns/op	192254843 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 257445590 ns/op	192254843 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 259856180 ns/op	192254851 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 251296560 ns/op	192254857 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 259263330 ns/op	192254822 B/op	  954220 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	75.883s
+== compare new 2026-11-26T23:41:46Z
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	  91112670 ns/op	59650756 B/op	  681153 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	  88450730 ns/op	59648188 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	 105149030 ns/op	59648172 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	 124566440 ns/op	59648209 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/none-24         	      10	 133463530 ns/op	59648209 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 133840860 ns/op	59648222 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 129008230 ns/op	59648217 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 141950120 ns/op	59648180 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 147121990 ns/op	59648192 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/unchanged/structural-v1-24         	      10	 134777750 ns/op	59648193 B/op	  681150 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 133929830 ns/op	60414358 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 140299670 ns/op	60414342 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 138871950 ns/op	60414388 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 118756750 ns/op	60414360 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/none-24               	      10	 135332890 ns/op	60414372 B/op	  683171 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 182190240 ns/op	98814625 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 179507130 ns/op	98814638 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 204296690 ns/op	98814675 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 192598480 ns/op	98814662 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-1%/structural-v1-24      	      10	 184625220 ns/op	98814619 B/op	  685203 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 139737850 ns/op	105720750 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 147428540 ns/op	105720750 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 129143240 ns/op	105720745 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 147917670 ns/op	105720756 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/none-24              	      10	 142763560 ns/op	105720729 B/op	  781184 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 222923280 ns/op	154918108 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 198856640 ns/op	154918110 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 201677360 ns/op	154918097 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 195352970 ns/op	154918086 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/relocated-50%/structural-v1-24     	      10	 189648640 ns/op	154918065 B/op	  802835 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 190729770 ns/op	138885169 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 182412330 ns/op	138885176 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 189483530 ns/op	138885180 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 195958540 ns/op	138885156 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/none-24                  	      10	 199194670 ns/op	138890872 B/op	  951880 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 258917490 ns/op	192260475 B/op	  954221 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 247684580 ns/op	192254828 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 266491510 ns/op	192254846 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 258567210 ns/op	192254843 B/op	  954220 allocs/op
+BenchmarkCompareMoves/100000/ambiguous/structural-v1-24         	      10	 257290760 ns/op	192254888 B/op	  954220 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	75.536s
+== done 2026-11-26T23:43:02Z
