@@ -63,7 +63,7 @@ jobs:
           grep "  $asset\$" checksums.txt | sha256sum -c -
           gh attestation verify "$asset" --repo dirloom/dirloom \
             --signer-workflow dirloom/dirloom/.github/workflows/release.yml \
-            --source-ref "refs/tags/$DIRLOOM_VERSION"
+            --source-ref "refs/tags/$DIRLOOM_VERSION" --deny-self-hosted-runners
           tar -xzf "$asset" dirloom
           echo "$dir" >> "$GITHUB_PATH"
           ./dirloom --version
@@ -110,9 +110,11 @@ Pin `DIRLOOM_VERSION` to the exact release you have validated. The stable packag
 
 The job sets `shell: bash`, so GitHub runs each `run:` block with `bash --noprofile --norc -eo pipefail`: any command or pipeline that exits non-zero ends the step, unless its status is captured with `|| status=$?`. Every file the steps write goes to `$RUNNER_TEMP` or to the job summary, never into the checked-out tree, which `verify` observes.
 
-**Install Dirloom** downloads the Linux archive and `checksums.txt` of one release, checks the archive's SHA-256, and verifies its GitHub artifact attestation: the archive must have been built by the `release.yml` workflow of `dirloom/dirloom` from the tag of that version. The step fails on any mismatch. The [security policy](../SECURITY.md#verifying-a-release) explains what these checks prove, and what they do not. On a Windows or macOS runner, use `dirloom_Windows_x86_64.zip` or `dirloom_Darwin_arm64.tar.gz` and that platform's checksum tool.
+**Install Dirloom** downloads the Linux archive and `checksums.txt` of one release, checks the archive's SHA-256, and verifies its GitHub artifact attestation: the archive must have been built by the `release.yml` workflow of `dirloom/dirloom`, from the tag of that version, on a GitHub-hosted runner. The step fails on any mismatch. The [security policy](../SECURITY.md#verifying-a-release) explains what these checks prove, and what they do not. On a macOS runner, use `dirloom_Darwin_arm64.tar.gz` and `shasum -a 256 -c -`. On a Windows runner, the archive is `dirloom_Windows_x86_64.zip` and holds `dirloom.exe`: extract it with `Expand-Archive` or `unzip` instead of `tar`, and check it with `Get-FileHash` as the security policy shows.
 
 **Summarize the structural changes** compares the committed tree of the target branch with the commit the pull request run checks out, GitHub's merge of the pull request into its target. Both sides are `git:` sources: Dirloom reads Git objects, not the working tree. They need Git 2.45 or newer on the runner; an older Git fails with `git_unavailable` (exit `5`).
+
+Two `git:` sources are compared whole, without Capture Semantics. The summary therefore also lists what the gate does not check: hidden entries such as a new file under `.github/`, built-in exclusions, and paths that the snapshot ignores. To summarize the change as the gate sees it, see the last variation below.
 
 | `diff` exit | Meaning | Step |
 | --- | --- | --- |
@@ -124,7 +126,7 @@ The job sets `shell: bash`, so GitHub runs each `run:` block with `bash --noprof
 
 Two `git:` sources take no snapshot, so `diff` cannot exit `3` or `4` here.
 
-**Summarize the structural history** lists, on `main`, the last 20 commits that changed the structure. `history` has no exit `1`: it exits `0`, or `2`, `5` or `6` on a failure, which fails the step through `-e`. In a shallow clone the walk stops at the shallow boundary and says so (`end: shallow`); `fetch-depth: 0` avoids that.
+**Summarize the structural history** examines, on `main`, the last 20 commits along the first-parent chain and lists those that changed the structure: `--limit` counts the commits examined, and `--structural-only` hides the others. `history` has no exit `1`: it exits `0`, or `2`, `5` or `6` on a failure, which fails the step through `-e`. In a shallow clone the walk stops at the shallow boundary and says so (`end: shallow`); `fetch-depth: 0` avoids that.
 
 **Check the structure** is the gate. `verify` observes the checked-out directory with the Capture Semantics of the snapshot:
 
@@ -146,3 +148,11 @@ The gate runs last, so the summaries are written even when it fails, and before 
 - **Moves.** `diff` reports a moved subtree as one `MOVED` entry. Add `--no-moves` to list every added and removed path instead.
 - **Several snapshots.** A monorepo can keep one snapshot per package, for example `dirloom snapshot packages/api --no-user-config --ignore architecture.dlm.json --output packages/api/architecture.dlm.json`, checked with `dirloom verify packages/api/architecture.dlm.json packages/api`. A literal name such as `architecture.dlm.json` is ignored at any depth, so the snapshot of the whole repository also leaves out those of its packages.
 - **Other CI systems.** The commands and exit codes are the same in GitLab CI, Azure DevOps or Jenkins: stdout and stderr are separate, output is UTF-8 without ANSI colors, and no terminal is needed. The [verify](reference/verify.md#ci) and [diff](reference/diff.md) references show POSIX shell and PowerShell variants.
+- **A summary with the gate's rules.** To list only the changes the gate checks, compare the snapshot of the target branch with the merged tree. The Git side is then observed with that snapshot's Capture Semantics. The step fails while the target branch has no snapshot yet, because `git show` finds no file:
+
+  ```bash
+  git show "origin/$BASE_REF:architecture.dlm.json" > "$RUNNER_TEMP/base.dlm.json"
+  status=0
+  dirloom diff "snapshot:$RUNNER_TEMP/base.dlm.json" git:HEAD > "$RUNNER_TEMP/structure-diff.txt" || status=$?
+  if [ "$status" -gt 1 ]; then exit "$status"; fi
+  ```

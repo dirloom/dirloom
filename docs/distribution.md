@@ -82,7 +82,7 @@ gh release download <version> --repo dirloom/dirloom
 sha256sum -c checksums.txt
 gh attestation verify dirloom_Linux_x86_64.tar.gz --repo dirloom/dirloom \
   --signer-workflow dirloom/dirloom/.github/workflows/release.yml \
-  --source-ref refs/tags/<version>
+  --source-ref refs/tags/<version> --deny-self-hosted-runners
 ```
 
 The [security policy](../SECURITY.md#release-trust-model) explains what each check proves. Checksums, SBOMs and attestations are not an independent cryptographic signature of the binaries: no maintainer-held key signs them.

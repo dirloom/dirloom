@@ -20,7 +20,7 @@ The stable channels stay on `v0.3.3` during the release candidate: `winget upgra
 | `dirloom fingerprint [directory]` | print the identity of the observed structure | `0`, `1`, `2` |
 | `dirloom snapshot [directory]` | record it as a self-verifying JSON file | `0`, `1`, `2` |
 | `dirloom verify <snapshot> [directory]` | check a directory against a snapshot | `0` to `6` |
-| `dirloom diff <source-a> <source-b>` | list the paths added, removed, changed or moved between two snapshots, directories or Git revisions | `0` to `6` |
+| `dirloom diff <source-a> <source-b>` | list the paths added, removed, changed or moved between a snapshot and a snapshot, a directory or a Git revision, or between two Git revisions | `0` to `6` |
 | `dirloom history [revision]` | summarize the structural changes along a Git history | `0`, `2`, `5`, `6` |
 | `dirloom watch [directory]` | **experimental**: report structural changes as they happen | `0`, `2`, `5`, `6` |
 
@@ -66,7 +66,11 @@ A file name that is not valid UTF-8, or a Windows name holding an unpaired UTF-1
 
 ### Configuration and theme files
 
-A `.dirloom.yaml`, a user configuration file or a theme file that is not a regular file, such as a link to `/dev/zero` or a named pipe, is refused before it is read, instead of being read without end or blocking. The 1 MiB limit of these files now holds whatever the file system reports as their size.
+A `.dirloom.yaml`, a user configuration file or a theme file that is not a regular file, such as a link to `/dev/zero` or a named pipe, is refused before it is read, instead of being read without end or blocking: exit `1` for a configuration file, `2` for a theme file. The 1 MiB limit of these files now holds whatever the file system reports as their size.
+
+### Ignore patterns made of many `**`
+
+An ignore pattern made of many `**` segments, from `--ignore`, a configuration `ignore:` entry or a theme `match.glob`, could make matching run for hours: the matcher backtracked exponentially. Matching is now linear in the pattern and the path, with the same results.
 
 ### Windows scans
 
@@ -78,8 +82,7 @@ A scan no longer blocks a rename or a removal of the entries it reads. Two outco
 
 ### Unchanged, now documented
 
-- Ignore patterns made of many `**` segments match with the same results, in time linear in the pattern and the path.
-- On Windows, `--output` cannot replace a destination that another process has open: exit `1`, the existing file unchanged. This was already the case in `v0.3.3` ([safe filesystem behavior](../README.md#safe-filesystem-behavior)).
+On Windows, `--output` cannot replace a destination that another process has open: exit `1`, the existing file unchanged. This was already the case in `v0.3.3` ([safe filesystem behavior](../README.md#safe-filesystem-behavior)).
 
 ## Stability from v0.4 on
 

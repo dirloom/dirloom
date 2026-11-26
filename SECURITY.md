@@ -18,11 +18,11 @@ Dirloom starts two kinds of external programs, never through a shell: `git`, for
 
 ### What Dirloom reads
 
-- **The selected tree.** Names, entry kinds and link targets under the selected root. Dirloom never reads the contents of project files, never executes them, never parses project code, never follows a symlink or a junction below the root, and never loads a script from the project.
-- **A few files, by design:** the `.gitignore` files of the tree (unless `--no-gitignore`), the project and user configuration files (unless `--no-config`), a custom theme file selected with `--theme` or by configuration, and the snapshot files given to `verify` and `diff`.
-- **Git objects,** for a `git:` source of `diff` and for `history`, through the `git` executable, as described below.
+- **The selected tree.** Names, entry kinds and link targets under the selected root. Apart from the files listed next, Dirloom never reads the contents of project files. It never executes them, never parses project code, never follows a symlink or a junction while it scans, and never loads a script from the project.
+- **A few files, by design:** the `.gitignore` files of the tree (unless `--no-gitignore`; a `.gitignore` that is a link is not read), the project and user configuration files (unless `--no-config`), a custom theme file selected with `--theme` or by configuration, and the snapshot files given to `verify` and `diff`. A configuration file is read through a link when the link leads to a regular file.
+- **Git data,** for a `git:` source of `diff` and for `history`: committed objects, through the `git` executable as described below, and, for `history`, the shallow boundary list of the repository, read directly from the path Git reports for it.
 
-Configuration and theme files cannot execute commands, include other files, interpolate environment variables, select another root or choose an output destination ([configuration security](docs/configuration.md#security-and-trust)).
+Configuration and theme files cannot execute commands, include other files, interpolate environment variables, select another root or choose an output destination ([configuration security](docs/configuration.md#security-and-trust)). On a tree you do not trust, `--no-config` disables the project and user configuration files.
 
 ### How Dirloom runs Git
 
@@ -43,8 +43,8 @@ Dirloom treats snapshots, Git data, `.gitignore`, configuration and theme files,
 | --- | --- | --- |
 | snapshot file | 256 MiB, 2,000,000 nodes or elements of any JSON array, 64 levels of nesting, 4,096 ignore patterns, 64 required features; strict UTF-8 and JSON, no duplicate key; embedded fingerprint recomputed | `snapshot_limit_exceeded` or another `INVALID_SNAPSHOT` code, exit 3 |
 | Git objects | tree object 32 MiB, `.gitignore` blob 1 MiB, link target 4,096 bytes, commit object 1 MiB, shallow list 16 MiB; an observation keeps at most 2,000,000 nodes and 256 MiB of paths | a `git_*` code, exit 5 |
-| `.gitignore` in a directory | 1 MiB, lines under 64 KiB | `source_read_failure` |
-| configuration and theme files | regular files only, 1 MiB | usage error, exit 2 |
+| `.gitignore` in a directory | 1 MiB, lines under 64 KiB | `source_read_failure` in the structural commands; exit 1 for the tree output |
+| configuration and theme files | regular files only, 1 MiB | above 1 MiB: usage error, exit 2; not a regular file: exit 1 for a configuration file, exit 2 for a theme file |
 | file names | valid UTF-8 on Linux and macOS, valid UTF-16 on Windows; never repaired | `invalid_canonical_path` in the structural commands; the tree outputs refuse the name too (exit 1) |
 
 Named pipes, sockets and devices are refused by the structural commands, never opened. The [exit codes reference](docs/reference/exit-codes.md) lists every machine code. An unexpected panic is reported as an internal error, never as a success and without a stack trace ([unexpected internal failures](docs/reference/exit-codes.md#unexpected-internal-failures)). The untrusted-input parsers ran through a recorded fuzz campaign before the v0.4 release candidate ([campaign record](docs/release/v0.4.0-rc1-fuzz-campaign.md)).
@@ -81,15 +81,15 @@ $Expected = ((Get-Content checksums.txt) -like "*  $Asset" -split " ")[0]
 
 A match proves that the archive is the one `checksums.txt` describes. It does not prove where either file came from: someone able to replace one could replace both.
 
-**2. Attestation.** With the GitHub CLI, check that the file was built by the Dirloom release workflow from the tag of that version:
+**2. Attestation.** With the GitHub CLI, check that the file was built by the Dirloom release workflow, from the tag of that version, on a GitHub-hosted runner:
 
 ```bash
 gh attestation verify dirloom_Linux_x86_64.tar.gz --repo dirloom/dirloom \
   --signer-workflow dirloom/dirloom/.github/workflows/release.yml \
-  --source-ref refs/tags/<version>
+  --source-ref refs/tags/<version> --deny-self-hosted-runners
 ```
 
-The same command verifies an SBOM or `checksums.txt`: all 13 files are subjects of the attestation. A success means that the file's SHA-256 is listed in a SLSA provenance statement signed during the release run with a short-lived certificate from the public Sigstore instance, issued to the `release.yml` workflow of `dirloom/dirloom` running at that tag on a GitHub-hosted runner, and that the signature is recorded in Sigstore's public transparency log. A file built anywhere else, or from another tag, fails.
+The same command verifies an SBOM or `checksums.txt`: all 13 files are subjects of the attestation. A success means that the file's SHA-256 is listed in a SLSA provenance statement signed during the release run with a short-lived certificate from the public Sigstore instance, issued to the `release.yml` workflow of `dirloom/dirloom` running at that tag, and that the signature is recorded in Sigstore's public transparency log. `--deny-self-hosted-runners` also requires a GitHub-hosted runner. A file built anywhere else, or from another tag, fails.
 
 **3. SBOM.** Read `<archive>.spdx.json` to see which dependency versions a binary contains, for example to check it against a vulnerability advisory. Verify the SBOM itself with steps 1 and 2 first.
 
