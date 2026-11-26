@@ -110,6 +110,15 @@ jobs:
         shell: pwsh
         run: go test ./internal/cli -count=1 -run TestHistoryShellExitCodes
 
+      # The showcase runs examples/showcase with every shell of the runner:
+      # bash, and PowerShell 7 where it is installed, plus Windows PowerShell
+      # 5.1 on Windows. It checks the transcript published in docs/showcase.md
+      # and README.md, then replays the experimental watch demonstration.
+      # -v lists the shells that ran and those skipped.
+      - name: Showcase
+        shell: bash
+        run: go test ./internal/cli -count=1 -v -run '^TestShowcase(Scenario|Watch)$'
+
       # The race job covers Linux. The watch backends differ per platform,
       # so their tests also run under the race detector on Windows and macOS.
       - name: Race detector (watch)
