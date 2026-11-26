@@ -21,7 +21,8 @@ Runs on Windows PowerShell 5.1 and PowerShell 7.
 
 .PARAMETER WorkDirectory
 Where the project is created. It must be empty or not exist yet. Default: a
-new temporary directory, which is kept and named on stderr at the end.
+new temporary directory, which is kept and named on stderr at the end, even
+on a failure.
 
 .NOTES
 The DIRLOOM environment variable names the dirloom executable to run.
@@ -161,7 +162,7 @@ try {
     New-Commit 2026-01-05T09:00:00Z 'Lay out the shop service'
 
     Write-Section project
-    Invoke-Dirloom 0 --no-config --style ascii
+    Invoke-Dirloom 0 --no-config --style ascii --color never
 
     # 2. Snapshot the structure and commit the snapshot with the code.
     Write-Section snapshot
@@ -202,8 +203,7 @@ try {
 } finally {
     foreach ($name in $saved.Keys) { Set-ProcessVariable $name $saved[$name] }
     Pop-Location
-}
-
-if ($announce) {
-    [Console]::Error.WriteLine("showcase: the project is in $project")
+    if ($announce) {
+        [Console]::Error.WriteLine("showcase: the project is in $project")
+    }
 }

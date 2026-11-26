@@ -47,9 +47,9 @@ same on every machine, commit ids included:
   `diff` and `history` read no configuration at all.
 - Git reads an empty configuration: `GIT_CONFIG_NOSYSTEM=1`, and
   `GIT_CONFIG_GLOBAL` names an empty file. It reads no global ignore or
-  attributes file either (`XDG_CONFIG_HOME` names an empty directory, and
-  `GIT_ATTR_NOSYSTEM=1`), and `git init --template=` copies no template, so
-  no hook runs.
+  attributes file either (`XDG_CONFIG_HOME` names a directory that does not
+  exist, and `GIT_ATTR_NOSYSTEM=1`), and `git init --template=` copies no
+  template, so no hook runs.
 - Every commit has a fixed author, committer and date (`GIT_AUTHOR_DATE`,
   `GIT_COMMITTER_DATE`).
 - Every file is written with the same bytes on every system: one line of
@@ -66,11 +66,12 @@ an error as soon as a command exits otherwise or writes to stderr.
 ## 1. A reference project
 
 `shop` is a small Go service, committed on `main`. The tree output shows its
-structure; `--style ascii` draws it with ASCII characters only.
+structure: `--style ascii` draws it with ASCII characters only, and
+`--color never` keeps it without color in a terminal too.
 
 <!-- showcase:project -->
 ```text
-$ dirloom --no-config --style ascii
+$ dirloom --no-config --style ascii --color never
 shop/
 |-- cmd/
 |   `-- shop/
@@ -262,16 +263,16 @@ project that the script left, whose path the script names on stderr:
 dirloom watch --no-config
 ```
 
-In a second terminal, in the same directory, rename a directory, with bash:
+In a second terminal, in the same directory, add a file, with bash:
 
 ```bash
-mv internal/textutil internal/strutil
+printf 'package billing\n' > internal/billing/refund.go
 ```
 
 or with PowerShell:
 
 ```powershell
-Move-Item internal/textutil internal/strutil
+Set-Content internal/billing/refund.go 'package billing'
 ```
 
 Then stop the watch with Ctrl+C:
@@ -280,14 +281,20 @@ Then stop the watch with Ctrl+C:
 ```text
 $ dirloom watch --no-config
 Watching structure (experimental, native): 20 nodes, dlm:v1:sha256:eaa4d0769c8e610272bbb9dd7bdfcf7733f72a37cf00fbb3ba34c6483f68fee8
-#1  > internal/textutil -> internal/strutil (subtree, 2 nodes)
-#1  = 20 nodes, dlm:v1:sha256:2e528d24d7566c6532b7816b70cff5a44971e8be2db3cdadc0f20dea977010bf  (+0 -0 ~0 >1)
+#1  + internal/billing/refund.go
+#1  = 21 nodes, dlm:v1:sha256:848f44797b76b223b938589310b9fa2ab7492b35eeac1a060b5bc5c1e3cb70b4  (+1 -0 ~0 >0)
 Stopped at #1.
 [exit 0]
 ```
 
 The first line is the state at startup: 20 nodes, the snapshot file
-included, since a watch has no snapshot to leave out. The rename is
-generation `#1`: one `MOVED`, then the new node count, fingerprint and
-counts. Ctrl+C is a controlled interruption, exit 0. A test replays this
-demonstration on Windows, Linux and macOS, separately from the scenario.
+included, since a watch has no snapshot to leave out. The new file is
+generation `#1`: one `+`, then the new node count, fingerprint and counts.
+Ctrl+C is a controlled interruption, exit 0.
+
+A watch reports moves too, as `>` lines in the vocabulary of `diff`. This
+demonstration adds a file because a single creation always gives the same
+output: a watch observes at times of its own, and an observation that runs
+while a directory is being renamed can see the rename half done and report
+it differently from one run to the next. A test replays this demonstration
+on Windows, Linux and macOS, separately from the scenario.

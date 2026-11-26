@@ -83,6 +83,7 @@ func TestShowcaseScenario(t *testing.T) {
 			checkShowcasePages(t, sections)
 			checkHostileConfigurationIsLive(t, bin, filepath.Join(work, "shop"), sections["project"])
 			checkShowcaseRefusesNonEmptyDirectory(t, shell, bin)
+			checkShowcaseNamesItsDirectoryOnFailure(t, shell, bin)
 			if shell.script == "showcase.ps1" {
 				checkShowcaseRestoresTheSession(t, shell, bin)
 			}
@@ -91,11 +92,21 @@ func TestShowcaseScenario(t *testing.T) {
 }
 
 // TestShowcaseWatch replays the watch demonstration of docs/showcase.md on
-// the project that the scenario leaves: a native watch, one directory
-// renamed, then an interruption. The rename is one atomic operation, made
-// once the watch is idle, so the output is exactly one generation; every
-// wait is bounded. watch stays experimental: its text output is for people
-// and is not a contract.
+// the project that the scenario leaves: a native watch, one file created,
+// then an interruption. Every wait is bounded. watch stays experimental: its
+// text output is for people and is not a contract.
+//
+// The output is deterministic without waiting for the watch to be idle,
+// which nothing outside the process can observe: after its header, a native
+// watch observes again at a time of its own (a verification of its startup
+// registrations), and later after each notification. The change is the
+// creation of one file: its entry appears at once and nothing is ever
+// removed, so every observation, before, during or after the creation, sees
+// either the state before or the state after, and never meets an entry that
+// disappears. A watch publishes only an observation that differs from the
+// last published state, so it publishes exactly one generation. A rename
+// would not do: an observation that lists a directory before the rename and
+// reads it after meets an entry that no longer exists.
 func TestShowcaseWatch(t *testing.T) {
 	gittest.Require(t)
 	bin := buildVerifyBinary(t)
@@ -157,23 +168,8 @@ func TestShowcaseWatch(t *testing.T) {
 	}
 
 	got := []string{read("header", time.After(2*watchWait))}
-	// At startup the watch observes once more, one debounce (200 ms) after
-	// its header, to check the state it published. A rename during that
-	// observation could meet a directory that no longer exists, so wait for
-	// it to pass. Windows can also refuse a rename for the instant an
-	// observation lists a directory below (docs/reference/watch.md, platform
-	// limits): none is due, but a second attempt is harmless.
-	time.Sleep(time.Second)
-	from, to := filepath.Join(project, "internal", "textutil"), filepath.Join(project, "internal", "strutil")
-	for attempt := 1; ; attempt++ {
-		err := os.Rename(from, to)
-		if err == nil {
-			break
-		}
-		if attempt == 50 {
-			t.Fatal(err)
-		}
-		time.Sleep(20 * time.Millisecond)
+	if err := os.WriteFile(filepath.Join(project, "internal", "billing", "refund.go"), []byte("package billing\n"), 0o600); err != nil {
+		t.Fatal(err)
 	}
 	generation := time.After(watchWait)
 	for !strings.HasPrefix(got[len(got)-1], "#1  = ") {
@@ -205,8 +201,8 @@ func TestShowcaseWatch(t *testing.T) {
 	fingerprint := `dlm:v1:sha256:[0-9a-f]{64}`
 	want := []*regexp.Regexp{
 		regexp.MustCompile(`^Watching structure \(experimental, native\): 20 nodes, ` + fingerprint + `$`),
-		regexp.MustCompile(`^#1  > internal/textutil -> internal/strutil \(subtree, 2 nodes\)$`),
-		regexp.MustCompile(`^#1  = 20 nodes, ` + fingerprint + `  \(\+0 -0 ~0 >1\)$`),
+		regexp.MustCompile(`^#1  \+ internal/billing/refund\.go$`),
+		regexp.MustCompile(`^#1  = 21 nodes, ` + fingerprint + `  \(\+1 -0 ~0 >0\)$`),
 		regexp.MustCompile(`^Stopped at #1\.$`),
 	}
 	if len(got) != len(want) {
@@ -231,10 +227,10 @@ type showcaseShell struct {
 }
 
 // findShowcaseShell returns the shell called name, or skips the test when
-// it is not installed and not required. The system's own shells are
-// required: bash on Linux and macOS; PowerShell 7, Windows PowerShell 5.1
-// and, on CI, Git Bash on Windows. PowerShell 7 runs on Linux and macOS when
-// it is installed.
+// it is not installed and not required. The system's own shells are always
+// required: bash on Linux and macOS; PowerShell 7 and Windows PowerShell 5.1
+// on Windows. On CI every shell is required: PowerShell 7 on Linux and
+// macOS, and Git Bash on Windows, as well.
 func findShowcaseShell(t *testing.T, name string) showcaseShell {
 	t.Helper()
 	windows := runtime.GOOS == "windows"
@@ -271,8 +267,8 @@ func findShowcaseShell(t *testing.T, name string) showcaseShell {
 	case "pwsh":
 		pwsh, err := exec.LookPath("pwsh")
 		if err != nil {
-			if windows {
-				t.Fatal("pwsh is required to run showcase.ps1 on Windows")
+			if windows || os.Getenv("CI") != "" {
+				t.Fatal("pwsh is required to run showcase.ps1 on Windows and on CI")
 			}
 			t.Skip("PowerShell 7 is not installed")
 		}
@@ -501,6 +497,37 @@ func checkShowcaseRefusesNonEmptyDirectory(t *testing.T, shell showcaseShell, bi
 	}
 }
 
+// checkShowcaseNamesItsDirectoryOnFailure runs a script without a work
+// directory and with a dirloom that does not exist: it fails at its first
+// dirloom command, and must still name the temporary directory that it
+// created and leaves behind.
+func checkShowcaseNamesItsDirectoryOnFailure(t *testing.T, shell showcaseShell, bin string) {
+	t.Helper()
+	tmp := t.TempDir()
+	script, err := filepath.Abs(filepath.Join(showcaseRoot, "examples", "showcase", shell.script))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, shell.program, append(append([]string{}, shell.args...), script)...) // #nosec G204 -- a shell running a script of this repository.
+	// bash's mktemp reads TMPDIR; .NET reads TMPDIR on Unix, TMP and TEMP on
+	// Windows.
+	cmd.Env = append(showcaseEnvironment(t, bin), "DIRLOOM=dirloom-showcase-not-installed", "TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+	cmd.WaitDelay = 10 * time.Second
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	err = cmd.Run()
+	entries, readErr := os.ReadDir(tmp)
+	if err == nil || readErr != nil || len(entries) != 1 || !strings.HasPrefix(entries[0].Name(), "dirloom-showcase.") {
+		t.Fatalf("failure without a work directory: %v; %s holds %v (%v); stderr %q", err, tmp, entries, readErr, stderr.String())
+	}
+	announce := regexp.MustCompile(`(?m)^showcase: the project is in .*` + regexp.QuoteMeta(entries[0].Name()) + `[/\\]shop\r?$`)
+	if !announce.MatchString(stderr.String()) {
+		t.Fatalf("the script did not name %s on a failure; stderr %q", entries[0].Name(), stderr.String())
+	}
+}
+
 // showcaseStep is one dirloom command of a transcript.
 type showcaseStep struct {
 	command string
@@ -562,7 +589,7 @@ func checkShowcaseScenario(t *testing.T, transcript string) map[string]string {
 
 	// Exit codes: tree output and snapshot 0 on success; verify 0 MATCH and
 	// 1 MISMATCH; diff 1 DIFFERENCES; history 0 OK.
-	tree := step("project", 1, 0, "dirloom --no-config --style ascii", "0").output
+	tree := step("project", 1, 0, "dirloom --no-config --style ascii --color never", "0").output
 	for _, want := range []string{"shop/\n", "|-- payment/\n", "|   `-- utils/\n", "|       `-- strings.go\n", "`-- README.md\n"} {
 		if !strings.Contains(tree, want) {
 			t.Fatalf("project tree lacks %q:\n%s", want, tree)

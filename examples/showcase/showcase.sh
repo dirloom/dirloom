@@ -7,7 +7,7 @@
 #
 #   work-directory  where the project is created. It must be empty or not
 #                   exist yet. Default: a new temporary directory, which is
-#                   kept and named on stderr at the end.
+#                   kept and named on stderr at the end, even on a failure.
 #   DIRLOOM         environment variable: the dirloom executable to run.
 #                   Default: dirloom on PATH.
 #
@@ -40,10 +40,9 @@ if [ $# -eq 1 ]; then
     echo "showcase: $1 is not empty" >&2
     exit 2
   fi
-  announce=false
 else
   work=$(mktemp -d "${TMPDIR:-/tmp}/dirloom-showcase.XXXXXX")
-  announce=true
+  trap 'echo "showcase: the project is in $work/shop" >&2' EXIT
 fi
 project=$work/shop
 
@@ -110,7 +109,7 @@ git add --all
 commit_at 2026-01-05T09:00:00Z "Lay out the shop service"
 
 section project
-run 0 --no-config --style ascii
+run 0 --no-config --style ascii --color never
 
 # 2. Snapshot the structure and commit the snapshot with the code.
 section snapshot
@@ -150,7 +149,3 @@ run 1 diff git:main git:refactor/layout
 # 7. The structural history of the branch.
 section history
 run 0 history
-
-if [ "$announce" = true ]; then
-  echo "showcase: the project is in $project" >&2
-fi

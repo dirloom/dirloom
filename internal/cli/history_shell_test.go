@@ -17,7 +17,13 @@ import (
 func TestHistoryShellExitCodes(t *testing.T) {
 	bin := buildVerifyBinary(t)
 	repo, _ := historyGoldenRepository(t)
-	outside := t.TempDir()
+	// A directory outside any repository, whatever the host has above the
+	// temporary directory: the smokes stop Git at its parent and clear
+	// GIT_DIR and GIT_WORK_TREE for that call.
+	outside := filepath.Join(t.TempDir(), "outside")
+	if err := os.Mkdir(outside, 0o750); err != nil {
+		t.Fatal(err)
+	}
 	out := t.TempDir()
 	if runtime.GOOS == "windows" {
 		runPowerShellHistorySmoke(t, bin, repo.Dir, outside, out)
@@ -75,6 +81,8 @@ set -e
 test "$code" -eq 5
 test ! -s "$out/missing.err"
 cd "$outside"
+unset GIT_DIR GIT_WORK_TREE
+export GIT_CEILING_DIRECTORIES="$(dirname "$outside")"
 set +e
 "$bin" history --format json >"$out/outside.json" 2>"$out/outside.err"
 code=$?
@@ -139,6 +147,8 @@ Assert-Line 'refused.err' '^Error: '
 if ($LASTEXITCODE -ne 5) { throw "missing LASTEXITCODE=$LASTEXITCODE" }
 Assert-Empty 'missing.err'
 Set-Location $Outside
+Remove-Item Env:GIT_DIR, Env:GIT_WORK_TREE -ErrorAction SilentlyContinue
+$env:GIT_CEILING_DIRECTORIES = Split-Path -Parent $Outside
 & $Bin history --format json > (Join-Path $Out 'outside.json') 2> (Join-Path $Out 'outside.err')
 if ($LASTEXITCODE -ne 5) { throw "outside LASTEXITCODE=$LASTEXITCODE" }
 Assert-Empty 'outside.err'
