@@ -312,10 +312,16 @@ func driveWatch(args []string, params watchParams, tree string, stdout, stderr *
 		_, _ = io.Copy(io.Discard, reader)
 	}()
 
-	stopWith := func(code int) (*watchResult, int) {
+	// stopWith ends the watch. A failure of the driver (non-zero) is the
+	// outcome; otherwise the watch's own exit status is.
+	stopWith := func(failure int) (*watchResult, int) {
 		cancel()
+		code := failure
 		select {
-		case code = <-exit:
+		case status := <-exit:
+			if failure == 0 {
+				code = status
+			}
 		case <-time.After(30 * time.Second):
 			_, _ = fmt.Fprintln(stderr, "perfbaseline: the watch did not stop within 30 s")
 			code = -1
