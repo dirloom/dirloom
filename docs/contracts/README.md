@@ -2,9 +2,29 @@
 
 > **Status:** candidate register for the v0.4 freeze, prepared in `v0.4.0-rc1` LOT 1. The definitive register is published in the freeze commit (gate G2), where candidate status lines become "frozen for v0.4".
 >
-> **Related:** [Compatibility and freeze policy](../compatibility-policy.md)
+> **Related:** [Compatibility and freeze policy](../compatibility-policy.md), [Exit codes and machine codes](../reference/exit-codes.md), [Structural Version Control](../structural-version-control.md)
 
 Every public input and output of Dirloom, with its status, its owner and what pins it. **Owner** is the package that defines the contract in code; a change to the contract starts there, with its tests and fixtures. Statuses are defined in the [policy](../compatibility-policy.md#1-what-is-a-public-contract).
+
+## Machine outputs by command
+
+Which command and flag write which machine-readable document, and how a program recognizes its version. Programs check that version field before they read the rest, and branch on the exit code first ([Exit codes and machine codes](../reference/exit-codes.md)).
+
+| Command | Output | Contract | Version field | Status |
+| --- | --- | --- | --- | --- |
+| `dirloom [directory] --format json` | tree | [Tree JSON Schema v1](tree-json-v1.md) | `"schemaVersion": 1` | candidate |
+| `dirloom [directory] --format markdown-tree` | Markdown list | [Markdown tree](../markdown-tree.md) | none: the format is the v0.2 output | candidate |
+| `dirloom [directory] --format mermaid`, `graphviz`, `d2` | graph source | [Graph exports](../graph-exports.md) | header `dirloom-diagram-contract: 1` | candidate |
+| `dirloom fingerprint` | one line `dlm:v1:sha256:<hex>` | [Identity Projection v1](identity-projection-v1.md) | the `v1` token | candidate |
+| `dirloom fingerprint --format json` | fingerprint | [Fingerprint JSON v1](fingerprint-json-v1.md) | `"schemaVersion": 1` | candidate |
+| `dirloom snapshot`, to stdout or `--output` | snapshot | [Snapshot Schema v1](snapshot-schema-v1.md) | `"schemaVersion": 1`, `"artifactVersion": 1`, `requiredFeatures` | candidate |
+| `dirloom verify --format json` | verify result | [Verify Result Schema v1](verify-result-v1.md) | `"schemaVersion": 1` | candidate |
+| `dirloom diff --format json` | diff result | [Diff Result Schema v3](diff-result-v3.md) | `"schemaVersion": 3` | candidate |
+| `dirloom history --format json` | history result | [History Result Schema v1](history-result-v1.md) | `"schemaVersion": 1` | candidate |
+| `dirloom watch --format ndjson` | one event per line | [Watch Event Schema v1](watch-event-v1.md) | `"schemaVersion": 1` on every line | experimental |
+| `config explain`, `preset explain`, `theme list`, `theme explain`, `theme validate`, `theme classify`, each with `--as json` | diagnostics | [policy §5](../compatibility-policy.md#5-diagnostic-outputs-d1) | `schemaVersion` | diagnostic, not a contract |
+
+Inputs that Dirloom reads have contracts too: a snapshot passed to `verify` or `diff` (Snapshot Schema v1), a Git tree named by `git:` or walked by `history` ([Git Tree Source v1](git-tree-source-v1.md), [Structural History v1](structural-history-v1.md)), and the YAML configuration and theme files (below).
 
 ## Candidates for the v0.4 freeze
 
@@ -56,4 +76,4 @@ The text and fenced Markdown tree renderings (`text`, `markdown`) are v0.1 outpu
 
 ## JSON Schema files (D12)
 
-Dirloom ships no JSON Schema file for v0.4. Each result contract is defined by its Markdown document together with byte-exact golden fixtures and fuzz targets, which also pin field order, indentation and exact codes. A JSON Schema could not express those properties, and a second normative description would have to be kept in step with the first. A JSON Schema can be published later as an informative companion without changing any contract version. This is the LOT 1 proposal, to be confirmed by the CTO review.
+Dirloom ships no JSON Schema file for v0.4. Each result contract is defined by its Markdown document together with byte-exact golden fixtures and fuzz targets, which also pin field order, indentation and exact codes. A JSON Schema could not express those properties, and a second normative description would have to be kept in step with the first. The Markdown contracts, the golden fixtures and the tests are the normative reference. A JSON Schema can be published after v0.4 as an informative companion without changing any contract version. The CTO confirmed this deferral on 2026-11-26.
