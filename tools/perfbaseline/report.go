@@ -9,6 +9,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -176,6 +177,7 @@ func formatStat(s stat) string {
 func runSummarize(args []string) error {
 	flags := flag.NewFlagSet("summarize", flag.ContinueOnError)
 	label := flags.String("label", "", "only this label")
+	pattern := flags.String("scenarios", ".", "regular expression selecting scenario names")
 	columns := flags.String("measures", "wall,heap,live,commit,ws,alloc,objects", "comma-separated measures: "+measureKeys())
 	format := flags.String("format", "markdown", "markdown, or bench for benchstat")
 	if err := flags.Parse(args); err != nil {
@@ -185,9 +187,13 @@ func runSummarize(args []string) error {
 	if err != nil {
 		return err
 	}
-	if *label != "" {
-		all = slices.DeleteFunc(all, func(r result) bool { return r.Label != *label })
+	selector, err := regexp.Compile(*pattern)
+	if err != nil {
+		return err
 	}
+	all = slices.DeleteFunc(all, func(r result) bool {
+		return (*label != "" && r.Label != *label) || !selector.MatchString(r.Scenario)
+	})
 	if *format == "bench" {
 		return writeBench(os.Stdout, all)
 	}
@@ -211,8 +217,23 @@ func measureKeys() string {
 }
 
 func writeMarkdown(w io.Writer, groups []*group, selected []measure) error {
-	header := "| Label | Scenario | Runs |"
-	rule := "| --- | --- | ---: |"
+	// The label column appears only when the results mix labels.
+	labels := map[string]bool{}
+	for _, g := range groups {
+		labels[g.Label] = true
+	}
+	withLabel := len(labels) > 1
+	label := func(g *group) string {
+		if withLabel {
+			return "| " + g.Label + " "
+		}
+		return ""
+	}
+	header := "| Scenario | Runs |"
+	rule := "| --- | ---: |"
+	if withLabel {
+		header, rule = "| Label "+header, "| --- "+rule
+	}
 	for _, m := range selected {
 		header += " " + m.Title + " |"
 		rule += " ---: |"
@@ -222,7 +243,7 @@ func writeMarkdown(w io.Writer, groups []*group, selected []measure) error {
 	}
 	var watch []*group
 	for _, g := range groups {
-		row := fmt.Sprintf("| %s | `%s` | %d/%d |", g.Label, g.Scenario, len(g.OK), len(g.OK)+len(g.Failed))
+		row := fmt.Sprintf("%s| `%s` | %d/%d |", label(g), g.Scenario, len(g.OK), len(g.OK)+len(g.Failed))
 		for _, m := range selected {
 			row += " " + formatStat(g.stat(m)) + " |"
 		}

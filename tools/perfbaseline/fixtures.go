@@ -474,7 +474,7 @@ func writeWideTree(dir string, nodes int) (map[string]any, error) {
 
 // writeDeepTree creates 100 chains c000..c099 of 50 nested directories
 // "a"; each directory of a chain holds 19 empty files f00..f18. With the
-// root: 100 × 50 × 20 + 1 = 100,001 nodes, paths up to 115 bytes.
+// root: 100 × 50 × 20 + 1 = 100,001 nodes, paths up to 106 bytes.
 func writeDeepTree(dir string) (map[string]any, error) {
 	root := artifact.Node{Path: artifact.RootPath, Name: ".", Kind: artifact.KindDirectory}
 	for c := 0; c < 100; c++ {

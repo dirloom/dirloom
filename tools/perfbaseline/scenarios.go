@@ -80,9 +80,9 @@ func scenarios() []scenario {
 
 		// Critical: malformed inputs close to the limits.
 		{Name: "bad-keys", Priority: "critical", Group: "malformed input", About: "verify a 250 MiB object of unique keys (finding F6)",
-			Needs: []string{"bad", "live-empty"}, Args: []string{"verify", "--format", "json", "@bad/keys.json", "@live-empty"}, Exits: []int{3}, Expect: `"invalid_snapshot_`},
+			Needs: []string{"bad", "live-empty"}, Args: []string{"verify", "--format", "json", "@bad/keys.json", "@live-empty"}, Exits: []int{3}, Expect: `"code": "missing_snapshot_field"`},
 		{Name: "bad-keys-after-2m", Priority: "critical", Group: "malformed input", About: "diff a valid 2,000,000-node snapshot, then the 250 MiB object of unique keys",
-			Needs: []string{"bad", "snap-wide-2m"}, Args: diffJSON("snapshot:@snap-wide-2m/a.json", "snapshot:@bad/keys.json"), Exits: []int{3}, Expect: `"invalid_snapshot_`},
+			Needs: []string{"bad", "snap-wide-2m"}, Args: diffJSON("snapshot:@snap-wide-2m/a.json", "snapshot:@bad/keys.json"), Exits: []int{3}, Expect: `"code": "missing_snapshot_field"`},
 		{Name: "bad-nodes-over", Priority: "critical", Group: "malformed input", About: "verify a snapshot of 2,000,001 nodes, one above the limit",
 			Needs: []string{"bad", "live-empty"}, Args: []string{"verify", "--format", "json", "@bad/nodes-over.json", "@live-empty"}, Exits: []int{3}, Expect: `"snapshot_limit_exceeded"`},
 		{Name: "bad-bytes-over", Priority: "critical", Group: "malformed input", About: "verify a 271 MiB snapshot, above the 256 MiB limit",
