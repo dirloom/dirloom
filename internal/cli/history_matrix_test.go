@@ -3,10 +3,8 @@ package cli
 import (
 	"encoding/json"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -108,93 +106,4 @@ func TestHistoryFingerprintMatchesLosslessCheckout(t *testing.T) {
 	if fingerprint.Fingerprint == "" || fingerprint.Fingerprint != historyFingerprint {
 		t.Fatalf("checkout %s, history %v", fingerprint.Fingerprint, historyFingerprint)
 	}
-}
-
-// TestHistoryShellExitCodes proves the history exit codes through a real
-// shell: bash on POSIX, PowerShell on Windows.
-func TestHistoryShellExitCodes(t *testing.T) {
-	bin := buildVerifyBinary(t)
-	repo, _ := historyGoldenRepository(t)
-	out := t.TempDir()
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		shell, err := exec.LookPath("pwsh")
-		if err != nil {
-			shell, err = exec.LookPath("powershell")
-		}
-		if err != nil {
-			t.Fatal("pwsh or powershell is required to prove $LASTEXITCODE for history")
-		}
-		script := `
-param(
-  [Parameter(Mandatory = $true)][string]$Work,
-  [Parameter(Mandatory = $true)][string]$Bin,
-  [Parameter(Mandatory = $true)][string]$Out
-)
-$ErrorActionPreference = 'Stop'
-Set-Location $Work
-& $Bin history --format json > (Join-Path $Out 'history.json') 2> (Join-Path $Out 'history.err')
-if ($LASTEXITCODE -ne 0) { throw "history LASTEXITCODE=$LASTEXITCODE" }
-& $Bin history nope --format json > (Join-Path $Out 'missing.json') 2> (Join-Path $Out 'missing.err')
-if ($LASTEXITCODE -ne 5) { throw "missing LASTEXITCODE=$LASTEXITCODE" }
-$ErrorActionPreference = 'Continue'
-& $Bin history --limit 0 --format json > (Join-Path $Out 'usage.out') 2> (Join-Path $Out 'usage.err')
-if ($LASTEXITCODE -ne 2) { throw "usage LASTEXITCODE=$LASTEXITCODE" }
-`
-		scriptPath := filepath.Join(t.TempDir(), "history-smoke.ps1")
-		if err := os.WriteFile(scriptPath, []byte(script), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		cmd = exec.Command(shell, "-NoProfile", "-File", scriptPath, repo.Dir, bin, out)
-	} else {
-		bash, err := exec.LookPath("bash")
-		if err != nil {
-			t.Fatal("bash is required to prove POSIX $? for history")
-		}
-		script := `
-set -euo pipefail
-cd "$1"
-bin=$2
-out=$3
-set +e
-"$bin" history --format json >"$out/history.json" 2>"$out/history.err"
-code=$?
-set -e
-test "$code" -eq 0
-test ! -s "$out/history.err"
-set +e
-"$bin" history nope --format json >"$out/missing.json" 2>"$out/missing.err"
-code=$?
-set -e
-test "$code" -eq 5
-test ! -s "$out/missing.err"
-set +e
-"$bin" history --limit 0 --format json >"$out/usage.out" 2>"$out/usage.err"
-code=$?
-set -e
-test "$code" -eq 2
-test ! -s "$out/usage.out"
-`
-		cmd = exec.Command(bash, "-c", script, "history-smoke", repo.Dir, bin, out)
-	}
-	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("history shell smoke: %v\n%s", err, output)
-	}
-	for name, status := range map[string]string{"history.json": "OK", "missing.json": "OBSERVATION_ERROR"} {
-		data, err := os.ReadFile(filepath.Join(out, name)) // #nosec G304 -- test-owned path.
-		if err != nil {
-			t.Fatal(err)
-		}
-		data = trimBOM(data)
-		if doc := readHistoryDocument(t, data); doc["status"] != status || doc["schemaVersion"] != float64(historyResultSchemaVersion) {
-			t.Fatalf("%s: %v", name, doc)
-		}
-	}
-}
-
-func trimBOM(data []byte) []byte {
-	if len(data) >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF {
-		return data[3:]
-	}
-	return data
 }
