@@ -116,7 +116,7 @@ Move detection, strategy `structural-v1`, reports a removed and an added entry a
 
 ## Scripts and CI
 
-Programs branch on three things, which the [compatibility policy](compatibility-policy.md#2-what-is-stable-and-what-is-not) keeps stable: the exit code, the `status` of a JSON result and the machine `code` of a diagnostic. Messages, on stdout or stderr, are not stable.
+Programs branch on three things, which the [compatibility policy](compatibility-policy.md#2-what-is-stable-and-what-is-not) will keep stable once the contracts are frozen: the exit code, the `status` of a JSON result and the machine `code` of a diagnostic. Messages, on stdout or stderr, are not stable.
 
 | Exit | `verify` | `diff` | `history` |
 | --- | --- | --- | --- |
@@ -136,7 +136,7 @@ Snapshots and Git trees are untrusted input, so their size is bounded:
 
 - a snapshot is refused beyond 256 MiB, 2,000,000 nodes, 64 levels of JSON nesting, 4,096 ignore patterns or 64 required features (`snapshot_limit_exceeded`, exit 3), and `dirloom snapshot` refuses to write one beyond them ([Reader limits](contracts/snapshot-schema-v1.md#reader-limits));
 - a Git observation stops beyond 2,000,000 nodes or 256 MiB of paths (`git_tree_too_large`, exit 5);
-- a `.gitignore` above 1 MiB, or with a line of 64 KiB or more, fails the observation, in a directory as in a Git tree.
+- a `.gitignore` above 1 MiB, or with a line of 64 KiB or more, fails the observation of a directory (`source_read_failure`), and that of a Git tree observed with a snapshot's Capture Semantics that apply `.gitignore` (`git_tree_invalid`). `git:` against `git:`, and `history`, never read `.gitignore`.
 
 Structural commands refuse named pipes, sockets and devices (`unsupported_node_type`); exclude them with `--ignore`. A Windows junction is recorded as `junction` with its target and is never entered. On Windows, while Dirloom reads an entry, the directories above it cannot be renamed; renaming again succeeds ([platform limits](reference/watch.md#platform-limits)).
 

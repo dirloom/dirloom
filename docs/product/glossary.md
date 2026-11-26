@@ -45,7 +45,7 @@ Comparaison entre deux artefacts ou entre un artefact et une structure observée
 
 ## Correspondance structurelle (`MOVED`)
 
-Paire formée d'une entrée supprimée et d'une entrée ajoutée que la détection de déplacements `structural-v1` relie parce que leur nom et leur structure sont uniques dans chaque source, ou parce qu'un dossier non vide est renommé sur place. Ce n'est pas la preuve qu'un fichier a été déplacé : Dirloom ne lit aucun contenu.
+Paire formée d'une entrée supprimée et d'une entrée ajoutée que la détection de déplacements `structural-v1` relie parce que leur nom et leur structure sont uniques dans chaque source, ou parce qu'un dossier non vide, à structure unique, est renommé sur place. Le résultat indique sa justification (`subtree` ou `name`). Ce n'est pas la preuve qu'un fichier a été déplacé : Dirloom ne lit aucun contenu.
 
 ## Structural Version Control
 
@@ -61,7 +61,7 @@ Contrat public de la v0.4 que la release candidate stabilise : il peut encore ê
 
 ## Code machine
 
-Identifiant stable d'un diagnostic, par exemple `snapshot_fingerprint_mismatch` ou `git_revision_not_found`. Avec le code de sortie et le `status` d'un résultat JSON, c'est ce sur quoi un script s'appuie ; le texte des messages n'est pas stable.
+Identifiant d'un diagnostic, stable une fois les contrats v0.4 figés, par exemple `snapshot_fingerprint_mismatch` ou `git_revision_not_found`. Avec le code de sortie et le `status` d'un résultat JSON, c'est ce sur quoi un script s'appuie ; le texte des messages n'est pas stable.
 
 ## Query
 

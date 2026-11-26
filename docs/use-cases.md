@@ -73,7 +73,7 @@ dirloom --help
 | Garantir un texte canonique sans décoration | `dirloom --color never --icons never` |
 | Inspecter ou valider un thème | `dirloom theme explain midnight` ou `dirloom theme validate theme.yaml` |
 | Identifier la vue structurelle observée | `dirloom fingerprint` |
-| Enregistrer la structure de référence | `dirloom snapshot --output architecture.dlm.json` |
+| Enregistrer la structure de référence | `dirloom snapshot --ignore architecture.dlm.json --output architecture.dlm.json` |
 | Vérifier que la structure n’a pas changé | `dirloom verify architecture.dlm.json` |
 | Lister ce qui a été ajouté, supprimé ou déplacé | `dirloom diff snapshot:architecture.dlm.json live:.` |
 | Comparer la structure de deux branches | `dirloom diff git:main git:feature` |

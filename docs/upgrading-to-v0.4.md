@@ -9,9 +9,9 @@ v0.4 adds Structural Version Control: six commands that record, check and compar
 The stable channels stay on `v0.3.3` during the release candidate: `winget upgrade`, `scoop update` and `brew upgrade` do not install v0.4 until `v0.4.0` is published. To try the candidate:
 
 - download a release archive from [GitHub Releases](https://github.com/dirloom/dirloom/releases) and verify it as the [security policy](../SECURITY.md#verifying-a-release) describes. The installation blocks of the [README](../README.md#release-archives) download one version, check its SHA-256 and keep the previous binary as `.bak`; do not point them at a directory that a package manager manages;
-- or build it from a clone checked out at the release candidate's tag, with Go 1.26.10 or newer ([Build from source](../README.md#build-from-source)). `go install` is not a supported way to install Dirloom before `v0.4.0`: the README's [Install with Go](../README.md#install-with-go) explains why.
+- or build it from a clone checked out at the release candidate's tag, with Go 1.26.10 or newer ([Build from source](../README.md#build-from-source)). `go install` is not a supported way to install Dirloom until a release decision restores it: the README's [Install with Go](../README.md#install-with-go) explains why.
 
-`dirloom --version` prints the installed version.
+`dirloom --version` prints the version of a release binary; a binary built from source prints `dev`.
 
 ## New commands
 

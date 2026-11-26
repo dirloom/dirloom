@@ -115,7 +115,7 @@ On a first install, add the directory to your `PATH` once. On Windows: `[Environ
 
 ### Install with Go
 
-`go install` is not a supported way to install Dirloom before `v0.4.0`. Seven tags, `v0.2.0` to `v0.4.0-a2` with `v0.3.3` among them, hold file names that Go modules refuse: the Go module proxy has no module for them, and `go install` of one of them fails. For the other versions, the result depends on the version list the proxy serves. `@latest` either fails or installs the old `v0.1.1`, and a named version can fail too, because `go install` reads the latest version to look for a deprecation notice. Use a [release archive](#release-archives), or build from source with Go 1.26.10.
+`go install` is not a supported way to install Dirloom until a release decision restores it. Seven tags, `v0.2.0` to `v0.4.0-a2` with `v0.3.3` among them, hold file names that Go modules refuse: the Go module proxy has no module for them, and `go install` of one of them fails. For the other versions, the result depends on the version list the proxy serves. `@latest` either fails or installs the old `v0.1.1`, and a named version can fail too, because `go install` reads the latest version to look for a deprecation notice. Use a [release archive](#release-archives), or build from source with Go 1.26.10.
 
 ### Build from source
 

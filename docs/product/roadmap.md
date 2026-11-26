@@ -650,7 +650,7 @@ Tier 4 — semantic identity
 
 Le contenu ne doit pas devenir obligatoire pour le moteur structurel canonique.
 
-**Livré en v0.4 :** le tier 1, stratégie `structural-v1`. Un `MOVED` n'est rapporté que pour une correspondance exacte et unique (même nom et même structure dans chaque source, ou renommage sur place d'un dossier non vide), avec sa preuve (`subtree` ou `name`) ; les cas ambigus restent `REMOVED` + `ADDED`. C'est une correspondance structurelle, pas la preuve d'un déplacement. Les tiers 2 à 4 ne sont pas livrés.
+**Livré en v0.4 :** le tier 1, stratégie `structural-v1`. Un `MOVED` n'est rapporté que pour une correspondance exacte et unique (même nom et même structure dans chaque source, ou renommage sur place d'un dossier non vide à structure unique), avec sa justification (`subtree` ou `name`) ; les cas ambigus restent `REMOVED` + `ADDED`. C'est une correspondance structurelle, pas la preuve d'un déplacement. Les tiers 2 à 4 ne sont pas livrés.
 
 ## 8.6 Structural History / Time Machine
 
