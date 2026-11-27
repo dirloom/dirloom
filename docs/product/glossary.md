@@ -21,11 +21,19 @@ Résultat calculé à partir d'un ou plusieurs inputs : métrique, conformité, 
 
 ## Fingerprint
 
-Empreinte calculée à partir d'une représentation canonique et d'un algorithme versionné. Les namespaces distinguent notamment structure, contenu, dépendances, architecture et contexte.
+Empreinte calculée à partir d'une représentation canonique et d'un algorithme versionné. Les namespaces distinguent notamment structure, contenu, dépendances, architecture et contexte. En v0.4, seul le fingerprint structurel existe : `dlm:v1:sha256:<digest>`.
 
 ## Snapshot
 
-Artefact persistant décrivant un état structurel précis et sa portée. `verify` compare une observation à cet état.
+Artefact persistant décrivant un état structurel précis et sa portée. `verify` compare une observation à cet état. En v0.4, c'est un document Snapshot Schema v1 qui embarque son propre fingerprint et ses Capture Semantics.
+
+## Capture Semantics
+
+Règles effectives qui déterminent la vue structurelle observée : profondeur, dossiers seuls, entrées cachées, exclusions intégrées, motifs `--ignore`, `.gitignore`. Un snapshot les enregistre ; `verify` et `diff` les réappliquent au côté observé, de sorte que les deux côtés d'une comparaison sont vus avec les mêmes règles.
+
+## Source
+
+Côté d'une comparaison `diff`, nommé par un préfixe : `snapshot:` (un fichier snapshot), `live:` (un dossier observé maintenant) ou `git:` (l'arbre commité d'une révision, lu dans les objets Git sans checkout ni réseau).
 
 ## Verify
 
@@ -33,15 +41,27 @@ Opération qui répond : « l'état observé correspond-il au snapshot de réfé
 
 ## Diff structurel
 
-Comparaison entre deux artefacts ou entre un artefact et une structure observée. Il décrit les ajouts, suppressions, changements et déplacements prouvés ou probables.
+Comparaison entre deux artefacts ou entre un artefact et une structure observée. Il décrit les ajouts, suppressions, changements et déplacements prouvés ou probables. En v0.4, `dirloom diff` rapporte `ADDED`, `REMOVED`, `CHANGED` et `MOVED`.
+
+## Correspondance structurelle (`MOVED`)
+
+Paire formée d'une entrée supprimée et d'une entrée ajoutée que la détection de déplacements `structural-v1` relie parce que leur nom et leur structure sont uniques dans chaque source, ou parce qu'un dossier non vide, à structure unique, est renommé sur place. Le résultat indique sa justification (`subtree` ou `name`). Ce n'est pas la preuve qu'un fichier a été déplacé : Dirloom ne lit aucun contenu.
 
 ## Structural Version Control
 
-Ensemble formé par fingerprint, snapshot, verify, diff, history et détection de déplacements. Il traite l'évolution de la structure comme une donnée de premier ordre ; il ne remplace pas Git pour le contenu.
+Ensemble formé par fingerprint, snapshot, verify, diff, history et détection de déplacements. Il traite l'évolution de la structure comme une donnée de premier ordre ; il ne remplace pas Git pour le contenu. Livré en v0.4, avec `watch` expérimental.
 
 ## Structural Event Stream
 
-Flux local d'événements structurels, notamment produit par `watch`, destiné au TUI, à Desktop, aux IDE et aux calculs incrémentaux. Il ne remplace pas une reconstruction complète lorsqu'un événement peut avoir été perdu.
+Flux local d'événements structurels, notamment produit par `watch`, destiné au TUI, à Desktop, aux IDE et aux calculs incrémentaux. Il ne remplace pas une reconstruction complète lorsqu'un événement peut avoir été perdu. En v0.4, `dirloom watch --format ndjson` l'expose sous la forme expérimentale Watch Event Schema v1 : des générations numérotées, chacune validée avant d'être écrite.
+
+## Contrat candidat au gel
+
+Contrat public de la v0.4 que la release candidate stabilise : il peut encore être corrigé jusqu'au commit de gel, puis devient « frozen for v0.4 ». Après le gel, un changement incompatible exige une nouvelle version du contrat ; un changement incompatible de ce que Dirloom observe exige une nouvelle version de fingerprint.
+
+## Code machine
+
+Identifiant d'un diagnostic, stable une fois les contrats v0.4 figés, par exemple `snapshot_fingerprint_mismatch` ou `git_revision_not_found`. Avec le code de sortie et le `status` d'un résultat JSON, c'est ce sur quoi un script s'appuie ; le texte des messages n'est pas stable.
 
 ## Query
 

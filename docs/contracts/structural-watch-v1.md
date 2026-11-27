@@ -1,6 +1,6 @@
 # Structural Watch v1
 
-> **Status:** experimental normative contract for Dirloom `v0.4.0-a8`; excluded from the v0.4 RC contract freeze ([Versioning](#versioning))
+> **Status:** experimental, excluded from the v0.4 freeze ([Versioning](#versioning)), see the [contract register](README.md); normative since Dirloom `v0.4.0-a8`
 >
 > **Related:** [Watch Event Schema v1](watch-event-v1.md), [Snapshot Schema v1](snapshot-schema-v1.md) (Capture Semantics v1), [Identity Projection v1](identity-projection-v1.md), [Diff Result Schema v3](diff-result-v3.md), [Move Detection structural-v1](move-detection-structural-v1.md), [ADR 0008](../adr/0008-experimental-watch.md)
 

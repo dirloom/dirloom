@@ -32,8 +32,8 @@ A waiting Microsoft Winget merge does **not** reopen the milestone. The v0.2.0 c
 RELEASE STATUS
 Latest stable release: v0.3.3
 Latest GitHub Pre-release: v0.4.0-a8
-Active release branch: none
-v0.4.0-a8: published / closed
+Active release branch: release/v0.4.0-rc1
+v0.4.0-rc1: in preparation, not frozen
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
@@ -52,7 +52,7 @@ Winget          ✅ v0.3.3
 | Homebrew | `dirloom/tap/dirloom` | macOS and Linux, amd64 and arm64 | `brew install --cask dirloom/tap/dirloom` |
 | Winget | `Dirloom.Dirloom` | Windows amd64, arm64 | Zip + nested portable `dirloom.exe` |
 
-No additional package manager is in v0.2.0. A later candidate must have demonstrated user demand, an official or Dirloom-maintained recipe, GitHub artifact consumption, SHA-256 verification, automated PR updates, install and upgrade tests, a named maintainer, and a documented retirement plan.
+No other package manager is supported. A candidate must have demonstrated user demand, an official or Dirloom-maintained recipe, GitHub artifact consumption, SHA-256 verification, automated PR updates, install and upgrade tests, a named maintainer, and a documented retirement plan.
 
 ## Release inventory
 
@@ -75,13 +75,17 @@ checksums.txt covers:
 
 `checksums.txt` contains exactly 12 hash lines. Archives keep LICENSE, README, CHANGELOG, CONTRIBUTING, SECURITY, THIRD_PARTY_NOTICES and the platform binary (`dirloom` or `dirloom.exe`).
 
-SBOMs are SPDX JSON, one per archive, produced by Syft 1.50.0. GitHub Artifact Attestations (actions/attest v4.2.1) cover all 13 subjects. Verify with:
+SBOMs are SPDX JSON, one per archive, produced by Syft 1.50.0. One GitHub artifact attestation (actions/attest v4.2.1), a SLSA build provenance statement, covers all 13 subjects. Verify a downloaded release with:
 
 ```bash
-gh release download v0.2.0 --pattern checksums.txt
+gh release download <version> --repo dirloom/dirloom
 sha256sum -c checksums.txt
-gh attestation verify dirloom_Linux_x86_64.tar.gz --repo dirloom/dirloom
+gh attestation verify dirloom_Linux_x86_64.tar.gz --repo dirloom/dirloom \
+  --signer-workflow dirloom/dirloom/.github/workflows/release.yml \
+  --source-ref refs/tags/<version> --deny-self-hosted-runners
 ```
+
+The [security policy](../SECURITY.md#release-trust-model) explains what each check proves. Checksums, SBOMs and attestations are not an independent cryptographic signature of the binaries: no maintainer-held key signs them.
 
 Do not rebuild or replace artifacts under an already published tag. A bad binary requires a new version such as v0.2.1.
 

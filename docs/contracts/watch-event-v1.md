@@ -1,6 +1,6 @@
 # Watch Event Schema v1
 
-> **Status:** experimental normative contract for Dirloom `v0.4.0-a8`; excluded from the v0.4 RC contract freeze ([Evolution and experimental policy](#evolution-and-experimental-policy))
+> **Status:** experimental, excluded from the v0.4 freeze ([Evolution and experimental policy](#evolution-and-experimental-policy)), see the [contract register](README.md); normative since Dirloom `v0.4.0-a8`
 >
 > **Related:** [Structural Watch v1](structural-watch-v1.md), [Diff Result Schema v3](diff-result-v3.md), [Snapshot Schema v1](snapshot-schema-v1.md), [ADR 0008](../adr/0008-experimental-watch.md)
 

@@ -3,7 +3,7 @@
 > **Statut :** Vision produit long terme et roadmap stratégique<br>
 > **Date :** 20 août 2026<br>
 > **Projet :** Dirloom<br>
-> **Socle actuel :** CLI Go multiplateforme — dernière préversion GitHub `v0.4.0-a8` publiée et clôturée ; stable `v0.3.3` ; aucune branche de release active ; RC v0.4 non démarrée<br>
+> **Socle actuel :** CLI Go multiplateforme — stable `v0.3.3` ; Structural Version Control livré dans les préversions GitHub `v0.4.0-a1` à `v0.4.0-a8` ; release candidate `v0.4.0-rc1` en préparation sur `release/v0.4.0-rc1`, contrats candidats au gel et pas encore figés<br>
 > **Nature du document :** orientation produit ; la spécification v0.1 reste la source normative pour le comportement du MVP<br>
 > **Principe directeur :** les numéros de versions proposés ci-dessous sont indicatifs. Les dépendances produit, la qualité et les preuves d’usage priment sur le calendrier.
 
@@ -552,7 +552,11 @@ Le choix technologique Desktop doit être confirmé au moment du milestone ; une
 
 # 8. Pilier III — Structural Version Control
 
+> **État en v0.4 :** ce pilier est livré pour l'essentiel ; chaque section ci-dessous indique ce qui l'est. Les exemples de cette section décrivent la vision ; la syntaxe réelle, les sorties et les codes de sortie sont ceux de la [vue d'ensemble Structural Version Control](../structural-version-control.md) et des contrats du [registre](../contracts/README.md).
+
 ## 8.1 Structural Fingerprint
+
+**Livré en v0.4 :** `dirloom fingerprint`, empreinte `dlm:v1:sha256:<digest>` de la vue structurelle observée (chemins, types, cibles de liens), sans lecture du contenu des fichiers. Seul l'espace de noms structurel existe ; les autres empreintes ci-dessous restent des évolutions possibles.
 
 **Niveau : Foundation stratégique**
 
@@ -585,6 +589,8 @@ dirloom snapshot --output architecture.dlm.json
 
 Usages : état de référence, migration, audit, release, documentation, comparaison de branches.
 
+**Livré en v0.4 :** Snapshot Schema v1, document JSON auto-vérifiant qui enregistre aussi les Capture Semantics (filtres effectifs).
+
 ## 8.3 `verify`
 
 **Niveau : Killer feature CI**
@@ -596,6 +602,8 @@ dirloom verify architecture.dlm.json
 `verify` répond : **« est-ce toujours cette structure ? »**
 
 `check` répondra : **« cette structure respecte-t-elle les règles ? »**
+
+**Livré en v0.4 :** `verify` (égalité de Fingerprint v1, codes de sortie `0` à `6`). `check` n'est pas livré.
 
 ## 8.4 Structural Diff
 
@@ -627,6 +635,8 @@ CHANGED
 
 Usages : revue d’architecture, migration, refactoring, revue de PR, monorepo.
 
+**Livré en v0.4 :** `dirloom diff` nomme ses deux sources : `snapshot:<fichier>`, `live:<dossier>` ou `git:<révision>`, par exemple `dirloom diff git:main git:feature/payments` ou `dirloom diff git:HEAD~10 git:HEAD`. Les opérations sont `ADDED`, `REMOVED`, `CHANGED` (type ou cible de lien) et `MOVED` ; le diff ne compte pas les fichiers d'un dossier. Sortie texte ou Diff Result Schema v3.
+
 ## 8.5 Détection de déplacements
 
 Stratégie progressive :
@@ -639,6 +649,8 @@ Tier 4 — semantic identity
 ```
 
 Le contenu ne doit pas devenir obligatoire pour le moteur structurel canonique.
+
+**Livré en v0.4 :** le tier 1, stratégie `structural-v1`. Un `MOVED` n'est rapporté que pour une correspondance exacte et unique (même nom et même structure dans chaque source, ou renommage sur place d'un dossier non vide à structure unique), avec sa justification (`subtree` ou `name`) ; les cas ambigus restent `REMOVED` + `ADDED`. C'est une correspondance structurelle, pas la preuve d'un déplacement. Les tiers 2 à 4 ne sont pas livrés.
 
 ## 8.6 Structural History / Time Machine
 
@@ -662,6 +674,8 @@ Aug 2026  6 domain modules
 
 Questions : quand un module est apparu, où la croissance se concentre, quand la profondeur a explosé, quand la dérive a commencé.
 
+**Livré en v0.4 :** `dirloom history`, une entrée par commit le long des premiers parents, avec l'empreinte de l'arbre commité et le nombre de chemins ajoutés, supprimés, modifiés et déplacés ; History Result Schema v1. La vue Time Machine, les métriques et l'historique par chemin ne sont pas livrés.
+
 ## 8.7 `watch` et Structural Event Stream
 
 **Niveau : Infrastructure**
@@ -676,6 +690,8 @@ dirloom watch --format ndjson
 ```
 
 Usages : TUI, Desktop, IDE, fingerprint incrémental, MCP et contrôles architecturaux en continu.
+
+**Livré en v0.4, expérimental :** `dirloom watch`, générations numérotées de changements structurels ; `--format ndjson` écrit Watch Event Schema v1 (`node.added`, `node.removed`, `node.changed`, `node.moved`, `state.changed`…). Structural Watch v1 et Watch Event Schema v1 restent hors du gel v0.4 et peuvent changer dans toute version v0.x.
 
 
 ---
@@ -2103,6 +2119,8 @@ Fonctions :
 
 ## v0.4 — Structural Version Control
 
+**Statut : fonctionnalités livrées dans huit GitHub Pre-releases, de `v0.4.0-a1` à `v0.4.0-a8` ; release candidate `v0.4.0-rc1` en préparation.** Les canaux stables restent sur `v0.3.3` jusqu'à `v0.4.0`. La [vue d'ensemble Structural Version Control](../structural-version-control.md) présente la v0.4 comme un tout ; les sections ci-dessous gardent l'historique de ses incréments.
+
 **Objectif :** rendre la structure versionnable.
 
 Fonctions :
@@ -2233,6 +2251,23 @@ Fonctions :
 - `watch` devient un nom de commande : un dossier nommé `watch` s'inspecte avec `dirloom ./watch`.
 
 Frontière : transitions structurelles entre états observés, pas journal d'opérations ; pas de contenu, pas de garantie de livraison unique, pas de FSEvents (cgo), pas de ré-observation par sous-arbre. Le `watch` stable reste prévu en v0.7.
+
+### v0.4.0-rc1 — Release candidate
+
+**Statut : en préparation sur `release/v0.4.0-rc1`, non figée, non publiée.** Première release candidate de CHANGE. Elle n'ajoute aucune fonctionnalité : elle fait des huit préversions un produit cohérent, prêt pour le gel des contrats.
+
+Contenu :
+
+- politique de compatibilité et de gel v0.4, registre des contrats ; tous les contrats v0.4 sont candidats au gel, sauf Structural Watch v1 et Watch Event Schema v1, qui restent expérimentaux ;
+- codes de sortie et codes machine cohérents et documentés dans une table unique, en gardant les deux familles historiques (`0`/`1`/`2` et `0` à `6`) ;
+- aide et messages de la CLI alignés sur les options réellement acceptées ;
+- corrections d'observation faites avant le gel : jonctions Windows enregistrées comme `junction`, tubes nommés, sockets et périphériques refusés par les commandes structurelles, noms invalides refusés par le JSON de l'arbre ;
+- durcissement face aux entrées non fiables : limites des snapshots, des arbres Git et des `.gitignore`, garde contre les panics, campagne de fuzzing enregistrée ;
+- mesures de performance et de mémoire de référence ;
+- documentation unifiée : vue d'ensemble, intégration CI, modèle de confiance des releases, note de mise à niveau depuis `v0.3.3` ;
+- un scénario de démonstration reproductible.
+
+Frontière : pas de nouvelle commande ni de nouveau format. Le gel des contrats, la fusion dans `main`, le tag et la publication exigent chacun un GO explicite. Pas de signature cryptographique indépendante des binaires : la chaîne de confiance reste checksums, SBOM et attestations. Pas de fichier JSON Schema : ils sont reportés après v0.4, et les contrats Markdown, les fixtures golden et les tests restent la référence normative.
 
 ## v0.5 — Scaffold & Architecture Packs
 

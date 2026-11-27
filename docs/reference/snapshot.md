@@ -2,8 +2,8 @@
 
 Snapshot Schema v1 persists the **structural view** Dirloom observes after applying
 the active filters. The result is a portable, self-verifying JSON document that
-later `verify` and `diff` can load. A2 does **not** compare a snapshot to a live
-tree.
+[`dirloom verify`](verify.md) and [`dirloom diff`](diff.md) load. `snapshot`
+itself does **not** compare a snapshot to a live tree.
 
 ## Purpose
 
@@ -40,8 +40,8 @@ is a usage error, exit 2, as in the tree output. A `--theme` path is checked
 for its `.yaml`/`.yml` form only; the file is not read. A valid value never
 enters Capture Semantics, never changes snapshot bytes and never injects ANSI.
 
-There is one public serialization format in A2: JSON. There is no `--format`
-matrix.
+There is one public serialization format: JSON. There is no `--format`
+flag.
 
 ## stdout
 
@@ -67,7 +67,7 @@ Writes the snapshot transactionally via Dirloom's existing output writer:
   open, whatever its sharing mode (a reader, an indexer, an antivirus scan): exit
   1 with an access-denied error, the existing file unchanged; the same command
   succeeds once the file is closed;
-- there is no `--force` in A2.
+- there is no `--force` flag.
 
 When the destination lies inside the inspected root, Dirloom excludes it from
 the observed artifact (same self-exclusion contract as tree `--output`). Running
@@ -113,17 +113,17 @@ Load path:
 Mismatch → corrupt / invalid snapshot (`snapshot_fingerprint_mismatch`).
 
 This is **not** a live structure mismatch. Comparing a valid snapshot to a live
-tree belongs to future A3 `verify`.
+tree is the job of [`dirloom verify`](verify.md).
 
 Changing only Capture Semantics does not change Fingerprint v1. The embedded
 fingerprint attests the structural artifact, not capture or provenance metadata.
 
-## Corruption vs future verify mismatch
+## Corruption vs verify mismatch
 
-| Concept | Meaning | Owner |
+| Concept | Meaning | Reported by |
 | --- | --- | --- |
-| Invalid / corrupt snapshot | Fails schema, artifact, feature or fingerprint self-verification | A2 |
-| Valid snapshot whose structure differs from live structure | Future product behavior | A3 |
+| Invalid / corrupt snapshot | Fails schema, artifact, feature or fingerprint self-verification | every reader: `INVALID_SNAPSHOT` (exit 3) or `UNSUPPORTED_SNAPSHOT` (exit 4) in `verify` and `diff` |
+| Valid snapshot whose structure differs from the live structure | A normal result | `verify`: `MISMATCH` (exit 1); `diff`: `DIFFERENCES` (exit 1) |
 
 ## Filters and configuration
 
@@ -144,7 +144,7 @@ See [Snapshot Schema v1](../contracts/snapshot-schema-v1.md) and
 
 ## What snapshot does not do
 
-- live structure comparison / `verify` / `diff`
+- live structure comparison: see [`verify`](verify.md) and [`diff`](diff.md)
 - file-content hashing or checksums
 - signatures, compression, binary formats
 - remote storage or snapshot databases
