@@ -11,10 +11,12 @@
       "sha256": "07019d12fab997db3f229145d907c49703d9db0d7b1bcbedd4c59846ec0669fe"
     },
     "keys": {
-      "bytes": 262143980
+      "bytes": 262143980,
+      "sha256": "c6822033c068bfb06fc43fd40da5c1139c56707887d54b2d940fc984c03c3a75"
     },
     "nesting": {
-      "bytes": 6000000
+      "bytes": 6000000,
+      "sha256": "832a70989ffe3d25a646223be449a4f67270ca92db7719ef863632ef38e994ae"
     },
     "nodes-over": {
       "bytes": 163978441,
