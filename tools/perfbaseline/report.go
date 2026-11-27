@@ -88,6 +88,7 @@ const mebibyte = 1 << 20
 
 var measures = []measure{
 	{"wall", "Time (s)", 1e9, func(r result) float64 { return float64(r.WallNs) }},
+	{"cpu", "CPU time (s)", 1e9, func(r result) float64 { return float64(r.UserNs + r.SystemNs) }},
 	{"heap", "Go heap peak (MiB)", mebibyte, func(r result) float64 { return float64(r.HeapPeak) }},
 	{"live", "Live heap peak (MiB)", mebibyte, func(r result) float64 { return float64(r.HeapLivePeak) }},
 	{"commit", "Process commit peak (MiB)", mebibyte, func(r result) float64 { return float64(r.PeakPrivate) }},
@@ -346,9 +347,14 @@ func writeBench(w io.Writer, all []result) error {
 	return nil
 }
 
-// runCompare compares the medians of two campaigns, scenario by scenario,
-// and flags every deviation at or above the investigation threshold (D8:
-// 20%). A flag asks for a manual investigation; it never fails anything.
+// runCompare compares two campaigns, scenario by scenario, and flags what
+// needs a manual investigation (D8): a scenario missing from the new
+// campaign, a smaller share of runs that complete, a failure the reference
+// did not have, and a change of 20% or more of a deterministic measure,
+// allocated bytes or allocations by default. Time, CPU time and the peaks
+// depend on the machine and on when collections run: their changes are
+// reported apart, to rerun before investigating. A flag never fails
+// anything.
 func runCompare(args []string) error {
 	flags := flag.NewFlagSet("compare", flag.ContinueOnError)
 	base := flags.String("base", "", "results of the reference campaign")
@@ -356,59 +362,181 @@ func runCompare(args []string) error {
 	baseLabel := flags.String("base-label", "baseline", "label of the reference runs")
 	newLabel := flags.String("new-label", "baseline", "label of the compared runs")
 	threshold := flags.Float64("threshold", 0.20, "investigation threshold, as a fraction of the reference median")
-	keys := flags.String("measures", "wall,alloc,heap,commit", "comma-separated measures: "+measureKeys())
+	gating := flags.String("measures", "alloc,objects", "measures whose change is flagged: "+measureKeys())
+	informative := flags.String("informative", "wall,cpu,heap,commit", "measures whose change is reported, to rerun before investigating")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	if *base == "" || *next == "" {
 		return errors.New("compare: -base and -new are required")
 	}
-	load := func(path, label string) (map[string]*group, error) {
-		all, err := readResults([]string{path})
-		if err != nil {
-			return nil, err
-		}
-		out := map[string]*group{}
-		for _, g := range groupResults(all) {
-			if g.Label == label {
-				out[g.Scenario] = g
-			}
-		}
-		return out, nil
+	opts := compareOptions{Threshold: *threshold}
+	var err error
+	if opts.Gating, err = parseMeasures(*gating); err != nil {
+		return err
 	}
-	reference, err := load(*base, *baseLabel)
+	if opts.Informative, err = parseMeasures(*informative); err != nil {
+		return err
+	}
+	reference, err := loadCampaign(*base, *baseLabel)
 	if err != nil {
 		return err
 	}
-	compared, err := load(*next, *newLabel)
+	compared, err := loadCampaign(*next, *newLabel)
 	if err != nil {
 		return err
 	}
-	fmt.Println("| Scenario | Measure | Reference median | New median | Change | |\n| --- | --- | ---: | ---: | ---: | --- |")
-	flagged := 0
-	for _, sc := range scenarios() {
-		a, b := reference[sc.Name], compared[sc.Name]
-		if a == nil || b == nil {
+	rows, flagged, rerun := compareCampaigns(reference, compared, opts)
+	fmt.Println("| Scenario | Measure | Reference | New | Change | |\n| --- | --- | ---: | ---: | ---: | --- |")
+	for _, r := range rows {
+		fmt.Printf("| `%s` | %s | %s | %s | %s | %s |\n", r.Scenario, r.Measure, r.Reference, r.New, r.Change, r.Flag)
+	}
+	fmt.Printf("\n%d flagged: each needs a manual investigation, never a rejection.\n", flagged)
+	fmt.Printf("%d change(s) of %.0f%% or more in time, CPU time or a peak: rerun on an idle machine, and compare with the old code in the same session, before investigating.\n", rerun, 100**threshold)
+	return nil
+}
+
+func parseMeasures(keys string) ([]measure, error) {
+	var out []measure
+	for _, key := range strings.Split(keys, ",") {
+		if key = strings.TrimSpace(key); key == "" {
 			continue
 		}
-		for _, key := range strings.Split(*keys, ",") {
-			m, ok := findMeasure(strings.TrimSpace(key))
-			if !ok {
-				return fmt.Errorf("unknown measure %q", key)
-			}
-			sa, sb := a.stat(m), b.stat(m)
-			if sa.N == 0 || sb.N == 0 || sa.Median == 0 {
-				continue
-			}
-			change := (sb.Median - sa.Median) / sa.Median
-			note := ""
-			if math.Abs(change) >= *threshold {
-				note = "investigate"
-				flagged++
-			}
-			fmt.Printf("| `%s` | %s | %.3g | %.3g | %+.1f%% | %s |\n", sc.Name, m.Title, sa.Median, sb.Median, 100*change, note)
+		m, ok := findMeasure(key)
+		if !ok {
+			return nil, fmt.Errorf("unknown measure %q (%s)", key, measureKeys())
+		}
+		out = append(out, m)
+	}
+	return out, nil
+}
+
+// loadCampaign returns the runs of one label, by scenario.
+func loadCampaign(path, label string) (map[string]*group, error) {
+	all, err := readResults([]string{path})
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]*group{}
+	for _, g := range groupResults(all) {
+		if g.Label == label {
+			out[g.Scenario] = g
 		}
 	}
-	fmt.Printf("\n%d deviation(s) at or above %.0f%%: each needs a manual investigation, not a rejection.\n", flagged, 100**threshold)
-	return nil
+	return out, nil
+}
+
+type compareOptions struct {
+	Threshold   float64
+	Gating      []measure
+	Informative []measure
+}
+
+// comparison is one row of a compare report.
+type comparison struct {
+	Scenario, Measure, Reference, New, Change string
+	// Flag is "investigate" for a flagged row, "rerun first" for an
+	// informative change at or above the threshold, and empty otherwise.
+	Flag string
+}
+
+const (
+	flagInvestigate = "investigate"
+	flagRerun       = "rerun first"
+)
+
+// compareCampaigns compares every scenario of either campaign, registry
+// scenarios first. It returns the rows, the number of flagged rows and the
+// number of informative changes at or above the threshold.
+func compareCampaigns(reference, compared map[string]*group, opts compareOptions) (rows []comparison, flagged, rerun int) {
+	var names []string
+	seen := map[string]bool{}
+	for _, s := range scenarios() {
+		if reference[s.Name] != nil || compared[s.Name] != nil {
+			names = append(names, s.Name)
+			seen[s.Name] = true
+		}
+	}
+	var others []string
+	for _, m := range []map[string]*group{reference, compared} {
+		for name := range m {
+			if !seen[name] {
+				seen[name] = true
+				others = append(others, name)
+			}
+		}
+	}
+	sort.Strings(others)
+	names = append(names, others...)
+
+	for _, name := range names {
+		a, b := reference[name], compared[name]
+		switch {
+		case a == nil:
+			rows = append(rows, comparison{Scenario: name, Measure: "runs", Reference: "absent", New: runCount(b), Change: "new scenario"})
+			continue
+		case b == nil:
+			rows = append(rows, comparison{Scenario: name, Measure: "runs", Reference: runCount(a), New: "absent", Change: "missing", Flag: flagInvestigate})
+			flagged++
+			continue
+		}
+		shareA := float64(len(a.OK)) / float64(len(a.OK)+len(a.Failed))
+		shareB := float64(len(b.OK)) / float64(len(b.OK)+len(b.Failed))
+		newFailure := len(b.Failed) > 0 && len(a.Failed) == 0
+		if shareB < shareA || newFailure || len(a.OK) != len(b.OK) || len(b.Failed) > 0 {
+			row := comparison{Scenario: name, Measure: "runs", Reference: runCount(a), New: runCount(b)}
+			switch {
+			case shareB < shareA:
+				row.Change, row.Flag = "fewer runs complete", flagInvestigate
+			case newFailure:
+				row.Change, row.Flag = "new failure", flagInvestigate
+			}
+			if row.Flag != "" {
+				flagged++
+			}
+			rows = append(rows, row)
+		}
+		if len(a.OK) == 0 || len(b.OK) == 0 {
+			continue
+		}
+		for _, set := range []struct {
+			measures []measure
+			flag     string
+		}{{opts.Gating, flagInvestigate}, {opts.Informative, flagRerun}} {
+			for _, m := range set.measures {
+				sa, sb := a.stat(m), b.stat(m)
+				if sa.Median == 0 {
+					continue
+				}
+				change := (sb.Median - sa.Median) / sa.Median
+				row := comparison{Scenario: name, Measure: m.Title, Reference: fmt.Sprintf("%.4g", sa.Median), New: fmt.Sprintf("%.4g", sb.Median), Change: fmt.Sprintf("%+.1f%%", 100*change)}
+				// "20% or more" includes exactly 20%, whatever the rounding.
+				if math.Abs(change) >= opts.Threshold-1e-9 {
+					row.Flag = set.flag
+					if set.flag == flagInvestigate {
+						flagged++
+					} else {
+						rerun++
+					}
+				}
+				rows = append(rows, row)
+			}
+		}
+	}
+	return rows, flagged, rerun
+}
+
+// runCount is "ok/total", with the out-of-memory failures if any.
+func runCount(g *group) string {
+	text := fmt.Sprintf("%d/%d", len(g.OK), len(g.OK)+len(g.Failed))
+	oom := 0
+	for _, r := range g.Failed {
+		if r.OOM {
+			oom++
+		}
+	}
+	if oom > 0 {
+		text += fmt.Sprintf(" (%d out of memory)", oom)
+	}
+	return text
 }

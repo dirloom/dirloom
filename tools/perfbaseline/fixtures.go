@@ -358,7 +358,7 @@ func writeBadSnapshots(root string) (map[string]any, error) {
 	if err := os.WriteFile(filepath.Join(dir, "keys.json"), keys.Bytes(), 0o600); err != nil {
 		return nil, err
 	}
-	info["keys"] = map[string]any{"bytes": keys.Len()}
+	info["keys"] = fileInfo(keys.Bytes())
 	keys = bytes.Buffer{}
 
 	// Dirloom never writes a snapshot it would refuse to read, so the two
@@ -389,7 +389,7 @@ func writeBadSnapshots(root string) (map[string]any, error) {
 	if err := os.WriteFile(filepath.Join(dir, "nesting.json"), nesting, 0o600); err != nil {
 		return nil, err
 	}
-	info["nesting"] = map[string]any{"bytes": len(nesting)}
+	info["nesting"] = fileInfo(nesting)
 
 	capture := defaultCapture()
 	capture.Ignore = ignorePatterns(snapshot.MaxIgnorePatterns)
@@ -852,4 +852,11 @@ func writeHistoryRepository(dir string, entries, commits int) (map[string]any, e
 	}
 	info["commits"], info["entries"] = commits, entries
 	return info, nil
+}
+
+// fileInfo is the manifest entry of a generated file: its size and
+// SHA-256.
+func fileInfo(data []byte) map[string]any {
+	sum := sha256.Sum256(data)
+	return map[string]any{"bytes": len(data), "sha256": hex.EncodeToString(sum[:])}
 }

@@ -83,6 +83,17 @@ func runRunner(args []string) error {
 			fmt.Fprintf(os.Stderr, "run: %s skipped: fixtures %v not generated\n", sc.Name, missing)
 			continue
 		}
+		// A fixture in the manifest may still lack a file: snaplive, for
+		// one, holds only the snapshots of the live trees that existed.
+		for _, path := range sc.fixturePaths(fixtureRoot) {
+			if _, err := os.Stat(path); err != nil {
+				missing = append(missing, path)
+			}
+		}
+		if len(missing) > 0 {
+			fmt.Fprintf(os.Stderr, "run: %s skipped: %v missing\n", sc.Name, missing)
+			continue
+		}
 		if *timeout > 0 {
 			sc.Timeout = *timeout
 		}

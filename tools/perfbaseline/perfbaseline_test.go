@@ -212,3 +212,136 @@ func TestBurst(t *testing.T) {
 		t.Fatalf("%d entries left after reset", len(entries))
 	}
 }
+
+// fakeRun is a result for the compare tests.
+func fakeRun(scenario string, ok bool, alloc, heap uint64, oom bool) result {
+	return result{Label: "x", Scenario: scenario, OK: ok, OOM: oom, AllocBytes: alloc, AllocObjects: alloc / 100, HeapPeak: heap, WallNs: 1e9}
+}
+
+func campaign(runs ...result) map[string]*group {
+	out := map[string]*group{}
+	for _, g := range groupResults(runs) {
+		out[g.Scenario] = g
+	}
+	return out
+}
+
+func compareFor(t *testing.T, reference, compared map[string]*group) ([]comparison, int, int) {
+	t.Helper()
+	gating, err := parseMeasures("alloc,objects")
+	if err != nil {
+		t.Fatal(err)
+	}
+	informative, err := parseMeasures("wall,heap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return compareCampaigns(reference, compared, compareOptions{Threshold: 0.20, Gating: gating, Informative: informative})
+}
+
+func flaggedRows(rows []comparison, flag string) []string {
+	var out []string
+	for _, r := range rows {
+		if r.Flag == flag {
+			out = append(out, r.Scenario+"/"+r.Measure+": "+r.Change)
+		}
+	}
+	return out
+}
+
+// TestCompareFlags: what D8 must catch is flagged, and only that.
+func TestCompareFlags(t *testing.T) {
+	five := func(scenario string, alloc, heap uint64) []result {
+		runs := make([]result, 5)
+		for i := range runs {
+			runs[i] = fakeRun(scenario, true, alloc, heap, false)
+		}
+		return runs
+	}
+	reference := campaign(slices.Concat(five("load-2m", 1000, 1000), five("bad-nesting", 1000, 1000), five("git-bomb", 1000, 1000))...)
+
+	t.Run("identical", func(t *testing.T) {
+		rows, flagged, rerun := compareFor(t, reference, reference)
+		if flagged != 0 || rerun != 0 {
+			t.Fatalf("identical campaigns: %d flagged, %d rerun: %v", flagged, rerun, rows)
+		}
+	})
+
+	t.Run("allocation change is flagged, heap change is to rerun", func(t *testing.T) {
+		compared := campaign(slices.Concat(five("load-2m", 1300, 1000), five("bad-nesting", 1000, 1300), five("git-bomb", 1000, 1000))...)
+		rows, flagged, rerun := compareFor(t, reference, compared)
+		if got := flaggedRows(rows, flagInvestigate); flagged != 2 || len(got) != 2 {
+			t.Fatalf("flagged %d %v, want the bytes and the allocations of load-2m", flagged, got)
+		}
+		if got := flaggedRows(rows, flagRerun); rerun != 1 || len(got) != 1 || !strings.HasPrefix(got[0], "bad-nesting/") {
+			t.Fatalf("rerun %d %v, want the heap of bad-nesting", rerun, got)
+		}
+	})
+
+	t.Run("runs that stop failing are flagged even when the rest match", func(t *testing.T) {
+		partial := five("bad-nesting", 1000, 1000)
+		for i := range 3 {
+			partial[i] = fakeRun("bad-nesting", false, 0, 0, true)
+		}
+		compared := campaign(slices.Concat(five("load-2m", 1000, 1000), partial, five("git-bomb", 1000, 1000))...)
+		rows, flagged, _ := compareFor(t, reference, compared)
+		got := flaggedRows(rows, flagInvestigate)
+		if flagged != 1 || len(got) != 1 || got[0] != "bad-nesting/runs: fewer runs complete" {
+			t.Fatalf("flagged %d %v, want bad-nesting's runs", flagged, got)
+		}
+		for _, r := range rows {
+			if r.Scenario == "bad-nesting" && r.Measure == "runs" && r.New != "2/5 (3 out of memory)" {
+				t.Fatalf("runs row %+v", r)
+			}
+		}
+	})
+
+	t.Run("a scenario with no completed run is flagged", func(t *testing.T) {
+		failed := make([]result, 5)
+		for i := range failed {
+			failed[i] = fakeRun("bad-nesting", false, 0, 0, false)
+		}
+		compared := campaign(slices.Concat(five("load-2m", 1000, 1000), failed, five("git-bomb", 1000, 1000))...)
+		_, flagged, _ := compareFor(t, reference, compared)
+		if flagged != 1 {
+			t.Fatalf("flagged %d, want 1", flagged)
+		}
+	})
+
+	t.Run("missing and new scenarios", func(t *testing.T) {
+		compared := campaign(slices.Concat(five("load-2m", 1000, 1000), five("git-bomb", 1000, 1000), five("not-in-reference", 1000, 1000))...)
+		rows, flagged, _ := compareFor(t, reference, compared)
+		got := flaggedRows(rows, flagInvestigate)
+		if flagged != 1 || len(got) != 1 || got[0] != "bad-nesting/runs: missing" {
+			t.Fatalf("flagged %d %v, want bad-nesting missing", flagged, got)
+		}
+		found := false
+		for _, r := range rows {
+			found = found || (r.Scenario == "not-in-reference" && r.Change == "new scenario" && r.Flag == "")
+		}
+		if !found {
+			t.Fatalf("no unflagged row for the new scenario: %v", rows)
+		}
+	})
+}
+
+// TestFixturePaths: the runner checks every path a scenario reads.
+func TestFixturePaths(t *testing.T) {
+	root := filepath.Join("r", "f")
+	s := scenario{Dir: "git-wide-2m", Args: []string{"diff", "snapshot:@snap/a.json", "live:@live", "@x/y", "git:HEAD"}}
+	want := []string{filepath.Join(root, "git-wide-2m"), filepath.Join(root, "snap", "a.json"), filepath.Join(root, "live"), filepath.Join(root, "x", "y")}
+	if got := s.fixturePaths(root); !slices.Equal(got, want) {
+		t.Fatalf("fixturePaths = %q, want %q", got, want)
+	}
+}
+
+// TestCompareExactThreshold: a change of exactly 20% is flagged, whatever
+// the floating-point rounding of the scaled medians.
+func TestCompareExactThreshold(t *testing.T) {
+	reference := campaign(fakeRun("load-2m", true, 1000, 1000, false))
+	compared := campaign(fakeRun("load-2m", true, 1200, 1000, false))
+	rows, flagged, _ := compareFor(t, reference, compared)
+	if flagged != 2 {
+		t.Fatalf("flagged %d, want bytes and allocations at exactly +20%%: %v", flagged, rows)
+	}
+}

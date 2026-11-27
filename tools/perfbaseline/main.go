@@ -13,6 +13,7 @@
 //	perfbaseline run -fixtures F -out results.jsonl [-scenarios RE] [-runs 5] [-mem-limit 8GiB] [-label L]
 //	perfbaseline summarize results.jsonl
 //	perfbaseline compare -base old.jsonl -new new.jsonl
+//	perfbaseline loadpeak -file snapshot.json [-runs 5]
 //	perfbaseline list
 package main
 
@@ -42,6 +43,8 @@ func main() {
 		err = runSummarize(os.Args[2:])
 	case "compare":
 		err = runCompare(os.Args[2:])
+	case "loadpeak":
+		err = runLoadPeak(os.Args[2:])
 	case "list":
 		err = list()
 	default:
@@ -64,6 +67,7 @@ func usage() {
   run        run scenarios in fresh processes and append their results
   summarize  print the distribution of each scenario (Markdown or benchstat)
   compare    compare two campaigns against the investigation threshold
+  loadpeak   load one snapshot in process and print its peak heap
   list       list the scenarios and the fixtures
 `)
 }

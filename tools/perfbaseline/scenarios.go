@@ -53,6 +53,23 @@ func (s scenario) dir(root string) string {
 	return filepath.Join(root, filepath.FromSlash(s.Dir))
 }
 
+// fixturePaths returns what the scenario reads under the fixtures: its
+// working directory and every path argument.
+func (s scenario) fixturePaths(root string) []string {
+	var out []string
+	if s.Dir != "" {
+		out = append(out, s.dir(root))
+	}
+	for _, a := range s.Args {
+		if strings.HasPrefix(a, "@") {
+			out = append(out, filepath.Join(root, filepath.FromSlash(a[1:])))
+		} else if _, path, ok := strings.Cut(a, ":@"); ok {
+			out = append(out, filepath.Join(root, filepath.FromSlash(path)))
+		}
+	}
+	return out
+}
+
 func scenarios() []scenario {
 	diffJSON := func(a, b string, extra ...string) []string {
 		return append([]string{"diff", "--format", "json", a, b}, extra...)
