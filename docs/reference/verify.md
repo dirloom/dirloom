@@ -2,7 +2,7 @@
 
 Verify answers one question: does the structure currently observed under the selected root still match this valid structural snapshot?
 
-It does not explain what changed. That is a later diff increment. It does not hash file contents.
+It does not explain what changed: [`dirloom diff`](diff.md) does. It does not hash file contents.
 
 ## Syntax
 
@@ -128,8 +128,8 @@ PowerShell:
 $code = $LASTEXITCODE
 ```
 
-`$LASTEXITCODE` uses the same numbers. GitLab CI, Azure DevOps, and Jenkins can use this process contract directly: separate stdout and stderr, UTF-8, no TTY, and no ANSI.
+`$LASTEXITCODE` uses the same numbers. GitLab CI, Azure DevOps, and Jenkins can use this process contract directly: separate stdout and stderr, UTF-8, no TTY, and no ANSI. [CI integration](../ci-integration.md) shows a complete GitHub Actions workflow built on these exit codes.
 
-## A3 and A4
+## Verify and diff
 
 Verify reports whether the fingerprints are equal. [`dirloom diff`](diff.md) names added paths, removed paths, type and target changes, and moves. Verify does not emit that data and does not reserve a fake diff field in the JSON result.

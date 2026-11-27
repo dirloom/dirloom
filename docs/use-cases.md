@@ -2,8 +2,8 @@
 
 > **Statut :** guide utilisateur évolutif<br>
 > **Périmètre :** capacités natives actuellement implémentées<br>
-> **Dernière vérification :** 20 août 2026<br>
-> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [exports graphiques](graph-exports.md), [thèmes](themes.md), [catalogue sémantique](catalog.md), [presse-papiers et complétions](clipboard-and-completions.md), [distribution](distribution.md) et [spécification v0.1](../SPEC-v0.1.md)
+> **Dernière vérification :** 20 août 2026 ; carte rapide, sections 7.9 et 12 revues le 26 novembre 2026 pour `v0.4.0-rc1`<br>
+> **Sources d’autorité :** CLI, tests, [README](../README.md), [configuration](configuration.md), [presets](presets.md), [Markdown sémantique](markdown-tree.md), [exports graphiques](graph-exports.md), [thèmes](themes.md), [catalogue sémantique](catalog.md), [presse-papiers et complétions](clipboard-and-completions.md), [distribution](distribution.md), [Structural Version Control](structural-version-control.md) et [spécification v0.1](../SPEC-v0.1.md)
 
 Ce guide montre ce que Dirloom permet de faire aujourd’hui. Il privilégie les recettes exécutables, les combinaisons utiles et les résultats attendus. Les fonctionnalités uniquement prévues dans la [roadmap](product/roadmap.md) sont identifiées comme indisponibles afin de ne pas les confondre avec le produit actuel.
 
@@ -73,6 +73,12 @@ dirloom --help
 | Garantir un texte canonique sans décoration | `dirloom --color never --icons never` |
 | Inspecter ou valider un thème | `dirloom theme explain midnight` ou `dirloom theme validate theme.yaml` |
 | Identifier la vue structurelle observée | `dirloom fingerprint` |
+| Enregistrer la structure de référence | `dirloom snapshot --ignore architecture.dlm.json --output architecture.dlm.json` |
+| Vérifier que la structure n’a pas changé | `dirloom verify architecture.dlm.json` |
+| Lister ce qui a été ajouté, supprimé ou déplacé | `dirloom diff snapshot:architecture.dlm.json live:.` |
+| Comparer la structure de deux branches | `dirloom diff git:main git:feature` |
+| Voir quels commits ont changé la structure | `dirloom history --structural-only` |
+| Suivre les changements en direct (expérimental) | `dirloom watch` |
 
 ## 3. Prendre en main l’inspection
 
@@ -719,24 +725,44 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (-not (Test-Path structure.json)) { throw 'structure.json is missing' }
 ```
 
-### 7.9 Détecter une évolution structurelle avec Git
+### 7.9 Détecter une évolution structurelle
 
-Dirloom v0.1 n’a pas encore de commande native `diff`, mais son artefact déterministe peut être versionné :
+Depuis v0.4, Dirloom enregistre, vérifie et compare la structure nativement. Le contenu des fichiers n’est jamais lu : seuls comptent les noms, les types, l’imbrication et les cibles de liens. La [vue d’ensemble Structural Version Control](structural-version-control.md) détaille ces commandes.
+
+Enregistrer la structure de référence dans le dépôt :
+
+```bash
+dirloom snapshot --ignore architecture.dlm.json --output architecture.dlm.json
+git add architecture.dlm.json
+git commit -m "chore: record the project structure"
+```
+
+`--ignore architecture.dlm.json` exclut le snapshot de la structure qu’il décrit, y compris lorsqu’un côté `git:` contient le fichier commité.
+
+Vérifier ensuite que la structure correspond toujours au snapshot, puis lister ce qui a changé :
+
+```bash
+dirloom verify architecture.dlm.json
+dirloom diff snapshot:architecture.dlm.json live:.
+```
+
+`verify` sort en `0` si la structure correspond et en `1` si elle diffère ; `diff` sort en `0` sans différence et en `1` avec des différences. Un sous-arbre déplacé apparaît comme un seul `MOVED`. Les codes `2` à `6` signalent une erreur ([codes de sortie](reference/exit-codes.md)).
+
+Comparer deux branches, ou lister les commits qui ont changé la structure, sans checkout (Git 2.45 ou plus récent) :
+
+```bash
+dirloom diff git:main git:feature
+dirloom history --limit 20 --structural-only
+```
+
+Le guide [d’intégration CI](ci-integration.md) assemble ces commandes dans un workflow GitHub Actions complet.
+
+Versionner la sortie JSON de l’arbre reste possible lorsqu’un fichier lisible par Git suffit :
 
 ```bash
 dirloom . --format json --output structure.json
 git diff --exit-code -- structure.json
 ```
-
-Workflow initial :
-
-```bash
-dirloom . --format json --output structure.json
-git add structure.json
-git commit -m "docs: record project structure"
-```
-
-Aux exécutions suivantes, Git montre les changements du JSON. La future capacité Structural Diff décrite dans la roadmap n’est pas encore utilisée ici.
 
 ### 7.10 Vérifier le déterminisme d’un environnement
 
@@ -995,7 +1021,7 @@ dirloom . --format json | jq -r '.. | objects | select(.type? == "symlink") | [.
 
 ### 9.5 Utiliser JSON lorsqu’une sélection positive est nécessaire
 
-Dirloom v0.1 sait exclure, mais ne possède pas de filtre natif « inclure uniquement ». Pour ne conserver que certains types, extensions ou chemins, produisez JSON puis appliquez la sélection dans le consommateur.
+Dirloom sait exclure, mais ne possède pas de filtre natif « inclure uniquement ». Pour ne conserver que certains types, extensions ou chemins, produisez JSON puis appliquez la sélection dans le consommateur.
 
 Exemple PowerShell après aplatissement :
 
@@ -1121,12 +1147,11 @@ La roadmap contient de nombreux exemples prospectifs. Les capacités suivantes n
 | Capacité future | Alternative actuelle |
 | --- | --- |
 | `browse` ou TUI | Générer une sortie texte, Markdown ou JSON ; `--copy` pour coller |
-| Fingerprint, snapshot, verify et diff natifs | Versionner le JSON et utiliser Git ou un outil de diff |
-| `watch` et flux d’événements | Relancer Dirloom depuis un outil externe |
+| `watch` stable | `dirloom watch` est disponible mais **expérimental** : son contrat peut changer dans toute version v0.x ([référence](reference/watch.md)) |
 | Scaffold, templates et Architecture Packs | Utiliser un générateur externe, puis réinspecter la structure |
-| Contracts, drift, conform et réconciliation | Contrôles externes sur le JSON, sans moteur natif Dirloom |
+| Contracts, drift, conform et réconciliation | `dirloom verify` contre un snapshot pour un état exact ; contrôles externes sur le JSON pour des règles |
 | Query et metrics | Interroger le JSON avec PowerShell, `jq` ou un programme |
-| Analyse des imports et dépendances | Dirloom v0.1 observe uniquement le système de fichiers |
+| Analyse des imports et dépendances | Dirloom observe la structure du système de fichiers et des arbres Git, jamais le code des fichiers |
 | Context Compiler, receipts, MCP et Agent Skills | Fournir manuellement le Markdown ou le JSON aux outils concernés |
 | `--follow-symlinks` | Les liens restent terminaux ; aucune traversée native |
 | Desktop et intégrations IDE | Utiliser la CLI et ses artefacts |

@@ -11,7 +11,7 @@ Thank you for helping improve Dirloom.
 
 ## Development workflow
 
-Versioned product work lands by pull request on `release/vX.Y.Z`. `v0.4.0-a2` is published and closed. No release branch is active until a Human GO starts `v0.4.0-a3` on `release/v0.4.0-a3`. Do not open a feature PR to `main` for a versioned increment. See
+Versioned product work lands by pull request on `release/vX.Y.Z`. The active release branch is `release/v0.4.0-rc1`, for the first v0.4 release candidate. Do not open a feature PR to `main` for a versioned increment. See
 [Release workflow](docs/release-workflow.md). Release notes are governed by
 [CHANGELOG policy](docs/release/changelog-policy.md) and the
 [release notes template](docs/release/release-notes-template.md): update
@@ -48,7 +48,7 @@ Catalog expansions must keep `internal/presentation/catalog/testdata/classificat
 
 Windows, Linux and macOS are first-class targets. Do not introduce shell-specific product behavior. Preserve UTF-8 without BOM, LF-only output, stable ordering and exactly one final LF in all public formats.
 
-Changes to JSON fields, CLI flags, default exclusions, filter priority or ordering are public-contract changes and require explicit discussion plus contract tests.
+Changes to JSON fields, CLI flags, default exclusions, filter priority or ordering are public-contract changes and require explicit discussion plus contract tests. The [contract register](docs/contracts/README.md) names the owner, the fixtures and the change rules of each contract, and the [compatibility policy](docs/compatibility-policy.md) says which changes need a new contract or fingerprint version.
 
 Changes to `.dirloom.yaml`, configuration discovery, precedence, diagnostic fields, source statuses, preset names, preset definitions, visual defaults, built-in themes, icon mappings, rule priority, theme schema, diagram export contracts, clipboard behavior, or completion scripts are also public-contract changes. Update implementation tests, CLI tests, the relevant public guide (`docs/configuration.md`, `docs/presets.md`, `docs/themes.md`, `docs/graph-exports.md`, `docs/clipboard-and-completions.md`, or `docs/distribution.md`), README and changelog together. Marked YAML, JSON and command examples in the public guides are checked by the test suite and must remain executable.
 

@@ -24,8 +24,8 @@ Published status is independent of each package manager. GitHub Releases is alwa
 RELEASE STATUS
 Latest stable release: v0.3.3
 Latest GitHub Pre-release: v0.4.0-a8
-Active release branch: none
-v0.4.0-a8: published / closed
+Active release branch: release/v0.4.0-rc1
+v0.4.0-rc1: in preparation, not frozen
 
 DISTRIBUTION STATUS
 GitHub Stable   ✅ v0.3.3
@@ -58,7 +58,7 @@ brew install --cask dirloom/tap/dirloom
 
 ### Release archives
 
-Every version is on [GitHub Releases](https://github.com/dirloom/dirloom/releases), including GitHub Pre-releases such as `v0.4.0-a8` that Winget, Scoop and Homebrew do not ship. To install or update one version, set the version and the install directory, then paste the block. It downloads the archive for your platform, checks its SHA-256 against `checksums.txt`, keeps the previous binary as `.bak`, and prints the installed version. Do not point it at a directory managed by Winget, Scoop or Homebrew.
+Every version is on [GitHub Releases](https://github.com/dirloom/dirloom/releases), including the v0.4 GitHub Pre-releases that Winget, Scoop and Homebrew do not ship: those stay on `v0.3.3` until `v0.4.0`. To install or update one version, set the version and the install directory, then paste the block. It downloads the archive for your platform, checks its SHA-256 against `checksums.txt`, keeps the previous binary as `.bak`, and prints the installed version. Do not point it at a directory managed by Winget, Scoop or Homebrew.
 
 PowerShell (Windows x64 or ARM64):
 
@@ -111,25 +111,21 @@ install -m 0755 dirloom "$DIR/dirloom"
 )
 ```
 
-On a first install, add the directory to your `PATH` once. On Windows: `[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$Dir", "User")`, then open a new terminal. SBOMs and attestations can also be verified as described in [Distribution](docs/distribution.md).
+On a first install, add the directory to your `PATH` once. On Windows: `[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$Dir", "User")`, then open a new terminal. To also verify the GitHub artifact attestation and read the SBOM of a release, follow [Verifying a release](SECURITY.md#verifying-a-release). These checks are not an independent signature of the binaries.
 
 ### Install with Go
 
-With Go 1.26.10:
-
-```bash
-go install github.com/dirloom/dirloom/cmd/dirloom@latest
-```
+`go install` is not a supported way to install Dirloom until a release decision restores it. Seven tags, `v0.2.0` to `v0.4.0-a2` with `v0.3.3` among them, hold file names that Go modules refuse: the Go module proxy has no module for them, and `go install` of one of them fails. For the other versions, the result depends on the version list the proxy serves. `@latest` either fails or installs the old `v0.1.1`, and a named version can fail too, because `go install` reads the latest version to look for a deprecation notice. Use a [release archive](#release-archives), or build from source with Go 1.26.10.
 
 ### Build from source
 
-For local development:
+For local development, or to build a released version from a clone checked out at its tag:
 
 ```bash
 go build -o ./bin/dirloom ./cmd/dirloom
 ```
 
-On PowerShell, use `-o .\bin\dirloom.exe` for the build output path.
+On PowerShell, use `-o .\bin\dirloom.exe` for the build output path. A binary built this way reports its version as `dev`.
 
 ## Quick start
 
@@ -193,6 +189,16 @@ dirloom --style ascii > structure.txt
 ```
 
 See [Clipboard and shell completions](docs/clipboard-and-completions.md), [Practical use cases and examples](docs/use-cases.md), [`dirloom fingerprint`](docs/reference/fingerprint.md), [`dirloom snapshot`](docs/reference/snapshot.md), [`dirloom verify`](docs/reference/verify.md), [`dirloom diff`](docs/reference/diff.md), [`dirloom history`](docs/reference/history.md) and [`dirloom watch`](docs/reference/watch.md) for filtering recipes, documentation and AI workflows, CI artifacts, JSON processing, structural identity, durable snapshots, live verification, structural diff, structural history, the experimental structural watch and current product limitations.
+
+## Structural Version Control
+
+v0.4 records, checks and compares the structure of a project: `fingerprint`, `snapshot`, `verify`, `diff` with move detection and `git:` sources, `history`, and the experimental `watch`. File contents are never read.
+
+- [Structural Version Control](docs/structural-version-control.md): the overview, with a walkthrough.
+- [CI integration](docs/ci-integration.md): a committed snapshot checked on every pull request, in GitHub Actions.
+- [Exit codes and machine codes](docs/reference/exit-codes.md), and the [contract register](docs/contracts/README.md): every machine-readable output and its contract, under the [compatibility and freeze policy](docs/compatibility-policy.md).
+- [Upgrading from v0.3.3](docs/upgrading-to-v0.4.md): what changes for an existing user.
+- [Security policy](SECURITY.md): what Dirloom reads, how it runs Git, and how to verify a release.
 
 ## Getting help
 
@@ -502,9 +508,9 @@ CLI arguments
     → stdout or transactional file output
 ```
 
-The configuration resolver, headless application service and model are independent from Cobra and from renderers, keeping future `browse` and diff interfaces able to reuse the same core. `Verify` is one of those application services: it loads a snapshot and scans once without rendering.
+The configuration resolver, headless application service and model are independent from Cobra and from renderers, so the structural commands and a future `browse` reuse the same core. `Verify` is one of those application services: it loads a snapshot and scans once without rendering.
 
-See [docs/architecture.md](docs/architecture.md) for package boundaries, [docs/reference/fingerprint.md](docs/reference/fingerprint.md), [docs/reference/snapshot.md](docs/reference/snapshot.md) and [docs/reference/verify.md](docs/reference/verify.md) for structural identity, durable snapshots and live verification, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
+See [docs/architecture.md](docs/architecture.md) for package boundaries, [Structural Version Control](docs/structural-version-control.md) for structural identity, snapshots, verification, diff, Git sources, history and watch, and [docs/dependencies.md](docs/dependencies.md) for dependency decisions.
 
 ## Development
 
@@ -523,13 +529,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 ## Release
 
 Dirloom uses a protected `release/vX.Y.Z` branch for release composition.
-`main` is the integration branch. The latest published GitHub Pre-release is
-`v0.4.0-a8`. The latest stable release is `v0.3.3`. No release branch is
-active. `v0.4.0-a8` is published and closed. The v0.4 release candidate has
-not started.
+`main` is the integration branch. The latest stable release is `v0.3.3`; the
+latest published GitHub Pre-release is `v0.4.0-a8`. The first v0.4 release
+candidate, `v0.4.0-rc1`, is in preparation on `release/v0.4.0-rc1`: its
+contracts are candidates for the v0.4 freeze, not yet frozen.
 See [Release workflow](docs/release-workflow.md).
 
-Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication.
+Tags matching `v*` invoke GoReleaser and produce a GitHub Release **draft**. Maintainers verify the 13 artifacts (6 archives, 6 SBOMs, `checksums.txt`), attestations, and checksums, then publish. Package-manager pull requests open only after a **non-prerelease** publication. The [security policy](SECURITY.md#release-trust-model) describes this trust model and what it does not cover.
 
 The six official archives remain:
 
@@ -557,16 +563,8 @@ v0.1 CORE → v0.2 ACCESSIBILITY → v0.3 PRESENTATION → v0.3.1 CLI GUIDANCE �
 - v0.3.1: published — CLI guidance, contextual help topics, implicit `--icons`/`--color` auto, and actionable usage errors;
 - v0.3.2: published — portable ASCII icons, declarative Nerd Font capability, and conservative `--icons auto`;
 - v0.3.3: published — Nerd catalog fidelity, provenance, and classification refinement;
-- v0.4.0-a1: published — structural fingerprint identity (GitHub Pre-release; stable package managers unchanged);
-- v0.4.0-a2: published — persistent self-verifying snapshots (GitHub Pre-release; no verify/diff in that increment; stable package managers unchanged);
-- v0.4.0-a3: published — live structural verification (`dirloom verify`; GitHub Pre-release; no diff);
-- v0.4.0-a4: published and closed — structural diff (`dirloom diff`; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a5: published and closed — move detection (`MOVED` in `dirloom diff`, Diff Result Schema v2; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a6: published and closed — Git sources (`git:<revision>` in `dirloom diff`, Diff Result Schema v3; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a7: published and closed — structural history (`dirloom history`, History Result Schema v1; GitHub Pre-release; stable package managers remain `v0.3.3`);
-- v0.4.0-a8: published and closed — experimental structural watch (`dirloom watch`, Structural Watch v1 and Watch Event Schema v1, both excluded from the v0.4 RC contract freeze; GitHub Pre-release; stable package managers remain `v0.3.3`); the v0.4 release candidate has not started;
+- v0.4: Structural Version Control — fingerprints, snapshots, verification, structural diff with move detection, Git sources, structural history and an experimental structural watch ([overview](docs/structural-version-control.md)). Its features shipped as eight GitHub Pre-releases, `v0.4.0-a1` to `v0.4.0-a8` (see the [CHANGELOG](CHANGELOG.md)). `v0.4.0-rc1`, the first release candidate, is in preparation; stable package managers remain on `v0.3.3` until `v0.4.0`;
 - after v0.3: interactive explorer (`dirloom browse`);
-- v0.4: fingerprints, snapshots, verification, structural diff, move detection, Git sources, structural history and an experimental structural watch;
 - v0.5: scaffold, templates and Architecture Packs.
 
 `dirloom browse` is scheduled after the v0.3 presentation increment. See the [product documentation](docs/product/README.md) for the vision, product principles, functional specification, glossary and the [voted strategic roadmap](docs/product/roadmap.md).

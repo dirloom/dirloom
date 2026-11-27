@@ -101,7 +101,7 @@ A `MOVED` covers its whole subtree: every descendant of `from` in A and of `path
 
 A `MOVED` reports a deterministic, unique structural correspondence under the named strategy. It is not historical evidence that the object was moved, even between two Git revisions. See [Move Detection structural-v1](move-detection-structural-v1.md#a-correspondence-not-proof-of-a-move).
 
-## `--no-moves` and A4 equivalence
+## `--no-moves` and Diff Result Schema v1 equivalence
 
 With `--no-moves`, `metadata.moveDetection` is `none`. For `snapshot:` and `live:` sources, the `changes` array and the `added`, `removed`, and `changed` counts are exactly those of `v0.4.0-a4` (Diff Result Schema v1) for the same inputs.
 
