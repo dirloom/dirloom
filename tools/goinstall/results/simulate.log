@@ -1,0 +1,900 @@
+
+######## variant today: Today's tags, v0.4.0-a8 the newest
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-a8
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-a8",
+	"Info": "<work>\\today\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.info",
+	"GoMod": "<work>\\today\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.mod",
+	"Zip": "<work>\\today\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.zip",
+	"Dir": "<work>\\today\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-a8",
+	"Sum": "h1:wVkUEH+vOpNsTPbgsTrbFaJmNQhlQ/ChhHC+qQA7YVc=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-a8
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-a8
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-a8",
+	"Info": "<work>\\today\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.info",
+	"GoMod": "<work>\\today\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.mod",
+	"Zip": "<work>\\today\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.zip",
+	"Dir": "<work>\\today\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-a8",
+	"Sum": "h1:wVkUEH+vOpNsTPbgsTrbFaJmNQhlQ/ChhHC+qQA7YVc=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-a8
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-a8
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-a8",
+	"Info": "<work>\\today\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.info",
+	"GoMod": "<work>\\today\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.mod",
+	"Zip": "<work>\\today\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.zip",
+	"Dir": "<work>\\today\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-a8",
+	"Sum": "h1:wVkUEH+vOpNsTPbgsTrbFaJmNQhlQ/ChhHC+qQA7YVc=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-a8
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-a8
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-a8",
+	"Info": "<work>\\today\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.info",
+	"GoMod": "<work>\\today\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.mod",
+	"Zip": "<work>\\today\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-a8.zip",
+	"Dir": "<work>\\today\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-a8",
+	"Sum": "h1:wVkUEH+vOpNsTPbgsTrbFaJmNQhlQ/ChhHC+qQA7YVc=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "015796e57654e397f5bb51eed8fc44ca3a4d2a5d",
+		"Ref": "refs/tags/v0.4.0-a8"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-a8
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+######## variant rc1: v0.4.0-rc1 tagged, its go.mod without retract
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "b018aa27270dfbd2b1bf426a0731d27e828ec5ad",
+		"Ref": "refs/tags/v0.4.0-rc1"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+######## variant rc1-retract-unzippable: v0.4.0-rc1 tagged, its go.mod retracting the seven unzippable versions
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "ad8a60b463af30bea23b5efbd522c1833e57e1e5",
+		"Ref": "refs/tags/v0.4.0-rc1"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+######## variant rc1-retract-earlier: v0.4.0-rc1 tagged, its go.mod retracting every earlier version
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-earlier\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-earlier\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-earlier\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-earlier\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:/fsssiAN3rIGZXjVxndBd+JN63OBcJFdtkOPjLBFYXQ=",
+	"GoModSum": "h1:HI0s7JIukgApptMEBzavmRsuqdVoWRnZzaWXBD9mJOo="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-earlier\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-earlier\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-earlier\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-earlier\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:/fsssiAN3rIGZXjVxndBd+JN63OBcJFdtkOPjLBFYXQ=",
+	"GoModSum": "h1:HI0s7JIukgApptMEBzavmRsuqdVoWRnZzaWXBD9mJOo="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.1.1
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-earlier\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-earlier\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-earlier\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-earlier\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:/fsssiAN3rIGZXjVxndBd+JN63OBcJFdtkOPjLBFYXQ=",
+	"GoModSum": "h1:HI0s7JIukgApptMEBzavmRsuqdVoWRnZzaWXBD9mJOo="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
+	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 1]
+go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.3.3
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\rc1-retract-earlier\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\rc1-retract-earlier\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\rc1-retract-earlier\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\rc1-retract-earlier\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:/fsssiAN3rIGZXjVxndBd+JN63OBcJFdtkOPjLBFYXQ=",
+	"GoModSum": "h1:HI0s7JIukgApptMEBzavmRsuqdVoWRnZzaWXBD9mJOo=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "52c147543ff505d8d2707341e5118a0c095737e3",
+		"Ref": "refs/tags/v0.4.0-rc1"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: verifying go.mod: github.com/dirloom/dirloom@v0.3.3/go.mod: reading <sumdb>/lookup/github.com/dirloom/dirloom@v0.3.3: 404 Not Found
+	server response: not found: no module zip for github.com/dirloom/dirloom@v0.3.3: file does not exist
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 1]
+go: downloading github.com/dirloom/dirloom v0.3.3
+go: github.com/dirloom/dirloom/cmd/dirloom@latest: create zip: plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md: malformed file path "plans/Plan v0.2.0 — Confort d’utilisation, complétions et distribution GitOps.md": invalid char '—'
+plans/Plan v0.3.0 — Presentation Richness.md: malformed file path "plans/Plan v0.3.0 — Presentation Richness.md": invalid char '—'
+
+######## variant stable: v0.4.0 tagged after v0.4.0-rc1, without retract
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:Ngyfen4N9lU271dnf3L9R6oFT+Vq0gMrByxfJyMNZ38=",
+	"GoModSum": "h1:9dLk6HDTiuf1Zp2leEqMJkHbMiUtGxmymOTEGWrLsUc=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "b018aa27270dfbd2b1bf426a0731d27e828ec5ad",
+		"Ref": "refs/tags/v0.4.0-rc1"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+######## variant stable-retract-unzippable: v0.4.0 tagged after v0.4.0-rc1, both go.mod files retracting the seven unzippable versions
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable-retract-unzippable\\runs\\proxy-all\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-all>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-zippable>,direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable-retract-unzippable\\runs\\proxy-zippable\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-zippable>,direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable-retract-unzippable\\runs\\proxy-all-only\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM="
+}
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4.0-a1 v0.4.0-a2 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=direct go list -m -versions github.com/dirloom/dirloom
+[exit 0]
+github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.4.0-a3 v0.4.0-a4 v0.4.0-a5 v0.4.0-a6 v0.4.0-a7 v0.4.0-a8 v0.4.0-rc1 v0.4.0
+
+$ GOPROXY=direct go list -m github.com/dirloom/dirloom@latest
+[exit 0]
+github.com/dirloom/dirloom v0.4.0
+
+$ GOPROXY=direct go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
+[exit 0]
+{
+	"Path": "github.com/dirloom/dirloom",
+	"Version": "v0.4.0-rc1",
+	"Info": "<work>\\stable-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.info",
+	"GoMod": "<work>\\stable-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.mod",
+	"Zip": "<work>\\stable-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\cache\\download\\github.com\\dirloom\\dirloom\\@v\\v0.4.0-rc1.zip",
+	"Dir": "<work>\\stable-retract-unzippable\\runs\\direct\\3\\gopath\\pkg\\mod\\github.com\\dirloom\\dirloom@v0.4.0-rc1",
+	"Sum": "h1:fDPHz5E+Hx+hxIYjbt0890jaHS43snyHu8+gmlZ9Niw=",
+	"GoModSum": "h1:uiw1mvpDsTpkzbWg+713NF1PKDYZx7GXLv/aktgVyYM=",
+	"Origin": {
+		"VCS": "git",
+		"URL": "https://github.com/dirloom/dirloom",
+		"Hash": "ad8a60b463af30bea23b5efbd522c1833e57e1e5",
+		"Ref": "refs/tags/v0.4.0-rc1"
+	}
+}
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0-rc1
+
+$ GOPROXY=direct go install github.com/dirloom/dirloom/cmd/dirloom@latest
+[exit 0]
+go: downloading github.com/dirloom/dirloom v0.4.0
