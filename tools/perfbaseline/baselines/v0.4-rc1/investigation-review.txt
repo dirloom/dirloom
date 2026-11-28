@@ -1,0 +1,81 @@
+== loadpeak snap-long-2m go126 round 1 2026-11-27T04:47:41Z
+loadpeak go=go1.26.10 run=1 bytes=263878369 peak-MiB=2863 seconds=22.61
+loadpeak go=go1.26.10 run=2 bytes=263878369 peak-MiB=2863 seconds=24.12
+loadpeak go=go1.26.10 run=3 bytes=263878369 peak-MiB=2863 seconds=28.84
+== loadpeak snap-long-2m go127 round 1 2026-11-27T04:48:57Z
+loadpeak go=go1.27.2 run=1 bytes=263878369 peak-MiB=2353 seconds=16.50
+loadpeak go=go1.27.2 run=2 bytes=263878369 peak-MiB=2341 seconds=18.17
+loadpeak go=go1.27.2 run=3 bytes=263878369 peak-MiB=2358 seconds=17.91
+== loadpeak snap-wide-2m go126 round 1 2026-11-27T04:49:50Z
+loadpeak go=go1.26.10 run=1 bytes=163978369 peak-MiB=2045 seconds=20.46
+loadpeak go=go1.26.10 run=2 bytes=163978369 peak-MiB=2051 seconds=16.35
+loadpeak go=go1.26.10 run=3 bytes=163978369 peak-MiB=2019 seconds=15.79
+== loadpeak snap-wide-2m go127 round 1 2026-11-27T04:50:43Z
+loadpeak go=go1.27.2 run=1 bytes=163978369 peak-MiB=1944 seconds=10.12
+loadpeak go=go1.27.2 run=2 bytes=163978369 peak-MiB=1953 seconds=10.10
+loadpeak go=go1.27.2 run=3 bytes=163978369 peak-MiB=1954 seconds=10.16
+== loadpeak snap-long-2m go126 round 2 2026-11-27T04:51:14Z
+loadpeak go=go1.26.10 run=1 bytes=263878369 peak-MiB=2863 seconds=28.66
+loadpeak go=go1.26.10 run=2 bytes=263878369 peak-MiB=2863 seconds=28.82
+loadpeak go=go1.26.10 run=3 bytes=263878369 peak-MiB=2863 seconds=28.79
+== loadpeak snap-long-2m go127 round 2 2026-11-27T04:52:41Z
+loadpeak go=go1.27.2 run=1 bytes=263878369 peak-MiB=2353 seconds=17.68
+loadpeak go=go1.27.2 run=2 bytes=263878369 peak-MiB=2345 seconds=17.95
+loadpeak go=go1.27.2 run=3 bytes=263878369 peak-MiB=2346 seconds=18.56
+== loadpeak snap-wide-2m go126 round 2 2026-11-27T04:53:35Z
+loadpeak go=go1.26.10 run=1 bytes=163978369 peak-MiB=1761 seconds=20.03
+loadpeak go=go1.26.10 run=2 bytes=163978369 peak-MiB=2064 seconds=21.07
+loadpeak go=go1.26.10 run=3 bytes=163978369 peak-MiB=2081 seconds=21.46
+== loadpeak snap-wide-2m go127 round 2 2026-11-27T04:54:38Z
+loadpeak go=go1.27.2 run=1 bytes=163978369 peak-MiB=1945 seconds=13.50
+loadpeak go=go1.27.2 run=2 bytes=163978369 peak-MiB=1951 seconds=14.66
+loadpeak go=go1.27.2 run=3 bytes=163978369 peak-MiB=1950 seconds=14.08
+== detector old round 1 2026-11-27T04:55:21Z
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  41150000 ns/op	48738891 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  40091310 ns/op	48739394 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  40075000 ns/op	48738880 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  44564540 ns/op	48739389 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  41403910 ns/op	48738884 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  68292720 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  71325500 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  74877650 ns/op	53370184 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  68760920 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  62328640 ns/op	53369664 B/op	    2340 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	6.835s
+== detector new round 1 2026-11-27T04:55:29Z
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  39160920 ns/op	48741429 B/op	   21620 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  38923100 ns/op	48738881 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  39797710 ns/op	48738881 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  41976930 ns/op	48738883 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  44504240 ns/op	48738881 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  57367590 ns/op	53369667 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  80676580 ns/op	53370173 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  73187490 ns/op	53371192 B/op	    2341 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  69279450 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  84936510 ns/op	53369664 B/op	    2340 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	6.946s
+== detector old round 2 2026-11-27T04:55:37Z
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  63418710 ns/op	48745085 B/op	   21618 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  47503890 ns/op	48738884 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  45913690 ns/op	48739389 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  54967520 ns/op	48738883 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  68169690 ns/op	48739389 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  91327840 ns/op	53375864 B/op	    2341 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  76597980 ns/op	53369664 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  75552860 ns/op	53370173 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  79123940 ns/op	53369673 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  85044650 ns/op	53369673 B/op	    2340 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	8.652s
+== detector new round 2 2026-11-27T04:55:47Z
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  52090770 ns/op	48739415 B/op	   21618 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  53526730 ns/op	48739407 B/op	   21618 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  54650680 ns/op	48738881 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  55511110 ns/op	48739921 B/op	   21618 allocs/op
+BenchmarkDetectMoves/100000/relocated-50%-24         	      10	  55427020 ns/op	48738881 B/op	   21617 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  69229250 ns/op	53370684 B/op	    2341 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  70276850 ns/op	53375355 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  80089550 ns/op	53370173 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  79548120 ns/op	53369675 B/op	    2340 allocs/op
+BenchmarkDetectMoves/100000/ambiguous-24             	      10	  73621630 ns/op	53369675 B/op	    2340 allocs/op
+ok  	github.com/dirloom/dirloom/internal/comparison	8.034s
+== done 2026-11-27T04:55:56Z

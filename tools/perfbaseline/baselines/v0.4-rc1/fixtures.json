@@ -1,0 +1,204 @@
+{
+  "bad": {
+    "about": "malformed documents close to the snapshot limits",
+    "bytes-over": {
+      "bytes": 284164096,
+      "sha256": "2094356ead9e9d2d7f4203a7bd551334e195e3743f02271a0fef29400a1fb365"
+    },
+    "ignore-4096": {
+      "bytes": 97722,
+      "nodes": 1,
+      "sha256": "07019d12fab997db3f229145d907c49703d9db0d7b1bcbedd4c59846ec0669fe"
+    },
+    "keys": {
+      "bytes": 262143980,
+      "sha256": "c6822033c068bfb06fc43fd40da5c1139c56707887d54b2d940fc984c03c3a75"
+    },
+    "nesting": {
+      "bytes": 6000000,
+      "sha256": "832a70989ffe3d25a646223be449a4f67270ca92db7719ef863632ef38e994ae"
+    },
+    "nodes-over": {
+      "bytes": 163978441,
+      "sha256": "a18a2ca37c1aebb9cadf5956473b2a35f0cd247448e3997866284c7abc0c6812"
+    }
+  },
+  "git-bomb": {
+    "HEAD": "955d0ce2995f4c7261e1262d09827bdd9a86046c",
+    "about": "a repository whose tree shares subtrees: 2,306,353 nodes from a few kilobytes",
+    "nodes": 2306353
+  },
+  "git-chain": {
+    "about": "a repository of directory chains: main~1 and main just under 256 MiB of paths, over just above",
+    "over": {
+      "commit": "0f936278080946a65253f7234c4b5256425942bc",
+      "depth": 16385,
+      "nodes": 16387,
+      "pathBytes": 268500999
+    },
+    "pathLimit": 268435456,
+    "under": {
+      "commit": "20d8f14e01615cde226869f0aaf24f1bae919c0a",
+      "depth": 16382,
+      "nodes": 16384,
+      "pathBytes": 268402692
+    },
+    "under, leaf renamed": {
+      "commit": "a5795ebecd44acdb283bad944361579a7ba53aa9",
+      "depth": 16382,
+      "nodes": 16384,
+      "pathBytes": 268402693
+    }
+  },
+  "git-history-100k": {
+    "HEAD": "ba0048099fd89f8a47d56cffa9b4b2aa87f702ff",
+    "about": "a repository of 200 commits over a tree of about 100,000 entries",
+    "commits": 200,
+    "entries": 100000
+  },
+  "git-history-10k": {
+    "HEAD": "ca7e206002aa76403baf5c40065ab26c000a4933",
+    "about": "a repository of 2,000 commits over a tree of about 10,000 entries",
+    "commits": 2000,
+    "entries": 10000
+  },
+  "git-wide-1m": {
+    "HEAD": "9ef8619e3426bd3a750d62c1954e091fc90569f5",
+    "HEAD~1": "08052ea58e96d254b0e1b5d946c3b86853bde483",
+    "about": "a repository: HEAD~1 of 999,999 nodes, HEAD with every 10th directory relocated",
+    "nodesHEAD": 1000000,
+    "nodesHEAD~1": 999999,
+    "relocatedDirectories": 100
+  },
+  "git-wide-2m": {
+    "HEAD": "d94303d53e2c27724f0270e4a83a0d02504c201c",
+    "HEAD~1": "6b7364d787ba44201de6718f287ad6764c3e753c",
+    "about": "a repository: HEAD~1 of 1,999,999 nodes, HEAD of 2,000,000 nodes with every 10th directory relocated",
+    "nodesHEAD": 2000000,
+    "nodesHEAD~1": 1999999,
+    "relocatedDirectories": 200
+  },
+  "live-deep-100k": {
+    "about": "a directory of 100,001 nodes on disk: 100 chains of 50 nested directories",
+    "directories": 5001,
+    "nodes": 100001
+  },
+  "live-empty": {
+    "about": "an empty directory",
+    "nodes": 1
+  },
+  "live-gi-long": {
+    "about": "100,000 nodes and a root .gitignore of 16 lines of 65,000 bytes",
+    "directories": 102,
+    "gitignoreBytes": 1040016,
+    "nodes": 99999
+  },
+  "live-gi-short": {
+    "about": "100,000 nodes and a root .gitignore of 1 MiB of short patterns",
+    "directories": 102,
+    "gitignoreBytes": 1048567,
+    "nodes": 99999
+  },
+  "live-gi-wild": {
+    "about": "100,000 nodes and a root .gitignore of 16 lines of 65,000 bytes of wildcards",
+    "directories": 102,
+    "gitignoreBytes": 1040016,
+    "nodes": 99999
+  },
+  "live-watch": {
+    "about": "a directory of 100,000 nodes for watch, with an empty bursts directory",
+    "directories": 102,
+    "nodes": 99999
+  },
+  "live-wide-100k": {
+    "about": "a directory of 100,000 nodes on disk, wide shape",
+    "directories": 102,
+    "nodes": 100000
+  },
+  "live-wide-1m": {
+    "about": "a directory of 1,000,000 nodes on disk, wide shape",
+    "directories": 1001,
+    "nodes": 1000000
+  },
+  "live-wide-2m": {
+    "about": "a directory of 2,000,000 nodes on disk, wide shape",
+    "directories": 2000,
+    "nodes": 2000000
+  },
+  "snap-long-2m": {
+    "a": {
+      "bytes": 263878369,
+      "nodes": 2000000,
+      "sha256": "ed45bf907899f48de92f4878d35bae6bf7d02407f1cfdce2f38e15b9fe2c26bd"
+    },
+    "about": "snapshots of 2,000,000 nodes with long names, about 252 MiB: a, b10",
+    "b10": {
+      "bytes": 265680169,
+      "nodes": 2000000,
+      "sha256": "82f6331e35af9f08de467cb086992eb7430d7e63e0c28933260ff04dfd588667"
+    }
+  },
+  "snap-wide-100k": {
+    "a": {
+      "bytes": 8199247,
+      "nodes": 100000,
+      "sha256": "be4c3961539f9661b6fb7bee81a1faaf6ee3066b118a1839ab11b8c7f4cf7e2d"
+    },
+    "about": "snapshots of 100,000 nodes: a, and b with every 10th directory relocated",
+    "b10": {
+      "bytes": 8289337,
+      "nodes": 100000,
+      "sha256": "4e9696d53634f92ffa67793e04fc36b96694a5a8a15221d24b6b200ed06b8bb2"
+    }
+  },
+  "snap-wide-1m": {
+    "a": {
+      "bytes": 81989358,
+      "nodes": 1000000,
+      "sha256": "31afa450f0023da2c250e54a24a81e411aa95bf0ccd3031d02132476290c50de"
+    },
+    "about": "snapshots of 1,000,000 nodes: a, b10",
+    "b10": {
+      "bytes": 82890258,
+      "nodes": 1000000,
+      "sha256": "6646bc6f3e94cf1a47d0586f45bee243b28f619e73594c4fd23fc09268294a05"
+    }
+  },
+  "snap-wide-2m": {
+    "a": {
+      "bytes": 163978369,
+      "nodes": 2000000,
+      "sha256": "05a13d0fe78c388a23dde5fd9eb879be2f45b5121a06746657a0325e4bafd395"
+    },
+    "about": "snapshots of 2,000,000 nodes, the limit: a, b10, and b50 with every 2nd directory relocated",
+    "b10": {
+      "bytes": 165780169,
+      "nodes": 2000000,
+      "sha256": "d235d07a9f984dd901d316eab502b1f4cb755f785701a65304f84052ed93ce15"
+    },
+    "b50": {
+      "bytes": 172978360,
+      "nodes": 2000000,
+      "sha256": "36e7cbaac1e997108d9a6953eaf865b96b9b838bacff0fe548b3f76d6d6bcca3"
+    }
+  },
+  "snaplive": {
+    "about": "snapshots of the live trees, written by dirloom snapshot",
+    "live-deep-100k": {
+      "bytes": 11705438,
+      "sha256": "3fb8f872dd077ec6d38c5a165781560d7eec402b9cfaf090b0e70cd2bbdb815d"
+    },
+    "live-wide-100k": {
+      "bytes": 8199247,
+      "sha256": "be4c3961539f9661b6fb7bee81a1faaf6ee3066b118a1839ab11b8c7f4cf7e2d"
+    },
+    "live-wide-1m": {
+      "bytes": 81989358,
+      "sha256": "31afa450f0023da2c250e54a24a81e411aa95bf0ccd3031d02132476290c50de"
+    },
+    "live-wide-2m": {
+      "bytes": 163978369,
+      "sha256": "05a13d0fe78c388a23dde5fd9eb879be2f45b5121a06746657a0325e4bafd395"
+    }
+  }
+}
