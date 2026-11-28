@@ -278,6 +278,22 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # A tag whose module zip Go refuses cannot be installed with go install (A14).
+      - name: Check that Go can zip the module
+        run: bash .github/scripts/check-module-zip.sh
+
+      # tools/goinstall is a separate module, outside ./... of the root module.
+      - name: Vet the go install experiment
+        run: |
+          set -euo pipefail
+          go -C tools/goinstall vet ./...
+          unformatted="$(gofmt -l tools)"
+          if [ -n "$unformatted" ]; then
+            echo "The following files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
       - name: Install Syft
         run: sudo bash .github/scripts/install-syft.sh /usr/local/bin
 

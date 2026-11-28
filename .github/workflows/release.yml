@@ -25,6 +25,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # Stop before the draft if Go cannot zip the tagged module: such a tag
+      # cannot be installed with go install (A14).
+      - name: Check that Go can zip the module
+        run: bash .github/scripts/check-module-zip.sh
+
       - name: Install Syft
         run: sudo bash .github/scripts/install-syft.sh /usr/local/bin
 
