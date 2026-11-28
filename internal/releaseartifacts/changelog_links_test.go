@@ -44,22 +44,28 @@ func TestChangelogRC1LinksArePinnedToTheTag(t *testing.T) {
 			t.Errorf("link %q is not absolute; write %s<path>", target, rc1LinkPrefix)
 			continue
 		}
-		if !strings.HasPrefix(target, "https://github.com/dirloom/dirloom/") {
-			continue // another site
+		// Files of this repository must be read at the tag; its issues,
+		// pull requests, releases and comparisons need no pin.
+		if !strings.HasPrefix(target, "https://github.com/dirloom/dirloom/blob/") &&
+			!strings.HasPrefix(target, "https://github.com/dirloom/dirloom/tree/") {
+			continue
 		}
 		if !strings.HasPrefix(target, rc1LinkPrefix) {
 			t.Errorf("link %q is not pinned to the tag; write %s<path>", target, rc1LinkPrefix)
 			continue
 		}
-		// The tag will hold this tree: the file, and its anchor, must exist.
+		// Until the tag exists, this tree is the one it will hold: the file,
+		// and its anchor, must exist. Once v0.4.0-rc1 is tagged, its links
+		// read the tag, and a later rename does not break them: this check
+		// can then go.
 		path, anchor, _ := strings.Cut(strings.TrimPrefix(target, rc1LinkPrefix), "#")
 		body, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
 		if err != nil {
-			t.Errorf("link %q: %v", target, err)
+			t.Errorf("link %q: %v (once v0.4.0-rc1 is tagged, check the link against the tag instead)", target, err)
 			continue
 		}
 		if anchor != "" && !hasHeadingAnchor(string(body), anchor) {
-			t.Errorf("link %q: %s has no heading with the anchor %q", target, path, anchor)
+			t.Errorf("link %q: %s has no heading with the anchor %q (once v0.4.0-rc1 is tagged, check the link against the tag instead)", target, path, anchor)
 		}
 	}
 }
