@@ -79,12 +79,12 @@ github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4
 $ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
 [exit 1]
 go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-a8
 [exit 0]
@@ -103,12 +103,12 @@ $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a
 [exit 1]
 go: downloading github.com/dirloom/dirloom v0.4.0-a8
 go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-a8: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+	server response: 404 page not found
 
 $ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
 [exit 0]
@@ -234,12 +234,12 @@ github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4
 $ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
 [exit 1]
 go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
 [exit 0]
@@ -258,12 +258,12 @@ $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-r
 [exit 1]
 go: downloading github.com/dirloom/dirloom v0.4.0-rc1
 go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+	server response: 404 page not found
 
 $ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
 [exit 0]
@@ -389,12 +389,12 @@ github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4
 $ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
 [exit 1]
 go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
 [exit 0]
@@ -413,12 +413,12 @@ $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-r
 [exit 1]
 go: downloading github.com/dirloom/dirloom v0.4.0-rc1
 go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+	server response: 404 page not found
 
 $ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
 [exit 0]
@@ -544,12 +544,12 @@ github.com/dirloom/dirloom v0.1.0 v0.1.1 v0.2.0 v0.3.0 v0.3.1 v0.3.2 v0.3.3 v0.4
 $ GOPROXY=<proxy-all> go list -m -versions github.com/dirloom/dirloom
 [exit 1]
 go: loading module retractions for github.com/dirloom/dirloom@v0.1.0: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go list -m github.com/dirloom/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go mod download -json github.com/dirloom/dirloom@v0.4.0-rc1
 [exit 0]
@@ -568,12 +568,12 @@ $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-r
 [exit 1]
 go: downloading github.com/dirloom/dirloom v0.4.0-rc1
 go: github.com/dirloom/dirloom/cmd/dirloom@v0.4.0-rc1: loading deprecation for github.com/dirloom/dirloom: github.com/dirloom/dirloom@v0.3.3: reading <proxy-all>/github.com/dirloom/dirloom/@v/v0.3.3.info: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/@v/v0.3.3.info
+	server response: 404 page not found
 
 $ GOPROXY=<proxy-all> go install github.com/dirloom/dirloom/cmd/dirloom@latest
 [exit 1]
 go: github.com/dirloom/dirloom/cmd/dirloom@latest: module github.com/dirloom/dirloom/cmd/dirloom: reading <proxy-all>/github.com/dirloom/dirloom/cmd/dirloom/@v/list: 404 Not Found
-	server response: not found: github.com/dirloom/dirloom/cmd/dirloom/@v/list
+	server response: 404 page not found
 
 $ GOPROXY=direct go list -m -versions -retracted github.com/dirloom/dirloom
 [exit 0]

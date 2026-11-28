@@ -95,7 +95,13 @@ func TestCheckModuleZipAcceptsAValidModule(t *testing.T) {
 	if !strings.Contains(out, `"Sum": "h1:`) {
 		t.Fatalf("no module sum in the output:\n%s", out)
 	}
-	if refs, _ := exec.Command("git", "-C", repo, "for-each-ref", "refs/heads/module-zip-check-*").Output(); len(refs) != 0 {
+	list := exec.Command("git", "-C", repo, "for-each-ref", "refs/heads/module-zip-check-*")
+	list.Env = zipEnv(t)
+	refs, err := list.Output()
+	if err != nil {
+		t.Fatalf("git for-each-ref: %v", err)
+	}
+	if len(refs) != 0 {
 		t.Fatalf("the temporary ref was not removed: %s", refs)
 	}
 }

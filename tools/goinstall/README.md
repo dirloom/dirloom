@@ -22,12 +22,14 @@ cd tools/goinstall
 go run . simulate -go "$(GOTOOLCHAIN=go1.26.10 go env GOROOT)/bin/go" -out results/simulate.md -log results/simulate.log
 ```
 
-It needs Git, takes about two minutes, and reaches no network. It builds a throwaway repository with the
+It needs Git, takes about two minutes, and reaches no network. It clears every `GIT_*` variable it inherits,
+and stops with status 3 if a version's zip fails for any reason other than the refused file names. On Windows,
+keep `TMP` short: the module cache paths under it get long. It builds a throwaway repository with the
 topology of the real tags (same names, same commit dates, the same refused file names), then serves it as:
 
 - a module proxy on 127.0.0.1 that answers 404 for an unzippable version, like proxy.golang.org, with a version
   list that holds either every tag or the zippable tags only: proxy.golang.org listed the zippable tags only on
-  2026-11-26 from 19:58Z, and every tag at 19:47Z that day and on 2026-11-28 from 02:35Z to 02:59Z at least;
+  2026-11-26 from 19:58Z, and every tag at 19:47Z that day and on 2026-11-28 from 02:35Z to 03:25Z at least;
 - a checksum database on 127.0.0.1 that has no record for an unzippable version, like sum.golang.org;
 - the repository itself for `GOPROXY=direct`, through a Git `url.insteadOf`.
 
@@ -39,7 +41,7 @@ Every command runs with a fresh `GOPATH`, module cache and `GOBIN`, `GOENV=off`,
 ### Fidelity
 
 [`results/check-v0.4.0-a8.md`](results/check-v0.4.0-a8.md) runs the same commands against the real module on
-2026-11-28 at 02:59Z, while proxy.golang.org listed every tag (15 versions at 02:59:56Z). Its two columns match
+2026-11-28 at 03:25Z, while proxy.golang.org listed every tag (15 versions at 03:25:32Z). Its two columns match
 the "proxy listing every tag, then direct" and `GOPROXY=direct` columns of the simulation's first variant, command
 for command: same exit statuses, same versions listed and selected, the same
 `loading deprecation … v0.3.3: verifying go.mod … 404` failure. Only the server names and the text of their 404
@@ -73,7 +75,8 @@ does not control, and `GOPROXY=direct` always fails until a zippable stable rele
 `v0.4.0` itself, provided its module zips. What RC1 can do:
 
 - keep every commit zippable: CI runs [`check-module-zip.sh`](../../.github/scripts/check-module-zip.sh), which has
-  `go` build the module zip of the commit with the proxy's code path. G3 tags a commit whose CI passed;
+  `go` build the module zip of the commit with the proxy's code path, and the release workflow runs it again on
+  the tag before it builds the draft;
 - not rely on `retract`, which the simulation shows has no effect;
 - check the published tag at G4/G5, below, and leave the `@latest` outcome to the CTO.
 
@@ -88,8 +91,9 @@ go run . check -version v0.4.0-rc1 -go "$(GOTOOLCHAIN=go1.26.10 go env GOROOT)/b
 On Windows PowerShell, pass `-go "$(go env GOROOT)\bin\go.exe"` from a shell where `$env:GOTOOLCHAIN='go1.26.10'`.
 
 It runs, through `GOPROXY=https://proxy.golang.org,direct` and then with `GOPROXY=direct`, each command with a fresh
-`GOPATH`, module cache and `GOBIN`, `GOENV=off`, no `GOFLAGS`, `GONOSUMDB`, `GOPRIVATE`, `GONOPROXY` or
-`GOINSECURE`, and the Git global configuration ignored:
+`GOPATH`, module cache and `GOBIN`, `GOENV=off`, `GOFLAGS=-modcacherw` only, no `GONOSUMDB`, `GOPRIVATE`,
+`GONOPROXY` or `GOINSECURE`, and the Git global configuration ignored. The Git system configuration and the
+network proxy settings of the host stay, so that the host can reach GitHub:
 
 1. `go list -m -versions -retracted github.com/dirloom/dirloom`, the versions the source lists;
 2. `go list -m -versions github.com/dirloom/dirloom`;
@@ -100,7 +104,8 @@ It runs, through `GOPROXY=https://proxy.golang.org,direct` and then with `GOPROX
 6. `go install github.com/dirloom/dirloom/cmd/dirloom@latest`, then the same.
 
 It exits 1 when the named version does not install, with the expected module version and binary output, in
-both modes. `@latest` does not have to install the release candidate: its outcome is recorded for the CTO.
+both modes, 2 on a usage error, and 3 when the tool itself fails, keeping its work directory and writing its
+log. Each go command is stopped after 10 minutes. `@latest` does not have to install the release candidate: its outcome is recorded for the CTO.
 A14 closes only on this check of the real tag, not on the simulation.
 
 The tag is public from G3, and querying the proxy for it records `v0.4.0-rc1` in proxy.golang.org and

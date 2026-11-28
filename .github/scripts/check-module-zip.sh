@@ -14,7 +14,7 @@ set -euo pipefail
 
 root="$(git rev-parse --show-toplevel)"
 rev="$(git -C "$root" rev-parse HEAD)"
-module="$(cd "$root" && GOENV=off GOFLAGS= go list -m)"
+module="$(cd "$root" && GOENV=off GOFLAGS= GOWORK=off go list -m)"
 url="file://${root}"
 if [[ "$root" != /* ]]; then
   url="file:///${root}" # Windows: file:///C:/...
@@ -24,8 +24,8 @@ tmp="$(mktemp -d)"
 # cmd/go fetches refs/heads/* and refs/tags/*: make a detached HEAD, such as a
 # pull request merge commit, reachable.
 ref="refs/heads/module-zip-check-$$"
+trap 'git -C "$root" update-ref -d "$ref" 2>/dev/null || true; rm -rf "$tmp"' EXIT
 git -C "$root" update-ref "$ref" "$rev"
-trap 'git -C "$root" update-ref -d "$ref"; rm -rf "$tmp"' EXIT
 
 cd "$tmp"
 GIT_CONFIG_COUNT=1 \
