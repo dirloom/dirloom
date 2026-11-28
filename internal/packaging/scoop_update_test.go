@@ -26,7 +26,9 @@ case "$1 $2" in
   ;;
 "repo clone")
   mkdir -p "$4"
-  if [[ -n "$FAKE_CURRENT" ]]; then
+  if [[ "$FAKE_CURRENT" == no-version ]]; then
+    printf '{\n  "version": ""\n}\n' >"$4/dirloom.json"
+  elif [[ -n "$FAKE_CURRENT" ]]; then
     printf '{\n  "version": "%s"\n}\n' "$FAKE_CURRENT" >"$4/dirloom.json"
   fi
   ;;
@@ -80,6 +82,8 @@ func TestUpdateScoopScriptDecision(t *testing.T) {
 		{"patch regression", "0.4.1", "v0.4.0", 1, "Refusing to move Scoop from 0.4.1 to 0.4.0: not a newer SemVer version", false},
 		{"manifest not SemVer", "latest", "v0.4.0", 2, "not a SemVer 2.0.0 version: 'latest'", false},
 		{"tag not SemVer", "0.3.3", "v0.4", 1, "Not a SemVer 2.0.0 version: 0.4", false},
+		// FAKE_CURRENT=no-version writes a manifest whose version is empty.
+		{"manifest without version", "no-version", "v0.3.2", 1, "Refusing to update Scoop: dirloom.json has no version", false},
 	}
 	bin := t.TempDir()
 	for name, body := range fakeTools {
@@ -120,6 +124,9 @@ exec bash "$1"`
 				status = cmd.ProcessState.ExitCode()
 			}
 			if status == 99 {
+				if os.Getenv("CI") != "" {
+					t.Fatalf("cannot shadow the real tools on CI: %s", out)
+				}
 				t.Skipf("cannot shadow the real tools: %s", out)
 			}
 			if status != c.status {

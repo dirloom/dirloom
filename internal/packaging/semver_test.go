@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -18,6 +19,27 @@ import (
 func bashCommand(t *testing.T, args ...string) *exec.Cmd {
 	t.Helper()
 	return exec.Command(bashPath(t), args...)
+}
+
+// testBashes returns the shells that run the library in these tests: the bash
+// of bashPath and, on macOS, /bin/bash, the bash 3.2 that the updaters must
+// support. Each one's version is logged.
+func testBashes(t *testing.T) []string {
+	t.Helper()
+	shells := []string{bashPath(t)}
+	if runtime.GOOS == "darwin" && shells[0] != "/bin/bash" {
+		if _, err := os.Stat("/bin/bash"); err == nil {
+			shells = append(shells, "/bin/bash")
+		}
+	}
+	for _, sh := range shells {
+		out, err := exec.Command(sh, "-c", `echo "$BASH_VERSION"`).Output()
+		if err != nil {
+			t.Fatalf("%s: %v", sh, err)
+		}
+		t.Logf("%s: bash %s", sh, strings.TrimSpace(string(out)))
+	}
+	return shells
 }
 
 func semverLib(t *testing.T) string {
@@ -36,9 +58,9 @@ type semverAnswer struct {
 	status int
 }
 
-// runSemver runs every query in one bash process and returns the output and
-// exit status of each call.
-func runSemver(t *testing.T, env []string, queries []semverQuery) []semverAnswer {
+// runSemver runs every query in one process of the bash at shell and returns
+// the output and exit status of each call.
+func runSemver(t *testing.T, shell string, env []string, queries []semverQuery) []semverAnswer {
 	t.Helper()
 	var input strings.Builder
 	for _, q := range queries {
@@ -57,7 +79,7 @@ while IFS='|' read -r fn a b; do
   IFS= read -r out <"$tmp" || true
   printf '%s %s\n' "$status" "$out"
 done`
-	cmd := bashCommand(t, "-c", driver, "semver-driver", semverLib(t))
+	cmd := exec.Command(shell, "-c", driver, "semver-driver", semverLib(t))
 	cmd.Env = append(os.Environ(), env...)
 	cmd.Stdin = strings.NewReader(input.String())
 	raw, err := cmd.Output()
@@ -115,10 +137,12 @@ func TestSemverCompareOrdersEveryPair(t *testing.T) {
 			}
 		}
 	}
-	for i, got := range runSemver(t, nil, queries) {
-		q := queries[i]
-		if got.status != 0 || got.out != want[i] {
-			t.Errorf("semver_compare %s %s = %q (status %d), want %q", q.a, q.b, got.out, got.status, want[i])
+	for _, sh := range testBashes(t) {
+		for i, got := range runSemver(t, sh, nil, queries) {
+			q := queries[i]
+			if got.status != 0 || got.out != want[i] {
+				t.Errorf("%s: semver_compare %s %s = %q (status %d), want %q", sh, q.a, q.b, got.out, got.status, want[i])
+			}
 		}
 	}
 }
@@ -152,11 +176,13 @@ func TestSemverCompareFollowsSemVerRules(t *testing.T) {
 	for i, c := range cases {
 		queries[i] = semverQuery{"semver_compare", c.a, c.b}
 	}
-	for _, env := range [][]string{nil, {"LC_ALL=C"}, {"LC_ALL=en_US.UTF-8"}, {"LC_ALL=C.UTF-8"}} {
-		for i, got := range runSemver(t, env, queries) {
-			c := cases[i]
-			if got.status != 0 || got.out != c.want {
-				t.Errorf("%v: semver_compare %s %s = %q (status %d), want %q", env, c.a, c.b, got.out, got.status, c.want)
+	for _, sh := range testBashes(t) {
+		for _, env := range [][]string{nil, {"LC_ALL=C"}, {"LC_ALL=en_US.UTF-8"}, {"LC_ALL=C.UTF-8"}} {
+			for i, got := range runSemver(t, sh, env, queries) {
+				c := cases[i]
+				if got.status != 0 || got.out != c.want {
+					t.Errorf("%s %v: semver_compare %s %s = %q (status %d), want %q", sh, env, c.a, c.b, got.out, got.status, c.want)
+				}
 			}
 		}
 	}
@@ -165,32 +191,40 @@ func TestSemverCompareFollowsSemVerRules(t *testing.T) {
 func TestSemverValid(t *testing.T) {
 	valid := []string{
 		"0.0.0", "0.4.0", "0.4.0-a8", "0.4.0-rc1", "1.0.0-rc.1", "1.0.0-0a", "1.0.0-x-y-z.--",
+		// "-" alone is an alphanumeric identifier.
+		"0.4.0--",
 		"1.0.0+001", "1.0.0-alpha+exp.sha.5114f85", "99999999999999999999.0.0",
 	}
 	invalid := []string{
 		"", "v0.4.0", "0.4", "0.4.0.1", "00.4.0", "0.04.0", "0.4.00", "0.4.0-", "0.4.0-01",
 		"0.4.0-rc..1", "0.4.0-rc_1", "0.4.0+", "0.4.0+a..b", "0.4.0-é", " 0.4.0", "0.4.0 ",
-		"0.4.0\n", "0.4.0-rc1 0.4.0", "-0.4.0", "0.4.0--", "0.4.0-+x",
+		"0.4.0-rc1 0.4.0", "-0.4.0", "0.4.0-+x",
 	}
 	var queries []semverQuery
+	isValid := map[string]bool{}
 	for _, v := range valid {
 		queries = append(queries, semverQuery{"semver_valid", v, ""})
-	}
-	for _, v := range invalid {
-		if strings.ContainsAny(v, "\t\n") {
-			continue // one query per line: covered by the update decision test
-		}
-		queries = append(queries, semverQuery{"semver_valid", v, ""})
-	}
-	// "0.4.0--" is valid SemVer: "-" is an alphanumeric identifier.
-	isValid := map[string]bool{"0.4.0--": true}
-	for _, v := range valid {
 		isValid[v] = true
 	}
-	for i, got := range runSemver(t, nil, queries) {
-		v := queries[i].a
-		if (got.status == 0) != isValid[v] {
-			t.Errorf("semver_valid %q: status %d, want valid=%v", v, got.status, isValid[v])
+	for _, v := range invalid {
+		queries = append(queries, semverQuery{"semver_valid", v, ""})
+	}
+	for _, sh := range testBashes(t) {
+		for i, got := range runSemver(t, sh, nil, queries) {
+			v := queries[i].a
+			if (got.status == 0) != isValid[v] {
+				t.Errorf("%s: semver_valid %q: status %d, want valid=%v", sh, v, got.status, isValid[v])
+			}
+		}
+	}
+	// A line break or a tab cannot travel through the one-query-per-line
+	// driver, nor through a Windows command line, which drops a trailing line
+	// break: pass the value in the environment.
+	for _, v := range []string{"0.4.0\n", "\n0.4.0", "0.4.0\t", "0.4.0\r", "0.4.0\nx"} {
+		cmd := bashCommand(t, "-c", `source "$1" && semver_valid "$SEMVER_VALUE"`, "semver-valid", semverLib(t))
+		cmd.Env = append(os.Environ(), "SEMVER_VALUE="+v)
+		if out, err := cmd.CombinedOutput(); err == nil {
+			t.Errorf("semver_valid %q succeeded: %s", v, out)
 		}
 	}
 }
@@ -224,19 +258,20 @@ func TestSemverUpdateDecision(t *testing.T) {
 	for i, c := range cases {
 		queries[i] = semverQuery{"semver_update_decision", c.current, c.next}
 	}
-	for i, got := range runSemver(t, nil, queries) {
-		c := cases[i]
-		if got.out != c.want || got.status != c.status {
-			t.Errorf("semver_update_decision %q %q = %q (status %d), want %q (status %d)",
-				c.current, c.next, got.out, got.status, c.want, c.status)
+	for _, sh := range testBashes(t) {
+		for i, got := range runSemver(t, sh, nil, queries) {
+			c := cases[i]
+			if got.out != c.want || got.status != c.status {
+				t.Errorf("%s: semver_update_decision %q %q = %q (status %d), want %q (status %d)",
+					sh, c.current, c.next, got.out, got.status, c.want, c.status)
+			}
 		}
 	}
 }
 
-// libraryBlock returns the lines between "# BEGIN semver.sh" and
-// "# END semver.sh", inclusive, with the indentation of the BEGIN line
-// removed.
-func libraryBlock(t *testing.T, path string) []string {
+// markedBlock returns the lines between "# BEGIN <name>" and "# END <name>",
+// inclusive, with the indentation of the BEGIN line removed.
+func markedBlock(t *testing.T, path, name string) []string {
 	t.Helper()
 	body, err := os.ReadFile(path)
 	if err != nil {
@@ -247,19 +282,19 @@ func libraryBlock(t *testing.T, path string) []string {
 	indent := ""
 	for i, line := range lines {
 		trimmed := strings.TrimLeft(line, " ")
-		if trimmed == "# BEGIN semver.sh" {
+		if trimmed == "# BEGIN "+name {
 			if start >= 0 {
-				t.Fatalf("%s: two BEGIN semver.sh lines", path)
+				t.Fatalf("%s: two BEGIN %s lines", path, name)
 			}
 			start = i
 			indent = line[:len(line)-len(trimmed)]
 		}
-		if trimmed == "# END semver.sh" && start >= 0 && end < 0 {
+		if trimmed == "# END "+name && start >= 0 && end < 0 {
 			end = i
 		}
 	}
 	if start < 0 || end < 0 {
-		t.Fatalf("%s: no BEGIN/END semver.sh block", path)
+		t.Fatalf("%s: no BEGIN/END %s block", path, name)
 	}
 	block := make([]string, 0, end-start+1)
 	for _, line := range lines[start : end+1] {
@@ -275,12 +310,33 @@ func libraryBlock(t *testing.T, path string) []string {
 	return block
 }
 
-func TestScoopBucketWorkflowCopiesTheSemverLibrary(t *testing.T) {
-	want := libraryBlock(t, filepath.Join(repoRoot(t), ".github", "scripts", "lib", "semver.sh"))
-	got := libraryBlock(t, filepath.Join(repoRoot(t), "packaging", "scoop", "update.yml"))
-	if strings.Join(got, "\n") != strings.Join(want, "\n") {
-		t.Fatalf("packaging/scoop/update.yml must copy the semver.sh block verbatim\n--- got ---\n%s\n--- want ---\n%s",
-			strings.Join(got, "\n"), strings.Join(want, "\n"))
+// The bucket workflow seed cannot source files of this repository: it carries
+// copies of the library and of the decision of update-scoop.sh, which the
+// end-to-end test exercises.
+func TestScoopBucketWorkflowCopiesTheSemverCode(t *testing.T) {
+	root := repoRoot(t)
+	seed := filepath.Join(root, "packaging", "scoop", "update.yml")
+	for _, c := range []struct{ name, source string }{
+		{"semver.sh", filepath.Join(root, ".github", "scripts", "lib", "semver.sh")},
+		{"scoop decision", filepath.Join(root, ".github", "scripts", "update-scoop.sh")},
+	} {
+		want := strings.Join(markedBlock(t, c.source, c.name), "\n")
+		got := strings.Join(markedBlock(t, seed, c.name), "\n")
+		if got != want {
+			t.Errorf("packaging/scoop/update.yml must copy the %s block verbatim\n--- got ---\n%s\n--- want ---\n%s",
+				c.name, got, want)
+		}
+	}
+	body, err := os.ReadFile(seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The seed validates the tag before any download, as update-scoop.sh does.
+	text := strings.ReplaceAll(string(body), "\r\n", "\n")
+	validate := "          VERSION=\"${TAG#v}\"\n          if ! semver_valid \"$VERSION\"; then\n"
+	at := strings.Index(text, validate)
+	if at < 0 || at > strings.Index(text, "gh release download") {
+		t.Error("packaging/scoop/update.yml must validate VERSION right after computing it, before any download")
 	}
 }
 

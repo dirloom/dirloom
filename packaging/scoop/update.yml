@@ -173,6 +173,10 @@ jobs:
           fi
           TAG="$(printf '%s' "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')"
           VERSION="${TAG#v}"
+          if ! semver_valid "$VERSION"; then
+            echo "Not a SemVer 2.0.0 version: ${VERSION}"
+            exit 1
+          fi
           work="$(mktemp -d)"
           gh release download "$TAG" --repo dirloom/dirloom --pattern checksums.txt --dir "$work"
           gh release download "$TAG" --repo dirloom/dirloom --pattern dirloom_Windows_x86_64.zip --dir "$work"
@@ -195,6 +199,12 @@ jobs:
           fi
           git checkout -B "$branch"
           current="$(python3 -c 'import json; print(json.load(open("dirloom.json")).get("version",""))')"
+          # BEGIN scoop decision
+          current="${current//$'\r'/}"
+          if [[ -f dirloom.json && -z "$current" ]]; then
+            echo "Refusing to update Scoop: dirloom.json has no version"
+            exit 1
+          fi
           # SemVer 2.0.0 precedence, not `sort -V`: 0.4.0 follows 0.4.0-rc1.
           decision="$(semver_update_decision "$current" "$VERSION")"
           case "$decision" in
@@ -208,6 +218,7 @@ jobs:
             exit 1
             ;;
           esac
+          # END scoop decision
           python3 - <<PY
           from pathlib import Path
           import json

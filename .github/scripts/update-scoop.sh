@@ -62,6 +62,14 @@ current=""
 if [[ -f dirloom.json ]]; then
   current="$(python3 -c 'import json; print(json.load(open("dirloom.json")).get("version",""))')"
 fi
+# The block between BEGIN and END is copied verbatim into
+# packaging/scoop/update.yml; internal/packaging tests keep the copies equal.
+# BEGIN scoop decision
+current="${current//$'\r'/}"
+if [[ -f dirloom.json && -z "$current" ]]; then
+  echo "Refusing to update Scoop: dirloom.json has no version"
+  exit 1
+fi
 # SemVer 2.0.0 precedence, not `sort -V`: 0.4.0 follows 0.4.0-rc1.
 decision="$(semver_update_decision "$current" "$VERSION")"
 case "$decision" in
@@ -75,6 +83,7 @@ newer) ;;
   exit 1
   ;;
 esac
+# END scoop decision
 
 python3 - <<PY
 from pathlib import Path
