@@ -110,6 +110,15 @@ prerelease tag with `workflow_dispatch`. The workflow uses the protected
 `package-publishing` environment. The bot token is never available to
 pull-request workflows.
 
+The Scoop updater moves the manifest only to a newer version under SemVer
+2.0.0 precedence ([`semver.sh`](../.github/scripts/lib/semver.sh)): `0.4.0`
+replaces `0.4.0-rc1`, and a release candidate never replaces its stable
+release. It refuses a tag or a manifest version that is not SemVer. GNU
+`sort -V`, used before, put `0.4.0` before `0.4.0-rc1`. The scheduled updater
+of `dirloom/scoop-bucket` must compare the same way; its seed,
+`packaging/scoop/update.yml`, carries a copy of the comparator that the tests
+keep identical.
+
 `dirloom/dirloom` is the unique Homebrew writer. It opens a version PR in
 `dirloom/homebrew-tap` by patching only `version` and the four archive SHA-256
 fields in `Casks/dirloom.rb`. Completions, caveats and other cask stanzas stay
