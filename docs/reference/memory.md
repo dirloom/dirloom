@@ -75,7 +75,7 @@ Measured with it, at the 2,000,000-node limit:
 
 **Treat these values as a starting point for constrained environments, not as a universal setting.** They held for these workflows, these budgets and this machine, and only these three cases were measured. For them, the live heap was 1.3 to 2.4 GiB: a value below the live heap of a workflow does not help it.
 
-To try it, set it in the environment of one command. The two values measured left 256 MiB and 512 MiB of the budget free, and stayed above the live heap; `1792MiB` is the value for a 2 GiB budget:
+To try it, set it in the environment of one command. The two values measured left 256 MiB and 512 MiB of the budget free, and stayed above the live heap; `1792MiB` is the value measured for a 2 GiB budget:
 
 ```bash
 GOMEMLIMIT=1792MiB dirloom diff snapshot:base.dlm.json snapshot:head.dlm.json
