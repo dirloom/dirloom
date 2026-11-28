@@ -138,6 +138,8 @@ Snapshots and Git trees are untrusted input, so their size is bounded:
 - a Git observation stops beyond 2,000,000 nodes or 256 MiB of paths (`git_tree_too_large`, exit 5);
 - a `.gitignore` above 1 MiB, or with a line of 64 KiB or more, fails the observation of a directory (`source_read_failure`), and that of a Git tree observed with a snapshot's Capture Semantics that apply `.gitignore` (`git_tree_invalid`). `git:` against `git:`, and `history`, never read `.gitignore`.
 
+These limits bound the input, not the memory. A workflow at the limits needs several GiB: comparing two snapshots of 2,000,000 nodes used about 2.8 GiB, up to 3.4 GiB with long file names, and the highest run measured, a hostile snapshot refused at the end, 4.1 GiB. That is a maximum observed, not a guaranteed ceiling. Dirloom does not cap its own memory. On Windows under a memory limit, as measured, running out of memory ends in a Go `fatal error: out of memory`, with no Dirloom diagnostic, and the process can hang instead of exiting. `GOMEMLIMIT`, a soft limit of the Go runtime and not a hard cap, let the two comparisons of two snapshots that were measured pass in a 2 GiB budget, at a CPU cost: a starting point for constrained environments, not a universal setting. [Memory and resource limits](reference/memory.md) has the figures, what they do not cover, and how to try `GOMEMLIMIT`.
+
 Structural commands refuse named pipes, sockets and devices (`unsupported_node_type`); exclude them with `--ignore`. A Windows junction is recorded as `junction` with its target and is never entered. On Windows, while Dirloom reads an entry, the directories above it cannot be renamed; renaming again succeeds ([platform limits](reference/watch.md#platform-limits)).
 
 ## Contracts and stability
