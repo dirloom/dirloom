@@ -15,6 +15,8 @@ import (
 
 func readDir(location string) ([]fs.DirEntry, error) { return os.ReadDir(location) }
 
+func lstat(path string) (fs.FileInfo, error) { return os.Lstat(path) }
+
 func readDirContext(_ context.Context, location string) ([]fs.DirEntry, error) {
 	return readDir(location)
 }

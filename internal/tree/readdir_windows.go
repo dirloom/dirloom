@@ -126,6 +126,31 @@ func readFile(path string, limit int64) ([]byte, error) {
 	return io.ReadAll(io.LimitReader(f, limit+1))
 }
 
+// lstat is os.Lstat, except for a deletion in progress (anomaly A15).
+// Windows refuses a path being deleted, or any path beneath a directory
+// being deleted, with ERROR_ACCESS_DENIED, as it refuses a denied
+// permission. A refused os.Lstat is told apart by opening the path through
+// openShared, which reads the NT status: a deletion in progress, or an entry
+// already gone, is reported as no longer existing; any other refusal stays
+// the denied permission of os.Lstat. A path that opens, such as a file
+// replaced in the meantime, is examined again.
+func lstat(path string) (fs.FileInfo, error) {
+	info, err := os.Lstat(path)
+	if err == nil || !errors.Is(err, windows.ERROR_ACCESS_DENIED) {
+		return info, err
+	}
+	h, probeErr := openShared(path, windows.FILE_FLAG_BACKUP_SEMANTICS|windows.FILE_FLAG_OPEN_REPARSE_POINT)
+	if probeErr == nil {
+		_ = windows.CloseHandle(h)
+		return os.Lstat(path)
+	}
+	var probe *os.PathError
+	if errors.Is(probeErr, fs.ErrNotExist) && errors.As(probeErr, &probe) {
+		return nil, &os.PathError{Op: "lstat", Path: path, Err: probe.Err}
+	}
+	return nil, err
+}
+
 // openShared calls CreateFile as syscall.Open does for O_RDONLY, with
 // FILE_SHARE_DELETE added, and reports a deletion in progress as
 // errDeletePending. The NT status is read on the thread that made the call,

@@ -5,6 +5,7 @@ package tree
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,6 +18,8 @@ import (
 	"unsafe"
 
 	"golang.org/x/sys/windows"
+
+	"github.com/dirloom/dirloom/internal/filter"
 )
 
 // The tests below prove that readDir is os.ReadDir with one difference, the
@@ -393,9 +396,10 @@ func setRetryDelays(t *testing.T, delays ...time.Duration) {
 	t.Cleanup(func() { retryDelays = old })
 }
 
-// markDeletePending deletes the empty directory dir through a handle it
-// keeps open: until the handle closes, dir is being deleted, and Windows
-// refuses to open it with ERROR_ACCESS_DENIED (STATUS_DELETE_PENDING).
+// markDeletePending deletes dir, a file or an empty directory, through a
+// handle it keeps open: until the handle closes, dir is being deleted, and
+// Windows refuses to open it, or any path beneath it, with
+// ERROR_ACCESS_DENIED (STATUS_DELETE_PENDING).
 func markDeletePending(t *testing.T, dir string) func() {
 	t.Helper()
 	p, err := windows.UTF16PtrFromString(dir)
@@ -480,18 +484,31 @@ func TestReadDirRetriesUntilTheDeletionEnds(t *testing.T) {
 }
 
 // TestScanReportsADirectoryBeingDeletedAsGone: the scan names a directory
-// removed during it as no longer existing, never as a denied permission.
+// removed during it as no longer existing, never as a denied permission,
+// with or without .gitignore files: the scan looks for the directory's
+// .gitignore before it lists the directory (A15).
 func TestScanReportsADirectoryBeingDeletedAsGone(t *testing.T) {
-	setRetryDelays(t, time.Millisecond)
-	root := t.TempDir()
-	dir := filepath.Join(root, "doomed")
-	if err := os.Mkdir(dir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	markDeletePending(t, dir)
-	_, err := NewScanner(ScanOptions{RootAbs: root, RootName: "root"}).Scan(context.Background())
-	if err == nil || err.Error() != `read directory "doomed": entry no longer exists` {
-		t.Fatalf("scan with a directory being deleted: %v", err)
+	for _, useGitIgnore := range []bool{false, true} {
+		t.Run("gitignore "+strconv.FormatBool(useGitIgnore), func(t *testing.T) {
+			setRetryDelays(t, time.Millisecond)
+			root := t.TempDir()
+			dir := filepath.Join(root, "doomed")
+			if err := os.Mkdir(dir, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			markDeletePending(t, dir)
+			options := ScanOptions{RootAbs: root, RootName: "root"}
+			if useGitIgnore {
+				git := filter.NewGitIgnore()
+				options.UseGitIgnore = true
+				options.GitIgnore = git
+				options.FilterPolicy = filter.NewPolicy("", true, nil, git, false)
+			}
+			_, err := NewScanner(options).Scan(context.Background())
+			if err == nil || err.Error() != `read directory "doomed": entry no longer exists` {
+				t.Fatalf("scan with a directory being deleted: %v", err)
+			}
+		})
 	}
 }
 
@@ -611,5 +628,71 @@ func TestReadFileReadsLikeOSReadFile(t *testing.T) {
 	defer func() { _ = windows.CloseHandle(h) }()
 	if err := os.Remove(file); err != nil {
 		t.Fatalf("remove under readFile's handle: %v", err)
+	}
+}
+
+// TestGitIgnoreBeingDeletedIsAbsent: os.Lstat reports a .gitignore being
+// deleted, or any path beneath a directory being deleted, as a denied
+// access; the filesystem backend reports the .gitignore as absent, as a
+// .gitignore that no longer exists (anomaly A15).
+func TestGitIgnoreBeingDeletedIsAbsent(t *testing.T) {
+	for name, prepare := range map[string]func(t *testing.T, dir string){
+		"gitignore being deleted": func(t *testing.T, dir string) {
+			path := filepath.Join(dir, ".gitignore")
+			if err := os.WriteFile(path, []byte("*.log\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			markDeletePending(t, path)
+		},
+		"directory being deleted": func(t *testing.T, dir string) {
+			markDeletePending(t, dir)
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir := filepath.Join(t.TempDir(), "doomed")
+			if err := os.Mkdir(dir, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			prepare(t, dir)
+			if _, err := os.Lstat(filepath.Join(dir, ".gitignore")); !errors.Is(err, os.ErrPermission) {
+				t.Fatalf("os.Lstat of the .gitignore: %v, want the denied access of A15", err)
+			}
+			data, ok, err := filesystemBackend{}.ReadGitIgnore(dir, "doomed")
+			if err != nil || ok || data != nil {
+				t.Fatalf("ReadGitIgnore = %q, %t, %v; want an absent .gitignore", data, ok, err)
+			}
+		})
+	}
+}
+
+// TestGitIgnoreDeniedStaysDenied: a .gitignore whose access is denied stays a
+// denied permission, never an absent file.
+func TestGitIgnoreDeniedStaysDenied(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".gitignore")
+	if err := os.WriteFile(path, []byte("*.log\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	sid := currentUserSID(t)
+	// Deny the directory's listing and the file's attributes and data, so
+	// that os.Lstat itself is refused.
+	for target, rights := range map[string]string{dir: "(RD)", path: "(RA,RD,REA)"} {
+		if output, err := exec.Command("icacls", target, "/deny", "*"+sid+":"+rights).CombinedOutput(); err != nil {
+			t.Fatalf("icacls %s /deny: %v\n%s", target, err, output)
+		}
+		t.Cleanup(func() { _ = exec.Command("icacls", target, "/remove:d", "*"+sid).Run() })
+	}
+	if _, err := os.Lstat(path); !errors.Is(err, os.ErrPermission) {
+		// This test alone proves that a denial is never read as absent: on
+		// CI it fails instead of skipping unseen.
+		reason := fmt.Sprintf("the denied .gitignore is still readable here (%v): this token bypasses the ACL", err)
+		if os.Getenv("CI") != "" {
+			t.Fatal(reason)
+		}
+		t.Skip(reason)
+	}
+	data, ok, err := filesystemBackend{}.ReadGitIgnore(dir, "")
+	if err == nil || ok || data != nil || !strings.Contains(err.Error(), `inspect gitignore ".gitignore": permission denied`) {
+		t.Fatalf("ReadGitIgnore of a denied .gitignore = %q, %t, %v; want the denied permission", data, ok, err)
 	}
 }

@@ -58,7 +58,9 @@ func (filesystemBackend) Child(location string, entry fs.DirEntry) string {
 
 func (filesystemBackend) ReadGitIgnore(location, relativeDirectory string) ([]byte, bool, error) {
 	path := filepath.Join(location, ".gitignore")
-	info, err := os.Lstat(path)
+	// A .gitignore being deleted, or beneath a directory being deleted, is
+	// absent, as one that no longer exists (A15, readdir_windows.go).
+	info, err := lstat(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, false, nil
 	}
