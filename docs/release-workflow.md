@@ -151,6 +151,11 @@ the merge into `main`, the tag and the publication each need their own
 explicit GO. `CHANGELOG.md` remains the unique source of truth for release
 notes. Do not open versioned feature pull requests against `main`.
 
+The [v0.4.0-rc1 release record](release/v0.4.0-rc1-release-record.md) follows
+the release candidate gate by gate, with its
+[acceptance packs](release/v0.4.0-rc1-acceptance.md) and its
+[soak protocol](release/v0.4.0-rc1-soak.md).
+
 | Field | Value |
 | --- | --- |
 | Latest published GitHub Pre-release | `v0.4.0-a8` |
