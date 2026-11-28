@@ -9,8 +9,8 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 CHANGE release candidate: Structural Version Control as one product, with
 consistent exit codes and errors, bounded untrusted input, hardened scans,
 user documentation and a reproducible showcase, and its contracts prepared
-for the v0.4 freeze. This increment does not add a command, a new contract
-version or a stable watch contract.
+for the v0.4 freeze. This increment does not add a command, a new version
+of an existing contract, or a stable watch contract.
 
 ### Added
 
