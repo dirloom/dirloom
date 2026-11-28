@@ -5,7 +5,6 @@ package tree
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -665,8 +664,40 @@ func TestGitIgnoreBeingDeletedIsAbsent(t *testing.T) {
 	}
 }
 
-// TestGitIgnoreDeniedStaysDenied: a .gitignore whose access is denied stays a
-// denied permission, never an absent file.
+// TestLstatKeepsADeniedProbeDenied: when the open that examines a refused
+// path is refused for any reason but a deletion in progress, lstat keeps the
+// denied permission, and the .gitignore is never read as absent. The refusal
+// of os.Lstat comes from a directory being deleted, and the probe is made to
+// fail as a denied ACL would: this runs on every machine, CI runners
+// included, whose token bypasses ACLs (TestGitIgnoreDeniedStaysDenied).
+func TestLstatKeepsADeniedProbeDenied(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "doomed")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	markDeletePending(t, dir)
+	path := filepath.Join(dir, ".gitignore")
+	if _, err := os.Lstat(path); !errors.Is(err, os.ErrPermission) {
+		t.Fatalf("os.Lstat beneath a directory being deleted: %v, want a denied access", err)
+	}
+	old := lstatProbe
+	lstatProbe = func(location string, _ uint32) (windows.Handle, error) {
+		return windows.InvalidHandle, &os.PathError{Op: "open", Path: location, Err: windows.ERROR_ACCESS_DENIED}
+	}
+	t.Cleanup(func() { lstatProbe = old })
+	if _, err := lstat(path); !errors.Is(err, os.ErrPermission) || errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("lstat with a denied probe: %v, want the denied permission", err)
+	}
+	data, ok, err := filesystemBackend{}.ReadGitIgnore(dir, "doomed")
+	if err == nil || ok || data != nil || err.Error() != `inspect gitignore "doomed/.gitignore": permission denied` {
+		t.Fatalf("ReadGitIgnore with a denied probe = %q, %t, %v; want the denied permission", data, ok, err)
+	}
+}
+
+// TestGitIgnoreDeniedStaysDenied: a .gitignore whose access is denied by its
+// ACL stays a denied permission, never an absent file. It needs a token that
+// honors ACLs: the token of GitHub's Windows runners bypasses them, and there
+// TestLstatKeepsADeniedProbeDenied proves the same rule.
 func TestGitIgnoreDeniedStaysDenied(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, ".gitignore")
@@ -683,13 +714,7 @@ func TestGitIgnoreDeniedStaysDenied(t *testing.T) {
 		t.Cleanup(func() { _ = exec.Command("icacls", target, "/remove:d", "*"+sid).Run() })
 	}
 	if _, err := os.Lstat(path); !errors.Is(err, os.ErrPermission) {
-		// This test alone proves that a denial is never read as absent: on
-		// CI it fails instead of skipping unseen.
-		reason := fmt.Sprintf("the denied .gitignore is still readable here (%v): this token bypasses the ACL", err)
-		if os.Getenv("CI") != "" {
-			t.Fatal(reason)
-		}
-		t.Skip(reason)
+		t.Skipf("the denied .gitignore is still readable here (%v): this token bypasses the ACL", err)
 	}
 	data, ok, err := filesystemBackend{}.ReadGitIgnore(dir, "")
 	if err == nil || ok || data != nil || !strings.Contains(err.Error(), `inspect gitignore ".gitignore": permission denied`) {

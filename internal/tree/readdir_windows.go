@@ -139,7 +139,7 @@ func lstat(path string) (fs.FileInfo, error) {
 	if err == nil || !errors.Is(err, windows.ERROR_ACCESS_DENIED) {
 		return info, err
 	}
-	h, probeErr := openShared(path, windows.FILE_FLAG_BACKUP_SEMANTICS|windows.FILE_FLAG_OPEN_REPARSE_POINT)
+	h, probeErr := lstatProbe(path, windows.FILE_FLAG_BACKUP_SEMANTICS|windows.FILE_FLAG_OPEN_REPARSE_POINT)
 	if probeErr == nil {
 		_ = windows.CloseHandle(h)
 		return os.Lstat(path)
@@ -150,6 +150,11 @@ func lstat(path string) (fs.FileInfo, error) {
 	}
 	return nil, err
 }
+
+// lstatProbe is the open with which lstat examines a refused path. Tests
+// change it: a token that bypasses ACLs, as on CI runners, cannot make
+// openShared refuse a denied permission.
+var lstatProbe = openShared
 
 // openShared calls CreateFile as syscall.Open does for O_RDONLY, with
 // FILE_SHARE_DELETE added, and reports a deletion in progress as
