@@ -100,6 +100,16 @@ jobs:
         shell: pwsh
         run: go test ./internal/cli -count=1 -run TestWatchShellExitCodes
 
+      - name: History shell smoke
+        if: runner.os != 'Windows'
+        shell: bash
+        run: go test ./internal/cli -count=1 -run TestHistoryShellExitCodes
+
+      - name: History shell smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: go test ./internal/cli -count=1 -run TestHistoryShellExitCodes
+
       # The race job covers Linux. The watch backends differ per platform,
       # so their tests also run under the race detector on Windows and macOS.
       - name: Race detector (watch)

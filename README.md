@@ -200,6 +200,39 @@ v0.4 records, checks and compares the structure of a project: `fingerprint`, `sn
 - [Upgrading from v0.3.3](docs/upgrading-to-v0.4.md): what changes for an existing user.
 - [Security policy](SECURITY.md): what Dirloom reads, how it runs Git, and how to verify a release.
 
+## Showcase
+
+A reproducible scenario takes a small project through a refactoring, from end to end: a snapshot, a refactoring that moves and renames files and directories, `verify` failing, `diff` naming the moves, two Git branches compared, and the structural history. The [showcase](docs/showcase.md) walks through it with the real outputs, and the scripts of [`examples/showcase`](examples/showcase) run it with bash or PowerShell:
+
+```bash
+examples/showcase/showcase.sh
+```
+
+After the refactoring, `diff` reports:
+
+<!-- showcase:diff -->
+```text
+$ dirloom diff snapshot:architecture.dlm.json live:.
+Structural Diff
+
+Summary: 2 added, 1 removed, 0 changed, 3 moved, 6 total
+
+ADDED
+  + docs/design.md
+  + internal/tax
+
+REMOVED
+  - docs/architecture.md
+
+MOVED
+  > payment -> internal/payment (subtree, 4 nodes)
+  > internal/billing/tax.go -> internal/tax/tax.go (name, 1 node)
+  > internal/utils -> internal/textutil (subtree, 2 nodes)
+[exit 1]
+```
+
+CI runs the scenario on Windows, Linux and macOS and checks every published output against it, commit ids included.
+
 ## Getting help
 
 ```bash
