@@ -4,6 +4,14 @@ All notable changes to Dirloom are documented here. The project follows Semantic
 
 ## [Unreleased]
 
+## [0.4.0-rc1]
+
+CHANGE release candidate: Structural Version Control as one product, with
+consistent exit codes and errors, bounded untrusted input, hardened scans,
+user documentation and a reproducible showcase, and its contracts prepared
+for the v0.4 freeze. This increment does not add a command, a new version
+of an existing contract, or a stable watch contract.
+
 ### Added
 
 - Publish the v0.4 [compatibility and freeze policy](docs/compatibility-policy.md) and the [contract register](docs/contracts/README.md): every public input and output, with its status, its owning package, what pins it and its change rules. The policy states what stays stable after the v0.4 freeze (fields, enumeration values, machine codes, exit codes, golden bytes, fingerprints) and what does not (diagnostic messages, including localized operating-system text, and stderr), and that an incompatible change to identity semantics, observation included, needs a new fingerprint version.
@@ -376,7 +384,8 @@ schema, or the default `icons: never`.
 - Unit, integration, contract, CLI and benchmark coverage.
 - Windows, Linux and macOS CI plus GoReleaser archives for amd64 and arm64.
 
-[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-a8...HEAD
+[Unreleased]: https://github.com/dirloom/dirloom/compare/v0.4.0-rc1...HEAD
+[0.4.0-rc1]: https://github.com/dirloom/dirloom/compare/v0.4.0-a8...v0.4.0-rc1
 [0.4.0-a8]: https://github.com/dirloom/dirloom/compare/v0.4.0-a7...v0.4.0-a8
 [0.4.0-a7]: https://github.com/dirloom/dirloom/compare/v0.4.0-a6...v0.4.0-a7
 [0.4.0-a6]: https://github.com/dirloom/dirloom/compare/v0.4.0-a5...v0.4.0-a6
