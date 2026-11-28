@@ -47,7 +47,7 @@ Dirloom treats snapshots, Git data, `.gitignore`, configuration and theme files,
 | configuration and theme files | regular files only, 1 MiB | above 1 MiB: usage error, exit 2; not a regular file: exit 1 for a configuration file, exit 2 for a theme file |
 | file names | valid UTF-8 on Linux and macOS, valid UTF-16 on Windows; never repaired | `invalid_canonical_path` in the structural commands; the tree outputs refuse the name too (exit 1) |
 
-Named pipes, sockets and devices are refused by the structural commands, never opened. The [exit codes reference](docs/reference/exit-codes.md) lists every machine code. An unexpected panic is reported as an internal error, never as a success and without a stack trace ([unexpected internal failures](docs/reference/exit-codes.md#unexpected-internal-failures)). The untrusted-input parsers ran through a recorded fuzz campaign before the v0.4 release candidate ([campaign record](docs/release/v0.4.0-rc1-fuzz-campaign.md)).
+These bounds limit the input, not the memory: a workflow at the limits needs several GiB, and Dirloom does not cap its own memory ([memory and resource limits](docs/reference/memory.md)). Named pipes, sockets and devices are refused by the structural commands, never opened. The [exit codes reference](docs/reference/exit-codes.md) lists every machine code. An unexpected panic is reported as an internal error, never as a success and without a stack trace ([unexpected internal failures](docs/reference/exit-codes.md#unexpected-internal-failures)). The untrusted-input parsers ran through a recorded fuzz campaign before the v0.4 release candidate ([campaign record](docs/release/v0.4.0-rc1-fuzz-campaign.md)).
 
 ## Release trust model
 

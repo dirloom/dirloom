@@ -32,7 +32,8 @@ func TestStructuralVersionControlDocumentationDiscoverable(t *testing.T) {
 	}
 	overview := readRepositoryDocument(t, "docs", "structural-version-control.md")
 	for _, want := range []string{"reference/exit-codes.md", "contracts/README.md", "compatibility-policy.md", "ci-integration.md",
-		"upgrading-to-v0.4.md", "../SECURITY.md", "candidates for the v0.4 freeze", "**experimental**", "File contents are never read."} {
+		"upgrading-to-v0.4.md", "../SECURITY.md", "candidates for the v0.4 freeze", "**experimental**", "File contents are never read.",
+		"reference/memory.md", "not a guaranteed ceiling"} {
 		if !strings.Contains(overview, want) {
 			t.Errorf("Structural Version Control overview missing %q", want)
 		}
@@ -62,10 +63,34 @@ func TestStructuralVersionControlDocumentationDiscoverable(t *testing.T) {
 	}
 	upgrade := readRepositoryDocument(t, "docs", "upgrading-to-v0.4.md")
 	for _, want := range []string{"`v0.3.3`", "### Windows junctions", "unsupported_node_type", "### `.gitignore` files", "64 KiB",
-		"`dirloom ./diff`", "reference/exit-codes.md", "../README.md#build-from-source"} {
+		"`dirloom ./diff`", "reference/exit-codes.md", "../README.md#build-from-source", "## Memory", "reference/memory.md"} {
 		if !strings.Contains(upgrade, want) {
 			t.Errorf("upgrade note missing %q", want)
 		}
+	}
+}
+
+// The memory guidance must keep the cautions that the CTO review of
+// 2026-11-28 asked for: what the figures are and what they are not.
+func TestMemoryGuidanceKeepsItsCautions(t *testing.T) {
+	memory := readRepositoryDocument(t, "docs", "reference", "memory.md")
+	for _, want := range []string{
+		"../benchmarks/v0.4-rc1.md",
+		"**4.1 GiB is the maximum observed, not a guaranteed ceiling.**",
+		"**The 8 GiB of the measurements is a budget, not a machine.**",
+		"soft limit of the Go runtime, not a hard cap on the process",
+		"`GOMEMLIMIT=1792MiB` let both comparisons of two snapshots pass 5 out of 5",
+		"not as a universal setting",
+		"`fatal error: out of memory`",
+		"the process can hang",
+	} {
+		if !strings.Contains(memory, want) {
+			t.Errorf("docs/reference/memory.md missing %q", want)
+		}
+	}
+	security := readRepositoryDocument(t, "SECURITY.md")
+	if !strings.Contains(security, "docs/reference/memory.md") {
+		t.Error("SECURITY.md must link the memory guidance from its untrusted-input limits")
 	}
 }
 
@@ -81,6 +106,7 @@ func TestDocumentedDirloomCommandsExist(t *testing.T) {
 		{"docs", "structural-version-control.md"},
 		{"docs", "ci-integration.md"},
 		{"docs", "upgrading-to-v0.4.md"},
+		{"docs", "reference", "memory.md"},
 		{"SECURITY.md"},
 	} {
 		name := filepath.Join(document...)
