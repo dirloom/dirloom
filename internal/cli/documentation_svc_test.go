@@ -79,8 +79,9 @@ func TestMemoryGuidanceKeepsItsCautions(t *testing.T) {
 		"**4.1 GiB is the maximum observed, not a guaranteed ceiling.**",
 		"**The 8 GiB of the measurements is a budget, not a machine.**",
 		"soft limit of the Go runtime, not a hard cap on the process",
-		"`GOMEMLIMIT=1792MiB` let both comparisons of two snapshots pass 5 out of 5",
+		"`GOMEMLIMIT=1792MiB` let both comparisons of two snapshots that were measured pass 5 out of 5",
 		"not as a universal setting",
+		"a starting point for constrained environments",
 		"`fatal error: out of memory`",
 		"the process can hang",
 	} {

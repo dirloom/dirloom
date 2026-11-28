@@ -86,9 +86,9 @@ On Windows, `--output` cannot replace a destination that another process has ope
 
 ## Memory
 
-The new commands read snapshots and Git trees, which v0.4 bounds: 256 MiB and 2,000,000 nodes for a snapshot, 2,000,000 nodes and 256 MiB of paths for a Git observation, among others. A workflow at those limits needs several GiB of memory, up to 4.1 GiB in the runs measured, a maximum observed and not a ceiling. The figures were measured inside an 8 GiB commit budget on Windows, not on a machine with 8 GiB of RAM.
+`verify`, `diff` and `history` read snapshots and Git trees, which v0.4 bounds: 256 MiB and 2,000,000 nodes for a snapshot, 2,000,000 nodes and 256 MiB of paths for a Git observation, among others; `snapshot` refuses to write beyond the same limits. A workflow at those limits needs several GiB of memory, up to 4.1 GiB in the runs measured, a maximum observed and not a ceiling. The figures were measured on Windows inside an 8 GiB commit budget, not on a machine with 8 GiB of RAM.
 
-Dirloom does not cap its own memory. When a workflow needs more than the machine can give, the Go runtime stops it with `fatal error: out of memory` and exit 2; under a Windows job memory limit, the process can hang instead of exiting. Setting `GOMEMLIMIT`, a soft limit of the Go runtime, not a hard cap, helped in a 2 GiB budget, at some CPU cost: a lead for constrained machines, not a universal value. [Memory and resource limits](reference/memory.md) gives the figures and their limits.
+Dirloom does not cap its own memory. On Windows under a memory limit, as measured, a workflow that needs more ends in a Go `fatal error: out of memory`, whose exit status 2 is Go's and does not mean invalid usage, and the process can hang instead of exiting. Setting `GOMEMLIMIT`, a soft limit of the Go runtime, not a hard cap, helped in a 2 GiB budget, at some CPU cost: a starting point for constrained environments, not a universal setting. [Memory and resource limits](reference/memory.md) gives the figures and their limits.
 
 The tree outputs of v0.1 to v0.3 read no snapshot and have no node limit.
 
