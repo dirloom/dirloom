@@ -8,6 +8,14 @@ TAG="${TAG:?tag is required}"
 VERSION="${TAG#v}"
 BUCKET_REPO="${SCOOP_BUCKET_REPO:-dirloom/scoop-bucket}"
 ROOT_REPO="${GITHUB_REPOSITORY:-dirloom/dirloom}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/semver.sh
+source "${SCRIPT_DIR}/lib/semver.sh"
+
+if ! semver_valid "$VERSION"; then
+  echo "Not a SemVer 2.0.0 version: ${VERSION}" >&2
+  exit 1
+fi
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
   echo "GH_TOKEN is required" >&2
@@ -54,17 +62,19 @@ current=""
 if [[ -f dirloom.json ]]; then
   current="$(python3 -c 'import json; print(json.load(open("dirloom.json")).get("version",""))')"
 fi
-if [[ "$current" == "$VERSION" ]]; then
+# SemVer 2.0.0 precedence, not `sort -V`: 0.4.0 follows 0.4.0-rc1.
+decision="$(semver_update_decision "$current" "$VERSION")"
+case "$decision" in
+same)
   echo "Scoop manifest already at ${VERSION}"
   exit 0
-fi
-if [[ -n "$current" ]]; then
-  latest="$(printf '%s\n%s\n' "$current" "$VERSION" | sort -V | tail -n1)"
-  if [[ "$latest" != "$VERSION" ]]; then
-    echo "Refusing to regress Scoop from ${current} to ${VERSION}"
-    exit 1
-  fi
-fi
+  ;;
+newer) ;;
+*)
+  echo "Refusing to move Scoop from ${current} to ${VERSION}: not a newer SemVer version"
+  exit 1
+  ;;
+esac
 
 python3 - <<PY
 from pathlib import Path
