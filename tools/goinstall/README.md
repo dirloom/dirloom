@@ -106,7 +106,7 @@ network proxy settings of the host stay, so that the host can reach GitHub:
 It exits 1 when the named version does not install, with the expected module version and binary output, in
 both modes, 2 on a usage error, and 3 when the tool itself fails, keeping its work directory and writing its
 log. Each go command is stopped after 10 minutes. `@latest` does not have to install the release candidate: its outcome is recorded for the CTO.
-A14 closes only on this check of the real tag, not on the simulation.
+The CTO accepted A14 for RC1 on 2026-11-28: an outcome that reproduces the simulation does not block the publication, and any other outcome goes to the CTO. Restoring `go install` is a condition of `v0.4.0`.
 
 The tag is public from G3, and querying the proxy for it records `v0.4.0-rc1` in proxy.golang.org and
 sum.golang.org, as any user can.
